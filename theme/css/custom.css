@@ -1,0 +1,248 @@
+/* Hide h3 and deeper from sidebar navigation */
+ol.section ol.section {
+    display: none;
+}
+
+/* Tighter line height for multi-line section titles in sidebar */
+.sidebar ol.chapter li.part-title {
+    line-height: 1.2;
+    margin-top: 0 !important;
+    padding-top: 1.4em !important;
+}
+
+/* H2 heading color — matches sidebar active link color across all themes. */
+.js .content main h2 a:link,
+.js .content main h2 a:visited {
+    color: var(--sidebar-active);
+}
+
+/* ── Cover: Hero ─────────────────────────────────────────── */
+
+.cover-hero {
+    display: flex;
+    align-items: center;
+    gap: 2em;
+    margin-bottom: 2em;
+}
+
+.cover-hero-image {
+    flex-shrink: 0;
+    width: 150px;
+}
+
+.cover-hero-image img {
+    width: 100%;
+    border-radius: 6px;
+    display: block;
+}
+
+.cover-hero-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.cover-title {
+    font-size: 1.9em;
+    font-weight: 700;
+    margin: 0 0 0.4em;
+    line-height: 1.2;
+    border: none;
+}
+
+.cover-subtitle {
+    font-size: 0.92em;
+    opacity: 0.72;
+    line-height: 1.6;
+    margin: 0 0 0.65em;
+}
+
+.cover-author {
+    font-size: 0.82em;
+    opacity: 0.5;
+    margin: 0;
+}
+
+.cover-author a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+}
+
+/* ── Cover: Section label (eyebrow heading) ──────────────── */
+
+.cover-sections-label {
+    font-size: 0.68em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    opacity: 0.38;
+    margin: 1.75em 0 0.7em;
+}
+
+/* ── Cover: Hardware paragraph ───────────────────────────── */
+
+.cover-hardware-desc {
+    font-size: 0.88em;
+    line-height: 1.75;
+    opacity: 0.75;
+    margin-bottom: 0.25em;
+}
+
+/* ── Hardware tags ───────────────────────────────────────── */
+
+.hw-tag {
+    display: inline-block;
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 0.2em 0.55em;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.hw-tag--xrp {
+    background: rgba(14, 116, 144, 0.15);
+    color: #0e7490;
+}
+
+.hw-tag--swerve {
+    background: rgba(180, 83, 9, 0.15);
+    color: #b45309;
+}
+
+.hw-tag--competition {
+    background: rgba(124, 58, 237, 0.15);
+    color: #7c3aed;
+}
+
+/* Dark theme adjustments */
+.navy .hw-tag--xrp,
+.ayu .hw-tag--xrp,
+.coal .hw-tag--xrp {
+    background: rgba(14, 116, 144, 0.25);
+    color: #22d3ee;
+}
+
+.navy .hw-tag--swerve,
+.ayu .hw-tag--swerve,
+.coal .hw-tag--swerve {
+    background: rgba(180, 83, 9, 0.25);
+    color: #fbbf24;
+}
+
+.navy .hw-tag--competition,
+.ayu .hw-tag--competition,
+.coal .hw-tag--competition {
+    background: rgba(124, 58, 237, 0.25);
+    color: #a78bfa;
+}
+
+/* ── Cover: Section grid ─────────────────────────────────── */
+
+.section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75em;
+    margin-bottom: 2em;
+}
+
+.section-card {
+    border: 1px solid var(--table-border-color);
+    border-radius: 8px;
+    padding: 0.9em 1em;
+    background: var(--quote-bg);
+    transition: border-color 0.15s;
+    display: flex;
+    flex-direction: column;
+}
+
+.section-card:not(.section-card--coming-soon):hover {
+    border-color: var(--sidebar-active);
+}
+
+.section-card--coming-soon {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.section-card-tags {
+    display: flex;
+    gap: 0.3em;
+    margin-bottom: 0.5em;
+}
+
+.section-card h3 {
+    margin: 0 0 0.65em;
+    font-size: 0.92em;
+    font-weight: 600;
+}
+
+.section-card h3 a {
+    color: var(--fg);
+    text-decoration: none;
+}
+
+.section-card h3 a:hover {
+    color: var(--sidebar-active);
+}
+
+.section-card p {
+    font-size: 0.82em;
+    margin: 0 0 0.55em;
+    flex: 1;
+    opacity: 0.75;
+    line-height: 1.5;
+}
+
+.section-chapters {
+    font-size: 0.7em;
+    font-weight: 600;
+    opacity: 0.4;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* ── Cover: Footer ───────────────────────────────────────── */
+
+.cover-footer {
+    padding-top: 1em;
+    border-top: 1px solid var(--table-border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+}
+
+.cover-footer-item {
+    font-size: 0.75em;
+    opacity: 0.42;
+    line-height: 1.6;
+}
+
+.cover-footer-item a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+    .cover-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1em;
+    }
+
+    .cover-hero-image { width: 110px; }
+}
+
+/* ── Section label above chapter title ───────────────────── */
+
+.section-label {
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.5;
+    margin-bottom: 0.25em;
+}

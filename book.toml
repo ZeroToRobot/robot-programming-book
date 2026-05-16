@@ -1,0 +1,15 @@
+[book]
+title = "Robot Programming Book"
+authors = ["Devang Doshi"]
+language = "en"
+
+[output.html]
+site-url = "/robot-programming-book/"
+no-section-label = true
+mathjax-support = true
+additional-css = ["theme/css/custom.css"]
+additional-js = ["theme/js/section-label.js", "theme/js/analytics.js"]
+
+
+[build]
+build-dir = "../robot-programming-book"
