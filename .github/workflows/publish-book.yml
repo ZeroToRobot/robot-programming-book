@@ -36,6 +36,7 @@ jobs:
           personal_token: ${{ secrets.GH_PAGES_PAT }}
           external_repository: doshidev/doshidev.github.io/robot-programming-book
           publish_branch: master
-          publish_dir: ./robot-programming-book
+          publish_dir: ./book
+          destination_dir: robot-programming-book
           user_name: github-actions[bot]
           user_email: 41898282+github-actions[bot]@users.noreply.github.com
