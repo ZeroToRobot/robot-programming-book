@@ -143,10 +143,6 @@ Follow the prompts. Choose **GitHub.com**, **HTTPS**, **Login with a web browser
 >
 > You can switch later if you ever feel limited. Most professional developers use HTTPS for years before considering it.
 
-### GitHub Classroom
-
-If your team or class uses **GitHub Classroom**, your instructor will share an "assignment link" that creates a repository for you automatically. Don't worry about that yet: Section 3.7 covers it. For now, focus on understanding the underlying tools.
-
 ---
 
 ## 3.5 Your First Three Commands
@@ -379,29 +375,7 @@ Once your remote is set up, the workflow extends to four steps:
 
 ---
 
-## 3.8 GitHub Classroom
-
-If your instructor uses GitHub Classroom, your workflow changes slightly: instead of creating your own repo, you accept an "assignment link" that creates a repo for you, pre-configured with starter files and connected to your instructor's classroom.
-
-The flow looks like this:
-
-1. Your instructor sends you a link like `https://classroom.github.com/a/abc123`
-2. You click it, sign in with GitHub, and accept the assignment
-3. GitHub Classroom creates a private repo for you under an organization owned by your instructor
-4. You clone that repo to your laptop:
-
-```bash
-git clone https://github.com/your-classroom-org/explorer-yourname.git
-cd explorer-yourname
-```
-
-`git clone` downloads the repo from GitHub and sets the remote up automatically. From there, the workflow is identical to Section 3.7: edit, add, commit, push. Every push is automatically visible to your instructor.
-
-Pushing your final commit to a Classroom repo is how you submit work in this book. There's no separate "submit" button: the latest pushed commit at the deadline is your submission.
-
----
-
-## 3.9 Branches: A Brief Preview
+## 3.8 Branches: A Brief Preview
 
 You'll spend most of Section II working on your `main` branch. But there's one branching concept worth introducing now, because you'll see it referenced throughout the book.
 
@@ -454,7 +428,7 @@ Your history is cleaner that way.
 
 ---
 
-## 3.10 Writing Good Commit Messages
+## 3.9 Writing Good Commit Messages
 
 Almost every developer writes a bad commit message at some point. Then, three weeks later, they're trying to figure out what `git log` is telling them and they regret it.
 
@@ -492,7 +466,7 @@ When you're debugging in Chapter 10 and using `git log` to find when a bug appea
 
 ---
 
-## 3.11 The Workflow You'll Use Every Chapter
+## 3.10 The Workflow You'll Use Every Chapter
 
 Putting Chapters 2 and 3 together, here's the cycle you'll repeat for the rest of this book:
 
@@ -523,7 +497,6 @@ The first few times, you'll have to think about each step. After a chapter or tw
 > - The basic cycle is **edit → add → commit → push**, repeated for every meaningful change
 > - **`git status`** and **`git diff`** are your two most useful inspection commands; run them constantly
 > - **`.gitignore`** keeps build outputs and tool junk out of your history; the WPILib template provides a sensible default
-> - **GitHub Classroom** uses cloned repos and pushed commits as the submission mechanism: there is no separate submit button
 > - **Good commit messages** describe what changed and why; the `Ch<n> — <description>` pattern works well for this book
 > - **Branches and merge conflicts** exist and are normal; you'll do a structured merge conflict lab in Chapter 11
 
@@ -578,8 +551,6 @@ See [zerotorobot.org/robot-programming-book](https://zerotorobot.org/robot-progr
 2. Commit it: `git add README.md && git commit -m "Ch3 — add README"`
 3. Push: `git push`
 4. Open the GitHub page for your repo in a browser. The README should now render at the top of the page.
-
-If you're using GitHub Classroom, this counts as your Chapter 3 submission.
 
 ### Reflect (Branching Preview)
 
