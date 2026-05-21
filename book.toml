@@ -12,4 +12,4 @@ additional-js = ["theme/js/section-label.js", "theme/js/analytics.js"]
 
 
 [build]
-build-dir = "../book"
+build-dir = "book"
