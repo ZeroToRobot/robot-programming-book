@@ -51,6 +51,14 @@ The roboRIO is the robot's brain. It's a small computer made by National Instrum
 
 When you hear "deploy your code," it means you're copying your compiled Java program from your laptop to the roboRIO over Wi-Fi.
 
+### The SystemCore
+
+Starting in the 2026-27 season, FRC is rolling out a new robot controller called the **SystemCore**, manufactured by Limelight Vision. It is the official successor to the roboRIO. The hardware is more capable: a Raspberry Pi Compute Module 5 brain, an onboard IMU and display, and more reconfigurable I/O than the roboRIO. From your program's perspective, though, the WPILib APIs are largely the same. Subsystems, commands, the 50 Hz loop, and everything else you learn in this book carry over.
+
+> **A note on SystemCore**
+>
+> SystemCore is brand new at the time of writing. We will revise the relevant chapters in 2027 once teams (and this book's author) have a full season of real experience with it. For now, the book is written against the roboRIO, and most of what you learn transfers directly to SystemCore.
+
 ### The Robot Radio
 
 The radio is a small Wi-Fi device that lives on the robot. At competitions, it connects to the field's network infrastructure. At home or in the shop, it broadcasts its own Wi-Fi network that your laptop connects to directly. Either way, it's the wireless bridge between your Driver Station laptop and the roboRIO.
@@ -227,6 +235,15 @@ Your actual competition robot. The skills from Phases 1 and 2 transfer directly.
 
 Here's where you're headed.
 
+This book is built around **three projects**, and you build them piece by piece across the chapters. Most chapters end with an exercise that adds one new working feature to whichever project that chapter belongs to.
+
+Two things matter about that structure:
+
+1. **Every exercise is complete on its own.** When you finish a chapter's exercise, the project still compiles, still deploys, and still does something you can see on the robot. You are never left with half-broken code sitting around between chapters.
+2. **The exercises compound.** Chapter 6's exercise builds on Chapter 5's work. Chapter 7 builds on Chapter 6. By the end of each section, what started as a program that just drives forward and stops has grown into something genuinely impressive, one chapter-sized step at a time.
+
+Think of it as building a house one room at a time, where every room is fully livable before you start on the next one. You always have a working robot. It just does more things each week.
+
 ### XRP Explorer (Chapters 5-25)
 
 Your first complete robot program. The XRP Explorer navigates an obstacle course autonomously: driving to specific distances, turning to specific headings, following a line, and stopping at a target. Along the way, you'll add teleop control, sensor feedback, PID tuning, a state machine, unit tests, and simulation support.
@@ -337,7 +354,7 @@ There are no wrong answers here. You're practicing the skill of looking at a rob
 > - **WPILib documentation**: [docs.wpilib.org](https://docs.wpilib.org) is the authoritative reference for everything WPILib. You'll use this constantly.
 > - **XRP documentation**: [docs.wpilib.org/en/stable/docs/xrp-robot](https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html) - hardware specs, setup guide, and API reference for the XRP.
 > - **The Blue Alliance**: [thebluealliance.com](https://www.thebluealliance.com) - match videos, team history, and competition results for every FRC event.
-> **Chief Delphi**: [chiefdelphi.com](https://www.chiefdelphi.com) is the FRC community forum. When you have a question that Google can't answer, Chief Delphi usually can.
+> - **Chief Delphi**: [chiefdelphi.com](https://www.chiefdelphi.com) is the FRC community forum. When you have a question that Google can't answer, Chief Delphi usually can.
 
 ---
 
