@@ -1,3 +1,3 @@
-# Appendix C — Git Command Reference
+# Appendix C: Git Command Reference
 
 *Coming soon.*

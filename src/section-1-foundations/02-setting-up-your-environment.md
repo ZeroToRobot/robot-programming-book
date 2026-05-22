@@ -392,11 +392,11 @@ You won't use the controller yet: that's Chapter 8. But confirming it shows up n
 Every chapter from here on follows the same cycle. It's worth understanding it clearly now so it becomes automatic:
 
 1. **Write code** in VS Code
-2. **Build** (`WPILib: Build Robot Code`) — catches syntax errors immediately
+2. **Build** (`WPILib: Build Robot Code`): catches syntax errors immediately
 3. **Connect** to the XRP's Wi-Fi if you're not already
-4. **Deploy** (`WPILib: Deploy Robot Code`) — sends the program to the XRP
-5. **Test** — enable the robot in Driver Station, observe behavior, check SmartDashboard
-6. **Git commit** — save your progress with a meaningful message
+4. **Deploy** (`WPILib: Deploy Robot Code`): sends the program to the XRP
+5. **Test**: enable the robot in Driver Station, observe behavior, check SmartDashboard
+6. **Git commit**: save your progress with a meaningful message
 
 > **Build before you deploy**
 >
@@ -470,7 +470,7 @@ In VS Code's integrated terminal (`` Ctrl+` ``):
 cd path/to/XRPExplorer
 git init
 git add .
-git commit -m "Ch2 — project created, firmware flashed, first deploy working"
+git commit -m "Ch2: project created, firmware flashed, first deploy working"
 ```
 
 If you're using GitHub Classroom, also push to your remote:
@@ -494,4 +494,4 @@ You'll learn Git in detail in Chapter 3. For now, you just need to know that thi
 
 ---
 
-*Next up, Chapter 3: Git and GitHub, Your Coding Notebook. You'll learn why version control matters, how to use the basic Git commands you'll need throughout this book, and how to connect your project to GitHub.*
+*Next up, Chapter 3, Git and GitHub: Your Coding Notebook. You'll learn why version control matters, how to use the basic Git commands you'll need throughout this book, and how to connect your project to GitHub.*

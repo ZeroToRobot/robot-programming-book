@@ -1,4 +1,4 @@
-# Chapter 3: Git and GitHub, Your Coding Notebook
+# Chapter 3: Git and GitHub: Your Coding Notebook
 
 Imagine you've spent three hours getting your XRP to follow a line. The code finally works. The reflectance sensor reads cleanly, the turn correction feels natural, the robot tracks the tape with satisfying precision. You commit nothing, save the file, and shut your laptop.
 
@@ -313,7 +313,7 @@ Stage and commit:
 
 ```bash
 git add Robot.java
-git commit -m "Ch3 — add startup print to robotInit"
+git commit -m "Ch3: add startup print to robotInit"
 ```
 
 You've now made a commit that captures one specific, small change with a clear message. This is the unit of progress you'll work in for the rest of the book.
@@ -439,7 +439,7 @@ Bad:   "fix"
 Bad:   "stuff"
 Bad:   "asdfasdf"
 Bad:   "minor changes"
-Good:  "Ch4 — add LED blink in autonomousPeriodic"
+Good:  "Ch4: add LED blink in autonomousPeriodic"
 Good:  "Fix encoder distance conversion: ticks per rev was 1440, not 360"
 Good:  "Increase teleop deadband from 0.05 to 0.1 to ignore stick drift"
 ```
@@ -449,14 +449,14 @@ Notice the good messages tell you what file or feature was affected and why the 
 A pattern that works well for this book:
 
 ```
-Ch<chapter> — <short description>
+Ch<chapter>: <short description>
 ```
 
 Examples:
 
-- `Ch3 — initial commit, project from WPILib template`
-- `Ch6 — extract driveForward into utility method`
-- `Ch9 — add reflectance sensor reading to dashboard`
+- `Ch3: initial commit, project from WPILib template`
+- `Ch6: extract driveForward into utility method`
+- `Ch9: add reflectance sensor reading to dashboard`
 
 When you're debugging in Chapter 10 and using `git log` to find when a bug appeared, you'll thank yourself for these messages.
 
@@ -475,7 +475,7 @@ Putting Chapters 2 and 3 together, here's the cycle you'll repeat for the rest o
 3. **Connect** to the XRP's Wi-Fi
 4. **Deploy** (`WPILib: Deploy Robot Code`)
 5. **Test** the robot, watch SmartDashboard
-6. **Stage and commit**: `git add .` then `git commit -m "Ch_ — <change>"`
+6. **Stage and commit**: `git add .` then `git commit -m "Ch_: <change>"`
 7. **Push**: `git push`
 
 The first few times, you'll have to think about each step. After a chapter or two, it'll be automatic. After Chapter 10, you won't even consciously notice you're doing it.
@@ -497,7 +497,7 @@ The first few times, you'll have to think about each step. After a chapter or tw
 > - The basic cycle is **edit → add → commit → push**, repeated for every meaningful change
 > - **`git status`** and **`git diff`** are your two most useful inspection commands; run them constantly
 > - **`.gitignore`** keeps build outputs and tool junk out of your history; the WPILib template provides a sensible default
-> - **Good commit messages** describe what changed and why; the `Ch<n> — <description>` pattern works well for this book
+> - **Good commit messages** describe what changed and why; the `Ch<n>: <description>` pattern works well for this book
 > - **Branches and merge conflicts** exist and are normal; you'll do a structured merge conflict lab in Chapter 11
 
 ---
@@ -548,7 +548,7 @@ The XRP Explorer project for Devang Doshi's *Robot Programming Book*.
 See [zerotorobot.org/robot-programming-book](https://zerotorobot.org/robot-programming-book) for the full book.
 ```
 
-2. Commit it: `git add README.md && git commit -m "Ch3 — add README"`
+2. Commit it: `git add README.md && git commit -m "Ch3: add README"`
 3. Push: `git push`
 4. Open the GitHub page for your repo in a browser. The README should now render at the top of the page.
 
@@ -564,7 +564,7 @@ Make a small change to `Robot.java` (any change at all). Commit it on this branc
 
 ```bash
 git add Robot.java
-git commit -m "Ch3 — branch experiment"
+git commit -m "Ch3: branch experiment"
 ```
 
 Now switch back to `main`:
@@ -581,7 +581,7 @@ When you're done playing, you can either merge the branch (`git merge ch3-experi
 
 > **Additional Resources**
 >
-> - **Pro Git book** (free): [git-scm.com/book](https://git-scm.com/book/en/v2) the canonical reference for Git, by Scott Chacon and Ben Straub. You don't need to read it cover to cover, but Chapters 1–3 are excellent and free
+> - **Pro Git book** (free): [git-scm.com/book](https://git-scm.com/book/en/v2) the canonical reference for Git, by Scott Chacon and Ben Straub. You don't need to read it cover to cover, but Chapters 1-3 are excellent and free
 > - **GitHub Docs Quickstart**: [docs.github.com/en/get-started/quickstart](https://docs.github.com/en/get-started/quickstart) GitHub's official walkthrough of the basics
 > - **Oh My Git!** (free game): [ohmygit.org](https://ohmygit.org) an interactive game that teaches Git concepts visually; especially helpful if commits and branches still feel abstract
 > - **Git visual cheat sheet**: [ndpsoftware.com/git-cheatsheet.html](https://ndpsoftware.com/git-cheatsheet.html) shows where each command moves data between working tree, staging area, local repo, and remote

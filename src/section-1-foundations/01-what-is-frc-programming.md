@@ -97,7 +97,7 @@ The XRP is a small educational robot designed by WPI specifically for learning F
 
 Here's why the XRP matters: it uses the same WPILib APIs as a full competition robot. The code you write for the XRP is not "beginner code" that you'll throw away later. It's the same architecture, the same classes, and the same patterns used by championship-winning FRC teams. The only difference is the scale.
 
-In Phase 1 of this book (Chapters 1–25), the XRP is your primary hardware. You can deploy to it from your own laptop, in your own home, without needing access to a shop or a team robot.
+In Phase 1 of this book (Chapters 1-25), the XRP is your primary hardware. You can deploy to it from your own laptop, in your own home, without needing access to a shop or a team robot.
 
 > **Draw this from memory**
 > 
@@ -111,7 +111,7 @@ Every FRC match has two distinct phases:
 
 **Autonomous (Auto):** the first 20 seconds of the match. The Driver Station connection is still active, but driver inputs are ignored. The robot must act entirely on its own, using pre-written logic and sensor feedback to complete tasks on the field. Autonomous is often worth a significant point bonus and can set up the rest of the match.
 
-**Teleop:** the remaining 2 minutes and 10 seconds. The drivers take over. Your program reads joystick inputs and translates them into robot movement and mechanism control.
+**Teleop:** the remaining 2 minutes and 20 seconds. The drivers take over. Your program reads joystick inputs and translates them into robot movement and mechanism control.
 
 Because these two phases are so different, every FRC robot program has two completely separate behaviors. In the TimedRobot template you'll use throughout this book, there are separate methods for each mode:
 
@@ -197,7 +197,7 @@ The XRP (Experiential Robotics Platform) was designed by WPI specifically to tea
 | IMU (gyroscope + accelerometer) | Measures rotation angle and acceleration |
 | Ultrasonic rangefinder | Measures distance to objects in front of the robot |
 | Reflectance sensor | Detects the difference between light and dark surfaces (line following) |
-| Onboard RGB LED | Useful for status indication and debugging |
+| Onboard green LED | Useful for status indication and debugging |
 | Wi-Fi | Connects to your laptop for deployment and Driver Station |
 
 The XRP runs WPILib's WebSockets-based hardware abstraction layer, which means your Java code looks almost identical to competition robot code. The class names are slightly different (`XRPMotor` instead of `SparkMax`), but the patterns (subsystems, commands, PID controllers, odometry) are exactly the same.
@@ -206,13 +206,13 @@ The XRP runs WPILib's WebSockets-based hardware abstraction layer, which means y
 
 This book follows a deliberate hardware progression:
 
-**Phase 1: XRP (Chapters 1–25)**
+**Phase 1: XRP (Chapters 1-25)**
 Personal hardware. Deploy from your desk. Crash it without worrying about a $10,000 mechanism. This is where you learn everything: Java, robot structure, sensors, control theory, command-based architecture, simulation, and testing.
 
-**Phase 2: Mini Swerve Bot (Chapters 26–33)**
+**Phase 2: Mini Swerve Bot (Chapters 26-33)**
 A shared team robot with real competition hardware: roboRIO, Spark MAX motor controllers, navX gyro, and a camera. This is where you graduate to the full FRC hardware stack, learn swerve drive kinematics, and add vision-based pose estimation.
 
-**Phase 3: Competition Robot (Chapters 34–39)**
+**Phase 3: Competition Robot (Chapters 34-39)**
 Your actual competition robot. The skills from Phases 1 and 2 transfer directly. Phase 3 adds mechanisms, full autonomous routines, pneumatics, and competition-day process.
 
 > **The XRP is not a toy**
@@ -227,17 +227,17 @@ Your actual competition robot. The skills from Phases 1 and 2 transfer directly.
 
 Here's where you're headed.
 
-### XRP Explorer (Chapters 5–25)
+### XRP Explorer (Chapters 5-25)
 
 Your first complete robot program. The XRP Explorer navigates an obstacle course autonomously: driving to specific distances, turning to specific headings, following a line, and stopping at a target. Along the way, you'll add teleop control, sensor feedback, PID tuning, a state machine, unit tests, and simulation support.
 
 By Chapter 25, the Explorer will be a full command-based robot program with AdvantageKit IO layers, the same architecture used by top FRC teams.
 
-### Mini Swerve Bot (Chapters 26–33)
+### Mini Swerve Bot (Chapters 26-33)
 
 Swerve drive is the gold standard for FRC mobility: each wheel can rotate independently, letting the robot strafe sideways, spin in place, and follow precise field-relative paths. In Section VI, you'll program a full swerve drivetrain from scratch, add PathPlanner for autonomous path following, characterize the motors with SysId, and fuse AprilTag vision measurements into the pose estimator.
 
-### Competition Bot (Chapters 34–39)
+### Competition Bot (Chapters 34-39)
 
 The final phase brings everything together on your team's actual competition robot. You'll add mechanism subsystems, full field autonomous routines with event markers, pneumatics control, and the competition-day deployment process that real teams use at regionals and championships.
 
@@ -254,7 +254,7 @@ new JoystickButton(controller, XboxController.Button.kA.value)
 And here's a slightly larger piece, a complete command that drives the XRP forward for a set distance:
 
 ```java
-public class DriveForwardCommand extends CommandBase {
+public class DriveForwardCommand extends Command {
     private final Drivetrain drivetrain;
     private final double targetDistance;
 
@@ -325,7 +325,7 @@ Compare your drawing to the description in Section 1.2. What did you miss? What 
 
 Find and watch one match video from a recent FRC season. Search for "FRC match 2026" or "FRC championship 2026" on YouTube and pick any match. While watching, write down:
 
-1. What does the robot do during the 15 to 20 second autonomous period?
+1. What does the robot do during the 20 second autonomous period?
 2. What does it do in teleop, what mechanisms does it operate?
 3. What sensors do you think it might be using to accomplish those things?
 

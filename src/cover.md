@@ -13,7 +13,7 @@
 
 <p class="cover-hardware-desc">
 This book progresses through three hardware phases.
-<span class="hw-tag hw-tag--xrp">XRP</span> is a small, affordable educational robot from WPI — personal hardware, no team or lab required, deployable from your desk.
+<span class="hw-tag hw-tag--xrp">XRP</span> is a small, affordable educational robot from WPI: personal hardware, no team or lab required, deployable from your desk.
 <span class="hw-tag hw-tag--swerve">Swerve</span> is a shared mini swerve robot running a roboRIO with real motor controllers (SparkMAX), a gyro, and a camera: full FRC hardware at a reduced scale.
 <span class="hw-tag hw-tag--competition">Competition</span> is a full FRC competition robot used for the final phases covering mechanisms, full-field autonomous, and season-ready architecture.
 </p>

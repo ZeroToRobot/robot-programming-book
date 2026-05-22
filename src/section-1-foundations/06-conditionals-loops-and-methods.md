@@ -198,9 +198,9 @@ A `while` loop keeps running its body as long as a condition is true:
 ```java
 int count = 0;
 while (count < 5) {
-    led.setOn(true);
+    onBoardIO.setLed(true);
     Timer.delay(0.2);
-    led.setOn(false);
+    onBoardIO.setLed(false);
     Timer.delay(0.2);
     count = count + 1;
 }
@@ -222,9 +222,9 @@ A `for` loop is a more compact way to count. The five-blink example above is exa
 
 ```java
 for (int count = 0; count < 5; count = count + 1) {
-    led.setOn(true);
+    onBoardIO.setLed(true);
     Timer.delay(0.2);
-    led.setOn(false);
+    onBoardIO.setLed(false);
     Timer.delay(0.2);
 }
 ```
@@ -333,9 +333,9 @@ Not every method gives back a value. Some methods just *do* something. For those
 ```java
 private void blinkLED(int times) {
     for (int i = 0; i < times; i++) {
-        led.setOn(true);
+        onBoardIO.setLed(true);
         Timer.delay(0.2);
-        led.setOn(false);
+        onBoardIO.setLed(false);
         Timer.delay(0.2);
     }
 }

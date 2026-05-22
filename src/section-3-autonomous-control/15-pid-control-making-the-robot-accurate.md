@@ -1,3 +1,3 @@
-# PID Control — Making the Robot Accurate
+# PID Control: Making the Robot Accurate
 
 *Coming soon.*

@@ -1,3 +1,3 @@
-# Vision — AprilTags, Auto-Align, and Pose Fusion
+# Vision: AprilTags, Auto-Align, and Pose Fusion
 
 *Coming soon.*

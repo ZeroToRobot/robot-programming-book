@@ -1,3 +1,3 @@
-# Appendix D — Tuning and Troubleshooting Guide
+# Appendix D: Tuning and Troubleshooting Guide
 
 *Coming soon.*

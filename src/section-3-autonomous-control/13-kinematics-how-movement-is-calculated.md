@@ -1,3 +1,3 @@
-# Kinematics — How Movement Is Calculated
+# Kinematics: How Movement Is Calculated
 
 *Coming soon.*

@@ -1,3 +1,3 @@
-# AdvantageScope — Visualizing and Replaying Logs
+# AdvantageScope: Visualizing and Replaying Logs
 
 *Coming soon.*
