@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mdbook --version)",
+      "Bash(curl -s https://api.github.com/repos/rust-lang/mdBook/releases/tags/v0.5.2)"
+    ]
+  }
+}

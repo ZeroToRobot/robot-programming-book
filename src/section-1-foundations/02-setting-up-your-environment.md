@@ -48,14 +48,18 @@ Before you start, confirm you have the following:
 |------|-------|
 | A laptop or desktop computer | Windows 10/11, macOS 12+, or Ubuntu 22.04+ |
 | An XRP robot | No tools or soldering required; if yours is new, you will need to assemble it from the box before starting |
-| A USB-C cable | For firmware flashing only; any USB-C data cable works |
-| A microSD card | Usually pre-installed in the XRP; 4 GB or larger |
+| A USB cable | For firmware flashing and Web UI configuration. Production (V1) XRPs use USB-C; older Beta XRPs use micro-USB. Either way, you need a data cable, not charge-only |
+| Four AA batteries | Rechargeable batteries work best; alkaline AAs are fine to start |
 | An Xbox controller | Any Xbox One or Xbox Series controller (wired or with USB adapter) |
 | A Wi-Fi connection | For downloading installers; the XRP creates its own network later |
 
 > **Disk space**
 >
 > The WPILib installer is large: roughly 2.0 GB to download and around 3 to 4 GB once installed. Make sure you have at least 5 GB free before you start.
+
+> **If your XRP is still in the box**
+>
+> XRPs come to students two ways. If a mentor or teammate handed you one that's already built, you can skip this paragraph. If you opened a fresh XRP kit yourself, take 30 to 45 minutes now to put it together following the printed instructions in the kit (or the [WPILib XRP assembly guide](https://docs.wpilib.org/en/stable/docs/xrp-robot/hardware-and-imaging.html)). Assembly is snap-fits and a handful of small screws; the kit includes the screwdriver you need, and no soldering is required.
 
 ---
 
@@ -96,8 +100,7 @@ The installer will download additional components and set up VS Code. This usual
 
 ### Step 3: Launch VS Code
 
-After installation, look for **"YEAR WPILib VS Code"** in your Applications or Start Menu and open it, e.g. "2026 WPILib VS Code". You can confirm the WPILib extension is installed correctly by checking three things: a WPILib icon appears in the top-right corner of the editor next to the tabs, the `...` menu in the tab bar includes WPILib-specific options like **Build Robot Code** and **Deploy Robot Code**, and the Explorer panel on the left shows a **WPILib Vendor 
-Dependencies** section.
+After installation, look for **"WPILib VS Code YEAR"** in your Applications or Start Menu and open it, e.g. "WPILib VS Code 2026". You can confirm the WPILib extension is installed correctly by checking two things: a WPILib icon (a small red "W") appears in the top-right corner of the editor next to the tabs, and the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) shows WPILib-specific commands like **WPILib: Build Robot Code** and **WPILib: Deploy Robot Code** when you type "WPILib".
 
 > **First launch takes a moment**
 >
@@ -111,92 +114,70 @@ Now we need to update the software running on the XRP itself. This process takes
 
 ### Step 1: Download the XRP Firmware
 
-The XRP firmware is included with your WPILib installation. Find it here:
+Go to **[github.com/wpilibsuite/xrp-wpilib-firmware/releases](https://github.com/wpilibsuite/xrp-wpilib-firmware/releases)** and find the latest release at the top of the page. Click **Assets** to expand the file list and download the `.uf2` file.
 
-- **Windows**: `C:\Users\Public\wpilib\YEAR\tools\xrp-firmware.uf2`
-- **macOS/Linux**: `~/wpilib/YEAR/tools/xrp-firmware.uf2`
+The filename includes the version and a short commit hash, for example `xrp-wpilib-firmware-2.1.0-aa439f0.uf2`. Don't worry about the exact name; just save it somewhere you can find again (your Downloads folder is fine).
 
-If you can't find it there, you can also download the latest `.uf2` file directly from **[github.com/wpilibsuite/xrp-wpilib-firmware/releases](https://github.com/wpilibsuite/xrp-wpilib-firmware/releases)**.
+> **Beta XRP vs. production (V1) XRP**
+>
+> If you have a beta XRP (the older boards distributed before public release), look for the asset whose filename contains `beta`. Production V1 XRPs use the asset without `beta` in the name. If you're not sure which you have, the production V1 has a USB-C connector; the beta board has micro-USB.
 
-### Step 2: Put the XRP into Bootloader Mode
+### Step 2: Connect the XRP via USB
 
-The XRP needs to be in a special mode to accept new firmware. Here's how:
+Plug the XRP into your laptop with the USB cable. USB alone provides enough power to flash firmware, so you don't need batteries installed for this step.
 
-1. Hold down the **BOOTSEL** button on the XRP (it's a small button on the RP2040 microcontroller)
-2. While holding BOOTSEL, plug in the USB-C cable to your computer
-3. Release the BOOTSEL button
+### Step 3: Put the XRP into Bootloader Mode
+
+The XRP needs to be in a special mode to accept new firmware. The procedure uses two buttons on the board:
+
+1. Find the **BOOTSEL** button (the small white button on the green Pico W board, near the USB connector)
+2. Find the **reset** button (on the middle-left side of the main XRP board)
+3. While holding **BOOTSEL** down, quickly press and release the **reset** button
+4. Release **BOOTSEL**
 
 If it worked, your computer will show a new drive called **"RPI-RP2"** (it shows up just like a USB thumb drive).
 
 > **If you don't see RPI-RP2**
 >
-> Make sure you're using a data cable, not a charge-only cable. Some USB-C cables only carry power. Try a different cable if the drive doesn't appear.
+> Make sure you're using a data cable, not a charge-only cable. Some USB cables only carry power. Try a different cable if the drive doesn't appear. Also double-check that you pressed the reset button while holding BOOTSEL, not the other way around.
 
-### Step 3: Copy the Firmware File
+### Step 4: Copy the Firmware File
 
-Drag and drop the `xrp-firmware.uf2` file onto the **RPI-RP2** drive. That's it. The file will copy over, the drive will disappear automatically, and the XRP will reboot with new firmware.
+Drag and drop the firmware `.uf2` file onto the **RPI-RP2** drive. That's it. The file will copy over, the drive will disappear automatically, and the XRP will reboot with new firmware.
 
 The XRP status LED should blink a few times and then settle into a steady pattern. You've flashed the firmware.
 
 > **What's a .uf2 file?**
 >
-> UF2 (USB Flashing Format) is a file format designed specifically for flashing microcontrollers over USB. When you copy a `.uf2` file onto the RPI-RP2 drive, the bootloader on the RP2040 automatically recognizes it, writes it to flash memory, and reboots. You don't need any special flashing software.
+> UF2 (USB Flashing Format) is a file format designed specifically for flashing microcontrollers over USB. When you copy a `.uf2` file onto the RPI-RP2 drive, the bootloader on the Pico W automatically recognizes it, writes it to flash memory, and reboots. You don't need any special flashing software.
 
 ---
 
-## 2.5 Preparing the MicroSD Card
+## 2.5 Connecting to the XRP
 
-The XRP uses a microSD card to store configuration files that set up its Wi-Fi network. If your XRP came with a pre-configured card, you may be able to skip this step, but it's worth understanding what's on the card.
-
-### What's on the Card
-
-The microSD card contains a file called `xrp_config.json`. This file tells the XRP the name of the Wi-Fi network it should create (its SSID) and the password for that network.
-
-A default config looks like this:
-
-```json
-{
-  "robotName": "xrp",
-  "ssid": "XRP-<serial>",
-  "password": "xrpxrpxrp"
-}
-```
-
-The XRP broadcasts this as its own Wi-Fi access point. Your laptop connects to it directly, without any router in between.
-
-### Configuring the Card (if needed)
-
-If your card isn't pre-configured, or if you want to change the network name:
-
-1. Remove the microSD card from the XRP (it's in a slot on the underside of the board)
-2. Insert it into your computer using a microSD adapter (most laptops have a full-size SD slot; microSD to SD adapters are inexpensive)
-3. Open the card in File Explorer or Finder; it should show up as a small drive
-4. Edit `xrp_config.json` with any text editor
-5. Save, eject the card safely, and reinsert it into the XRP
-
-> **Use a unique SSID if you have multiple XRPs**
->
-> If you're in a classroom with several XRP robots, change the SSID to something that identifies yours: `XRP-Alice`, `XRP-Team3415`, etc. Otherwise, you might accidentally connect to someone else's robot.
-
----
-
-## 2.6 Connecting to the XRP
-
-With firmware flashed and the SD card configured, it's time to turn on the XRP and connect your laptop.
+With firmware flashed, it's time to power up the XRP and connect your laptop to it. The XRP broadcasts its own Wi-Fi network straight out of the box. There's no router and no microSD card involved: your laptop connects directly to the robot.
 
 ### Step 1: Power the XRP
 
-The XRP is powered by four AA batteries in the battery holder on the underside of the chassis. Insert fully-charged batteries and flip the power switch. The status LED should light up.
+The XRP runs on four AA batteries that sit in a holder on the underside of the chassis. Insert fully-charged batteries and flip the power switch. The status LED should light up.
 
-You can also power the XRP from the USB-C port, which is convenient for desktop testing when you don't want to drain batteries. Keep in mind that USB power may limit motor speed if your computer's USB port is current-limited. Use batteries for any real driving tests.
+You can also power the XRP from its USB port, which is handy for desktop testing when you don't want to drain batteries. USB power may limit motor speed on some laptops, so use batteries for any real driving tests.
 
 ### Step 2: Connect to the XRP's Wi-Fi
+
+Out of the box, every XRP creates a Wi-Fi network with these defaults:
+
+| Setting | Default |
+|---------|---------|
+| SSID | `XRP-AAAA-BBBB` (where `AAAA-BBBB` are hex digits unique to your board) |
+| Password | `xrp-wpilib` |
+| IP address | `192.168.42.1` |
 
 On your laptop:
 
 1. Open your Wi-Fi settings
-2. Look for a network with the name you set in `xrp_config.json` (default: `XRP-<serial>`)
-3. Connect using the password from the config (default: `xrpxrpxrp`)
+2. Look for a network whose name starts with `XRP-`
+3. Connect using the password `xrp-wpilib`
 
 Once connected, your laptop loses internet access. You're now on the XRP's local network, not your home or school router. This is expected.
 
@@ -208,9 +189,37 @@ Once connected, your laptop loses internet access. You're now on the XRP's local
 
 ### Step 3: Verify the Connection
 
-Open a web browser and navigate to **[http://192.168.42.1](http://192.168.42.1)**. If the XRP is running and your laptop is connected to its network, you should see the XRP's built-in status page showing firmware version, battery level, and network info.
+Open a web browser and navigate to **[http://192.168.42.1:5000](http://192.168.42.1:5000)**. The `:5000` at the end is the port number; the XRP's configuration Web UI runs there.
 
-If you see this page, your connection is working.
+If the XRP is running and your laptop is connected to its network, you should see the XRP's built-in Web UI showing the current network configuration, firmware version, and other status information.
+
+If you see that page, your connection is working.
+
+---
+
+## 2.6 Customizing the XRP's Network (Optional)
+
+You can skip this section on a first read. The defaults above will get you through every chapter in this book. Come back if you're in a classroom with several XRPs and want to give yours a memorable name.
+
+### Why Customize
+
+When you're sitting next to a friend whose XRP is also broadcasting `XRP-AAAA-BBBB`-something, it's surprisingly easy to deploy code to the wrong robot. Giving your XRP a distinctive SSID, like `XRP-Alice` or `XRP-Team3415`, removes that confusion entirely.
+
+### How to Customize
+
+The same Web UI you visited in Section 2.5 also lets you change settings. With your laptop connected to the XRP's Wi-Fi:
+
+1. Open **[http://192.168.42.1:5000](http://192.168.42.1:5000)** in your browser
+2. Find the **Access Point** section
+3. Change the **SSID** and **passphrase** to whatever you want (write the password down somewhere safe; you'll need it again the next time you connect)
+4. Click **Save** (the exact button name may vary slightly between firmware releases)
+5. The XRP will restart its Wi-Fi with the new settings
+
+Reconnect your laptop using the new SSID and password. Visit `http://192.168.42.1:5000` again to confirm the change stuck.
+
+> **The Web UI also supports station mode**
+>
+> The Web UI has a `mode` setting that switches the XRP between **access point mode** (the default, where the XRP creates its own network) and **station mode** (where the XRP joins an existing Wi-Fi network). Leave it on access point mode for this book. Station mode is useful in some classroom and competition setups, but it adds enough networking complexity that we won't cover it here.
 
 ---
 
@@ -248,7 +257,7 @@ Before building anything, take a moment to look at the files VS Code created. In
 - **`Main.java`**: the entry point; you'll never edit this
 - **`Robot.java`**: the main robot class; this is where most of your code will live for now
 
-Open `Robot.java`. It should look like this:
+Open `Robot.java`. The file the generator creates is longer than what we show here (it includes a small autonomous mode chooser as an example), but the skeleton looks like this:
 
 ```java
 package frc.robot;
@@ -257,8 +266,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 
 public class Robot extends TimedRobot {
 
-    @Override
-    public void robotInit() {
+    public Robot() {
         // Called once when the robot program starts
     }
 
@@ -286,10 +294,30 @@ public class Robot extends TimedRobot {
     public void teleopPeriodic() {
         // Called every 20ms during teleop
     }
+
+    @Override
+    public void disabledInit() {
+        // Called once when the robot is disabled
+    }
+
+    @Override
+    public void disabledPeriodic() {
+        // Called every 20ms while disabled
+    }
+
+    @Override
+    public void testInit() {
+        // Called once when test mode starts
+    }
+
+    @Override
+    public void testPeriodic() {
+        // Called every 20ms during test mode
+    }
 }
 ```
 
-This is the TimedRobot template, the foundation every robot program in this book starts from. You'll spend all of Chapter 5 understanding exactly what this code means. For now, just notice the structure: there are methods for each robot mode, and each method is called either once (at the start of a mode) or repeatedly (every loop cycle).
+This is the TimedRobot template, the foundation every robot program in this book starts from. You'll spend all of Chapter 5 understanding exactly what this code means. For now, just notice the structure: there are methods for each robot mode, and each method is called either once (at the start of a mode) or repeatedly (every loop cycle). The `Robot()` constructor at the top runs once when the program starts; it's where you set up anything that needs to exist before any mode begins.
 
 ### Step 3: Build the Project
 
@@ -434,8 +462,8 @@ On a competition robot, the process is almost identical. The `.jar` is deployed 
 > **What you learned in Chapter 2**
 >
 > - The WPILib installer sets up VS Code, the WPILib extension, and a bundled JDK: everything you need to write and deploy robot code
-> - XRP firmware is flashed once via USB-C bootloader mode by dragging a `.uf2` file onto the RPI-RP2 drive
-> - The XRP creates its own Wi-Fi network from settings stored on the microSD card; your laptop connects directly to it
+> - XRP firmware is flashed once by entering bootloader mode (hold BOOTSEL, press the reset button) and dragging a `.uf2` file onto the RPI-RP2 drive
+> - The XRP broadcasts its own Wi-Fi network with default SSID `XRP-AAAA-BBBB` and password `xrp-wpilib`; you can customize either from the Web UI at `http://192.168.42.1:5000`
 > - A WPILib project is created from a template (TimedRobot with the XRP option checked) and deployed with `WPILib: Deploy Robot Code`
 > - The deploy workflow (write, build, connect, deploy, test, commit) is the cycle you'll use for every chapter in this book
 > - The XRP's deploy process is nearly identical to a competition roboRIO; the architecture is the same, just smaller
