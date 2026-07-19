@@ -4,7 +4,7 @@ authors = ["Devang Doshi"]
 language = "en"
 
 [output.html]
-site-url = "/book/"
+site-url = "/"
 no-section-label = true
 mathjax-support = true
 additional-css = ["theme/css/custom.css"]

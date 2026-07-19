@@ -123,23 +123,18 @@ If you don't already have one, go to [github.com](https://github.com) and sign u
 - Use the same email you configured Git with.
 - Enable two-factor authentication when prompted: GitHub will eventually require it, and it's a good security habit.
 
-After signing up, you'll need to authenticate your laptop with GitHub so Git can push to it. The easiest way is to install the **GitHub CLI**:
+After signing up, you'll need a way for Git on your laptop to prove to GitHub that it's really you when you push. Git does this over **HTTPS**, and you authenticate the first time you push. How that first push looks depends on your operating system:
 
-- **Windows**: [cli.github.com](https://cli.github.com), download and run the installer
-- **macOS**: `brew install gh` (if you have Homebrew) or download from the same site
-- **Linux**: see [github.com/cli/cli#installation](https://github.com/cli/cli#installation)
+- **Windows**: the Git for Windows installer includes **Git Credential Manager**. The first time you run `git push`, a window opens asking you to sign in to GitHub. Click **Sign in with your browser**, approve it, and you're done. Git saves the credential and won't ask again.
+- **macOS and Linux**: the simplest reliable option is a **Personal Access Token**. On GitHub, go to **Settings**, then **Developer settings**, then **Personal access tokens**, then **Tokens (classic)**. Click **Generate new token**, give it the **repo** scope, and copy the token somewhere safe. The first time you push, Git asks for a username and password: enter your GitHub username, and paste the token as the password.
 
-Then run:
+A Personal Access Token is like a password that only works for the permissions you grant it. GitHub requires one (or the browser sign-in above) instead of your account password.
 
-```bash
-gh auth login
-```
-
-Follow the prompts. Choose **GitHub.com**, **HTTPS**, **Login with a web browser**, and paste the code it gives you into the browser window that opens. Once you see "Logged in as `<yourusername>`", you're authenticated.
+You don't need to do any of this right now. Just know that when you reach Section 3.7 and run your first `git push`, this is the prompt you'll see. Once you authenticate, Git remembers it.
 
 > **Why HTTPS instead of SSH?**
 >
-> Git can authenticate to GitHub two ways: HTTPS (with a token managed by `gh auth`) or SSH (with a key pair you generate yourself). HTTPS is easier to set up, works through most corporate firewalls, and is what GitHub recommends for new users. SSH is slightly more elegant but adds setup steps that aren't worth it at this stage.
+> Git can authenticate to GitHub two ways: HTTPS (with a token or credential manager, as above) or SSH (with a key pair you generate yourself). HTTPS is easier to set up, works through most corporate firewalls, and is what GitHub recommends for new users. SSH is slightly more elegant but adds setup steps that aren't worth it at this stage.
 >
 > You can switch later if you ever feel limited. Most professional developers use HTTPS for years before considering it.
 
@@ -163,7 +158,7 @@ Now turn this folder into a Git repository:
 git init
 ```
 
-You should see something like `Initialized empty Git repository in /Users/you/git-practice/.git/`. That's the hidden `.git` folder being created.
+You should see `Initialized empty Git repository in ...`, ending in `git-practice/.git/` (the exact path depends on your operating system). That's the hidden `.git` folder being created.
 
 Create a file:
 
@@ -244,7 +239,7 @@ You'll see both commits, newest first, with their IDs, your name, and your messa
 
 > **`git add .` is your friend**
 >
-> Once you trust your changes, you can stage every modified file at once with `git add .` (the dot means "everything in the current folder"). Most of the time, that's what you want. Only use specific filenames when you have changes you intentionally want to leave out of a commit.
+> Once you trust your changes, you can stage every modified file at once with `git add .` (the dot means "everything in the current folder and its subfolders"). Most of the time, that's what you want. Only use specific filenames when you have changes you intentionally want to leave out of a commit.
 
 ---
 
@@ -267,6 +262,14 @@ git status
 ```
 
 If you followed Chapter 2's Git exercise, you'll see "nothing to commit, working tree clean" and your earlier commit will exist. If for any reason the repo wasn't initialized, run `git init` now.
+
+One more thing: make sure your branch is named `main`. When you ran `git init` back in Chapter 2, older versions of Git may have named the default branch `master` instead. The rest of this book and GitHub both use `main`, so standardize it now:
+
+```bash
+git branch -M main
+```
+
+The `-M` flag renames the current branch to `main`. If you were already on `main`, this changes nothing, so it's safe to run either way.
 
 ### The .gitignore File
 
@@ -326,29 +329,12 @@ Local commits are good, but they only exist on your laptop. If your hard drive d
 
 ### Creating the Remote Repository
 
-The fastest way is the GitHub CLI:
-
-```bash
-gh repo create XRPExplorer --public --source=. --remote=origin --push
-```
-
-Walk through what just happened:
-
-- `gh repo create XRPExplorer` creates a new repository named XRPExplorer on your GitHub account
-- `--public` makes it visible to anyone (use `--private` if you'd rather keep it private; both work the same way for our purposes)
-- `--source=.` says "use the Git repo in the current folder"
-- `--remote=origin` adds GitHub as a remote named `origin` (the conventional name)
-- `--push` pushes your existing commits up immediately
-
-You'll see a URL like `https://github.com/yourname/XRPExplorer`. Open it in your browser. Your code is there, with your commit history visible.
-
-### Or, the Manual Way
-
-If you'd rather not use the CLI, do it through the website:
+You'll create an empty repository on GitHub's website, then connect your local repo to it.
 
 1. On [github.com](https://github.com), click the **+** icon in the top-right and choose **"New repository"**
-2. Name it `XRPExplorer`, leave the rest of the defaults, and click **Create repository**
-3. GitHub shows a setup page; copy the line under "…or push an existing repository from the command line", which looks like:
+2. Name it `XRPExplorer`. Leave **"Add a README"**, the `.gitignore` dropdown, and the license unchecked: your local project already has these, and adding them on GitHub now would create a conflict you'd have to untangle on your first push.
+3. Choose **Public** or **Private** (either is fine for this book), then click **Create repository**
+4. GitHub shows a setup page. Because your project already has commits, use the section titled **"…or push an existing repository from the command line"**. It lists three commands like these:
 
 ```bash
 git remote add origin https://github.com/yourname/XRPExplorer.git
@@ -356,7 +342,15 @@ git branch -M main
 git push -u origin main
 ```
 
-Run those three commands in your XRPExplorer terminal. Refresh the GitHub page: your code is there.
+Copy them from your own setup page (GitHub fills in your real username) and run them in your XRPExplorer terminal. Here's what each one does:
+
+- `git remote add origin <url>` tells your local repo where its GitHub copy lives and names that remote `origin` (the conventional name)
+- `git branch -M main` makes sure your branch is named `main`; you already did this in Section 3.6, so it changes nothing here
+- `git push -u origin main` uploads your commits and links `main` to `origin`, so that from now on you can push with just `git push`
+
+This first push is when the authentication from Section 3.4 kicks in. If Git prompts you to sign in, follow the browser flow (Windows) or paste your Personal Access Token as the password (macOS and Linux).
+
+Refresh the GitHub page: your code is there, with your commit history visible.
 
 ### The Push/Pull Cycle
 
@@ -575,7 +569,7 @@ git checkout main
 
 Open `Robot.java` in VS Code. Notice your change is gone: it's still safe on the `ch3-experiment` branch, but `main` is unchanged. Switch back and forth a few times and watch the file's contents change.
 
-When you're done playing, you can either merge the branch (`git merge ch3-experiment`) or delete it (`git branch -D ch3-experiment`). Either way, write 2 to 3 sentences explaining what just happened: what is a branch actually doing, in your own words?
+When you're done playing, you can either merge the branch (`git merge ch3-experiment`) or delete it. Use a capital `-D` to force-delete a branch whose work you never merged (`git branch -D ch3-experiment`); the lowercase `-d` from Section 3.8 only deletes branches you've already merged. Either way, write 2 to 3 sentences explaining what just happened: what is a branch actually doing, in your own words?
 
 ---
 
@@ -585,7 +579,6 @@ When you're done playing, you can either merge the branch (`git merge ch3-experi
 > - **GitHub Docs Quickstart**: [docs.github.com/en/get-started/quickstart](https://docs.github.com/en/get-started/quickstart) GitHub's official walkthrough of the basics
 > - **Oh My Git!** (free game): [ohmygit.org](https://ohmygit.org) an interactive game that teaches Git concepts visually; especially helpful if commits and branches still feel abstract
 > - **Git visual cheat sheet**: [ndpsoftware.com/git-cheatsheet.html](https://ndpsoftware.com/git-cheatsheet.html) shows where each command moves data between working tree, staging area, local repo, and remote
-> - **GitHub CLI manual**: [cli.github.com/manual](https://cli.github.com/manual) full reference for the `gh` command if you want to do more from the terminal
 > - **WPILib Git documentation**: [docs.wpilib.org/en/stable/docs/software/basic-programming/git-getting-started.html](https://docs.wpilib.org/en/stable/docs/software/basic-programming/git-getting-started.html) FRC-specific Git advice from the WPILib team
 
 ---

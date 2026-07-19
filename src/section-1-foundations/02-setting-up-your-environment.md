@@ -501,14 +501,7 @@ git add .
 git commit -m "Ch2: project created, firmware flashed, first deploy working"
 ```
 
-If you're using GitHub Classroom, also push to your remote:
-
-```bash
-git remote add origin <your-classroom-repo-url>
-git push -u origin main
-```
-
-You'll learn Git in detail in Chapter 3. For now, you just need to know that this saves a snapshot of your project that you can return to.
+You'll learn Git in detail in Chapter 3, including how to push this project to GitHub. For now, you just need to know that this saves a snapshot of your project that you can return to.
 
 ---
 
