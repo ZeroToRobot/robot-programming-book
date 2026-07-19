@@ -2,11 +2,13 @@
 //
 // Static Web Apps calls this endpoint on every login with the user's identity
 // in the request body. We upsert the user into Azure Table Storage (new users
-// default to the "student" role) and return the user's role(s) to SWA.
+// default to the "student" role, with profileComplete=false) and return the
+// user's role(s) to SWA. We also capture/refresh the Google-derived profile
+// fields (first name, last name, picture) from the token claims.
 //
-// Today all authenticated users can view the book (gating is "authenticated"),
-// so roles are stored for future role-based access but not yet used to
-// differentiate what a user can see.
+// Today all authenticated users can view the book (gating is "authenticated" +
+// a client-side profile-completion check), so roles are stored for future
+// role-based access but do not yet differentiate what a user can see.
 
 const { TableClient } = require("@azure/data-tables");
 
@@ -16,12 +18,19 @@ const PARTITION_KEY = "google";
 const DEFAULT_ROLE = "student";
 const VALID_ROLES = ["student", "mentor", "admin"];
 
-function findClaim(claims, type) {
+function findClaim(claims, types) {
   if (!Array.isArray(claims)) return undefined;
+  const wanted = (Array.isArray(types) ? types : [types]).map((t) => t.toLowerCase());
   const match = claims.find(
-    (c) => c && typeof c.typ === "string" && c.typ.toLowerCase() === type.toLowerCase()
+    (c) => c && typeof c.typ === "string" && wanted.includes(c.typ.toLowerCase())
   );
   return match ? match.val : undefined;
+}
+
+function splitName(full) {
+  if (!full) return { first: "", last: "" };
+  const parts = full.trim().split(/\s+/);
+  return { first: parts[0] || "", last: parts.slice(1).join(" ") || "" };
 }
 
 function isNotFound(err) {
@@ -33,18 +42,20 @@ module.exports = async function (context, req) {
   const userId = body.userId;
   const claims = body.claims || [];
 
-  // No identity provided: grant no custom roles. SWA still assigns the built-in
-  // "authenticated" role, which is all today's gating requires.
+  // No identity: grant no custom roles. SWA still assigns built-in "authenticated".
   if (!userId) {
     context.res = { status: 200, body: { roles: [] } };
     return;
   }
 
-  const email = body.userDetails || findClaim(claims, "email") || "";
-  const name = findClaim(claims, "name") || email;
+  const email = body.userDetails || findClaim(claims, ["email", "emails"]) || "";
+  const fullName = findClaim(claims, ["name"]) || email;
+  const derived = splitName(fullName);
+  const firstName = findClaim(claims, ["given_name", "givenname"]) || derived.first;
+  const lastName = findClaim(claims, ["family_name", "familyname", "surname"]) || derived.last;
+  const pictureUrl = findClaim(claims, ["picture"]) || "";
 
-  // If the datastore is not configured, fail open to "student" so login is not
-  // blocked. (Role differentiation is not enforced yet, so this is safe today.)
+  // Datastore not configured: fail open to "student" so login is not blocked.
   if (!CONNECTION_STRING) {
     context.log.error("USERS_TABLE_CONNECTION_STRING is not set; returning default role.");
     context.res = { status: 200, body: { roles: [DEFAULT_ROLE] } };
@@ -58,7 +69,7 @@ module.exports = async function (context, req) {
     try {
       await client.createTable();
     } catch (err) {
-      // Table already exists (409) or a benign race - ignore.
+      /* already exists */
     }
   }
 
@@ -67,27 +78,31 @@ module.exports = async function (context, req) {
     try {
       existing = await client.getEntity(PARTITION_KEY, userId);
     } catch (err) {
-      if (!isNotFound(err)) throw err; // real error, not "user/table missing"
+      if (!isNotFound(err)) throw err;
     }
 
     let role = DEFAULT_ROLE;
 
     if (!existing) {
-      // First login for this user -> create as a student.
+      // First login -> create as a student with an incomplete profile.
       await ensureTableExists();
+      const entity = {
+        partitionKey: PARTITION_KEY,
+        rowKey: userId,
+        email,
+        name: fullName,
+        firstName,
+        lastName,
+        pictureUrl,
+        role: DEFAULT_ROLE,
+        profileComplete: false,
+        createdAt: now,
+        lastLoginAt: now,
+      };
       try {
-        await client.createEntity({
-          partitionKey: PARTITION_KEY,
-          rowKey: userId,
-          email,
-          name,
-          role: DEFAULT_ROLE,
-          createdAt: now,
-          lastLoginAt: now,
-        });
+        await client.createEntity(entity);
       } catch (err) {
         if (err && err.statusCode === 409) {
-          // Concurrent first login created it; read back the role.
           const raced = await client.getEntity(PARTITION_KEY, userId);
           role = VALID_ROLES.includes(raced.role) ? raced.role : DEFAULT_ROLE;
         } else {
@@ -95,12 +110,19 @@ module.exports = async function (context, req) {
         }
       }
     } else {
-      // Returning user -> keep their stored role, refresh metadata.
+      // Returning user -> keep role + profile fields; refresh Google metadata.
       role = VALID_ROLES.includes(existing.role) ? existing.role : DEFAULT_ROLE;
-      await client.updateEntity(
-        { partitionKey: PARTITION_KEY, rowKey: userId, email, name, lastLoginAt: now },
-        "Merge"
-      );
+      const update = {
+        partitionKey: PARTITION_KEY,
+        rowKey: userId,
+        email,
+        name: fullName,
+        lastLoginAt: now,
+      };
+      if (firstName) update.firstName = firstName;
+      if (lastName) update.lastName = lastName;
+      if (pictureUrl) update.pictureUrl = pictureUrl;
+      await client.updateEntity(update, "Merge");
     }
 
     context.res = { status: 200, body: { roles: [role] } };

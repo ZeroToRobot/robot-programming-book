@@ -8,7 +8,7 @@ site-url = "/"
 no-section-label = true
 mathjax-support = true
 additional-css = ["theme/css/custom.css"]
-additional-js = ["theme/js/section-label.js", "theme/js/analytics.js", "theme/js/auth-menu.js"]
+additional-js = ["theme/js/section-label.js", "theme/js/analytics.js", "theme/js/auth-menu.js", "theme/js/profile-gate.js"]
 
 
 [build]

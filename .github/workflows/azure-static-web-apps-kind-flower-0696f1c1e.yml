@@ -33,8 +33,8 @@ jobs:
       - name: Build book
         run: mdbook build
 
-      - name: Copy SWA config and login page into build output
-        run: cp staticwebapp.config.json login.html book/
+      - name: Copy SWA config and auth pages into build output
+        run: cp staticwebapp.config.json login.html welcome.html book/
 
       # Azure SWA requires a GitHub OIDC id-token for deployment auth
       - name: Get GitHub OIDC token
