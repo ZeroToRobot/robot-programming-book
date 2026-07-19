@@ -1,0 +1,12 @@
+{
+  "name": "robot-programming-book-api",
+  "version": "1.0.0",
+  "description": "Managed Azure Functions API for the Robot Programming Book (SWA roles source)",
+  "main": "GetRoles/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@azure/data-tables": "^13.3.0"
+  }
+}

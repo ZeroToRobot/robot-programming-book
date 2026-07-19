@@ -1,5 +1,40 @@
 {
+  "platform": {
+    "apiRuntime": "node:20"
+  },
+  "auth": {
+    "rolesSource": "/api/GetRoles",
+    "identityProviders": {
+      "customOpenIdConnectProviders": {
+        "google": {
+          "registration": {
+            "clientIdSettingName": "GOOGLE_CLIENT_ID",
+            "clientCredential": {
+              "clientSecretSettingName": "GOOGLE_CLIENT_SECRET"
+            },
+            "openIdConnectConfiguration": {
+              "wellKnownOpenIdConfiguration": "https://accounts.google.com/.well-known/openid-configuration"
+            }
+          },
+          "login": {
+            "nameClaimType": "email",
+            "scopes": ["openid", "profile", "email"]
+          }
+        }
+      }
+    }
+  },
+  "routes": [
+    { "route": "/login", "rewrite": "/login.html", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/login.html", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/.auth/*", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/*", "allowedRoles": ["authenticated"] }
+  ],
   "responseOverrides": {
+    "401": {
+      "statusCode": 302,
+      "redirect": "/login"
+    },
     "404": {
       "rewrite": "/404.html"
     }
