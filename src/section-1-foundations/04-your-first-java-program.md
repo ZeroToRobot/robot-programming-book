@@ -550,8 +550,6 @@ git commit -m "Ch4: variables, LED control, dashboard live values"
 git push
 ```
 
-If you set up GitHub Classroom, this push submits your progress automatically.
-
 ---
 
 > **Additional Resources**

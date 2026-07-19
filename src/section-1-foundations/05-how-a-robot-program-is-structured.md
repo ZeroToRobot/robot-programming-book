@@ -385,15 +385,13 @@ git add .
 git commit -m "Ch5: XRP Explorer skeleton with mode dashboard prints"
 ```
 
-If you set up a remote in Chapter 2, push:
+Push your commit to GitHub:
 
 ```bash
 git push
 ```
 
-If your class uses GitHub Classroom, this is the chapter to make sure your assignment repo is set up and your push went through. Confirm on GitHub.com that your commit appears, then submit your repo link via the Classroom assignment for Chapter 5.
-
-This is the first commit that contains your own design decisions, not just template code. From here forward, every chapter will add to this repository. Treat it like the start of something real, because it is.
+Confirm on GitHub that your commit appears. This is the first commit that contains your own design decisions, not just template code. From here forward, every chapter will add to this repository. Treat it like the start of something real, because it is.
 
 ---
 
