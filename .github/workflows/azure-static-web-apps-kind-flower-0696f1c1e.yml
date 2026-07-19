@@ -33,8 +33,8 @@ jobs:
       - name: Build book
         run: mdbook build
 
-      - name: Copy Azure SWA config into build output
-        run: cp staticwebapp.config.json book/staticwebapp.config.json
+      - name: Copy SWA config and login page into build output
+        run: cp staticwebapp.config.json login.html book/
 
       # Azure SWA requires a GitHub OIDC id-token for deployment auth
       - name: Get GitHub OIDC token
@@ -50,10 +50,12 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_FLOWER_0696F1C1E }}
           github_id_token: ${{ steps.idtoken.outputs.result }}
           action: "upload"
-          # Pre-built output: point Azure at the finished folder and skip its build step
+          # Pre-built book output: point Azure at the finished folder and skip its build step
           app_location: "book"
           output_location: ""
           skip_app_build: true
+          # Managed Functions API (roles source + user store). Oryx builds this.
+          api_location: "api"
 
   close_pull_request:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
