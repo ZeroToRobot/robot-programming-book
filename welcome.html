@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Complete your profile - Robot Programming Book</title>
+  <link rel="icon" href="/favicon-8114d1fc.png" />
+  <style>
+    :root {
+      --bg: #f7f7f9; --card: #ffffff; --text: #1b1f24; --muted: #5b6470;
+      --border: #d9dde2; --accent: #2f6feb; --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14161a; --card: #1d2027; --text: #eceff3; --muted: #9aa4b2;
+        --border: #333842; --accent: #5b8cff; --shadow: 0 10px 30px rgba(0,0,0,0.4);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text); margin: 0; padding: 32px 16px;
+      display: flex; justify-content: center;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: var(--shadow); max-width: 540px; width: 100%; padding: 32px;
+    }
+    .head { display: flex; align-items: center; gap: 14px; margin-bottom: 6px; }
+    .avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); background: var(--bg); flex: none; }
+    h1 { font-size: 1.4rem; margin: 0; letter-spacing: -0.01em; }
+    p.sub { color: var(--muted); margin: 6px 0 24px; font-size: 0.95rem; line-height: 1.5; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin: 16px 0 6px; }
+    .req::after { content: " *"; color: var(--accent); }
+    input, select {
+      width: 100%; padding: 10px 12px; font-size: 1rem; color: var(--text);
+      background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+    }
+    input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+    .row { display: flex; gap: 14px; }
+    .row > div { flex: 1; }
+    .radio-group { display: flex; gap: 10px; margin-top: 4px; }
+    .radio-group label {
+      flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px; border: 1px solid var(--border); border-radius: 9px; cursor: pointer; font-weight: 500;
+    }
+    .radio-group input { width: auto; }
+    #team-fields { border-top: 1px dashed var(--border); margin-top: 20px; padding-top: 4px; }
+    #team-fields.hidden { display: none; }
+    button {
+      margin-top: 26px; width: 100%; padding: 12px; font-size: 1rem; font-weight: 700;
+      color: #fff; background: var(--accent); border: none; border-radius: 10px; cursor: pointer;
+    }
+    button:disabled { opacity: 0.6; cursor: default; }
+    .errors { margin-top: 16px; color: #c0392b; font-size: 0.9rem; }
+    @media (prefers-color-scheme: dark) { .errors { color: #ff8a80; } }
+    .errors ul { margin: 6px 0 0; padding-left: 18px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="head">
+      <img id="avatar" class="avatar" alt="" hidden />
+      <div>
+        <h1>Welcome! Let's set up your profile</h1>
+      </div>
+    </div>
+    <p class="sub">A few quick details before you dive into the book. This helps us understand who's learning with us.</p>
+
+    <form id="profile-form" novalidate>
+      <div class="row">
+        <div>
+          <label class="req" for="firstName">First name</label>
+          <input id="firstName" name="firstName" autocomplete="given-name" maxlength="100" required />
+        </div>
+        <div>
+          <label for="lastName">Last name</label>
+          <input id="lastName" name="lastName" autocomplete="family-name" maxlength="100" />
+        </div>
+      </div>
+
+      <label class="req" for="country">Country</label>
+      <select id="country" name="country" required>
+        <option value="" disabled selected>Select your country</option>
+      </select>
+
+      <label class="req">Are you part of a robotics team or club?</label>
+      <div class="radio-group">
+        <label><input type="radio" name="onTeam" value="yes" /> Yes</label>
+        <label><input type="radio" name="onTeam" value="no" /> No</label>
+      </div>
+
+      <div id="team-fields" class="hidden">
+        <div class="row">
+          <div>
+            <label class="req" for="teamName">Team / club name</label>
+            <input id="teamName" name="teamName" maxlength="150" />
+          </div>
+          <div>
+            <label for="teamNumber">Team number</label>
+            <input id="teamNumber" name="teamNumber" inputmode="numeric" pattern="\d*" maxlength="7" placeholder="Optional" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label class="req" for="programType">Program</label>
+            <select id="programType" name="programType">
+              <option value="" disabled selected>Select</option>
+              <option>FRC</option><option>FTC</option><option>FLL</option><option>VEX</option><option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="req" for="teamRole">Your role on the team</label>
+            <select id="teamRole" name="teamRole">
+              <option value="" disabled selected>Select</option>
+              <option>Student - Programmer</option>
+              <option>Student - Other</option>
+              <option>Mentor</option>
+              <option>Coach</option>
+              <option>Lead/Captain</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="submit-btn">Save and continue</button>
+      <div class="errors" id="errors" hidden></div>
+    </form>
+  </main>
+
+  <script>
+    var COUNTRIES = ["Afghanistan","Albania","Algeria","Andorra","Angola","Antigua and Barbuda","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bhutan","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cabo Verde","Cambodia","Cameroon","Canada","Central African Republic","Chad","Chile","China","Colombia","Comoros","Congo","Costa Rica","Cote d'Ivoire","Croatia","Cuba","Cyprus","Czechia","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Eswatini","Ethiopia","Fiji","Finland","France","Gabon","Gambia","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guinea","Guinea-Bissau","Guyana","Haiti","Honduras","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nauru","Nepal","Netherlands","New Zealand","Nicaragua","Niger","Nigeria","North Korea","North Macedonia","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saint Kitts and Nevis","Saint Lucia","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor-Leste","Togo","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+
+    (function () {
+      var countrySel = document.getElementById("country");
+      COUNTRIES.forEach(function (c) {
+        var o = document.createElement("option");
+        o.value = c; o.textContent = c;
+        countrySel.appendChild(o);
+      });
+
+      var teamFields = document.getElementById("team-fields");
+      function toggleTeam() {
+        var yes = document.querySelector('input[name="onTeam"]:checked');
+        teamFields.classList.toggle("hidden", !(yes && yes.value === "yes"));
+      }
+      Array.prototype.forEach.call(document.querySelectorAll('input[name="onTeam"]'), function (r) {
+        r.addEventListener("change", toggleTeam);
+      });
+
+      function claim(claims, type) {
+        if (!claims) return "";
+        for (var i = 0; i < claims.length; i++) {
+          if (claims[i] && (claims[i].typ || "").toLowerCase() === type) return claims[i].val;
+        }
+        return "";
+      }
+
+      // Prefill from Google identity, then override with any saved values.
+      fetch("/.auth/me", { credentials: "same-origin" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          var p = d && d.clientPrincipal;
+          if (!p) return;
+          var claims = p.claims || [];
+          var first = claim(claims, "given_name");
+          var last = claim(claims, "family_name");
+          var pic = claim(claims, "picture");
+          if (first && !document.getElementById("firstName").value) document.getElementById("firstName").value = first;
+          if (last && !document.getElementById("lastName").value) document.getElementById("lastName").value = last;
+          if (pic) {
+            var img = document.getElementById("avatar");
+            img.src = pic; img.hidden = false;
+          }
+        })
+        .catch(function () {});
+
+      fetch("/api/GetProfile", { credentials: "same-origin" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (p) {
+          if (!p) return;
+          if (p.profileComplete) { window.location.replace("/"); return; }
+          if (p.firstName) document.getElementById("firstName").value = p.firstName;
+          if (p.lastName) document.getElementById("lastName").value = p.lastName;
+          if (p.pictureUrl) { var img = document.getElementById("avatar"); img.src = p.pictureUrl; img.hidden = false; }
+          if (p.country) document.getElementById("country").value = p.country;
+        })
+        .catch(function () {});
+
+      var form = document.getElementById("profile-form");
+      var btn = document.getElementById("submit-btn");
+      var errBox = document.getElementById("errors");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        errBox.hidden = true; errBox.innerHTML = "";
+        var onTeamEl = document.querySelector('input[name="onTeam"]:checked');
+        var payload = {
+          firstName: document.getElementById("firstName").value,
+          lastName: document.getElementById("lastName").value,
+          country: document.getElementById("country").value,
+          onTeam: onTeamEl ? onTeamEl.value === "yes" : false,
+          teamName: document.getElementById("teamName").value,
+          teamNumber: document.getElementById("teamNumber").value,
+          programType: document.getElementById("programType").value,
+          teamRole: document.getElementById("teamRole").value
+        };
+
+        var localErrors = [];
+        if (!payload.firstName.trim()) localErrors.push("First name is required.");
+        if (!payload.country) localErrors.push("Country is required.");
+        if (!onTeamEl) localErrors.push("Please tell us whether you're on a team.");
+        if (payload.onTeam) {
+          if (!payload.teamName.trim()) localErrors.push("Team or club name is required.");
+          if (!payload.programType) localErrors.push("Program is required.");
+          if (!payload.teamRole) localErrors.push("Your role on the team is required.");
+        }
+        if (localErrors.length) { showErrors(localErrors); return; }
+
+        btn.disabled = true; btn.textContent = "Saving...";
+        fetch("/api/SaveProfile", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        })
+          .then(function (r) {
+            if (r.ok) { window.location.replace("/"); return null; }
+            return r.json().catch(function () { return { error: "Save failed" }; });
+          })
+          .then(function (data) {
+            if (!data) return;
+            showErrors(data.details && data.details.length ? data.details : [data.error || "Save failed"]);
+            btn.disabled = false; btn.textContent = "Save and continue";
+          })
+          .catch(function () {
+            showErrors(["Network error. Please try again."]);
+            btn.disabled = false; btn.textContent = "Save and continue";
+          });
+      });
+
+      function showErrors(list) {
+        errBox.innerHTML = "<strong>Please fix the following:</strong><ul>" +
+          list.map(function (x) {
+            var d = document.createElement("li"); d.textContent = x; return d.outerHTML;
+          }).join("") + "</ul>";
+        errBox.hidden = false;
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -27,6 +27,7 @@
   "routes": [
     { "route": "/login", "rewrite": "/login.html", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/login.html", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/welcome", "rewrite": "/welcome.html", "allowedRoles": ["authenticated"] },
     { "route": "/.auth/*", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/*", "allowedRoles": ["authenticated"] }
   ],
