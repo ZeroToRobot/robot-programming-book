@@ -252,9 +252,12 @@ ol.section ol.section {
 .auth-menu {
     display: inline-flex;
     align-items: center;
+    align-self: center;
+    vertical-align: middle;
     gap: 0.5rem;
     margin-left: 0.5rem;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
+    line-height: 1;
 }
 
 .auth-menu .auth-avatar {
@@ -285,16 +288,18 @@ ol.section ol.section {
     white-space: nowrap;
     opacity: 0.85;
     cursor: default;
+    font-size: 0.95rem;
 }
 
 .auth-menu .auth-signout {
     text-decoration: none;
-    padding: 0.15rem 0.55rem;
+    padding: 0.25rem 0.7rem;
     border: 1px solid currentColor;
     border-radius: 5px;
     color: inherit;
     opacity: 0.85;
     white-space: nowrap;
+    font-size: 0.95rem;
 }
 
 .auth-menu .auth-signout:hover {
