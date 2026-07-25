@@ -2,11 +2,10 @@
 // book's client-side gate and to prefill the /welcome form. The caller is
 // identified from the trusted x-ms-client-principal header only.
 
-const { TableClient } = require("@azure/data-tables");
 const { getClientPrincipal } = require("../shared/principal");
+const { getUsersTableClient } = require("../shared/table");
 
 const CONNECTION_STRING = process.env.USERS_TABLE_CONNECTION_STRING;
-const TABLE_NAME = "Users";
 const PARTITION_KEY = "google";
 
 function isNotFound(err) {
@@ -24,7 +23,7 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const client = TableClient.fromConnectionString(CONNECTION_STRING, TABLE_NAME);
+  const client = getUsersTableClient();
 
   try {
     const e = await client.getEntity(PARTITION_KEY, principal.userId);
