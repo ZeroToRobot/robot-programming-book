@@ -2,3 +2,5 @@ CLAUDE.md
 book
 node_modules/
 local.settings.json
+swa-cli.config.json
+staticwebapp.config.local.json

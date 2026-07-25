@@ -10,10 +10,9 @@
 // a client-side profile-completion check), so roles are stored for future
 // role-based access but do not yet differentiate what a user can see.
 
-const { TableClient } = require("@azure/data-tables");
+const { getUsersTableClient } = require("../shared/table");
 
 const CONNECTION_STRING = process.env.USERS_TABLE_CONNECTION_STRING;
-const TABLE_NAME = "Users";
 const PARTITION_KEY = "google";
 const DEFAULT_ROLE = "student";
 const VALID_ROLES = ["student", "mentor", "admin"];
@@ -62,7 +61,7 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const client = TableClient.fromConnectionString(CONNECTION_STRING, TABLE_NAME);
+  const client = getUsersTableClient();
   const now = new Date().toISOString();
 
   async function ensureTableExists() {

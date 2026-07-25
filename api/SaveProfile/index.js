@@ -3,11 +3,10 @@
 // request can only ever write the caller's own row. Google-derived fields
 // (name/picture/role/createdAt) are preserved via a Merge upsert.
 
-const { TableClient } = require("@azure/data-tables");
 const { getClientPrincipal } = require("../shared/principal");
+const { getUsersTableClient } = require("../shared/table");
 
 const CONNECTION_STRING = process.env.USERS_TABLE_CONNECTION_STRING;
-const TABLE_NAME = "Users";
 const PARTITION_KEY = "google";
 
 const PROGRAM_TYPES = ["FRC", "FTC", "FLL", "VEX", "Other"];
@@ -69,7 +68,7 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const client = TableClient.fromConnectionString(CONNECTION_STRING, TABLE_NAME);
+  const client = getUsersTableClient();
   const now = new Date().toISOString();
 
   const entity = {
