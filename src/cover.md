@@ -1,10 +1,13 @@
 <div class="cover-hero">
 <div class="cover-hero-image">
-<img src="./images/book-cover.png" alt="Robot Programming Book Cover" />
+<img src="./images/book-cover-web.jpg" alt="Robot Programming Book cover by Devang Doshi" />
 </div>
 <div class="cover-hero-text">
+<p class="cover-kicker">FRC &middot; Java &middot; WPILib</p>
 <h1 class="cover-title">Robot Programming Book</h1>
-<p class="cover-subtitle">A practical guide to programming FRC robots. This guide is built for students who want to understand not just <em>how</em>, but <em>why</em>.</p>
+<p class="cover-subtitle">A practical guide to programming FRC robots. Built for students who want to understand not just <em>how</em>, but <em>why</em>.</p>
+<div class="cover-rule"><span></span><span></span><span></span></div>
+<a class="cover-cta" href="./section-1-foundations/01-what-is-frc-programming.md">Start reading &rarr;</a>
 <p class="cover-author">By <a href="https://www.linkedin.com/in/doshidev" target="_blank">Devang Doshi</a></p>
 </div>
 </div>
