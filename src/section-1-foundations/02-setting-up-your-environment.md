@@ -478,6 +478,16 @@ Deploy the empty template to your XRP and confirm the status LED behavior. Then 
 
 Next, try changing the string to something else and redeploying. Observe how long the full write, build, deploy cycle takes. This is your baseline: you'll get faster at it, but it's useful to know the floor.
 
+### Build (XRP Explorer)
+
+This is the first checkpoint for the running project you'll grow all the way through Chapter 25. Get its foundation solid and leave it that way:
+
+1. Confirm your project is named `XRPExplorer`, created from the **XRP - TimedRobot** template with **Desktop Support** enabled (Section 2.7).
+2. Run `WPILib: Build Robot Code` and confirm `BUILD SUCCESSFUL`.
+3. Run `WPILib: Deploy Robot Code` and confirm the Driver Station shows green for Communications and Robot Code.
+
+Leave the project deployed and working. Every chapter from here adds to this same project, so a clean, deployable starting point is worth getting right once.
+
 ### Reflect
 
 In your own words, explain the difference between:

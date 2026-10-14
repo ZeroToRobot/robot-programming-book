@@ -50,8 +50,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 
 public class Robot extends TimedRobot {
 
-    @Override
-    public void robotInit() {
+    public Robot() {
         // Called once when the robot program starts
     }
 
@@ -112,19 +111,27 @@ This is why your robot program "just works" without you writing any networking c
 >
 > `extends TimedRobot` means: "everything TimedRobot can do, my class can do too, and I can add my own behavior on top." We'll come back to this idea formally in Chapter 7. For now, just trust that `extends TimedRobot` gives you all the FRC plumbing for free.
 
+### `public Robot()`
+
+This is the **constructor**: a special block that runs **exactly once**, the moment WPILib creates your robot program at startup. You can spot it because it has the same name as the class (`Robot`) and no return type. Chapter 7 explains constructors in full; for now, think of it as the robot's startup block.
+
+`public` means it can be called from outside the class (WPILib calls it for you). The empty parentheses mean it takes no arguments.
+
+The constructor is the place to do one-time setup: creating motor objects, configuring sensors, initializing the dashboard. Anything that should happen once and stay set up for the rest of the program goes here.
+
+> **What about `robotInit()`?**
+>
+> Older robot code, including many examples you will find online, does this startup work in a method called `robotInit()`. Current WPILib templates use the constructor instead, and so does this book. If you see `robotInit()` in another team's code, read it as "the startup block": it plays the same role.
+
 ### `@Override`
 
-Each method has `@Override` written on the line above it. This is a Java **annotation**: a hint to the compiler. It says: "I'm rewriting a method that already exists in TimedRobot."
+Every method below the constructor has `@Override` written on the line above it. This is a Java **annotation**: a hint to the compiler. It says: "I'm rewriting a method that already exists in TimedRobot." The constructor does not get one, because it is not replacing anything from TimedRobot; it belongs to your `Robot` class alone.
 
-If you misspell the method name (say, `robotInIt` instead of `robotInit`), the `@Override` annotation will catch it and the compiler will refuse to build. Without `@Override`, your typo would compile cleanly, and your robot would silently never call the method. That bug is unbelievably annoying to find. Always keep `@Override`.
-
-### `public void robotInit()`
-
-`public` means this method can be called from outside the class. `void` means it doesn't return anything. `robotInit` is the method name. The empty parentheses mean it takes no arguments.
-
-`robotInit()` runs **exactly once**, the moment the robot program starts up. This is the place to do one-time setup: creating motor objects, configuring sensors, initializing the dashboard. Anything that should happen once and stay set up for the rest of the program goes here.
+If you misspell the method name (say, `teleopPeriodc` instead of `teleopPeriodic`), the `@Override` annotation will catch it and the compiler will refuse to build. Without `@Override`, your typo would compile cleanly, and your robot would silently never call the method. That bug is unbelievably annoying to find. Always keep `@Override`.
 
 ### `public void robotPeriodic()`
+
+`public` means this method can be called from outside the class. `void` means it doesn't return anything. `robotPeriodic` is the method name. The empty parentheses mean it takes no arguments. Every method in the template follows this same pattern.
 
 `robotPeriodic()` runs **every 20 milliseconds**, regardless of what mode the robot is in. Disabled, autonomous, teleop, test: doesn't matter, this method gets called.
 
@@ -151,7 +158,7 @@ The template you just read shows three of the robot's modes: disabled (kind of),
 | Mode | When It Runs | Periodic Method |
 | --- | --- | --- |
 | **Disabled** | Robot is on but cannot move (safety state) | `disabledPeriodic()` |
-| **Autonomous** | First 15 seconds of a match | `autonomousPeriodic()` |
+| **Autonomous** | First 15 to 20 seconds of a match (depends on the year's game) | `autonomousPeriodic()` |
 | **Teleop** | Driver-controlled period of a match | `teleopPeriodic()` |
 | **Test** | A custom mode for testing mechanisms | `testPeriodic()` |
 | **Simulation** | When running in the WPILib simulator | `simulationPeriodic()` |
@@ -160,10 +167,10 @@ Each mode also has an `Init` method that fires once when the robot enters that m
 
 Here's the lifecycle of a typical match, in order:
 
-1. **Robot turns on** → `robotInit()` runs once
+1. **Robot turns on** → the `Robot()` constructor runs once
 2. **Driver Station connects, robot is disabled** → `disabledInit()` runs once, then `disabledPeriodic()` and `robotPeriodic()` run every 20 ms
-3. **Match starts, autonomous begins** → `autonomousInit()` runs once, then `autonomousPeriodic()` and `robotPeriodic()` run every 20 ms for 15 seconds
-4. **Autonomous ends, teleop begins** → `teleopInit()` runs once, then `teleopPeriodic()` and `robotPeriodic()` run every 20 ms for 2 minutes 15 seconds
+3. **Match starts, autonomous begins** → `autonomousInit()` runs once, then `autonomousPeriodic()` and `robotPeriodic()` run every 20 ms until autonomous ends (15 to 20 seconds, depending on the year's game)
+4. **Autonomous ends, teleop begins** → `teleopInit()` runs once, then `teleopPeriodic()` and `robotPeriodic()` run every 20 ms for the rest of the match, a little over two minutes
 5. **Match ends, robot is disabled again** → `disabledInit()` runs once, then `disabledPeriodic()` and `robotPeriodic()` resume
 
 Notice that `robotPeriodic()` runs in **every** mode. It's the universal heartbeat.
@@ -172,10 +179,10 @@ Notice that `robotPeriodic()` runs in **every** mode. It's the universal heartbe
 >
 > A surprising number of bugs come from putting code in the wrong method. Two examples I see every season:
 >
-> 1. Creating motor objects inside `robotPeriodic()`. This creates a brand new motor object 50 times per second and breaks badly. Motors should be created once, in `robotInit()`.
-> 2. Putting `drivetrain.drive(joystick.getY(), joystick.getX())` inside `robotInit()`. The robot reads the joystick exactly once at startup and then never again. The drivetrain code belongs in `teleopPeriodic()`.
+> 1. Creating motor objects inside `robotPeriodic()`. This creates a brand new motor object 50 times per second and breaks badly. Motors should be created once, in the `Robot()` constructor.
+> 2. Putting `drivetrain.drive(joystick.getY(), joystick.getX())` inside the `Robot()` constructor. The robot reads the joystick exactly once at startup and then never again. The drivetrain code belongs in `teleopPeriodic()`.
 >
-> The rule of thumb: **Init methods are for "do this once." Periodic methods are for "do this every loop."**
+> The rule of thumb: **The constructor and Init methods are for "do this once." Periodic methods are for "do this every loop."**
 
 ---
 
@@ -192,8 +199,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
-    @Override
-    public void robotInit() {
+    public Robot() {
         // Runs ONCE at startup
         System.out.println("Robot started!");
     }
@@ -206,7 +212,7 @@ public class Robot extends TimedRobot {
 }
 ```
 
-If you deploy this and watch SmartDashboard, the `Time` value will tick upward smoothly. If you watch the **RioLog** (we'll set that up in Chapter 10) or the Driver Station log, you'll see "Robot started!" appear exactly once, when the program first runs.
+If you deploy this and watch SmartDashboard, the `Time` value will tick upward smoothly. If you watch the **RioLog** (you opened it in Chapter 4) or the Driver Station log, you'll see "Robot started!" appear exactly once, when the program first runs.
 
 `Timer.getFPGATimestamp()` returns the number of seconds since the robot was powered on. We'll use that timer constantly throughout the rest of the book.
 
@@ -234,10 +240,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
-    @Override
-    public void robotInit() {
+    public Robot() {
         System.out.println("XRP Explorer started!");
-        SmartDashboard.putString("Mode", "robotInit");
+        SmartDashboard.putString("Mode", "Starting");
     }
 
     @Override
@@ -321,7 +326,7 @@ In a normal program, if your code hangs or crashes, the worst case is a frozen w
 
 The TimedRobot template enforces a structure that WPILib can monitor. If your `teleopPeriodic()` takes too long to execute, WPILib will print warnings. If your code throws an exception, WPILib catches it and stops the motors. If the Driver Station disconnects, WPILib disables the robot automatically. None of that would be possible if your code were a free-form loop.
 
-The structure is also a contract between programmers. Every FRC robot program in the world has the same basic shape: `robotInit`, the periodic methods, the mode transitions. When you join a new team, or read another team's code on GitHub, or get help on Chief Delphi, you can skip the "where do I start reading?" step. You already know.
+The structure is also a contract between programmers. Every FRC robot program in the world has the same basic shape: a startup block, the periodic methods, the mode transitions. When you join a new team, or read another team's code on GitHub, or get help on Chief Delphi, you can skip the "where do I start reading?" step. You already know.
 
 > **Frameworks vs. libraries**
 >
@@ -339,7 +344,7 @@ The structure is also a contract between programmers. Every FRC robot program in
 > * The five robot modes are Disabled, Autonomous, Teleop, Test, and Simulation. `robotPeriodic()` runs in all of them
 > * `extends TimedRobot` is how your `Robot` class inherits all of WPILib's lifecycle, networking, and safety machinery
 > * `@Override` annotations protect you from typos by forcing the compiler to check that you're really replacing a method that exists in TimedRobot
-> * The rule of thumb: **Init methods are for one-time setup. Periodic methods are for code that runs every loop.**
+> * The rule of thumb: **The constructor and Init methods are for one-time setup. Periodic methods are for code that runs every loop.**
 > * The XRP Explorer project skeleton uses dashboard prints in each `Init` to verify the mode lifecycle works exactly as advertised
 
 ---
@@ -370,7 +375,7 @@ Without looking at this chapter, on a blank piece of paper or in a text file, wr
 
 - The package and import lines
 - The class declaration with `extends TimedRobot`
-- All six methods you saw in Section 5.2 (`robotInit`, `robotPeriodic`, `autonomousInit`, `autonomousPeriodic`, `teleopInit`, `teleopPeriodic`)
+- The `Robot()` constructor and all five methods you saw in Section 5.2 (`robotPeriodic`, `autonomousInit`, `autonomousPeriodic`, `teleopInit`, `teleopPeriodic`)
 - The `@Override` annotations
 
 Compare to the original. What did you forget? Curly braces? Semicolons? `@Override`? Whatever you missed is worth re-reading until you can write the template confidently. You'll be re-creating it from scratch many times during build season, sometimes under time pressure.
@@ -405,4 +410,4 @@ Confirm on GitHub that your commit appears. This is the first commit that contai
 
 ---
 
-*Next up, Chapter 6: Conditionals, Loops, and Methods. We'll fill out the periodic methods you just created with real Java logic, `if` statements, `for` loops, helper methods, and use them all to make the XRP do something interesting on command.*
+*Next up, Chapter 6: Conditionals, Loops, and Methods. We'll fill out the periodic methods you just created with real Java logic, `if` statements, `for` loops, helper methods, and use them all to make the XRP do something interesting on command.*

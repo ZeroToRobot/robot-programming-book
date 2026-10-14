@@ -117,9 +117,9 @@ In Phase 1 of this book (Chapters 1-25), the XRP is your primary hardware. You c
 
 Every FRC match has two distinct phases:
 
-**Autonomous (Auto):** the first 20 seconds of the match. The Driver Station connection is still active, but driver inputs are ignored. The robot must act entirely on its own, using pre-written logic and sensor feedback to complete tasks on the field. Autonomous is often worth a significant point bonus and can set up the rest of the match.
+**Autonomous (Auto):** the first 15 to 20 seconds of the match. The exact length depends on that year's game, so check the game manual each season. The Driver Station connection is still active, but driver inputs are ignored. The robot must act entirely on its own, using pre-written logic and sensor feedback to complete tasks on the field. Autonomous is often worth a significant point bonus and can set up the rest of the match.
 
-**Teleop:** the remaining 2 minutes and 20 seconds. The drivers take over. Your program reads joystick inputs and translates them into robot movement and mechanism control.
+**Teleop:** the rest of the match, a little over two minutes. The drivers take over. Your program reads joystick inputs and translates them into robot movement and mechanism control.
 
 Because these two phases are so different, every FRC robot program has two completely separate behaviors. In the TimedRobot template you'll use throughout this book, there are separate methods for each mode:
 
@@ -342,7 +342,7 @@ Compare your drawing to the description in Section 1.2. What did you miss? What 
 
 Find and watch one match video from a recent FRC season. Search for "FRC match 2026" or "FRC championship 2026" on YouTube and pick any match. While watching, write down:
 
-1. What does the robot do during the 20 second autonomous period?
+1. What does the robot do during the autonomous period at the start of the match?
 2. What does it do in teleop, what mechanisms does it operate?
 3. What sensors do you think it might be using to accomplish those things?
 

@@ -214,7 +214,7 @@ This will blink the LED five times, then stop. Read it line by line: start count
 >
 > Remember: those methods run 50 times per second. They are expected to finish quickly and return. If you put a `while` loop with `Timer.delay()` inside `teleopPeriodic()`, the entire robot freezes for the duration of the loop. Driver Station inputs are ignored. Other code does not run. The watchdog will start barking.
 >
-> `while` loops with delays belong in standalone test code, in `robotInit()` (which runs once at startup), or in command-based code, which we get to in Chapter 19. Until then, when you want loop-like behavior in periodic code, you use a counter variable that is checked on each tick. We will see this pattern later in the book.
+> `while` loops with delays belong in standalone test code, in the `Robot()` constructor (which runs once at startup), or in command-based code, which we get to in Chapter 19. Until then, when you want loop-like behavior in periodic code, you use a counter variable that is checked on each tick. We will see this pattern later in the book.
 
 ### The `for` Loop
 
@@ -343,7 +343,7 @@ private void blinkLED(int times) {
 
 `void` literally means "nothing". This method takes a count, blinks the LED that many times, and returns nothing. You call it like `blinkLED(3);` and the method just runs.
 
-Note: this `blinkLED` example uses `Timer.delay`, so just like our earlier `while` example, you would only call it from `robotInit()` or test code, not from `teleopPeriodic()`. We will write a non-blocking version of this in the exercises.
+Note: this `blinkLED` example uses `Timer.delay`, so just like our earlier `while` example, you would only call it from the `Robot()` constructor or test code, not from `teleopPeriodic()`. We will write a non-blocking version of this in the exercises.
 
 ### Methods That Return Booleans
 
@@ -464,9 +464,19 @@ In your XRP scratch project, write these three methods. Each one should be teste
 
 2. **`driveForward(double speed)`** returns nothing (`void`). Sets both drive motors to the given speed. Test it by calling `driveForward(0.3)` when the A button is pressed and `stopMotors()` otherwise. Use the `isAButtonPressed()` method from above when writing the condition.
 
-3. **`blinkLED(int times)`** returns nothing. Blinks the onboard LED the given number of times. For this exercise, write the *blocking* version using `Timer.delay()` and call it once from `robotInit()`. Deploy and verify the LED blinks the expected number of times at startup.
+3. **`blinkLED(int times)`** returns nothing. Blinks the onboard LED the given number of times. For this exercise, write the *blocking* version using `Timer.delay()` and call it once from the `Robot()` constructor. Deploy and verify the LED blinks the expected number of times at startup.
 
 After you have all three working, commit your work.
+
+### Build (XRP Explorer)
+
+Bring the chapter together in your XRP Explorer project, starting from the "smarter teleop" in Section 6.8:
+
+1. Add an `applyDeadband(double value)` helper method and use it on the drive stick input, replacing any copy-pasted deadband logic.
+2. In `teleopPeriodic()`, read the rangefinder and drive forward only while the path is clear, stopping when you are within the threshold distance of a wall. Use an `if` and a boolean helper like `isWallClose()`.
+3. Report the current state (driving or stopped, and the measured distance) to SmartDashboard.
+
+Deploy, then drive the XRP toward a wall and confirm it stops on its own. This is the first time the Explorer reacts to its environment instead of just obeying the stick.
 
 ### Reflect
 
