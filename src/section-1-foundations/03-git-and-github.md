@@ -289,11 +289,10 @@ If you ever notice unwanted files showing up in `git status`, the fix is usually
 
 ### Make a Real Commit
 
-Open `Robot.java` and update the `robotInit()` method to print a startup message:
+Open `Robot.java` and update the `Robot()` constructor (the block near the top that runs once when the program starts) to print a startup message:
 
 ```java
-@Override
-public void robotInit() {
+public Robot() {
     System.out.println("XRP Explorer starting up.");
 }
 ```
@@ -316,7 +315,7 @@ Stage and commit:
 
 ```bash
 git add Robot.java
-git commit -m "Ch3: add startup print to robotInit"
+git commit -m "Ch3: add startup print to Robot constructor"
 ```
 
 You've now made a commit that captures one specific, small change with a clear message. This is the unit of progress you'll work in for the rest of the book.
@@ -504,7 +503,7 @@ In your XRPExplorer repository, make three small commits in sequence, each with 
 
 1. Add a comment at the top of `Robot.java` describing what the file does (one sentence is fine)
 2. Add a `System.out.println("Teleop started")` to `teleopInit()`
-3. Change the message in `robotInit()` to include your name
+3. Change the message in the `Robot()` constructor to include your name
 
 After each change, run `git status` and `git diff` before committing. Get comfortable seeing exactly what Git sees.
 
@@ -539,7 +538,7 @@ The XRP Explorer project for Devang Doshi's *Robot Programming Book*.
 2. Open this folder in WPILib VS Code
 3. Run `WPILib: Deploy Robot Code`
 
-See [zerotorobot.org/robot-programming-book](https://zerotorobot.org/robot-programming-book) for the full book.
+See [robotprogrammingbook.com](https://robotprogrammingbook.com) for the full book.
 ```
 
 2. Commit it: `git add README.md && git commit -m "Ch3: add README"`
@@ -583,4 +582,4 @@ When you're done playing, you can either merge the branch (`git merge ch3-experi
 
 ---
 
-*Next up, Chapter 4: Your First Java Program. You'll learn variables, data types, and print statements by blinking the XRP's LED and watching values change live in SmartDashboard.*
+*Next up, Chapter 4: Your First Java Program. You'll learn variables, data types, and print statements by blinking the XRP's LED and watching values change live in SmartDashboard.*

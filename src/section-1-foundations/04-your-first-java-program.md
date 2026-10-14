@@ -249,15 +249,14 @@ We'll do this inside your XRP Explorer project, but in a way that runs on your l
 
 In VS Code, open `src/main/java/frc/robot/Robot.java`. You should see the TimedRobot template from Chapter 2.
 
-Find the `robotInit()` method. It's the method called once, at the very start, when the robot program first runs.
+Find the `Robot()` constructor near the top of the class (the block that starts with `public Robot() {`). It runs once, at the very start, when the robot program first runs. You'll learn exactly what a constructor is in Chapter 7; for now, think of it as the robot's startup block.
 
 ### Step 2: Add Some Variables and Prints
 
-Inside `robotInit()`, add the following:
+Inside the `Robot()` constructor, add the following:
 
 ```java
-@Override
-public void robotInit() {
+public Robot() {
     int teamNumber = 3415;
     double batteryVoltage = 12.3;
     boolean isReady = true;
@@ -293,7 +292,7 @@ Connect to the XRP's Wi-Fi (you remember the drill from Chapter 2). Then `WPILib
 
 `Ctrl+Shift+P` → `WPILib: Start RioLog`. A window opens at the bottom of VS Code.
 
-The XRP just rebooted with your new code, and `robotInit()` ran exactly once at startup. You should see your print messages in RioLog:
+The XRP just rebooted with your new code, and the `Robot()` constructor ran exactly once at startup. You should see your print messages in RioLog:
 
 ```
 ---- Robot starting up ----
@@ -307,7 +306,7 @@ If you see this, your code ran on the robot. The variables you declared in Java 
 
 > **Why these messages only show up once**
 >
-> `robotInit()` is called exactly once when the program starts. The XRP rebooted on deploy, so the program just started, so `robotInit` just ran. If you want to see something print repeatedly, you'd put it in `robotPeriodic()`, which runs every 20 ms. Don't do that with print statements: you'd get 50 messages per second and saturate the log. We'll get to a much better approach in Section 4.7.
+> The `Robot()` constructor runs exactly once when the program starts. The XRP rebooted on deploy, so the program just started, so the constructor just ran. If you want to see something print repeatedly, you'd put it in `robotPeriodic()`, which runs every 20 ms. Don't do that with print statements: you'd get 50 messages per second and saturate the log. We'll get to a much better approach in Section 4.7.
 
 ---
 
@@ -337,8 +336,7 @@ public class Robot extends TimedRobot {
 
     private final XRPOnBoardIO onBoardIO = new XRPOnBoardIO();
 
-    @Override
-    public void robotInit() {
+    public Robot() {
         // ... your existing code
     }
     // ... rest of the file
@@ -349,7 +347,7 @@ Don't worry about `private final` or `new XRPOnBoardIO()` for now. You'll unders
 
 ### Turning the LED On
 
-Inside `robotInit()`, after your print statements, add:
+Inside the `Robot()` constructor, after your print statements, add:
 
 ```java
 onBoardIO.setLed(true);
@@ -366,8 +364,7 @@ You just controlled physical hardware from a Java program. That's the loop from 
 Let's tie this back to variables. Change your code to:
 
 ```java
-@Override
-public void robotInit() {
+public Robot() {
     boolean ledShouldBeOn = true;
 
     System.out.println("LED state: " + ledShouldBeOn);
@@ -409,7 +406,7 @@ Notice that `putNumber` is used for both `int` and `double`. SmartDashboard trea
 
 ### A Live Loop Example
 
-Print statements went in `robotInit()` because it only runs once. SmartDashboard is the opposite: it's designed to be called every loop, so you put it in `robotPeriodic()`, which runs every 20 ms.
+Print statements went in the `Robot()` constructor because it only runs once. SmartDashboard is the opposite: it's designed to be called every loop, so you put it in `robotPeriodic()`, which runs every 20 ms.
 
 Make sure `SmartDashboard` is imported (you added this in Chapter 2):
 
@@ -438,7 +435,7 @@ You'll need one more import:
 import edu.wpi.first.wpilibj.Timer;
 ```
 
-Don't worry about the `?` on the `mode` line: it's a shorthand for an if/else that we'll cover in Chapter 6. For now, just know it sets `mode` to `"Enabled"` if the robot is enabled, `"Disabled"` otherwise.
+Don't worry about the `?` on the `mode` line: it's a shorthand for an if/else called the ternary operator, which we'll cover in Chapter 8. For now, just know it sets `mode` to `"Enabled"` if the robot is enabled, `"Disabled"` otherwise.
 
 Build, deploy, and open SmartDashboard (`WPILib: Start Tool` → `SmartDashboard`). You should see three widgets: `Match Time` ticking up, `LED On` showing the current LED state, and `Mode` changing whenever you enable or disable the robot in the Driver Station.
 
@@ -509,7 +506,7 @@ Every chapter from here on builds on this. Joystick values come in as doubles. E
 
 ### Practice
 
-In `robotInit()`, declare four variables of four different types: an `int`, a `double`, a `boolean`, and a `String`. Before you run the program, write down on paper exactly what you expect each `System.out.println` to print. Then run it and compare. If anything surprised you, that's worth understanding before you move on.
+In the `Robot()` constructor, declare four variables of four different types: an `int`, a `double`, a `boolean`, and a `String`. Before you run the program, write down on paper exactly what you expect each `System.out.println` to print. Then run it and compare. If anything surprised you, that's worth understanding before you move on.
 
 Next, add a fifth variable that combines two of the others into a string, like:
 
@@ -524,7 +521,7 @@ Predict the output, then verify.
 
 Add the LED control and the SmartDashboard live values from Sections 4.6 and 4.7 to your XRP Explorer project. Specifically:
 
-1. Add a `boolean ledShouldBeOn` variable in `robotInit()` and use it to set the LED
+1. Add a `boolean ledShouldBeOn` variable in the `Robot()` constructor and use it to set the LED
 2. In `robotPeriodic()`, send `Match Time`, `LED On`, and `Mode` to SmartDashboard
 3. Confirm all three widgets appear in SmartDashboard and the values look reasonable
 
@@ -562,4 +559,4 @@ git push
 
 ---
 
-*Next up, Chapter 5: How a Robot Program Is Structured. You'll learn what every method in the TimedRobot template actually does, when each one runs, and how the 50 Hz loop from Chapter 1 is implemented in code.*
+*Next up, Chapter 5: How a Robot Program Is Structured. You'll learn what every method in the TimedRobot template actually does, when each one runs, and how the 50 Hz loop from Chapter 1 is implemented in code.*
