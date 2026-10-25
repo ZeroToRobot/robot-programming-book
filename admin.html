@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Users - Robot Programming Book</title>
+  <link rel="icon" href="/favicon-8114d1fc.png" />
+  <style>
+    :root {
+      --bg: #f7f7f9; --card: #ffffff; --text: #1b1f24; --muted: #5b6470;
+      --border: #d9dde2; --accent: #2f6feb; --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --row-hover: #f1f3f6; --yes: #1a7f37; --no: #b35900;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14161a; --card: #1d2027; --text: #eceff3; --muted: #9aa4b2;
+        --border: #333842; --accent: #5b8cff; --shadow: 0 10px 30px rgba(0,0,0,0.4);
+        --row-hover: #252932; --yes: #4ac26b; --no: #f0a35e;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text); margin: 0; padding: 32px 16px;
+    }
+    main { max-width: 1280px; margin: 0 auto; }
+    header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    h1 { font-size: 1.4rem; margin: 0; letter-spacing: -0.01em; }
+    header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+    .note { color: var(--muted); font-size: 0.85rem; margin: 6px 0 0; line-height: 1.5; }
+
+    .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 24px 0; }
+    .tile { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+    .tile .label { color: var(--muted); font-size: 0.8rem; }
+    .tile .value { font-size: 1.6rem; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+    .controls input, .controls select, .controls button {
+      padding: 9px 12px; font-size: 0.95rem; color: var(--text);
+      background: var(--card); border: 1px solid var(--border); border-radius: 9px;
+    }
+    .controls input { flex: 1; min-width: 200px; }
+    .controls button { cursor: pointer; font-weight: 600; }
+    .controls input:focus, .controls select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+
+    .table-wrap {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      box-shadow: var(--shadow); overflow-x: auto;
+    }
+    table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--row-hover); }
+    th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); cursor: pointer; user-select: none; }
+    th[aria-sort="ascending"]::after { content: " \25B2"; }
+    th[aria-sort="descending"]::after { content: " \25BC"; }
+    .user { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: var(--bg); flex: none; }
+    .email { color: var(--muted); font-size: 0.82rem; }
+    .yes { color: var(--yes); font-weight: 600; }
+    .no { color: var(--no); font-weight: 600; }
+    .muted { color: var(--muted); }
+    .status { padding: 24px; color: var(--muted); text-align: center; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Registered users</h1>
+        <p class="note" id="allowlist-note"></p>
+      </div>
+      <a href="/">Back to the book</a>
+    </header>
+
+    <section class="tiles" aria-label="Summary">
+      <div class="tile"><div class="label">Registered</div><div class="value" id="t-total">-</div></div>
+      <div class="tile"><div class="label">Can read the book</div><div class="value" id="t-access">-</div></div>
+      <div class="tile"><div class="label">Profile complete</div><div class="value" id="t-profile">-</div></div>
+      <div class="tile"><div class="label">Signed up, last 7 days</div><div class="value" id="t-new">-</div></div>
+      <div class="tile"><div class="label">Signed in, last 7 days</div><div class="value" id="t-active">-</div></div>
+    </section>
+
+    <div class="controls">
+      <input id="search" type="search" placeholder="Search name, email, team, country" aria-label="Search" />
+      <select id="role-filter" aria-label="Role">
+        <option value="">All roles</option>
+        <option>student</option><option>mentor</option><option>admin</option>
+      </select>
+      <select id="access-filter" aria-label="Access">
+        <option value="">Any access</option>
+        <option value="yes">Can read</option>
+        <option value="no">Waiting</option>
+      </select>
+      <button id="export" type="button">Download CSV</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-key="name">User</th>
+            <th data-key="role">Role</th>
+            <th data-key="hasAccess">Access</th>
+            <th data-key="profileComplete">Profile</th>
+            <th data-key="country">Country</th>
+            <th data-key="team">Team</th>
+            <th data-key="programType">Program</th>
+            <th data-key="teamRole">Team role</th>
+            <th data-key="createdAt">Signed up</th>
+            <th data-key="lastLoginAt">Last sign-in</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <div class="status" id="status">Loading...</div>
+    </div>
+    <p class="note">"Last sign-in" updates when someone signs in, not on every page they read.</p>
+  </main>
+
+  <script>
+    (function () {
+      var DAY_MS = 24 * 60 * 60 * 1000;
+      var users = [];
+      var sortKey = "createdAt";
+      var sortDir = -1;
+
+      var rowsEl = document.getElementById("rows");
+      var statusEl = document.getElementById("status");
+
+      function fullName(u) { return (u.firstName + " " + u.lastName).trim(); }
+      function team(u) {
+        if (!u.onTeam) return "";
+        return u.teamName + (u.teamNumber ? " #" + u.teamNumber : "");
+      }
+      function sortValue(u, key) {
+        if (key === "name") return (fullName(u) || u.email).toLowerCase();
+        if (key === "team") return team(u).toLowerCase();
+        var v = u[key];
+        return typeof v === "string" ? v.toLowerCase() : v;
+      }
+      function withinDays(iso, days) {
+        var t = Date.parse(iso);
+        return !isNaN(t) && Date.now() - t <= days * DAY_MS;
+      }
+      function relative(iso) {
+        var t = Date.parse(iso);
+        if (isNaN(t)) return "";
+        var days = Math.floor((Date.now() - t) / DAY_MS);
+        if (days <= 0) return "today";
+        if (days === 1) return "yesterday";
+        if (days < 30) return days + " days ago";
+        return new Date(t).toLocaleDateString();
+      }
+
+      function cell(tr, text, className, title) {
+        var td = document.createElement("td");
+        td.textContent = text;
+        if (className) td.className = className;
+        if (title) td.title = title;
+        tr.appendChild(td);
+        return td;
+      }
+      function dateCell(tr, iso) {
+        var t = Date.parse(iso);
+        cell(tr, relative(iso), "", isNaN(t) ? "" : new Date(t).toLocaleString());
+      }
+
+      function filtered() {
+        var q = document.getElementById("search").value.trim().toLowerCase();
+        var role = document.getElementById("role-filter").value;
+        var access = document.getElementById("access-filter").value;
+        return users.filter(function (u) {
+          if (role && u.role !== role) return false;
+          if (access && u.hasAccess !== (access === "yes")) return false;
+          if (!q) return true;
+          return [fullName(u), u.email, team(u), u.country, u.programType, u.teamRole]
+            .join(" ").toLowerCase().indexOf(q) !== -1;
+        }).sort(function (a, b) {
+          var x = sortValue(a, sortKey), y = sortValue(b, sortKey);
+          return x < y ? -sortDir : x > y ? sortDir : 0;
+        });
+      }
+
+      function render() {
+        var list = filtered();
+        rowsEl.innerHTML = "";
+        list.forEach(function (u) {
+          var tr = document.createElement("tr");
+
+          var td = document.createElement("td");
+          var wrap = document.createElement("div");
+          wrap.className = "user";
+          if (u.pictureUrl) {
+            var img = document.createElement("img");
+            img.className = "avatar"; img.alt = ""; img.src = u.pictureUrl;
+            img.referrerPolicy = "no-referrer";
+            wrap.appendChild(img);
+          }
+          var names = document.createElement("div");
+          var n = document.createElement("div");
+          n.textContent = fullName(u) || "(no name)";
+          var e = document.createElement("div");
+          e.className = "email"; e.textContent = u.email;
+          names.appendChild(n); names.appendChild(e);
+          wrap.appendChild(names);
+          td.appendChild(wrap);
+          tr.appendChild(td);
+
+          cell(tr, u.role);
+          cell(tr, u.hasAccess ? "Can read" : "Waiting", u.hasAccess ? "yes" : "no");
+          cell(tr, u.profileComplete ? "Complete" : "Not yet", u.profileComplete ? "" : "muted");
+          cell(tr, u.country);
+          cell(tr, u.onTeam ? team(u) : "No team", u.onTeam ? "" : "muted");
+          cell(tr, u.programType);
+          cell(tr, u.teamRole);
+          dateCell(tr, u.createdAt);
+          dateCell(tr, u.lastLoginAt);
+          rowsEl.appendChild(tr);
+        });
+        statusEl.hidden = list.length > 0;
+        statusEl.textContent = users.length ? "No users match." : "No users yet.";
+
+        Array.prototype.forEach.call(document.querySelectorAll("th[data-key]"), function (th) {
+          if (th.dataset.key === sortKey) th.setAttribute("aria-sort", sortDir > 0 ? "ascending" : "descending");
+          else th.removeAttribute("aria-sort");
+        });
+      }
+
+      function renderTiles() {
+        function count(fn) { return users.filter(fn).length; }
+        document.getElementById("t-total").textContent = users.length;
+        document.getElementById("t-access").textContent = count(function (u) { return u.hasAccess; });
+        document.getElementById("t-profile").textContent = count(function (u) { return u.profileComplete; });
+        document.getElementById("t-new").textContent = count(function (u) { return withinDays(u.createdAt, 7); });
+        document.getElementById("t-active").textContent = count(function (u) { return withinDays(u.lastLoginAt, 7); });
+      }
+
+      function csvField(v) {
+        var s = v === undefined || v === null ? "" : String(v);
+        // Quote everything; a leading = + - @ is prefixed so spreadsheets do not run it as a formula.
+        if (/^[=+\-@]/.test(s)) s = "'" + s;
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      function exportCsv() {
+        var cols = ["email", "firstName", "lastName", "role", "hasAccess", "profileComplete", "country",
+          "onTeam", "teamName", "teamNumber", "programType", "teamRole", "createdAt", "lastLoginAt", "profileCompletedAt"];
+        var lines = [cols.join(",")].concat(filtered().map(function (u) {
+          return cols.map(function (c) { return csvField(u[c]); }).join(",");
+        }));
+        var blob = new Blob([lines.join("\r\n")], { type: "text/csv" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "users-" + new Date().toISOString().slice(0, 10) + ".csv";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }
+
+      Array.prototype.forEach.call(document.querySelectorAll("th[data-key]"), function (th) {
+        th.addEventListener("click", function () {
+          if (sortKey === th.dataset.key) sortDir = -sortDir;
+          else { sortKey = th.dataset.key; sortDir = 1; }
+          render();
+        });
+      });
+      ["search", "role-filter", "access-filter"].forEach(function (id) {
+        document.getElementById(id).addEventListener("input", render);
+      });
+      document.getElementById("export").addEventListener("click", exportCsv);
+
+      fetch("/api/ListUsers", { credentials: "same-origin" })
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status === 403 ? "Admins only." : "Could not load users (" + r.status + ").");
+          return r.json();
+        })
+        .then(function (data) {
+          users = data.users || [];
+          document.getElementById("allowlist-note").textContent = data.allowlistEnabled
+            ? "Early access is on: only people on the allow list (plus mentors and admins) can read the book."
+            : "Early access is off: every signed-in user can read the book.";
+          renderTiles();
+          render();
+        })
+        .catch(function (err) { statusEl.textContent = err.message; });
+    })();
+  </script>
+</body>
+</html>
