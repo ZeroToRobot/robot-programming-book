@@ -28,13 +28,21 @@
     { "route": "/login", "rewrite": "/login.html", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/login.html", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/welcome", "rewrite": "/welcome.html", "allowedRoles": ["authenticated"] },
+    { "route": "/not-yet", "rewrite": "/not-yet.html", "allowedRoles": ["authenticated"] },
+    { "route": "/not-yet.html", "allowedRoles": ["authenticated"] },
+    { "route": "/favicon-*", "allowedRoles": ["anonymous", "authenticated"] },
     { "route": "/.auth/*", "allowedRoles": ["anonymous", "authenticated"] },
-    { "route": "/*", "allowedRoles": ["authenticated"] }
+    { "route": "/api/*", "allowedRoles": ["authenticated"] },
+    { "route": "/*", "allowedRoles": ["reader"] }
   ],
   "responseOverrides": {
     "401": {
       "statusCode": 302,
       "redirect": "/login"
+    },
+    "403": {
+      "statusCode": 302,
+      "redirect": "/not-yet"
     },
     "404": {
       "rewrite": "/404.html"
