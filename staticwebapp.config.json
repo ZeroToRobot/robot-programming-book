@@ -31,7 +31,10 @@
     { "route": "/not-yet", "rewrite": "/not-yet.html", "allowedRoles": ["authenticated"] },
     { "route": "/not-yet.html", "allowedRoles": ["authenticated"] },
     { "route": "/favicon-*", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/admin", "rewrite": "/admin.html", "allowedRoles": ["admin"] },
+    { "route": "/admin.html", "allowedRoles": ["admin"] },
     { "route": "/.auth/*", "allowedRoles": ["anonymous", "authenticated"] },
+    { "route": "/api/ListUsers", "allowedRoles": ["admin"] },
     { "route": "/api/*", "allowedRoles": ["authenticated"] },
     { "route": "/*", "allowedRoles": ["reader"] }
   ],

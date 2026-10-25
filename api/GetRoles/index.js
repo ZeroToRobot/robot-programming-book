@@ -6,41 +6,16 @@
 // user's role(s) to SWA. We also capture/refresh the Google-derived profile
 // fields (first name, last name, picture) from the token claims.
 //
-// Pre-launch allow list: the book requires the "reader" role, which we add only
-// for emails (or "@domain" entries) listed in the ALLOWED_EMAILS app setting,
-// plus mentors and admins. Set ALLOWLIST_ENABLED=false at launch to give every
-// signed-in user "reader". Both are SWA app settings, so changing them needs no
-// redeploy; a user's roles refresh on their next sign-in.
+// The returned roles also carry the pre-launch "reader" role when the user is
+// allowed in (see ../shared/access.js).
 
 const { getUsersTableClient } = require("../shared/table");
+const { rolesFor } = require("../shared/access");
 
 const CONNECTION_STRING = process.env.USERS_TABLE_CONNECTION_STRING;
 const PARTITION_KEY = "google";
 const DEFAULT_ROLE = "student";
 const VALID_ROLES = ["student", "mentor", "admin"];
-const READER_ROLE = "reader";
-const ALWAYS_READER_ROLES = ["mentor", "admin"];
-
-const ALLOWLIST_ENABLED = (process.env.ALLOWLIST_ENABLED || "").trim().toLowerCase() !== "false";
-const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || "")
-  .split(/[\s,;]+/)
-  .map((s) => s.trim().toLowerCase())
-  .filter(Boolean);
-
-function isAllowed(email) {
-  if (!ALLOWLIST_ENABLED) return true;
-  const e = (email || "").trim().toLowerCase();
-  if (!e) return false;
-  const at = e.lastIndexOf("@");
-  return ALLOWED_EMAILS.includes(e) || (at > 0 && ALLOWED_EMAILS.includes(e.slice(at)));
-}
-
-// The user's stored role, plus "reader" if they may view the book.
-function rolesFor(role, email) {
-  const roles = [role];
-  if (isAllowed(email) || ALWAYS_READER_ROLES.includes(role)) roles.push(READER_ROLE);
-  return roles;
-}
 
 function findClaim(claims, types) {
   if (!Array.isArray(claims)) return undefined;
