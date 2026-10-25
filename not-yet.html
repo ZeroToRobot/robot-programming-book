@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Early access - Robot Programming Book</title>
+  <link rel="icon" href="/favicon-8114d1fc.png" />
+  <style>
+    :root {
+      --bg: #f7f7f9; --card: #ffffff; --text: #1b1f24; --muted: #5b6470;
+      --border: #d9dde2; --accent: #2f6feb; --shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14161a; --card: #1d2027; --text: #eceff3; --muted: #9aa4b2;
+        --border: #333842; --accent: #5b8cff; --shadow: 0 10px 30px rgba(0,0,0,0.4);
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text); margin: 0; padding: 32px 16px;
+      display: flex; justify-content: center;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: var(--shadow); max-width: 540px; width: 100%; padding: 32px;
+    }
+    h1 { font-size: 1.4rem; margin: 0; letter-spacing: -0.01em; }
+    p { color: var(--muted); margin: 12px 0 0; font-size: 0.95rem; line-height: 1.5; }
+    p strong { color: var(--text); }
+    .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 26px; }
+    .btn {
+      display: block; text-align: center; text-decoration: none; padding: 12px;
+      font-size: 1rem; font-weight: 700; border-radius: 10px;
+    }
+    .btn.primary { color: #fff; background: var(--accent); }
+    .btn.secondary { color: var(--text); border: 1px solid var(--border); }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>The book isn't open yet</h1>
+    <p>
+      The Robot Programming Book is in early access right now, open only to a small group of invited readers.
+      It will open to everyone at launch.
+    </p>
+    <p id="signed-in" hidden>You're signed in as <strong id="email"></strong>.</p>
+    <p>
+      Were you just invited? Sign out and sign in again with the same Google account to pick up your access.
+    </p>
+
+    <div class="actions">
+      <a class="btn primary" id="profile-link" href="/welcome" hidden>Tell us about yourself</a>
+      <a class="btn secondary" href="/.auth/logout?post_logout_redirect_uri=/login">Sign out</a>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      fetch("/.auth/me", { credentials: "same-origin" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          var p = d && d.clientPrincipal;
+          if (!p) return;
+          // Already allowed in (e.g. landed here from an old link): go read.
+          if ((p.userRoles || []).indexOf("reader") !== -1) { window.location.replace("/"); return; }
+          if (p.userDetails) {
+            document.getElementById("email").textContent = p.userDetails;
+            document.getElementById("signed-in").hidden = false;
+          }
+        })
+        .catch(function () {});
+
+      // Invite people who have not filled in the profile yet to do it now.
+      fetch("/api/GetProfile", { credentials: "same-origin" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (p) {
+          if (p && p.profileComplete !== true) document.getElementById("profile-link").hidden = false;
+        })
+        .catch(function () {});
+    })();
+  </script>
+</body>
+</html>
