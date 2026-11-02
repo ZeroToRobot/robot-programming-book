@@ -59,6 +59,22 @@ The 7 blockers were counted against the committed text. All are fixed in the wor
 5. **Best practice:** Ch 27 (config retry) and Ch 28 (onboard loops, `TunerConstants` map), plus Ch 1, Ch 3 and Ch 6's loop lesson.
 6. **Needs hardware before fixing:** the Ch 12 and 13 top speed.
 
+## Phase C status (2026-11-02, new chapter numbers)
+
+Done and committed, in this order:
+
+1. **Cross-chapter:** Ch 7 hand-off from Ch 6; M2/D4/D4a Elastic and AdvantageScope; M4 (Ch 17 split into 17 and 18, the book renumbered to 40 chapters, mentor checkpoints, meeting-split notes, capstone in two to three meetings).
+2. **Safety:** Ch 7 (stop before you start), Ch 12 (floor only, finger on Disabled), Ch 27 (glasses, disabled before hands go in, battery shorts), Ch 26 (what the leg 4 safety distance cannot stop; extension E).
+3. **Broken exercises:** Ch 19 (the align bug is real; the disabled rule), Ch 21 (Practice 3 and 5), Ch 22 (Practice 5), Ch 23 and 26 (the course test asserts `Line State`), Ch 11 (solo path).
+4. **Wrong claims:** Ch 5 (exceptions), Ch 4 (scope), Ch 8 (deadband and squaring), Ch 19 (disable semantics), Ch 29 (`getDegrees`, the break-on-purpose drill).
+5. **Best practice:** Ch 28 and 29 (configuration retries), Ch 29 (onboard loops promised for Ch 33; `TunerConstants` map), Ch 1 (code glimpse), Ch 3 (`pull.rebase`, push rejected, sign-in, constructor, `git add` path), Ch 6 (non-blocking heartbeat).
+
+Still open:
+
+- **Needs hardware:** the Ch 12 and 13 XRP top speed (Ch 12 VERIFY 1). Measure one real XRP at full power, then make Ch 12's sample log and 3.0 s `STEP_TIMEOUT_SECONDS` agree with Ch 13's `MAX_WHEEL_SPEED_METERS_PER_SECOND`, and add a Diagnose line for leg 1 timing out.
+- **Not started:** the MINOR findings in each `chNN-sme.md`, and items marked [verify] or [verify on hardware].
+- **CLAUDE.md:** Ch 33's plan should say it moves steering (`PositionVoltage`, `RemoteCANcoder`) and driving (`VelocityVoltage`) onto the Talon FX.
+
 ## For Devang (by hand, outside Phase C)
 
 Update CLAUDE.md:
