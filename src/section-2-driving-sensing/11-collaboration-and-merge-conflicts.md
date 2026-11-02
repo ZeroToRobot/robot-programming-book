@@ -705,7 +705,7 @@ Organizations also make it easier to enforce the rules in this chapter. A team c
 
 ## Exercises
 
-These exercises need a partner, and the Collab exercise needs a group of three. You do not need to be in the same room: everything goes through GitHub. A video or voice call while you work makes it more fun and much faster, but it is not required. You do not need your XRP until the very last step of the Build, and that step is optional.
+These exercises are written for a partner, and the Collab exercise needs a group of three. If you are working alone, you can still do the Practice and the Build: see "Working alone?" at the start of the Build. You do not need to be in the same room: everything goes through GitHub. A video or voice call while you work makes it more fun and much faster, but it is not required. You do not need your XRP until the very last step of the Build, and that step is optional.
 
 ### Practice
 
@@ -753,6 +753,10 @@ Do it a second time, but this time use `git merge --abort` instead of resolving.
 In this lab, you and your partner each add a feature to the same `Robot.java`, on separate branches, in the same repository. The two features touch the same lines, so the second one to merge will conflict. You will do the lab **twice**: once in your repository and once in your partner's, swapping roles, so each of you resolves one conflict and each of your Explorers ends up with both features.
 
 Below, the **owner** is the person whose Explorer repository you are working in. The **teammate** is the other partner.
+
+> **Working alone?**
+>
+> You can play both roles. Do Part A as written. In Part B, skip inviting a collaborator, and instead clone your own repository a second time, into a folder called `XRPExplorer-teammate`, and open it in a second VS Code window. From then on, do the owner's steps in your usual folder and the teammate's steps in the second one, pushing and pulling through GitHub exactly as two people would. GitHub will not let you **Approve** your own pull request, so in Part D leave a **Comment** review instead, then merge. You will get the same conflict and resolve it the same way, and your Explorer ends up with both features, which Chapter 12 builds on. Skip Part E, since there is no second repository to swap into. If you can, find a partner for the Chapter 21 pair lab.
 
 **Part A: prepare your own repository (each partner, alone, before the lab).**
 
