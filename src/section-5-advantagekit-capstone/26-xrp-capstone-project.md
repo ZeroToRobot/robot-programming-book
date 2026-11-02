@@ -101,7 +101,7 @@ An echo after 1 millisecond means the wall is about 0.17 meters away. The sensor
 Now take Section 9.6's list of habits, and ask what each one does to a robot trying to park:
 
 - **It sees a cone, not a line.** A chair leg beside the course can be "the wall," and the robot parks in front of nothing.
-- **Soft and slanted surfaces are hard to hear.** If the echo never comes back, the reading jumps toward 4 meters, and the robot drives on, looking for a wall that is right in front of it. That is why leg 4 needs a safety distance.
+- **Soft and slanted surfaces are hard to hear.** If the echo never comes back, the reading jumps toward 4 meters, and the robot thinks the way is clear. The safety distance in Section 26.7 stops a robot that never finds a wall at all. It does **not** stop one that loses the echo 15 cm from the wall: that robot is still inside the safety distance, and it drives on into the wall. The real defense is a wall the sensor can hear (the next bullet), and on a faster robot, a check that the sensor agrees with the encoders.
 - **Too close is a blind spot.** One reason to park at 10 cm, not 2.
 - **It flickers.** A noisy reading near the target can make the robot twitch back and forth. A tolerance (park when "close enough") is the simple answer.
 
@@ -828,7 +828,7 @@ public static final double LEG_4_MAX_DISTANCE_METERS = 0.60;   // safety net: no
 
 `WALL_GAP_METERS` is a measurement, like `LINE_DISTANCE_METERS` in Chapter 14: once your wall is standing on the floor, measure from the end of the tape to the wall's face, and type your number. `WALL_Y_METERS` is computed from it, so it moves when you re-measure. In the field frame from Chapter 14, leg 3 runs up the y axis, so a wall across the end of the line sits at one y value. Only the simulator uses `WALL_Y_METERS`; the real robot uses the real wall.
 
-The safety distance is twice the gap, which leaves room for leg 3 ending early, but stops a robot whose rangefinder sees nothing long before it wanders off your table.
+The safety distance is twice the gap, which leaves room for leg 3 ending early, but stops a robot whose rangefinder sees nothing before it wanders far across the floor. Notice what it **cannot** do: it is longer than the gap, so it never stops the robot from reaching the wall. Stopping before the wall is the rangefinder's job, and only the rangefinder's.
 
 ### Step 2: The pretend wall
 
@@ -1101,7 +1101,8 @@ What to look for:
 | Bumps the wall, or stops past 10 cm and then backs up | kP is too high: the robot cannot stop in time | Lower Park kP |
 | Rocks back and forth near the wall before parking | kP too high, or a noisy reading near the target | Lower Park kP; check the wall is hard and square |
 | Turns as it drives, and ends up crooked | The heading hold needs tuning, or a wheel is slipping | Re-check the heading gains from Chapter 24 on the bench |
-| Says `NO_WALL` right away, or drives on past the wall | The rangefinder is not hearing the wall | Check the wall (Section 26.2), and the reading in Step 1 |
+| Says `NO_WALL` right away | The rangefinder is not hearing the wall | Check the wall (Section 26.2), and the reading in Step 1 |
+| Drives into the wall | The echo dropped out close to the wall, so the reading jumped toward 4 m | Disable, then fix the wall: a flat, hard box, square to the robot (Section 26.2). Never raise the safety distance to hide it. Extension E is the code fix |
 
 Write each try in your tuning log in `reflections.md`, the same table as Chapter 24: the value, what you saw, and what you will try next. Two or three tries is usually enough for one gain.
 
@@ -1528,7 +1529,8 @@ For pairs who finish early, and for the catch-up meetings at the end of the seas
 - **B. Come home.** After parking, turn around and drive back to the corner of leg 1, using odometry. Which existing commands can you reuse? Where does the robot think it is when it gets there, and how close is that to where it really is? (Chapter 14's "square that never closes" is back.)
 - **C. Beat the clock.** Record the course's total time as an output (`Course/ElapsedSeconds`), and make the course faster without losing three clean runs in a row: higher speeds, smarter timeouts, shorter searches. Keep a tuning log. What is your best time, and what finally stopped you going faster?
 - **D. Wait for the road to clear.** On leg 1, if something is within 15 cm of the rangefinder, wait until it moves, then carry on. (If your pair did Chapter 22's Collab lab, you have a head start: `WAITING_FOR_CLEAR`.) How do you test it in the simulator, where the only wall is at the end?
-- **E. Your own idea.** Anything that uses the Explorer's sensors in a new way. The design doc must be reviewed by a mentor or another pair before you start.
+- **E. Trust, but check.** Make `ParkAtWall` notice a lost echo. If the reading jumps up by more than 0.20 m in one loop while the encoders say the robot moved forward, the reading cannot be true, so go to `NO_WALL` and stop. `decide` needs two more facts (the last gap, and how far the robot moved since the last loop), so this is a pure-function change with its own tests first, red, then green. This is how teams protect fast robots that drive at a target until a sensor says stop.
+- **F. Your own idea.** Anything that uses the Explorer's sensors in a new way. The design doc must be reviewed by a mentor or another pair before you start.
 
 ### Build (XRP Explorer)
 
