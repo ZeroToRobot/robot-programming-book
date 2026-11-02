@@ -502,7 +502,7 @@ changeSysIdTest(State.kNone);
 
 #### The Test mode code
 
-Here is the whole Test mode section of `Robot.java`, from the comment above `testInit()` to the end of the class. It replaces the Chapter 15 version. `testInit()` and `setBenchTarget()` are unchanged except for one log message; `testPeriodic()` has two new blocks; everything below `// SysId` is new. Type it, do not paste:
+Here is the whole Test mode section of `Robot.java`, from the comment above `testInit()` to the end of the class. It replaces the Chapter 15 version. `testInit()` and `setBenchTarget()` are unchanged except for one log message; `testPeriodic()` has two new blocks; everything below `// SysId` is new. This is a teaching version, so you see every step of a SysId test once: in Chapter 20, WPILib's `SysIdRoutine` replaces most of it. Type it, do not paste:
 
 ```java
 // Test mode: the PID tuning bench (Section 15.9) and the SysId tests (Section 16.5).
@@ -1310,7 +1310,7 @@ Your SysId tests drove straight. When the XRP spins in place, its wheels scrub s
 ### Where you will see it next
 
 - **Chapter 18, simulation.** A simulated robot needs a model of how voltage turns into motion. kV and kA are exactly that model, and they are what WPILib's drivetrain simulation is built from.
-- **Chapters 19 to 21, commands.** WPILib's `SysIdRoutine` class does what your Test mode code does, as ready-made commands. Now that you have written the four tests yourself, you will know exactly what it is doing when you meet it.
+- **Chapter 20, commands.** WPILib's `SysIdRoutine` class does what your Test mode code does, as ready-made commands. Now that you have written the four tests yourself, you will know exactly what it is doing when you meet it.
 - **Chapter 24, live tuning.** Feedforward gains can be published and adjusted live, like your PID gains.
 - **Chapter 27, the roboRIO.** A real robot can measure its battery, and its motors can be given volts that stay volts as the battery sags. Pretend volts become real volts.
 - **Chapter 32, path following.** PathPlanner plans a speed for every moment along a path, and feedforward turns each one into volts, with PID correcting the drift.

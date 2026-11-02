@@ -255,7 +255,7 @@ Walk through it:
 - **`RED(30.0)`** creates the `RED` object by calling the constructor with `30.0`. Each constant is a constructor call that Java makes for you, once.
 - **The semicolon after `GREEN(25.0)`** ends the list of constants. It is required whenever the enum has anything after the list, and forgetting it is the most common enum compile error.
 - **`private final double durationSeconds`** is an ordinary field. Each of the three objects has its own copy. It is `final`, so the objects never change: an enum's constants should be as constant as their name says (the immutability idea from Chapter 14).
-- **The constructor has no `public`.** An enum's constructor is always `private`, whether you write the word or not. Nobody outside can call it: `new TrafficLight(10.0)` is a compile error, `enum classes may not be instantiated`. That is the same idea as Chapter 21's holder classes, a `private` constructor so nobody can make more objects, taken one step further: Java makes exactly the objects in the list, and no others, ever.
+- **The constructor has no `public`.** An enum's constructor is always `private`, whether you write the word or not. Nobody outside can call it: `new TrafficLight(10.0)` is a compile error, `enum types may not be instantiated`. That is the same idea as Chapter 21's holder classes, a `private` constructor so nobody can make more objects, taken one step further: Java makes exactly the objects in the list, and no others, ever.
 - **`next()`** is an ordinary method. Inside it, `this` is whichever light you called it on, so `TrafficLight.RED.next()` is `GREEN`. Its body is a new kind of `switch`, with arrows instead of colons, that hands back a value. That is the next section.
 
 > **An enum, in one sentence**

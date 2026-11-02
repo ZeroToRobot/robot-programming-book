@@ -76,7 +76,7 @@ Your laptop has the working copy. GitHub has the shared copy. Git keeps them in 
 
 ## 3.3 Installing Git
 
-If you completed Chapter 2, you may already have Git: VS Code's WPILib edition usually installs alongside it. Let's verify.
+The WPILib installer does not install Git, but your computer may already have it (macOS and most Linux systems often do). Let's check.
 
 Open the VS Code integrated terminal (`` Ctrl+` `` on Windows/Linux, or `` Cmd+` `` on macOS) and run:
 
@@ -253,7 +253,7 @@ You'll see both commits, newest first, with their IDs, your name, and your messa
 
 ## 3.6 Initializing Your XRP Explorer Repository
 
-Now do the real thing. In Chapter 2, you committed your XRPExplorer project once at the very end. Let's go back to that project and make sure it's properly set up.
+Now do the real thing: turn the XRPExplorer project from Chapter 2 into a repository.
 
 Open the XRPExplorer folder in VS Code if it isn't already. Open the integrated terminal and confirm you're in the project root:
 
@@ -263,21 +263,14 @@ pwd
 
 You should see something ending in `/XRPExplorer`. If not, `cd` there.
 
-Check status:
+Turn it into a repository, then check its status:
 
 ```bash
+git init
 git status
 ```
 
-If you followed Chapter 2's Git exercise, you'll see "nothing to commit, working tree clean" and your earlier commit will exist. If for any reason the repo wasn't initialized, run `git init` now.
-
-One more thing: make sure your branch is named `main`. When you ran `git init` back in Chapter 2, older versions of Git may have named the default branch `master` instead. The rest of this book and GitHub both use `main`, so standardize it now:
-
-```bash
-git branch -M main
-```
-
-The `-M` flag renames the current branch to `main`. If you were already on `main`, this changes nothing, so it's safe to run either way.
+`git status` says `On branch main` (Section 3.3 set the default branch name, so it is `main` and not the older `master`) and `No commits yet`, followed by a long list of untracked files: the whole WPILib template. Before you commit them, look at what Git will leave out.
 
 ### The .gitignore File
 
@@ -294,6 +287,17 @@ You'll see entries like `build/`, `.vscode/settings.json`, and `.DS_Store`. Git 
 > Every time you run `WPILib: Build Robot Code`, Gradle generates a large number of compiled files in the `build/` folder. These are derived from your source code: they can be regenerated at any time, and they change constantly. Committing them would clutter your history with millions of lines of meaningless diff. The same logic applies to `.gradle/`, `bin/`, and similar tool output.
 
 If you ever notice unwanted files showing up in `git status`, the fix is usually adding a line to `.gitignore`.
+
+### The First Commit
+
+Stage everything the `.gitignore` allows, and commit it as the starting point of your project:
+
+```bash
+git add .
+git commit -m "Ch3: project from the WPILib XRP template"
+```
+
+`git add .` means "stage every new or changed file in this folder", so it is the right tool for a first commit, when everything is new. Run `git status` again: `nothing to commit, working tree clean`. From here on, every commit is a change to this snapshot.
 
 ### Make a Real Commit
 
@@ -355,7 +359,7 @@ git push -u origin main
 Copy them from your own setup page (GitHub fills in your real username) and run them in your XRPExplorer terminal. Here's what each one does:
 
 - `git remote add origin <url>` tells your local repo where its GitHub copy lives and names that remote `origin` (the conventional name)
-- `git branch -M main` makes sure your branch is named `main`; you already did this in Section 3.6, so it changes nothing here
+- `git branch -M main` makes sure your branch is named `main`; yours already is (Section 3.3), so it changes nothing here
 - `git push -u origin main` uploads your commits and links `main` to `origin`, so that from now on you can push with just `git push`
 
 This first push is when the authentication from Section 3.4 kicks in. If Git prompts you to sign in, follow the browser flow (or, if you made one, paste your fine-grained token as the password).
@@ -375,7 +379,7 @@ Once your remote is set up, the workflow extends to four steps:
 
 > **If `git push` says "rejected"**
 >
-> It means GitHub has commits your laptop does not, usually from your other computer. Run `git pull`, then `git push` again. If Git says there is a **conflict**, do not panic, and do not delete the folder: your work is safe in your commits. Chapter 11 shows you how to fix a conflict, and Section 3.8 shows you what one looks like.
+> It means GitHub has commits your laptop does not, usually from your other computer. Run `git pull`, then `git push` again. If Git says there is a **conflict**, do not panic, and do not delete the folder: your work is safe in your commits. Chapter 11 shows you what a conflict looks like and how to fix one.
 
 > **Push frequently**
 >

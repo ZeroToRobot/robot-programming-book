@@ -431,7 +431,7 @@ A record with three components that implements an interface: every measure you m
 
 > **AdvantageKit can log a whole record**
 >
-> `Logger.recordOutput` has a version that takes any record, and AdvantageScope shows its components as a folder of fields. It works well for records of numbers, booleans, enums, and WPILib types like `Pose2d`. There is one catch, from AdvantageKit's documentation: the **first** time a record type is logged, AdvantageKit has to work out how to store it, which can take more than 100 ms, five whole loops. Its advice is to log each record type for the first time while the robot is disabled. `ParkAtWall` runs in the middle of autonomous, so it logs the decision's two parts separately instead: an enum and a `double`, which cost nothing. Exercise 4 tries the record version.
+> `Logger.recordOutput` has a version that takes any record, and AdvantageScope shows its components as a folder of fields. It works well for records of numbers, booleans, enums, and WPILib types like `Pose2d`. There is one catch, from AdvantageKit's documentation: the **first** time a record type is logged, AdvantageKit has to work out how to store it, and that first call is slow. On a laptop running the Explorer it took about 9 ms and stretched that loop to about 21 ms, one whole loop; on a roboRIO, which is much slower, it is worse. AdvantageKit's advice is to log each record type for the first time while the robot is disabled. `ParkAtWall` runs in the middle of autonomous, so it logs the decision's two parts separately instead: an enum and a `double`, which cost nothing. Exercise 4 tries the record version.
 
 ---
 ## 26.5 Tests First

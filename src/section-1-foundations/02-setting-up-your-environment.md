@@ -511,18 +511,7 @@ Write 2 to 3 sentences on each. If you're not sure about any of them, re-read Se
 
 ### Git
 
-Initialize your XRP Explorer repository now, even though the project is nearly empty. Starting version control on day one is a habit, not an afterthought.
-
-In VS Code's integrated terminal (`` Ctrl+` ``):
-
-```bash
-cd path/to/XRPExplorer
-git init
-git add .
-git commit -m "Ch2: project created, firmware flashed, first run working"
-```
-
-You'll learn Git in detail in Chapter 3, including how to push this project to GitHub. For now, you just need to know that this saves a snapshot of your project that you can return to.
+Nothing to do yet. In Chapter 3 you'll install Git, turn this project into a repository, and put it on GitHub. Leave the project as it is.
 
 ---
 

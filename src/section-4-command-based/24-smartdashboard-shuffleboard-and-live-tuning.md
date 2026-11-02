@@ -415,7 +415,7 @@ Make it fail on purpose, as Chapter 23 taught you. Delete the three lines of the
 ObstacleCourseTest > courseEndsAtTheEndOfTheLine() FAILED
 ```
 
-and the report says `expected: <0.5> but was: <0.0>`. The robot never moved: nothing was scheduled, the LED never came on, and the test's loop ended at once with the robot still at the start line. A test you wrote for the obstacle course just caught a bug in a chooser it has never heard of. Put the `if` back, and run the tests again: green.
+and the report says `the course never finished ==> expected: <false> but was: <true>`, after a long wait. Near the top of the output is the clue: `Tried to schedule a null command`. Nothing was scheduled, so the robot never moved. In simulation the LED starts on, so it never went out, and the test's loop ran for its whole 40 seconds before giving up. A test you wrote for the obstacle course just caught a bug in a chooser it has never heard of. Put the `if` back, and run the tests again: green.
 
 Now run the Explorer, real or simulated. In Elastic, open **Add Widget** > **SmartDashboard**. There is a new entry, `Auto Routine`. Drag it onto the **Driver** tab. Elastic recognizes it as a chooser and draws a **ComboBox Chooser**: a dropdown showing `Obstacle Course`. Open it, and pick `Leg 1 Only`.
 

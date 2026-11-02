@@ -48,7 +48,7 @@ The XRP's encoders produce **12 counts per revolution of the motor shaft**. But 
 
 > **Gear ratios: trading speed for strength**
 >
-> The XRP motor spins very fast but very weakly. Connected straight to a wheel, it could not push the robot across a carpet. So the gearbox slows it down: the motor turns **48.75 times** for every one turn of the wheel. That is a **48.75:1 gear ratio**. You trade speed for torque (turning strength), the same way a bicycle's lowest gear makes a hill easy but slow. Every FRC mechanism has a gear ratio, and you will multiply and divide by them constantly: on the Mini Swerve's brushless motors in Chapter 28, and when you characterize real mechanisms in Chapter 33.
+> The XRP motor spins very fast but very weakly. Connected straight to a wheel, it could not push the robot across a carpet. So the gearbox slows it down: the motor turns **48.75 times** for every one turn of the wheel. That is a **48.75:1 gear ratio**. You trade speed for torque (turning strength), the same way a bicycle's lowest gear makes a hill easy but slow. Every FRC mechanism has a gear ratio, and you will multiply and divide by them constantly: on the Mini Swerve's brushless motors in Chapter 29, and when you characterize real mechanisms in Chapter 33.
 
 So for every turn of the **wheel**, the encoder sees:
 
@@ -230,7 +230,7 @@ For a two-minute FRC match, a good gyro drifts only a little, and that is fine. 
 
 > **Every sensor lies a little, in its own way**
 >
-> Drift is the gyro's characteristic error: small, slow, and growing. Encoders have a different one: they are precise about how far the wheel **turned**, but if the wheel slips on a smooth floor, the robot did not actually move that far. In Chapter 14 you will combine encoders and the gyro to track the robot's position on the field (**odometry**), and in Chapter 31 you will add camera measurements to correct the slow errors of both. Combining sensors so each covers the others' weaknesses is called **sensor fusion**, and it is how every serious robot knows where it is.
+> Drift is the gyro's characteristic error: small, slow, and growing. Encoders have a different one: they are precise about how far the wheel **turned**, but if the wheel slips on a smooth floor, the robot did not actually move that far. In Chapter 14 you will combine encoders and the gyro to track the robot's position on the field (**odometry**), in Chapter 31 you will build a pose estimator, and in Chapter 34 you will feed it camera measurements to correct the slow errors of both. Combining sensors so each covers the others' weaknesses is called **sensor fusion**, and it is how every serious robot knows where it is.
 
 ### The accelerometer
 

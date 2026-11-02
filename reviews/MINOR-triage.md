@@ -11,7 +11,7 @@
 | ID | Ch | Problem | Fix |
 |---|---|---|---|
 | ch02-M1 | 2 | The Git exercise runs `git init` and commits before Ch 3 installs and configures Git (fails with "'git' is not recognized" or "Author identity unknown") | Replace it with "Nothing to do yet"; Ch 3 Section 3.6 starts with `git init` and the first commit, and drops the "If you followed Chapter 2's Git exercise" paragraph and `git branch -M main` |
-| ch23-v1 | 24 | Line 418 says the test fails with `expected: <0.5> but was: <0.0>` without the `null` check | The real failure is `the course never finished ==> expected: <false> but was: <true>`, after the full 40 s |
+| ch23-v1 | 24 | DONE (batch 1) | The real failure is `the course never finished ==> expected: <false> but was: <true>`, after the full 40 s |
 
 ## High priority among the MINORs
 
@@ -32,6 +32,10 @@
 VERIFY-WEB: bw-m4 (docs.wpilib.org per-year paths), ch10-m4 (debugger on an XRP run), ch11-m4 (Student Pack GitHub Pro and branch protection), ch11-v6 (CONTRIBUTING link on the default branch only), ch16-m3 (SysId "Diagnostic Plots" and "Direction" labels), ch26-m1 (field behavior after a mid-match code restart), ch26-m2 (who installs Java on the roboRIO), ch26-m5 (two `TalonFX` objects with one CAN ID).
 
 HARDWARE: ch15-v4 (leg 1 ends a few mm short of `X: 0.50`), ch17-v5 (simulated sensors answer a loop sooner), ch18-v3 (DIO 1 starts on in the Sim GUI), ch21-v6 (line ending mid-correction reads as lost), ch27-m5 (Tuner X card colors and year picker). Also still open from Phase C: the Ch 12 and 13 XRP top speed (Ch 12 sample log times wait on it, ch12-v3).
+
+## Batch 1 (done 2026-11-02)
+
+The two missed MAJORs (ch02-M1: Git moved from Ch 2 into Ch 3 Section 3.6, which now runs `git init` and a first commit, and the Ch 3 claim that WPILib installs Git is gone; ch23-v1) and every high-priority item above: Ch 18 Practice 1 (probed: a second `XRPRangefinder` throws `AllocationException: Code: -1029`; the real branch is now a predict-the-crash step with a warning callout in 18.3), the Ch 3 push-rejected pointer, Ch 6 (enable Teleop, Elastic, a "Test new stopping code slowly" callout, Chapter 19), the pointers in Ch 9, 14 (Practice 4 only; the ghost-pose look is still HARDWARE), 15 and 16, and the Ch 22 and 26 error texts. A scan of every pointer to Ch 17 or later in Ch 1 to 16 found no others.
 
 ## Plan
 
@@ -121,8 +125,8 @@ Aside (not a MINOR, outside scope): Ch 2 MAJOR M1 looks unfixed. The Git exercis
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
 | ch06-m1 | `speed != 0.0` on a double, before the rule | FIX | S | After the read-aloud paragraph (~line 466): safe only because `applyDeadband` returns exactly `0.0`; measured values use `<`/`>`, Chapter 12 explains | `06-conditionals-loops-and-methods.md` |
-| ch06-m2 | No reminder to enable Teleop | FIX | S | After line 72: "Then click **Teleoperated** in the Robot State panel; `teleopPeriodic()` only runs while Teleop is enabled." Same parenthetical in Practice 1. Also line 72 still says "watching SmartDashboard": make it Elastic | `06-*.md` |
-| ch06-m3 | Wall-stop test needs a safety habit | FIX | S | Ch 6 Build is the first time motors move (Ch 7's callout comes after). Before line 532 add: finger on **Disabled**, part stick first, rangefinder can miss angled or soft walls | `06-*.md` |
+| ch06-m2 | No reminder to enable Teleop | DONE (batch 1) | S | After line 72: "Then click **Teleoperated** in the Robot State panel; `teleopPeriodic()` only runs while Teleop is enabled." Same parenthetical in Practice 1. Also line 72 still says "watching SmartDashboard": make it Elastic | `06-*.md` |
+| ch06-m3 | Wall-stop test needs a safety habit | DONE (batch 1) | S | Ch 6 Build is the first time motors move (Ch 7's callout comes after). Before line 532 add: finger on **Disabled**, part stick first, rangefinder can miss angled or soft walls | `06-*.md` |
 | ch06-m4 | "Watchdog will start barking" | FIX | S | Line 215: name the console message `Loop time of 0.02s overrun` and the per-method timing list. Confirm exact text in 2026.2.1 `Watchdog` source while editing | `06-*.md` |
 | ch06-m5 | Command-based chapter number wrong | FIX | S | Line 473 now says "By Chapter 20"; "Why Command-Based?" is Ch 19 after renumbering: "In Chapter 19, when you meet..." | `06-*.md` |
 | ch06-v5 | Can't back away once wall is close | SKIP | | The assignment's "Check yourself" (assignment.md line 67, answer key line 86) uses this as a deliberate predict-and-fix task | |
@@ -170,7 +174,7 @@ DONE 12, FIX 47, VERIFY-WEB 1, HARDWARE 0, SKIP 1 (61 items).
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch09-m1 | Forward pointers to wrong chapters | FIX | S | Line 51: gear ratios on the Mini Swerve arrive in Chapter 29 (29.3), not 28. Line 233: "in Chapter 31 you will build a pose estimator, and in Chapter 34 feed it camera measurements..." | book 09 |
+| ch09-m1 | Forward pointers to wrong chapters | DONE (batch 1) | S | Line 51: gear ratios on the Mini Swerve arrive in Chapter 29 (29.3), not 28. Line 233: "in Chapter 31 you will build a pose estimator, and in Chapter 34 feed it camera measurements..." | book 09 |
 | ch09-m2 | "bury RioLog" wrong for XRP | FIX | S | Line 718: "would bury the VS Code terminal in a thousand lines a second." | book 09 |
 | ch09-m3 | "Integrate ... fifty times a second" implies your code integrates | FIX | S | Line 189: "Add up that rate over time ... The XRP does that adding for you in its firmware, and `getAngle()` hands you the total." | book 09 |
 | ch09-m4 | Wall stop chatters at threshold; add hysteresis sprinkle | FIX | S | End of "Noise and filtering" callout (line 458): `Blocked` may flicker near 20 cm (**chatter**); fixes are a debounce (Ch 21) or two thresholds, **hysteresis** (Ch 22). | book 09 |
@@ -272,14 +276,14 @@ DONE 12, FIX 47, VERIFY-WEB 1, HARDWARE 0, SKIP 1 (61 items).
 | ch15-v7 | Practice 3 "move `errorSum` inside" breaks `reset()` | FIX | S | Line 1226: "add `double errorSum = 0.0;` as the first line of `calculate` (leave the field; the local hides it)" | 15-pid...md |
 | ch15-v8 | Practice 5 finger nudge may not show the cascade | FIX | M | Line 1256: add tape-measure reading next to `Pose Y`, start with `resetPose(new Pose2d(0.0, 0.03, new Rotation2d()))`, one sentence that a slide fools odometry (copy from assignment) | 15-pid...md |
 | ch15-v9 | §15.11 says `TurnToAngle` | FIX | S | Line 1183: `TurnToHeading` | 15-pid...md |
-| ch15-v10 | Talon FX onboard PID pointer is wrong chapter | FIX | S | Line 1185: point to Ch 33 (Ch 29 line 428 says loops move into the Talon FX in Ch 33) | 15-pid...md |
+| ch15-v10 | Talon FX onboard PID pointer is wrong chapter | DONE (batch 1) | S | Line 1185: point to Ch 33 (Ch 29 line 428 says loops move into the Talon FX in Ch 33) | 15-pid...md |
 
 ## Ch 16 (review ch16-sme)
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
 | ch16-m1 | "Try every possible kS, kV, kA" misdescribes least squares | FIX | S | Line 195: use review's wording ("finds the one set ... a little algebra gets there in one step") | src/section-3-autonomous-control/16-sysid-characterization-on-the-xrp.md |
-| ch16-m2 | 165-line SysId runner not signposted as temporary | FIX | S | Before listing (line 505) add "This is a teaching version: in Chapter 20, `SysIdRoutine` replaces it". End-of-chapter checkpoint (line 1396) already exists. Also line 1313 "Chapters 19 to 21" should say Chapter 20 | 16-sysid...md |
+| ch16-m2 | 165-line SysId runner not signposted as temporary | DONE (batch 1) | S | Before listing (line 505) add "This is a teaching version: in Chapter 20, `SysIdRoutine` replaces it". End-of-chapter checkpoint (line 1396) already exists. Also line 1313 "Chapters 19 to 21" should say Chapter 20 | 16-sysid...md |
 | ch16-m3 | "Diagnostic Plots" window and "Direction" box not in docs | VERIFY-WEB | S | Check allwpilib `sysid` GUI source (or open SysId 2026.2.1) for exact labels; fall back to "Diagnostics pane, forward and backward plots" (line 800) | 16-sysid...md |
 | ch16-v1 | "two regular imports" but three named | FIX | S | Line 915: "three regular imports" | 16-sysid...md |
 | ch16-v2 | §16.8 listing drops Ch 14 Javadoc | DONE | | Ch 14 and Ch 16 `Drivetrain` listings now match (no getter Javadoc in either; same `getHeadingDegrees` Javadoc) | |
@@ -305,7 +309,7 @@ DONE 12, FIX 47, VERIFY-WEB 1, HARDWARE 0, SKIP 1 (61 items).
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch17-m1 | Creating `RangefinderDistanceSensor` beside `Sensors` throws "already allocated" | FIX | M | Worse now: Ch 18 Practice 1 (line 525) has students run the `false` branch. Tell students it throws because `Sensors` owns the rangefinder (or make it the lesson), and add the note after §18.3 snippet (line 94). Confirm exact error text by running Simulate Robot Code | 18-simulating-the-xrp.md, 17-advantagekit...md (Practice 1) |
+| ch17-m1 | Creating `RangefinderDistanceSensor` beside `Sensors` throws "already allocated" | DONE (batch 1) | M | Worse now: Ch 18 Practice 1 (line 525) has students run the `false` branch. Tell students it throws because `Sensors` owns the rangefinder (or make it the lesson), and add the note after §18.3 snippet (line 94). Confirm exact error text by running Simulate Robot Code | 18-simulating-the-xrp.md, 17-advantagekit...md (Practice 1) |
 | ch17-v2 | "Drives straight? Perfectly" wrong: per-side FF vs averaged model curves | FIX | S | §18.6 table line 465: "Almost; per-side feedforward on twin sim motors drifts a little, PID corrects" | 18-simulating-the-xrp.md |
 | ch17-v3 | `subtractFriction` only while driven; coasting sim wheel slides further | FIX | S | Add bullet to §18.6 list (after line 474): "No friction while coasting" | 18-simulating-the-xrp.md |
 | ch17-v5 | Sim sensors answer a loop sooner than real ones | HARDWARE | S | Confirm the one-loop lag on a real XRP before adding a §18.6 bullet | 18-simulating-the-xrp.md |
@@ -368,7 +372,7 @@ DONE 12, FIX 47, VERIFY-WEB 1, HARDWARE 0, SKIP 1 (61 items).
 | ch21-m1 | "easy to test" oversells `decideNextState()` | FIX | S | Line 706: "not quite easy to test yet: it reads sensors and gyro itself; Chapter 23 passes them in" | src/section-4-command-based/22-state-machines.md |
 | ch21-m2 | XRP course link is Python, not said | FIX | S | Line 391: "in Python"; resource line 1405: "(Python and Blockly; compare its `error` line with `getSteeringError()`)" | 22-state-machines.md |
 | ch21-m3 | `Line State` stale after command ends | FIX | M | `end()` (line 571): publish final state plus "(interrupted)"; one sentence in walk-through; update solution `FollowLine.java` | 22-state-machines.md, exercises ch22 solution |
-| ch21-v1 | javac 17 says "enum types", not "enum classes" | FIX | S | Line 258: `enum types may not be instantiated` | 22-state-machines.md |
+| ch21-v1 | javac 17 says "enum types", not "enum classes" | DONE (batch 1) | S | Line 258: `enum types may not be instantiated` | 22-state-machines.md |
 | ch21-v2 | Missing semicolon message text | FIX | S | Row line 1122: "`',', '}', or ';' expected` (and more errors at the constructor)" | 22-state-machines.md |
 | ch21-v3 | Without `.and(teleop)` bumper works in every mode | FIX | S | Row line 1128: "does nothing: binding uses `test` or is missing"; separate row for missing `.and(teleop)` | 22-state-machines.md |
 | ch21-v4 | Sim leg 2 changes (sensors ahead of center) | FIX | S | Line 1037: "on the real robot the first four steps should not change; on the sim leg 2 stops a few cm sooner" | 22-state-machines.md |
@@ -454,7 +458,7 @@ File: `section-5-advantagekit-capstone/26-xrp-capstone-project.md`
 | ch25-m5 | Release form checkbox is "Set as a pre-release" | FIX | S | Line 1350: "Leave **Set as a pre-release** unchecked, check **Set as the latest release** is ticked" | Ch 26 §26.10 Step 5 |
 | ch25-v2 | Test reads 0.1197 before coasting; flip at or below 0.12 | FIX | S | Line 1041: "around 12 cm, and the robot coasts a few mm more after"; line 1049: "as the distance crosses 0.12" | Ch 26 §26.7 Steps 5, 6 |
 | ch25-v3 | Outside `ParkAtWall` the error is "has private access" | FIX | S | Line 385: "Try it inside `ParkAtWall` ..." plus the `private access` message for a test | Ch 26 §26.4 |
-| ch25-v4 | "More than 100 ms, five whole loops" (coordinator item) | FIX | S | Confirmed at line 434: "can take more than 100 ms on a roboRIO; on your laptop it is closer to one loop" | Ch 26 §26.4 callout; CLAUDE.md Ch 26 Java entry |
+| ch25-v4 | "More than 100 ms, five whole loops" (coordinator item) | DONE (batch 1) | S | Confirmed at line 434: "can take more than 100 ms on a roboRIO; on your laptop it is closer to one loop" | Ch 26 §26.4 callout; CLAUDE.md Ch 26 Java entry |
 | ch25-v5 | gversion counts staged changes as clean | FIX | S | Line 1206: add "a change you have `git add`ed but not committed counts as clean too, so commit first, then build" | Ch 26 §26.9 Step 2 |
 | ch25-v6 | No `noWallStaysNoWall` test | FIX | M | Add test 7 (39 tests; red stage 37 tests, 5 failed) and fix counts at lines 13, 590, 799, 1043, 1270, 1370, 1544; or reword criterion 2 (line 33) and line 298 to "every rule" (S) | Ch 26 §26.1, §26.3, §26.5; ch26 solution |
 | ch25-v7 | `git diff main` also shows `reflections.md` | FIX | S | Line 1254: add "`reflections.md` (your tuning log)" | Ch 26 §26.9 Step 4 |

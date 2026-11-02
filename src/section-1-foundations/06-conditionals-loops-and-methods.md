@@ -69,7 +69,7 @@ if (distance < 0.20) {
 }
 ```
 
-Run this and slowly push the XRP toward a wall while watching SmartDashboard. The status string will switch the moment you cross the 20 cm threshold.
+Run this, select **Teleoperated** in the Robot State panel, and slowly push the XRP toward a wall while watching the `Status` value in Elastic. The status string will switch the moment you cross the 20 cm threshold. (`teleopPeriodic()` only runs while Teleop is enabled, Chapter 5, so if `Status` never appears, that is the first thing to check.)
 
 That switch is your conditional firing. Notice that the program does not have to do anything special to detect the switch. It just runs the `if` check 50 times per second, and one of those 50 ticks happens to be the first one where the condition becomes true.
 
@@ -470,7 +470,7 @@ That is the goal. Code that reads like a description of what the robot is doing,
 
 > **The foundation of clean robot code**
 >
-> This is the foundation of every clean robot program in this book. By Chapter 20, when you learn the command-based framework, you will see that commands are essentially a more powerful version of the same pattern: each command names a piece of behavior, and the robot composes them into something coordinated. The skill of breaking logic into well-named methods, the one you are practicing right now, is exactly what makes command-based code work later.
+> This is the foundation of every clean robot program in this book. By Chapter 19, when you meet the command-based framework, you will see that commands are essentially a more powerful version of the same pattern: each command names a piece of behavior, and the robot composes them into something coordinated. The skill of breaking logic into well-named methods, the one you are practicing right now, is exactly what makes command-based code work later.
 
 ---
 
@@ -529,7 +529,11 @@ Bring the chapter together in your XRP Explorer project, starting from the "smar
 
    The 50 Hz loop **is** your loop. Each call does one small step and leaves. You will use this "check every loop, never wait" idea for the rest of the book.
 
-Run it. While it is disabled, the LED should blink about once a second. Then drive the XRP toward a wall and confirm it stops on its own. This is the first time the Explorer reacts to its environment instead of just obeying the stick.
+> **Test new stopping code slowly**
+>
+> This is the first time your own code decides whether the robot stops. Keep the mouse on **Disabled** in the Robot State panel, and push the stick only part of the way the first few times. A rangefinder can miss a wall that is angled, soft, or very close, so your code is a helper, not a guarantee. Chapter 7 makes this a habit for every run, and Chapter 27 does the same on the big robot.
+
+Run it. While it is disabled, the LED should blink about once a second. Then select **Teleoperated**, drive the XRP slowly toward a wall, and confirm it stops on its own. This is the first time the Explorer reacts to its environment instead of just obeying the stick.
 
 ### Reflect
 
