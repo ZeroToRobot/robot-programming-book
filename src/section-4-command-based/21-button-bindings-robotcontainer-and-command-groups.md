@@ -707,7 +707,7 @@ One detail of `whileTrue` matters for the Explorer: if the command **finishes** 
 
 ### The feature request from Chapter 19, done properly
 
-Chapter 19 opened with a driver's request: "When I hold A in teleop, can the robot turn itself to face the tape, at heading 90, and then give me the sticks back?" The `TimedRobot` version took an `aligning` field, a `return` that froze the dashboard, and a fix in `disabledInit()` that you had to remember. Here is the command-based version:
+Chapter 19 opened with a driver's request: "When I press A in teleop, can the robot turn itself to face the tape, at heading 90, and then give me the sticks back?" After the spinning-robot story, make one change to it: the driver **holds** A, so letting go stops the turn at once. That is the abort the callout above recommends for an auto-align. The `TimedRobot` version took an `aligning` field, a `return` that froze the dashboard, and a fix in `disabledInit()` that you had to remember. Here is the command-based version:
 
 ```java
 controller.a().whileTrue(new TurnToHeading(drivetrain, CourseConstants.TURN_HEADING_DEGREES));

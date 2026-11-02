@@ -18,14 +18,14 @@ You will need your XRP for the Build exercise. Most of the chapter is reading an
 
 Here is a request your drive coach might make on any Tuesday:
 
-> "When I hold A in teleop, can the robot turn itself to face the tape, at heading 90, and then give me the sticks back?"
+> "When I press A in teleop, can the robot turn itself to face the tape, at heading 90, and then give me the sticks back?"
 
-It is a reasonable request. Real FRC drivers ask for exactly this kind of thing, usually called **auto-align**: the driver gets the robot close, holds a button, and the code lines it up perfectly with the goal. (In Chapter 34 the Mini Swerve does it for real, using a camera to find the target.) And you already have every piece you need: the heading PID controller, the `calculateTurnRate()` helper, and the constant `TURN_HEADING_DEGREES`.
+It is a reasonable request. Real FRC drivers ask for exactly this kind of thing, usually called **auto-align**: the driver gets the robot close, presses a button, and the code lines it up perfectly with the goal. (In Chapter 34 the Mini Swerve does it for real, using a camera to find the target.) And you already have every piece you need: the heading PID controller, the `calculateTurnRate()` helper, and the constant `TURN_HEADING_DEGREES`.
 
 So you write it. It goes in `teleopPeriodic()`, before the driver's sticks are read, because while the robot is aligning, the sticks should be ignored:
 
 ```java
-// Hold A: turn to face the tape, then hand the sticks back.
+// Press A: turn to face the tape, then hand the sticks back.
 if (controller.getAButtonPressed()) {
     headingController.reset();   // forget whatever job it was doing before
     aligning = true;
@@ -33,7 +33,7 @@ if (controller.getAButtonPressed()) {
 }
 if (aligning) {
     drivetrain.drive(0.0, calculateTurnRate(TURN_HEADING_DEGREES));
-    if (headingController.atSetpoint() || !controller.getAButton()) {
+    if (headingController.atSetpoint()) {
         aligning = false;
         drivetrain.stop();
         DataLogManager.log("Align ended");
@@ -48,13 +48,13 @@ Plus one new field, in the "Remembered from loop to loop" group:
 private boolean aligning = false;
 ```
 
-Read it aloud. "When A is first pressed, clear the heading controller and start aligning. While aligning, spin toward 90. Stop aligning when the heading is there or the driver lets go. While aligning, skip everything else in teleop."
+Read it aloud. "When A is first pressed, clear the heading controller and start aligning. While aligning, spin toward 90. Stop aligning when the heading is there. While aligning, skip everything else in teleop."
 
 You test it. It works. The robot spins to face the tape and stops. Ship it.
 
 Then, two days later, three things happen.
 
-**First**, at practice, the driver holds A, and halfway through the turn the robot is disabled (someone pressed Disable, or in a match, the match ended). `aligning` is still `true`. Nothing set it back, because `teleopPeriodic()` never ran again to notice. The next time the robot is enabled in teleop, before anyone touches anything, **it starts spinning**. That is not just a bug. On a full-size robot, that is how people get hurt. The fix is one line, `aligning = false;`, but it does not go in the align code. It goes in `disabledInit()`, a different method, far away, which you have to remember exists. (Look at your Chapter 16 SysId code: `disabledInit()` already has a line just like it, `changeSysIdTest(State.kNone)`, for exactly the same reason.)
+**First**, at practice, the driver presses A, and halfway through the turn the robot is disabled (someone pressed Disable, or in a match, the match ended). `aligning` is still `true`. Nothing set it back, because `teleopPeriodic()` never ran again to notice. The next time the robot is enabled in teleop, before anyone touches anything, **it starts spinning**. That is not just a bug. On a full-size robot, that is how people get hurt. The fix is one line, `aligning = false;`, but it does not go in the align code. It goes in `disabledInit()`, a different method, far away, which you have to remember exists. (Look at your Chapter 16 SysId code: `disabledInit()` already has a line just like it, `changeSysIdTest(State.kNone)`, for exactly the same reason.)
 
 **Second**, you notice that the wall stop's log messages are wrong. While aligning, the `return` skips the rest of `teleopPeriodic()`, including the code that updates `wasBlocked` and publishes `Blocked` and `Slow Mode`. Those widgets freeze while the robot aligns, and when the align ends, the "did it just change?" logic from Chapter 10 compares against a stale value. Your new feature broke an old one without touching a single line of it.
 
@@ -64,7 +64,7 @@ None of these are beginner mistakes. They are what happens to **every** robot pr
 
 > **A common beginner mistake**
 >
-> Testing only the happy path. The align feature worked perfectly the first time you tried it, because you held A until it finished, then let go. Bugs in robot code hide on the paths nobody tests: disabling in the middle, pressing two buttons at once, switching modes mid-action. Whenever you add a behavior that lasts longer than one loop, ask: "What happens if it is interrupted?"
+> Testing only the happy path. The align feature worked perfectly the first time you tried it, because you pressed A and watched it finish. Bugs in robot code hide on the paths nobody tests: disabling in the middle, pressing two buttons at once, switching modes mid-action. Whenever you add a behavior that lasts longer than one loop, ask: "What happens if it is interrupted?"
 
 ---
 
@@ -108,7 +108,7 @@ That `return` exists for one reason: without it, the SysId test and the PID benc
 
 ### 4. Every action needs a cleanup, in every way it can end
 
-An action can end in two ways: it **finishes** (the turn reached 90 degrees) or it is **interrupted** (the driver let go, the robot was disabled, a different mode started). Both need cleanup: stop the motors, reset a controller, log the end, clear the "I am running" field. In your code, the finish cleanup lives next to the action, and the interrupted cleanup lives wherever you remembered to put it: `disabledInit()`, the top of `testPeriodic()`, `changeSysIdTest()`. The align bug in Section 19.1 was a missing interrupted cleanup.
+An action can end in two ways: it **finishes** (the turn reached 90 degrees) or it is **interrupted** (the robot was disabled, a different mode started, another action needed the motors). Both need cleanup: stop the motors, reset a controller, log the end, clear the "I am running" field. In your code, the finish cleanup lives next to the action, and the interrupted cleanup lives wherever you remembered to put it: `disabledInit()`, the top of `testPeriodic()`, `changeSysIdTest()`. The align bug in Section 19.1 was a missing interrupted cleanup.
 
 ### 5. The mode methods do everything
 
@@ -264,7 +264,7 @@ That one line is the head chef's walk down the line. Here is what happens inside
 
 1. **Subsystems check in.** Every subsystem's `periodic()` method runs. In Chapter 17 you gave `Drivetrain` a method named `periodic()` that reads the inputs and updates odometry, and you call it yourself in `robotPeriodic()`. In Chapter 20, once `Drivetrain` is a subsystem, the scheduler calls it for you, and you will delete your own call.
 2. **Buttons are checked.** Any button or condition you have tied to a command is checked, and commands are started if their button was just pressed. (Chapter 21 is all about this.)
-3. **Commands run.** For each running command: if the robot is disabled, the command is **cancelled**. Otherwise its `execute()` runs, then its `isFinished()` is asked, and if the answer is `true`, its `end(false)` runs and it is removed.
+3. **Commands run.** For each running command: if the robot is disabled, the command is **cancelled** (unless it asked to keep running while disabled; see "The disabled rule" below). Otherwise its `execute()` runs, then its `isFinished()` is asked, and if the answer is `true`, its `end(false)` runs and it is removed.
 4. **Changes are applied.** Commands that were started or cancelled during this loop are started or cancelled now.
 5. **Idle subsystems get their default.** A subsystem with no command using it can have a **default command**, which starts automatically. "Drive with the sticks" is the classic default command for a drivetrain: whenever nothing else needs the drivetrain, the driver has it. (Chapter 20.)
 
@@ -281,7 +281,7 @@ And the wall stop? It would live in the drive-with-the-sticks command, so it run
 
 > **The disabled rule**
 >
-> When the robot is disabled, the scheduler cancels every running command, and calls each one's `end(true)`. (A command can ask to keep running while disabled. That is meant only for things that cannot move the robot, like LEDs or logging.) You no longer write "if it was running, stop it" in `disabledInit()`. The scheduler already did.
+> When the robot is disabled, the scheduler cancels every running command, and calls each one's `end(true)`. (A command can ask to keep running while disabled. That is meant only for things that cannot move the robot, like LEDs or logging. WPILib's own waiting and printing commands, `Commands.waitSeconds`, `Commands.waitUntil`, and `Commands.print`, are marked that way, because they cannot move anything. A command that drives a motor never is.) You no longer write "if it was running, stop it" in `disabledInit()`. The scheduler already did.
 
 ### Never block the loop
 
@@ -685,7 +685,7 @@ The kitchen gets busier, but the head chef's rules never change.
 > * As a `TimedRobot` program grows, five problems grow with it: "what am I doing now" fields scattered across the class, the same action written in several places, two pieces of code driving the same motors, cleanups forgotten when an action is interrupted, and mode methods that do everything.
 > * **Command-based programming** sorts the robot into **subsystems** (the nouns: parts that do one thing at a time) and **commands** (the verbs: actions that use subsystems until they end), run by the **command scheduler**.
 > * Every command has four parts: `initialize()` once at the start, `execute()` every loop, `isFinished()` to say when it is done, and `end(interrupted)` once at the end, **however** it ends. Your Chapter 12 autonomous steps were commands all along.
-> * The scheduler runs when you call `CommandScheduler.getInstance().run()` every loop. It runs subsystems' `periodic()`, checks buttons, runs commands, and enforces one rule: at most one command per subsystem. A new command **interrupts** the old one, and disabling the robot cancels every command.
+> * The scheduler runs when you call `CommandScheduler.getInstance().run()` every loop. It runs subsystems' `periodic()`, checks buttons, runs commands, and enforces one rule: at most one command per subsystem. A new command **interrupts** the old one, and disabling the robot cancels every command that could move it.
 > * New Java: a **lambda**, `(parameters) -> body`, is a piece of code turned into an object that runs only when called. It fills in any **functional interface** (one method), such as `Runnable`, `BooleanSupplier`, and `DoubleSupplier`. A **method reference** like `sensors::isLeftOnLine` is a shorter lambda.
 > * Lambdas read fields when they run, but captured local variables must be **effectively final**, and are copied when the lambda is made. Anything that must be fresh each loop has to be read **inside** the lambda.
 > * The Explorer now runs the scheduler, and its first command, built with `Commands.startEnd(...)` and `.until(...)`, lights the LED during autonomous and turns it off however the routine ends.
@@ -716,7 +716,7 @@ CommandScheduler.getInstance().schedule(
     Commands.waitUntil(controller::getAButton).withName("Waiting for A"));
 ```
 
-For each, predict how long it will stay in the Scheduler list before you run it. Then: disable the robot while `Waiting for A` is listed and enable again. Is it still there? Why? Finally, add `.withTimeout(3.0)` to the `waitUntil` command and try again without pressing A. Remove the test code when you are done.
+For each, predict how long it will stay in the Scheduler list before you run it. Then: disable the robot while `Waiting for A` is listed and enable again. Is it still there? Why? (Hint: "The disabled rule" callout in Section 19.5.) And why are there now two? Finally, add `.withTimeout(3.0)` to the `waitUntil` command and try again without pressing A. Remove the test code when you are done.
 
 **4. Label the parts.** Print out (or copy into `reflections.md`) your `autonomousPeriodic()`, `startStep()`, and `autonomousInit()`. For **each** of the three driving steps, label which lines are its `initialize()`, its `execute()`, its `isFinished()`, and its `end()`, as Section 19.4 did for the turn. Which step has **two** ways to finish? Then do the same for one SysId test in Test mode, using `changeSysIdTest()` and `updateSysIdTest()`. Where is its interrupted cleanup?
 
