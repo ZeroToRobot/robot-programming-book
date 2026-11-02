@@ -32,7 +32,8 @@
 - [14. Odometry: Knowing Where You Are](section-3-autonomous-control/14-odometry-knowing-where-you-are.md)
 - [15. PID Control: Making the Robot Accurate](section-3-autonomous-control/15-pid-control-making-the-robot-accurate.md)
 - [16. SysId Characterization on the XRP](section-3-autonomous-control/16-sysid-characterization-on-the-xrp.md)
-- [17. Simulation and AdvantageKit on the XRP](section-3-autonomous-control/17-simulation-and-advantagekit-on-the-xrp.md)
+- [17. AdvantageKit and the IO Layer](section-3-autonomous-control/17-advantagekit-and-the-io-layer.md)
+- [18. Simulating the XRP](section-3-autonomous-control/18-simulating-the-xrp.md)
 
 ---
 
