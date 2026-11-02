@@ -85,9 +85,9 @@ This book uses **WPILib 2026.2.1**. Go to the **[WPILib 2026.2.1 release page](h
 > | FRC season | **2026** | |
 > | WPILib (and GradleRIO in `build.gradle`) | **2026.2.1** | This chapter |
 > | Java | **17**, bundled with WPILib | This chapter (automatic) |
-> | AdvantageKit | **26.0.2** | Chapter 17 (XRP) and Chapter 26 (Mini Swerve) |
-> | Phoenix 6 (CTRE) | **26.x**, the `frc2026` release | Chapter 27 |
-> | PathPlannerLib | **2026** release | Chapter 31 |
+> | AdvantageKit | **26.0.2** | Chapter 17 (XRP) and Chapter 27 (Mini Swerve) |
+> | Phoenix 6 (CTRE) | **26.x**, the `frc2026` release | Chapter 28 |
+> | PathPlannerLib | **2026** release | Chapter 32 |
 >
 > Every robot in this book, the XRP and the Mini Swerve, uses this 2026 software (Chapter 1). If VS Code, the Driver Station, or a vendor library ever offers to upgrade a project to a newer year, say no.
 
@@ -372,7 +372,7 @@ The Simulation GUI is also how you **enable** the XRP. Its **Robot State** panel
 >
 > Because the program runs on your laptop, stopping it stops the robot. Close the Simulation GUI window, or click the red **Stop** square in VS Code's debug toolbar. To try new code, stop the program, then run `WPILib: Simulate Robot Code` again. If the robot doesn't respond, check the two links between them: the XRP is on, and your laptop is on the XRP's Wi-Fi (not your school's). If you changed your XRP's IP address, update the `HALSIMXRP_HOST` line in `build.gradle` to match.
 >
-> In Chapter 26 your program moves onto a real robot computer, the roboRIO. That's when you'll **deploy** it for the first time: copy it onto the robot so it runs there.
+> In Chapter 27 your program moves onto a real robot computer, the roboRIO. That's when you'll **deploy** it for the first time: copy it onto the robot so it runs there.
 
 ---
 
@@ -416,7 +416,7 @@ Every time a later chapter publishes a new value, you add it the same way: **Add
 
 > **Why the code says `SmartDashboard` but the app is Elastic**
 >
-> The class in your code is called `SmartDashboard` for historical reasons: it is named after an old dashboard app. The class just writes values into a table called `/SmartDashboard`, and every dashboard can read that table. The old SmartDashboard and Shuffleboard **apps** still come with WPILib 2026, but WPILib has deprecated them and removes them for 2027. Its documentation recommends **Elastic** for the dashboard and **AdvantageScope** (which you will meet later) for debugging, so those are the two this book uses. Chapter 23 explains how dashboards work underneath.
+> The class in your code is called `SmartDashboard` for historical reasons: it is named after an old dashboard app. The class just writes values into a table called `/SmartDashboard`, and every dashboard can read that table. The old SmartDashboard and Shuffleboard **apps** still come with WPILib 2026, but WPILib has deprecated them and removes them for 2027. Its documentation recommends **Elastic** for the dashboard and **AdvantageScope** (which you will meet later) for debugging, so those are the two this book uses. Chapter 24 explains how dashboards work underneath.
 
 ### Connect the Xbox Controller
 
@@ -458,7 +458,7 @@ When you ran "Simulate Robot Code", here's what actually happened:
 
 Every 20 milliseconds, your program runs through its loop exactly once: calling `robotPeriodic()`, reading any inputs, and writing any outputs. The loop from Chapter 1.1 is running right now, on your laptop, even if your program doesn't do anything interesting yet.
 
-On a competition robot, the code is the same, but it runs in a different place. The `.jar` is **deployed**, copied onto the roboRIO, the computer inside the robot, and runs there; the Driver Station laptop only sends commands to it. The roboRIO runs the same 50 Hz loop. The robot is different. Your code, and the way you write it, are the same. Chapter 26 makes that move.
+On a competition robot, the code is the same, but it runs in a different place. The `.jar` is **deployed**, copied onto the roboRIO, the computer inside the robot, and runs there; the Driver Station laptop only sends commands to it. The roboRIO runs the same 50 Hz loop. The robot is different. Your code, and the way you write it, are the same. Chapter 27 makes that move.
 
 > **You've already done the hard part**
 >
@@ -477,7 +477,7 @@ On a competition robot, the code is the same, but it runs in a different place. 
 > - The XRP broadcasts its own Wi-Fi network with default SSID `XRP-AAAA-BBBB` and password `xrp-wpilib`; you can customize either from the Web UI at `http://192.168.42.1:5000`
 > - A WPILib project is created from a template (TimedRobot with the XRP option checked) and run with `WPILib: Simulate Robot Code`. XRP programs run on your **laptop** and talk to the XRP over Wi-Fi; nothing is copied onto the robot
 > - The workflow (write, build, connect, run, test, commit) is the cycle you'll use for every chapter in this book, and the Simulation GUI's Robot State panel enables and disables the XRP
-> - A competition robot runs the same code, but it is **deployed** onto the robot's roboRIO and runs there (Chapter 26)
+> - A competition robot runs the same code, but it is **deployed** onto the robot's roboRIO and runs there (Chapter 27)
 
 ---
 
@@ -491,7 +491,7 @@ Next, try changing the string to something else and running it again. Observe ho
 
 ### Build (XRP Explorer)
 
-This is the first checkpoint for the running project you'll grow all the way through Chapter 25. Get its foundation solid and leave it that way:
+This is the first checkpoint for the running project you'll grow all the way through Chapter 26. Get its foundation solid and leave it that way:
 
 1. Confirm your project is named `XRPExplorer`, created from the **XRP - TimedRobot** template with **Desktop Support** enabled (Section 2.7).
 2. Run `WPILib: Build Robot Code` and confirm `BUILD SUCCESSFUL`.

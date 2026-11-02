@@ -1,5 +1,7 @@
 # Review Summary: Phases A and B
 
+> **Renumbered 2026-11-01 (M4):** the old Ch 17 was split into Ch 17 (AdvantageKit and the IO Layer) and Ch 18 (Simulating the XRP), and the old Ch 18 to 39 are now Ch 19 to 40. The review files keep the **old** numbers. Old 17.1, 17.2, 17.8 to 17.11 are now 18.1, 18.2, 18.4 to 18.7; old 17.3, 17.4, 17.6, 17.7 are now 17.1 to 17.4; old 17.5 is split (polymorphism is 18.3, default methods are in 17.2).
+
 **Status (2026-11-01):** Phase A (`00-book-wide.md`) and the lightweight Phase B (`chNN-sme.md`, run as described in `PHASE-B-LIGHT.md`) are complete for the 28 written chapters. Each Phase B file combines its own new findings with the issues carried over from the build verification, which lives in `robot-programming-book-exercises/chNN-*/VERIFY.md`. Chapters 29 to 39 are stubs and were not reviewed.
 
 **Totals:** 7 blockers, 44 majors and 281 minors. Every chapter with code builds (27 of 27).

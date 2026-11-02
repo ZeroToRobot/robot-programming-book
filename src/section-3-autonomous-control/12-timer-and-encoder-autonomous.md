@@ -40,7 +40,7 @@ You already wrote the first kind in Chapter 7: a one-second nudge forward. It ha
 
 > **Dead reckoning: navigating by arithmetic**
 >
-> Before satellites and GPS, ship navigators found their position with **dead reckoning**: "We sailed northeast at 8 knots for 3 hours, so we are about 24 nautical miles northeast of where we started." It works, but every small error in the speed or heading adds up, so the longer the voyage, the further off the estimate gets. A timed autonomous routine is dead reckoning with the crudest possible speedometer: a motor power setting. Encoder-based driving is dead reckoning with a real speedometer. In Chapter 14, **odometry** will do dead reckoning properly, fifty times a second, combining the encoders and the gyro into a running estimate of where the robot is on the field. And in Chapter 33, cameras will correct the errors that dead reckoning always piles up.
+> Before satellites and GPS, ship navigators found their position with **dead reckoning**: "We sailed northeast at 8 knots for 3 hours, so we are about 24 nautical miles northeast of where we started." It works, but every small error in the speed or heading adds up, so the longer the voyage, the further off the estimate gets. A timed autonomous routine is dead reckoning with the crudest possible speedometer: a motor power setting. Encoder-based driving is dead reckoning with a real speedometer. In Chapter 14, **odometry** will do dead reckoning properly, fifty times a second, combining the encoders and the gyro into a running estimate of where the robot is on the field. And in Chapter 34, cameras will correct the errors that dead reckoning always piles up.
 
 ### Leg 1 of the obstacle course
 
@@ -541,7 +541,7 @@ So the final answer to "timer or encoders?" turns out to be: **both, with differ
 
 > **You just built a state machine**
 >
-> A variable that remembers which step the robot is on, code that behaves differently in each step, and rules for moving from one step to the next: that is a **finite state machine**, one of the most useful ideas in all of robotics. Your steps are its **states**, and conditions like "distance reached 0.5 m" are its **transitions**. Chapter 21 gives state machines a full chapter, with Java's `enum` replacing the `static final int` step numbers. And in Chapter 20, WPILib's **command groups** will let you write this whole routine as one readable line per step, with the step-tracking handled for you.
+> A variable that remembers which step the robot is on, code that behaves differently in each step, and rules for moving from one step to the next: that is a **finite state machine**, one of the most useful ideas in all of robotics. Your steps are its **states**, and conditions like "distance reached 0.5 m" are its **transitions**. Chapter 22 gives state machines a full chapter, with Java's `enum` replacing the `static final int` step numbers. And in Chapter 21, WPILib's **command groups** will let you write this whole routine as one readable line per step, with the step-tracking handled for you.
 
 ---
 
@@ -940,7 +940,7 @@ Diagnose anything strange:
 - **Stops at the line but well to one side of the corner mark:** the robot curved during leg 1. That is expected for now. Chapter 15 drives straight with the gyro.
 - **Prints `Output not updated often enough`:** some path through `autonomousPeriodic()` does not command the drivetrain. Check that every case calls `arcadeDrive` or `stop`.
 
-When the robot runs leg 1 five times in a row and stops on the line every time, you have a working autonomous routine. Every later chapter in Sections III and IV upgrades a piece of it: kinematics, odometry, PID, feedforward, then command-based steps in Chapter 20, until the whole obstacle course runs on its own in Chapter 25.
+When the robot runs leg 1 five times in a row and stops on the line every time, you have a working autonomous routine. Every later chapter in Sections III and IV upgrades a piece of it: kinematics, odometry, PID, feedforward, then command-based steps in Chapter 21, until the whole obstacle course runs on its own in Chapter 26.
 
 ### Reflect
 

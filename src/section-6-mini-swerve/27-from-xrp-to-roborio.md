@@ -1,6 +1,6 @@
-# Chapter 26: From XRP to roboRIO
+# Chapter 27: From XRP to roboRIO
 
-The Explorer is finished. It is tagged `v1.0.0`, its release page has a green check and a video, and it is still sitting on your desk, ready for the next idea you want to try. Over twenty-five chapters it taught you how a robot program is shaped, how to make a robot move accurately, how to test code without a robot, and how to work on code with other people.
+The Explorer is finished. It is tagged `v1.0.0`, its release page has a green check and a video, and it is still sitting on your desk, ready for the next idea you want to try. Over twenty-six chapters it taught you how a robot program is shaped, how to make a robot move accurately, how to test code without a robot, and how to work on code with other people.
 
 This chapter starts Section VI and a new robot: the **Mini Swerve**. It is a real FRC control system on a small chassis: a **roboRIO** for a brain, **Kraken X60** brushless motors with built-in **Talon FX** motor controllers on a **CAN bus**, **CANcoder** absolute encoders, a **Pigeon 2** gyro, a camera, a radio, and a 12-volt battery that can push a lot of current. By the end of Section VI it will drive in any direction while spinning, follow paths drawn on a field, and find its place on the field by looking at AprilTags.
 
@@ -21,13 +21,13 @@ This chapter needs the Mini Swerve, a charged robot battery, a USB stick, and a 
 
 ---
 
-## 26.1 Where Your Code Runs Now
+## 27.1 Where Your Code Runs Now
 
 Think back to how the Explorer worked. You pressed a button in VS Code, and your program started... on your laptop. Chapter 10 pointed this out (Section 10.4): an XRP program runs on the laptop, inside WPILib's simulator, and an extension called the XRP client sends motor commands to the XRP over Wi-Fi and brings its sensor readings back. The XRP itself never ran a line of your Java. That is why your prints showed up in VS Code's terminal, why your logs landed in your project's `logs` folder, and why `ROBOT_MODE` had to be set by hand: as far as WPILib could tell, it was always running in simulation.
 
 > **A correction to Chapter 2**
 >
-> Chapter 2 described a deploy as "the `.jar` file was transferred to the XRP." For the XRP, that was not quite right: nothing was copied anywhere, and your program ran on your laptop the whole time. The steps Chapter 2 described are exactly what happens on a roboRIO, which is what you will do in Section 26.7. Chapter 2 was describing this chapter.
+> Chapter 2 described a deploy as "the `.jar` file was transferred to the XRP." For the XRP, that was not quite right: nothing was copied anywhere, and your program ran on your laptop the whole time. The steps Chapter 2 described are exactly what happens on a roboRIO, which is what you will do in Section 27.7. Chapter 2 was describing this chapter.
 
 A roboRIO is different. It is a small computer, built for robots, with a processor, memory, an operating system (a version of Linux), and Java installed on it. When you **deploy** to a roboRIO, your program is packed into a single file, copied onto the roboRIO over a cable or Wi-Fi, and started **there**. Your laptop's job shrinks to two things: it runs the **Driver Station**, which enables and disables the robot and sends it your controller's buttons and sticks, and it runs whatever dashboards you want to watch.
 
@@ -47,7 +47,7 @@ Almost everything else follows from that one move:
 | What the battery is | Four AA cells your code cannot measure | A 12-volt battery the roboRIO measures fifty times a second |
 | What a crash does | Your program stops on your laptop | The robot loses its code for a few seconds, wherever it is |
 
-Read the last row twice. A crash on the Explorer was an annoyance. A crash on a competition robot happens in the middle of a match, with the robot on the field and your alliance counting on it. Section 26.10 is about exactly that.
+Read the last row twice. A crash on the Explorer was an annoyance. A crash on a competition robot happens in the middle of a match, with the robot on the field and your alliance counting on it. Section 27.10 is about exactly that.
 
 > **RioLog, at last**
 >
@@ -55,7 +55,7 @@ Read the last row twice. A crash on the Explorer was an annoyance. A crash on a 
 
 ---
 
-## 26.2 Meet the Mini Swerve
+## 27.2 Meet the Mini Swerve
 
 Before you write any code for a robot, you should know exactly what is on it. On the Explorer, the XRP was the same for everyone, so the book could tell you its wheel size and its encoder counts. The Mini Swerve is built by your team, and teams build them differently. So the first job is to walk around the robot and write down what is really there.
 
@@ -65,23 +65,23 @@ Here is what every Mini Swerve has, and the chapter where your code first talks 
 |---|---|---|
 | **roboRIO** (1 or 2) | Runs your program. Has the CAN port, USB ports, Ethernet, a built-in accelerometer, status lights, and a few buttons | This chapter |
 | **Battery** and **main breaker** | A 12-volt lead-acid battery, and a 120-amp breaker that is the robot's on/off switch | This chapter (measured by the roboRIO) |
-| **Power distribution** (PDH or PDP) | Splits battery power into a channel per device, each with its own breaker or fuse, and can measure each channel's current | Chapter 27 |
+| **Power distribution** (PDH or PDP) | Splits battery power into a channel per device, each with its own breaker or fuse, and can measure each channel's current | Chapter 28 |
 | **Radio** | The robot's Wi-Fi, linking the roboRIO to the Driver Station laptop | This chapter (as a network) |
-| **Four swerve modules** | Each has a **drive** motor that spins the wheel and a **steer** motor that points it, so each wheel can roll in any direction | Chapter 27 (spin), Chapter 28 (math) |
-| **Kraken X60** motors | Brushless motors, each with a **Talon FX** motor controller built in. One per drive and steer job, eight in all, chained together on the **CAN bus** | Chapter 27 |
-| **CANcoder** absolute encoders | One per module, on the CAN bus, telling the code which way each wheel points, even right after power-on | Chapter 27 (ID), Chapter 28 (calibration) |
-| **Pigeon 2** | A gyro and accelerometer on the CAN bus, for the robot's heading | Chapter 27 (ID), Chapter 29 (heading) |
-| **Camera** | Sees AprilTags on the field | Chapter 33 |
+| **Four swerve modules** | Each has a **drive** motor that spins the wheel and a **steer** motor that points it, so each wheel can roll in any direction | Chapter 28 (spin), Chapter 29 (math) |
+| **Kraken X60** motors | Brushless motors, each with a **Talon FX** motor controller built in. One per drive and steer job, eight in all, chained together on the **CAN bus** | Chapter 28 |
+| **CANcoder** absolute encoders | One per module, on the CAN bus, telling the code which way each wheel points, even right after power-on | Chapter 28 (ID), Chapter 29 (calibration) |
+| **Pigeon 2** | A gyro and accelerometer on the CAN bus, for the robot's heading | Chapter 28 (ID), Chapter 30 (heading) |
+| **Camera** | Sees AprilTags on the field | Chapter 34 |
 
 > **Swerve in one paragraph**
 >
-> The Explorer's wheels could only roll forward and back, so to go sideways it had to turn first. A swerve module can **point** its wheel, like a shopping-cart caster that you control. With four of them pointed the same way, the robot slides sideways without turning. With them pointed around a circle, it spins in place. Mix the two, and it can drive across the field while it turns to face anything it likes. The math that decides each wheel's angle and speed is kinematics, the same idea as Chapter 13, in two directions instead of one. Chapter 28 works it out.
+> The Explorer's wheels could only roll forward and back, so to go sideways it had to turn first. A swerve module can **point** its wheel, like a shopping-cart caster that you control. With four of them pointed the same way, the robot slides sideways without turning. With them pointed around a circle, it spins in place. Mix the two, and it can drive across the field while it turns to face anything it likes. The math that decides each wheel's angle and speed is kinematics, the same idea as Chapter 13, in two directions instead of one. Chapter 29 works it out.
 
 ### The robot fact sheet
 
 Teams lose hours to facts nobody wrote down: which CAN ID is the front-left steer motor, which gear ratio the modules use, which way the Pigeon 2 is mounted. You will write them down now, in a Markdown file that lives in your repository next to the code, so it travels with the code and changes through pull requests like the code does.
 
-Make a table like this one in a notebook today (you will turn it into `docs/robot.md` in Section 26.5), and fill in every row you can by **looking at the robot** and asking a mentor. Leave a row as "unknown" rather than guess. An honest "unknown" gets found out; a wrong guess hides for weeks.
+Make a table like this one in a notebook today (you will turn it into `docs/robot.md` in Section 27.5), and fill in every row you can by **looking at the robot** and asking a mentor. Leave a row as "unknown" rather than guess. An honest "unknown" gets found out; a wrong guess hides for weeks.
 
 ```markdown
 # The Mini Swerve: Robot Fact Sheet
@@ -92,7 +92,7 @@ Written from the real robot. Change it through a pull request, like code.
 |---|---|---|
 | Team number | 3415 | Team roster |
 | roboRIO version | roboRIO 2 | Label on the case |
-| roboRIO image | (from the Driver Station, Section 26.7) | |
+| roboRIO image | (from the Driver Station, Section 27.7) | |
 | Radio | VH-109 | Label |
 | Power distribution | REV PDH | Label |
 | Swerve module type | | Ask the builders |
@@ -101,31 +101,31 @@ Written from the real robot. Change it through a pull request, like code.
 | Wheel diameter | | Measured with calipers |
 | Drive and steer motors | | Labels |
 | Absolute encoders | | Labels |
-| Gyro | Pigeon 2 | Label, and its CAN ID (Chapter 27) |
+| Gyro | Pigeon 2 | Label, and its CAN ID (Chapter 28) |
 | Camera | | Label |
-| CAN IDs | (Chapter 27) | |
+| CAN IDs | (Chapter 28) | |
 ```
 
-The first column will grow as the robot does. The rows the book needs next are the module type and gear ratios (Chapter 28) and the CAN IDs (Chapter 27).
+The first column will grow as the robot does. The rows the book needs next are the module type and gear ratios (Chapter 29) and the CAN IDs (Chapter 28).
 
 > **Why "how we know"?**
 >
-> A fact sheet is only as good as its worst row. "Wheel diameter: 4 in" could mean someone measured it, or someone remembered it from last year's robot. When the robot drives 5% short in Chapter 30, the "how we know" column tells you which numbers to check first. It is the same reason a good tuning log (Chapter 23) records the conditions, not just the result.
+> A fact sheet is only as good as its worst row. "Wheel diameter: 4 in" could mean someone measured it, or someone remembered it from last year's robot. When the robot drives 5% short in Chapter 31, the "how we know" column tells you which numbers to check first. It is the same reason a good tuning log (Chapter 24) records the conditions, not just the result.
 
 ---
 
-## 26.3 Working Safely on a Robot That Can Hurt You
+## 27.3 Working Safely on a Robot That Can Hurt You
 
 The Explorer weighs about as much as a textbook, and its motors could not pinch a finger. The Mini Swerve is heavier, its motors are many times more powerful, and its battery can deliver hundreds of amps for a moment. Treat it the way your team treats every real robot, from the first day.
 
 These are the rules for every chapter in Section VI. Your team may have more; follow those too.
 
-1. **Wheels off the ground until the code is trusted.** Put the robot on blocks (a sturdy box or a robot cart) so its wheels spin in the air. Every first test of new code happens on blocks. Chapter 27 will tell you when it is time to put it on the floor.
+1. **Wheels off the ground until the code is trusted.** Put the robot on blocks (a sturdy box or a robot cart) so its wheels spin in the air. Every first test of new code happens on blocks. Chapter 28 will tell you when it is time to put it on the floor.
 2. **Say it before you enable it.** Before you press Enable, say "Enabling!" loudly enough for everyone near the robot to hear, and wait for hands to come away from it. Your team may use another word; use the same one every time.
 3. **Know your stop keys.** In the Driver Station, **Enter** disables the robot, and the **space bar** is an emergency stop that works even when the Driver Station window is not in front. After an emergency stop, the roboRIO must be rebooted before it can be enabled again, which is exactly why it is safe: nothing can quietly start the robot back up. Keep a hand near the space bar whenever the robot is enabled.
 4. **One person drives the Driver Station.** On a shared robot, only one laptop is connected and enabling it at a time. Everyone else watches the robot, not the screen.
 5. **Batteries are heavy and full of acid.** Carry them by the handle or the body, never by the wires. A battery that is cracked, leaking, or swollen goes to a mentor, not into a robot. Plug in a charged battery, and put the used one on the charger.
-6. **Power off before you touch wiring.** Switch off the main breaker before you plug or unplug anything on the robot. Never power the robot off in the middle of a deploy (Section 26.7 says why).
+6. **Power off before you touch wiring.** Switch off the main breaker before you plug or unplug anything on the robot. Never power the robot off in the middle of a deploy (Section 27.7 says why).
 
 > **The enable keys you should not learn**
 >
@@ -137,7 +137,7 @@ These are the rules for every chapter in Section VI. Your team may have more; fo
 
 ---
 
-## 26.4 Getting the roboRIO Ready
+## 27.4 Getting the roboRIO Ready
 
 A roboRIO needs three things before your code can run on it: an **image**, a **team number**, and a way for your laptop to reach it. On a team robot, a mentor or a lead usually sets these up once a season, and you will most likely find them done already. Read this section anyway, so you know what was done and can check it.
 
@@ -162,7 +162,7 @@ The image files come with the FRC Game Tools, and a roboRIO 2 image file is name
 
 A roboRIO's team number decides its **name** on the network. For team 3415, the roboRIO calls itself `roborio-3415-FRC.local`, and on the robot's radio network it lives at the address `10.34.15.2`: the team number split into two parts, `34` and `15`. WPILib calls this **TE.AM** notation. Your team's numbers go in the same places: team 254 is `10.2.54.2`, and team 5 is `10.0.5.2`.
 
-Your laptop uses the same team number in three places, and all three must match the roboRIO: the Driver Station's **Setup** tab, your WPILib project (Section 26.5), and your dashboards (Section 26.11).
+Your laptop uses the same team number in three places, and all three must match the roboRIO: the Driver Station's **Setup** tab, your WPILib project (Section 27.5), and your dashboards (Section 27.11).
 
 ### The radio, and two cables
 
@@ -172,7 +172,7 @@ There are three ways to connect your laptop to a roboRIO:
 - **Ethernet cable.** From your laptop to the radio, or straight to the roboRIO.
 - **Wi-Fi, through the radio.** The robot's radio connects to your laptop over Wi-Fi. Today's FRC radio, the VH-109, works best with a second VH-109 set up as an **access point** that your laptop plugs into with an Ethernet cable. Radio setup is a mentor's job, done once, with a web page on the radio itself; WPILib's "Programming your Radio" page has the steps.
 
-For this chapter, use a USB cable. The robot is on blocks and not going anywhere, and USB takes the radio out of the list of things that could be wrong. Wireless driving comes when the robot drives, in Chapter 29.
+For this chapter, use a USB cable. The robot is on blocks and not going anywhere, and USB takes the radio out of the list of things that could be wrong. Wireless driving comes when the robot drives, in Chapter 30.
 
 > **Why one robot, many names**
 >
@@ -180,7 +180,7 @@ For this chapter, use a USB cable. The robot is on blocks and not going anywhere
 
 ---
 
-## 26.5 A New Project for a New Robot
+## 27.5 A New Project for a New Robot
 
 The Explorer's code drives two wheels with `XRPMotor`s. The Mini Swerve has eight brushless motors on CAN, four absolute encoders, and a different gyro. Very little of the Explorer's **hardware** code could survive the move, and the drivetrain math is new too. So the Mini Swerve gets a brand-new project, in a brand-new repository. What survives is the **shape** of the program and the habits around it, and you will copy those in on purpose, one at a time, so you know exactly what came along.
 
@@ -219,7 +219,7 @@ Two choices on that form matter more than they look. **Command Robot** is the pl
 
 ### Step 2: Look around
 
-The template looks like a younger version of your Explorer at the end of Chapter 20:
+The template looks like a younger version of your Explorer at the end of Chapter 21:
 
 - `Main.java`: starts the program. You still never edit it.
 - `Robot.java`: the template shape you know, with a `RobotContainer` field and the scheduler running in `robotPeriodic()`.
@@ -237,7 +237,7 @@ Two files are new to you, and they are the ones that make this a roboRIO project
 }
 ```
 
-`teamNumber` is how the deploy tool finds your roboRIO (Section 26.4), and `projectYear` is the WPILib year this project belongs to. If you typed the wrong team number in the Project Creator, fix it here, or with **WPILib: Set Team Number** in the command palette.
+`teamNumber` is how the deploy tool finds your roboRIO (Section 27.4), and `projectYear` is the WPILib year this project belongs to. If you typed the wrong team number in the Project Creator, fix it here, or with **WPILib: Set Team Number** in the command palette.
 
 Second, open `build.gradle` and find this block near the top. The Explorer's `build.gradle` did not have it:
 
@@ -263,7 +263,7 @@ deploy {
 }
 ```
 
-(The real block also has comments; they are left out here.) Read it like a shipping order. There is one **target**, the roboRIO, found by team number. Two things get shipped to it: `frcJava`, your program, and `frcStaticFileDeploy`, every file in your project's `src/main/deploy` folder, copied to a folder named `/home/lvuser/deploy` on the roboRIO. `lvuser` is the name of the user account your program runs as on the roboRIO, the way you have an account on your laptop. Remember that folder: later chapters put path files (Chapter 31) and dashboard layouts there, and WPILib's `Filesystem.getDeployDirectory()` finds it for you, on the robot or on your laptop.
+(The real block also has comments; they are left out here.) Read it like a shipping order. There is one **target**, the roboRIO, found by team number. Two things get shipped to it: `frcJava`, your program, and `frcStaticFileDeploy`, every file in your project's `src/main/deploy` folder, copied to a folder named `/home/lvuser/deploy` on the roboRIO. `lvuser` is the name of the user account your program runs as on the roboRIO, the way you have an account on your laptop. Remember that folder: later chapters put path files (Chapter 32) and dashboard layouts there, and WPILib's `Filesystem.getDeployDirectory()` finds it for you, on the robot or on your laptop.
 
 ### Step 3: Into Git, and onto GitHub
 
@@ -273,7 +273,7 @@ The owner turns the project into a repository and pushes it, exactly as Chapter 
 git init
 git branch -M main
 git add .
-git commit -m "Ch26: New Command Robot project for the Mini Swerve"
+git commit -m "Ch27: New Command Robot project for the Mini Swerve"
 ```
 
 Then create an empty repository on GitHub named `MiniSwerve` (no README, no `.gitignore`: the project has its own), and connect and push:
@@ -297,7 +297,7 @@ git checkout -b roborio-setup
 
 ### Step 4: Clear out the examples
 
-Delete `ExampleSubsystem.java`, `ExampleCommand.java`, and `Autos.java`. Build. It fails, because `RobotContainer` still uses them. You will rewrite `RobotContainer.java`, `Robot.java`, and `Constants.java` completely in Section 26.8, so for now make the build pass the quickest way: in `RobotContainer`, delete the field, the two lines inside `configureBindings()`, and the imports that refer to the deleted files, and make `getAutonomousCommand()` return `Commands.none()` (import `edu.wpi.first.wpilibj2.command.Commands`). Build again: `BUILD SUCCESSFUL`. A project that builds after every step is a habit worth keeping on a new robot too.
+Delete `ExampleSubsystem.java`, `ExampleCommand.java`, and `Autos.java`. Build. It fails, because `RobotContainer` still uses them. You will rewrite `RobotContainer.java`, `Robot.java`, and `Constants.java` completely in Section 27.8, so for now make the build pass the quickest way: in `RobotContainer`, delete the field, the two lines inside `configureBindings()`, and the imports that refer to the deleted files, and make `getAutonomousCommand()` return `Commands.none()` (import `edu.wpi.first.wpilibj2.command.Commands`). Build again: `BUILD SUCCESSFUL`. A project that builds after every step is a habit worth keeping on a new robot too.
 
 ### Step 5: What comes along from the Explorer
 
@@ -305,17 +305,17 @@ Here is every piece of the Explorer, and what happens to it. The rule of thumb: 
 
 | From the Explorer | On the Mini Swerve | When |
 |---|---|---|
-| The template shape: `Robot`, `RobotContainer`, `Constants` with nested groups | The same, written fresh | Section 26.8 |
-| AdvantageKit: the vendordep, the `build.gradle` lines, `LoggedRobot`, the logger setup | The same, copied | Step 6 and Section 26.8 |
-| `RobotMode` and the three-way IO switch | The same idea, but the roboRIO picks `REAL` by itself | Section 26.8 |
+| The template shape: `Robot`, `RobotContainer`, `Constants` with nested groups | The same, written fresh | Section 27.8 |
+| AdvantageKit: the vendordep, the `build.gradle` lines, `LoggedRobot`, the logger setup | The same, copied | Step 6 and Section 27.8 |
+| `RobotMode` and the three-way IO switch | The same idea, but the roboRIO picks `REAL` by itself | Section 27.8 |
 | gversion and the Git metadata in every log | The same, copied | Step 6 |
 | `.github/workflows/build.yml` | Copied, unchanged | Step 6 |
 | `CONTRIBUTING.md` (Chapter 11) | Copied, then updated for a shared robot | Exercises |
-| `TunableNumber` (Chapter 23) | Copied when you first tune something on this robot | Later |
-| `Drivetrain`, its IO classes, `Sensors`, the course commands | **Stay with the Explorer.** Swerve replaces them | Chapters 27 to 30 |
-| The Explorer's tests | **Stay with the Explorer.** New code, new tests | Section 26.9 |
+| `TunableNumber` (Chapter 24) | Copied when you first tune something on this robot | Later |
+| `Drivetrain`, its IO classes, `Sensors`, the course commands | **Stay with the Explorer.** Swerve replaces them | Chapters 28 to 31 |
+| The Explorer's tests | **Stay with the Explorer.** New code, new tests | Section 27.9 |
 | `elastic-layout.json`, `advantagescope-layout.json` | Not yet: a new robot needs a new dashboard | Later |
-| Gains: kS, kV, kA, PID, wheel sizes | **Never copied.** Every number belongs to the robot it was measured on | Chapter 32 |
+| Gains: kS, kV, kA, PID, wheel sizes | **Never copied.** Every number belongs to the robot it was measured on | Chapter 33 |
 
 The last row is the one people get wrong. A kV measured on a 60 mm XRP wheel with an AA battery means nothing for a brushless swerve module. Copying a number from another robot is worse than having no number, because it looks like an answer.
 
@@ -323,15 +323,15 @@ The last row is the one people get wrong. A kV measured on a 60 mm XRP wheel wit
 
 Work through these on the `roborio-setup` branch, building after each one.
 
-1. **AdvantageKit.** Install it as in Section 17.6: **WPILib: Manage Vendor Libraries** > **Install new libraries (online)**, and paste the same pinned URL (`https://github.com/Mechanical-Advantage/AdvantageKit/releases/download/v26.0.2/AdvantageKit.json`). If the dialog offers AdvantageKit by name in a list instead, check that it says **26.0.2** before you install it. Either way you get `vendordeps/AdvantageKit.json`. Then open the Explorer's `build.gradle` beside the new one, and copy the two `akitJson`/`annotationProcessor` lines into the end of the `dependencies` block and the `replayWatch` task to the end of the file.
-2. **gversion.** Copy the `id "com.peterabeles.gversion" version "1.10"` line into the `plugins` block (leave the new project's GradleRIO line as it is), and the `gversion` block to the end of the file, from Section 25.9. Add the `BuildConstants.java` line to the end of `.gitignore`.
+1. **AdvantageKit.** Install it as in Section 17.3: **WPILib: Manage Vendor Libraries** > **Install new libraries (online)**, and paste the same pinned URL (`https://github.com/Mechanical-Advantage/AdvantageKit/releases/download/v26.0.2/AdvantageKit.json`). If the dialog offers AdvantageKit by name in a list instead, check that it says **26.0.2** before you install it. Either way you get `vendordeps/AdvantageKit.json`. Then open the Explorer's `build.gradle` beside the new one, and copy the two `akitJson`/`annotationProcessor` lines into the end of the `dependencies` block and the `replayWatch` task to the end of the file.
+2. **gversion.** Copy the `id "com.peterabeles.gversion" version "1.10"` line into the `plugins` block (leave the new project's GradleRIO line as it is), and the `gversion` block to the end of the file, from Section 26.9. Add the `BuildConstants.java` line to the end of `.gitignore`.
 3. **CI.** Copy the whole `.github` folder from the Explorer into the Mini Swerve project, so it has `.github/workflows/build.yml`. Nothing in it is specific to the XRP: it checks out the code, installs Java 17, and runs `./gradlew build`, which compiles and runs the tests. It never deploys, so it never needs a robot.
 
 Build. You should see `BUILD SUCCESSFUL`, and a new, ignored `src/main/java/frc/robot/BuildConstants.java`. Commit:
 
 ```bash
 git add .
-git commit -m "Ch26: AdvantageKit, gversion, and CI, copied from the Explorer"
+git commit -m "Ch27: AdvantageKit, gversion, and CI, copied from the Explorer"
 ```
 
 > **Copy the lines, not the file**
@@ -340,7 +340,7 @@ git commit -m "Ch26: AdvantageKit, gversion, and CI, copied from the Explorer"
 
 ---
 
-## 26.6 New Java: Bytecode, the JVM, and Jar Files
+## 27.6 New Java: Bytecode, the JVM, and Jar Files
 
 Here is a puzzle. Your laptop has an Intel or AMD processor, or an Apple one. The roboRIO has an ARM processor, the same family as most phones. Processors from different families understand completely different machine instructions: a program built for one is gibberish to the other. Yet the Explorer's program ran on your laptop, and the Mini Swerve's program, built by the same Gradle on the same laptop, is about to run on the roboRIO. Nobody asked you which processor to build for. How?
 
@@ -377,7 +377,7 @@ Read it aloud: "load the first `double`, load the second `double`, multiply them
 
 > **Where you have met the JVM already**
 >
-> Every stack trace since Chapter 10 was printed by the JVM. Lines like `at frc.robot.Robot.<init>(Robot.java:42)` are the JVM telling you which method's bytecode it was running and which line of your source that bytecode came from. And `lambda$new$0` from Chapter 18 is the name the compiler gave the bytecode for a lambda. The JVM was always there; now you know its name.
+> Every stack trace since Chapter 10 was printed by the JVM. Lines like `at frc.robot.Robot.<init>(Robot.java:42)` are the JVM telling you which method's bytecode it was running and which line of your source that bytecode came from. And `lambda$new$0` from Chapter 19 is the name the compiler gave the bytecode for a lambda. The JVM was always there; now you know its name.
 
 ### The jar: one file to ship
 
@@ -395,7 +395,7 @@ Delete the copy when you are done looking.
 
 ### The part that is not portable
 
-There is a catch, and it explains a word you have seen scroll past in every deploy. Some of WPILib is not Java at all. The **HAL** (Chapter 22) talks to real hardware, and that code is written in C++ and compiled into **native libraries**: files of real processor instructions, one version for each kind of computer. Java reaches them through a bridge called **JNI** (Java Native Interface). That is why `build.gradle` lists dependencies like `roborioRelease` and `nativeRelease`: one set of native libraries for the roboRIO's ARM processor, and one set for your laptop. The jar is the same everywhere; the native libraries are not, and the deploy copies the ARM ones onto the robot along with your jar.
+There is a catch, and it explains a word you have seen scroll past in every deploy. Some of WPILib is not Java at all. The **HAL** (Chapter 23) talks to real hardware, and that code is written in C++ and compiled into **native libraries**: files of real processor instructions, one version for each kind of computer. Java reaches them through a bridge called **JNI** (Java Native Interface). That is why `build.gradle` lists dependencies like `roborioRelease` and `nativeRelease`: one set of native libraries for the roboRIO's ARM processor, and one set for your laptop. The jar is the same everywhere; the native libraries are not, and the deploy copies the ARM ones onto the robot along with your jar.
 
 This is also why the Explorer could only ever be "real" in a pretend way. On the laptop, the HAL's native library is the **simulator** version. On a roboRIO, it is the real one, which reads real pins and real voltages. Your Java does not change; the HAL underneath it does.
 
@@ -405,14 +405,14 @@ This is also why the Explorer could only ever be "real" in a pretend way. On the
 
 ---
 
-## 26.7 Your First Deploy
+## 27.7 Your First Deploy
 
 Chapter 2 deployed an empty program first, to prove the tools worked before there was any code to blame. Do the same here. The project builds, it has AdvantageKit installed but not yet started, and it does nothing at all. That is perfect.
 
 ### Step 1: Get the robot ready
 
 1. Put the robot on blocks, wheels in the air.
-2. Plug a charged battery in, and plug a **USB stick** into one of the roboRIO's USB ports (the ones that look like a laptop's, not the device port). It should be formatted **FAT32** (Section 24.12). Write your team's name on it.
+2. Plug a charged battery in, and plug a **USB stick** into one of the roboRIO's USB ports (the ones that look like a laptop's, not the device port). It should be formatted **FAT32** (Section 25.12). Write your team's name on it.
 3. Switch on the main breaker. The roboRIO's **Power** light turns green, and after about half a minute of booting, its **Status** light goes out. A Status light that stays on or keeps blinking means the roboRIO has a problem: get a mentor.
 4. Connect your laptop to the roboRIO with a USB cable.
 
@@ -431,12 +431,12 @@ If Communications stays red, check the team number first, and the cable second. 
 
 In VS Code, run **WPILib: Deploy Robot Code** from the command palette (or the `...` menu at the top right of the editor). Watch the terminal. A deploy to a roboRIO does much more than "run the program," and you can see the steps go by:
 
-1. **Build.** Gradle compiles your code and packs the fat jar (Section 26.6).
-2. **Find the roboRIO.** The deploy tool tries its addresses (Section 26.4) until one answers.
+1. **Build.** Gradle compiles your code and packs the fat jar (Section 27.6).
+2. **Find the roboRIO.** The deploy tool tries its addresses (Section 27.4) until one answers.
 3. **Check the image.** It reads the roboRIO's image version and stops if it is the wrong year.
 4. **Stop the old program.** Whatever was running on the roboRIO is stopped.
 5. **Copy.** The jar goes to `/home/lvuser`, the ARM native libraries go to their own folder, and the files in `src/main/deploy` go to `/home/lvuser/deploy`. The first deploy of a season may also copy Java itself, if the roboRIO's image did not include it, which takes a few extra minutes once.
-6. **Write the start command.** A tiny file on the roboRIO, `/home/lvuser/robotCommand`, gets the exact line that starts your program: the roboRIO's Java, a few settings, and `-jar` with the path of your jar. That is the JVM from Section 26.6, being told which jar to run.
+6. **Write the start command.** A tiny file on the roboRIO, `/home/lvuser/robotCommand`, gets the exact line that starts your program: the roboRIO's Java, a few settings, and `-jar` with the path of your jar. That is the JVM from Section 27.6, being told which jar to run.
 7. **Start it.**
 
 The terminal ends with `BUILD SUCCESSFUL`, and a **RioLog** panel opens in VS Code by itself. In it, one of the first lines is WPILib's:
@@ -449,7 +449,7 @@ Back in the Driver Station, **Robot Code** turns green. Your program is running 
 
 > **Never switch off during a deploy**
 >
-> A deploy is writing files on the roboRIO. Cut the power in the middle, and a half-written file can damage the roboRIO's file system, badly enough that the only fix is to re-image it (Section 26.4). If a deploy seems stuck, wait for it to fail on its own; it times out. Then try again.
+> A deploy is writing files on the roboRIO. Cut the power in the middle, and a half-written file can damage the roboRIO's file system, badly enough that the only fix is to re-image it (Section 27.4). If a deploy seems stuck, wait for it to fail on its own; it times out. Then try again.
 
 ### Step 4: Enable it (nothing will move)
 
@@ -462,9 +462,9 @@ That is a complete round trip: code built on your laptop, shipped to the robot, 
 | What you see | What it usually means |
 |---|---|
 | The terminal says it cannot find or connect to the roboRIO | The roboRIO is still booting, the cable is loose, or the team number in `.wpilib/wpilib_preferences.json` is wrong. Over USB, the FRC Game Tools' driver must be installed |
-| `Invalid RoboRIO Image Version!`, with the current and allowed versions | The roboRIO's image is from another year. A mentor re-images it (Section 26.4). Do not change your WPILib version to match |
+| `Invalid RoboRIO Image Version!`, with the current and allowed versions | The roboRIO's image is from another year. A mentor re-images it (Section 27.4). Do not change your WPILib version to match |
 | A compiler or test error, before any deploying starts | Not a deploy problem at all. Read it like any build error (Chapter 2's "build errors vs. deploy errors") |
-| `BUILD SUCCESSFUL`, but **Robot Code** stays red | The program started and crashed. RioLog has the stack trace. Section 26.10 is about this |
+| `BUILD SUCCESSFUL`, but **Robot Code** stays red | The program started and crashed. RioLog has the stack trace. Section 27.10 is about this |
 | Communications red in the Driver Station | The Driver Station's team number does not match the roboRIO, or another network adapter (often Wi-Fi) is confusing the laptop. Try turning the laptop's Wi-Fi off while using USB |
 
 > **Restart the code, not the robot**
@@ -475,7 +475,7 @@ Commit nothing yet: nothing has changed since your last commit. The next section
 
 ---
 
-## 26.8 Real Volts: A Subsystem for the roboRIO Itself
+## 27.8 Real Volts: A Subsystem for the roboRIO Itself
 
 In Chapter 16, you met **pretend volts**. The XRP could not measure its own battery, so the Explorer multiplied power by a fixed `6.0` and called the result volts. Because the same number was used both ways, it cancelled out. Section 16.2 warned about the catch: as batteries drain, the same power gives less real voltage, so the robot slows down, and a model measured on fresh batteries over-promises. It promised that a roboRIO could measure its battery. Here is that promise.
 
@@ -496,7 +496,7 @@ Now remember what a motor controller does with "power." `set(0.5)` means "switch
 | 11.0 V (sagging while driving) | 5.5 V |
 | 10.0 V (a tired battery, driving hard) | 5.0 V |
 
-The same line of code, three different speeds. An autonomous routine tuned on a fresh battery comes up short on a tired one, every time. The cure is to stop asking for power and ask for **volts**: "give this motor 6 volts," and let the motor controller work out the power from the battery voltage it measures, every few milliseconds. Your Explorer's code already asks for volts (`setVolts`, since Chapter 16); on the Explorer they were pretend, and on the Mini Swerve the motor controllers will make them real. Chapter 27 sets that up on the Talon FXs, and Chapter 32 measures kS, kV, and kA in real volts.
+The same line of code, three different speeds. An autonomous routine tuned on a fresh battery comes up short on a tired one, every time. The cure is to stop asking for power and ask for **volts**: "give this motor 6 volts," and let the motor controller work out the power from the battery voltage it measures, every few milliseconds. Your Explorer's code already asks for volts (`setVolts`, since Chapter 16); on the Explorer they were pretend, and on the Mini Swerve the motor controllers will make them real. Chapter 28 sets that up on the Talon FXs, and Chapter 33 measures kS, kV, and kA in real volts.
 
 > **Pretend volts, retired**
 >
@@ -517,9 +517,9 @@ A robot that browns out stops dead for a moment and then lurches on. A driver wh
 
 Reading the battery takes one line of WPILib: `RobotController.getBatteryVoltage()`. And AdvantageKit already logs it, along with dozens of other roboRIO numbers, under `SystemStats` in every log, without you writing anything. So why build a subsystem?
 
-Because of **replay** (Section 24.6). AdvantageKit's documentation is careful about this: `SystemStats` is recorded as an **output**. It is in the log for you to look at, but in a replay, `RobotController.getBatteryVoltage()` does not return the logged value. If your code ever **decides** something from the battery, like a warning, and reads it straight from `RobotController`, a replay of that decision would read your laptop's pretend battery instead, and quietly lie. That is the same trap as Section 24.9's sensor that was read outside its IO layer.
+Because of **replay** (Section 25.6). AdvantageKit's documentation is careful about this: `SystemStats` is recorded as an **output**. It is in the log for you to look at, but in a replay, `RobotController.getBatteryVoltage()` does not return the logged value. If your code ever **decides** something from the battery, like a warning, and reads it straight from `RobotController`, a replay of that decision would read your laptop's pretend battery instead, and quietly lie. That is the same trap as Section 25.9's sensor that was read outside its IO layer.
 
-The rule from Chapter 24 still holds on a new robot: **every input your code decides from comes through an IO layer.** The roboRIO is hardware, so it gets one, like every other piece of hardware on the Mini Swerve will. It is small, which makes it a good first one.
+The rule from Chapter 25 still holds on a new robot: **every input your code decides from comes through an IO layer.** The roboRIO is hardware, so it gets one, like every other piece of hardware on the Mini Swerve will. It is small, which makes it a good first one.
 
 Here is the plan, in the shape you know from the Explorer:
 
@@ -532,7 +532,7 @@ Here is the plan, in the shape you know from the Explorer:
 
 > **The RADIO light**
 >
-> The roboRIO's front panel has a row of status lights, and one of them is labeled **RADIO**. It came from a time when the roboRIO had its own Wi-Fi, which FRC never used, and WPILib now lets your code set its color: off, green, red, or orange. It is the closest thing the Mini Swerve has to the Explorer's LED from Chapter 4, so it gets the Explorer's oldest job: shining during autonomous (Chapter 18's Auto Light).
+> The roboRIO's front panel has a row of status lights, and one of them is labeled **RADIO**. It came from a time when the roboRIO had its own Wi-Fi, which FRC never used, and WPILib now lets your code set its color: off, green, red, or orange. It is the closest thing the Mini Swerve has to the Explorer's LED from Chapter 4, so it gets the Explorer's oldest job: shining during autonomous (Chapter 19's Auto Light).
 
 ### Step 1: `Constants`
 
@@ -543,24 +543,24 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
 
-/** Settings the whole Mini Swerve program shares (Chapter 20, moved to a new robot in Chapter 26). */
+/** Settings the whole Mini Swerve program shares (Chapter 21, moved to a new robot in Chapter 27). */
 public final class Constants {
     private Constants() {}
 
-    /** The three robots this program can drive (Chapter 24). */
+    /** The three robots this program can drive (Chapter 25). */
     public enum RobotMode {
         REAL,     // the real Mini Swerve: this program is running on its roboRIO
         SIM,      // the simulated Mini Swerve, on your laptop
         REPLAY    // no robot at all: every input comes from a log file
     }
 
-    // What to be when the program is NOT on a roboRIO: SIM, or REPLAY to replay a log (Chapter 26).
+    // What to be when the program is NOT on a roboRIO: SIM, or REPLAY to replay a log (Chapter 27).
     public static final RobotMode SIM_MODE = RobotMode.SIM;
 
-    // A roboRIO knows it is real, so this picks itself (Chapter 26).
+    // A roboRIO knows it is real, so this picks itself (Chapter 27).
     public static final RobotMode ROBOT_MODE = RobotBase.isReal() ? RobotMode.REAL : SIM_MODE;
 
-    /** Driver controls (Chapter 20). */
+    /** Driver controls (Chapter 21). */
     public static final class OperatorConstants {
         private OperatorConstants() {}
 
@@ -569,9 +569,9 @@ public final class Constants {
 }
 ```
 
-The enum is Chapter 24's, word for word. The difference is the last two constants. `RobotBase.isReal()` is `true` when the program is running on a roboRIO and `false` anywhere else. On the Explorer it was always `false` (the program never ran on a roboRIO), which is why `ROBOT_MODE` had to be set by hand. Here, the ternary from Chapter 8 picks `REAL` on the robot, and `SIM_MODE` on a laptop. `SIM_MODE` is the only thing you ever change by hand, and only to choose between simulating and replaying.
+The enum is Chapter 25's, word for word. The difference is the last two constants. `RobotBase.isReal()` is `true` when the program is running on a roboRIO and `false` anywhere else. On the Explorer it was always `false` (the program never ran on a roboRIO), which is why `ROBOT_MODE` had to be set by hand. Here, the ternary from Chapter 8 picks `REAL` on the robot, and `SIM_MODE` on a laptop. `SIM_MODE` is the only thing you ever change by hand, and only to choose between simulating and replaying.
 
-> **A rule from Chapter 24 gets easier**
+> **A rule from Chapter 25 gets easier**
 >
 > On the Explorer, committing `ROBOT_MODE = SIM` by mistake made your teammate's real XRP sit still. Here, that mistake is impossible: on the robot, `isReal()` wins, whatever `SIM_MODE` says. A `REPLAY` left in by mistake only changes what a teammate's **simulator** does. Commit `SIM_MODE` as `SIM` anyway, out of politeness. This is the same pattern AdvantageKit's own template projects use.
 
@@ -585,7 +585,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.RobotController.RadioLEDState;
 import org.littletonrobotics.junction.AutoLog;
 
-/** The roboRIO's own hardware: its battery reading and its RADIO light (Chapter 26). */
+/** The roboRIO's own hardware: its battery reading and its RADIO light (Chapter 27). */
 public interface RoboRioIO {
 
     /** What the roboRIO reports, read once per loop. AdvantageKit logs every field. */
@@ -603,7 +603,7 @@ public interface RoboRioIO {
 }
 ```
 
-Compare it with `DrivetrainIO` from Chapter 17, line by line. Same nested `@AutoLog` inputs class, same `default` methods that do nothing, so a replay robot can be built from an empty anonymous class (Chapter 24). `RadioLEDState` is an enum inside WPILib's `RobotController` class, with the values `kOff`, `kGreen`, `kRed`, and `kOrange` (WPILib's `k` names, Section 21.3).
+Compare it with `DrivetrainIO` from Chapter 17, line by line. Same nested `@AutoLog` inputs class, same `default` methods that do nothing, so a replay robot can be built from an empty anonymous class (Chapter 25). `RadioLEDState` is an enum inside WPILib's `RobotController` class, with the values `kOff`, `kGreen`, `kRed`, and `kOrange` (WPILib's `k` names, Section 22.3).
 
 ### Step 3: The real roboRIO, and a pretend one
 
@@ -615,7 +615,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.RobotController.RadioLEDState;
 
-/** The real roboRIO, read and written through WPILib's RobotController (Chapter 26). */
+/** The real roboRIO, read and written through WPILib's RobotController (Chapter 27). */
 public class RoboRioIOReal implements RoboRioIO {
 
     @Override
@@ -641,12 +641,12 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.RobotController.RadioLEDState;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 
-/** A pretend roboRIO, with a pretend battery, for the simulator and for tests (Chapter 26). */
+/** A pretend roboRIO, with a pretend battery, for the simulator and for tests (Chapter 27). */
 public class RoboRioIOSim implements RoboRioIO {
     // A fully charged battery at rest reads 12.7 to 13.5 volts (WPILib's battery guide).
     public static final double FRESH_BATTERY_VOLTS = 12.8;
 
-    // A roboRIO 2 browns out below this by default; a roboRIO 1, below 6.3 (Section 26.8).
+    // A roboRIO 2 browns out below this by default; a roboRIO 1, below 6.3 (Section 27.8).
     public static final double BROWNOUT_VOLTS = 6.75;
 
     private double batteryVolts = FRESH_BATTERY_VOLTS;
@@ -673,7 +673,7 @@ The pretend battery is a single number that starts fresh and stays fresh, unless
 
 > **Why not let WPILib's simulator answer?**
 >
-> WPILib's simulator has a pretend roboRIO of its own (`RoboRioSim`), and `RobotController.getBatteryVoltage()` works on a laptop: it reads that pretend roboRIO, which says 12 volts. You could use `RoboRioIOReal` for `SIM` too. But 12.0 volts is below the 12.5 that the subsystem warns about, so the simulator would always nag about a battery that does not exist. A simulation IO class is where you decide what the pretend world looks like, the same way `SensorsIOSim` decided where the Explorer's pretend tape and wall were (Chapters 24 and 25).
+> WPILib's simulator has a pretend roboRIO of its own (`RoboRioSim`), and `RobotController.getBatteryVoltage()` works on a laptop: it reads that pretend roboRIO, which says 12 volts. You could use `RoboRioIOReal` for `SIM` too. But 12.0 volts is below the 12.5 that the subsystem warns about, so the simulator would always nag about a battery that does not exist. A simulation IO class is where you decide what the pretend world looks like, the same way `SensorsIOSim` decided where the Explorer's pretend tape and wall were (Chapters 25 and 26).
 
 ### Step 4: The `RoboRio` subsystem, and alerts
 
@@ -692,7 +692,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-/** The roboRIO itself: its battery, its brownouts, and its RADIO light (Chapter 26). */
+/** The roboRIO itself: its battery, its brownouts, and its RADIO light (Chapter 27). */
 public class RoboRio extends SubsystemBase {
     // Swap the battery if it reads below this with the robot idle (WPILib's battery guide).
     public static final double LOW_BATTERY_VOLTS = 12.5;
@@ -733,7 +733,7 @@ public class RoboRio extends SubsystemBase {
         return inputs.batteryVolts;
     }
 
-    /** Whether the roboRIO is in brownout protection this loop (Section 26.8). */
+    /** Whether the roboRIO is in brownout protection this loop (Section 27.8). */
     public boolean isBrownedOut() {
         return inputs.brownedOut;
     }
@@ -766,9 +766,9 @@ Walk through it:
 - **`periodic()`** has the shape of every subsystem from Chapter 17 on: update the inputs from the IO layer, hand them to AdvantageKit with `processInputs`, then use them. Everything after `processInputs` reads `inputs`, never `RobotController`.
 - **The low battery alert** is set every loop to a fresh answer, so it comes and goes with the battery. It only looks while the robot is **disabled**, because sag while driving is normal (the table above) and a warning that flickers every time the robot accelerates teaches everyone to ignore warnings.
 - **The brownout alert** is different on purpose: it is only ever set to `true`. A brownout might last a tenth of a second, far too short for anyone to notice a light. Leaving the alert up until the program restarts means that whoever looks at the dashboard after the run finds out it happened. Chapter 10's "did it just change?" pattern would catch the moment; this one remembers it.
-- **`showColor(color)`** is a command factory, like Chapter 20's `lightTheLed()`. `startEnd` is a method every subsystem inherits (Chapter 19): it builds a command that runs one lambda when it starts and another when it ends, and that **requires** this subsystem, so two light commands cannot fight over the light (Section 18.5's one-command-per-subsystem rule).
-- **The RADIO light is an output**, so the color is recorded with `recordOutput` (Chapter 24) every loop. In a replay, `io.setRadioLed` does nothing, but the log still shows what the code asked for.
-- **Two package-private getters** exist only for tests (Chapter 22's table of who can see what): tests in `frc.robot.subsystems` can ask whether an alert is showing, and nothing else can.
+- **`showColor(color)`** is a command factory, like Chapter 21's `lightTheLed()`. `startEnd` is a method every subsystem inherits (Chapter 20): it builds a command that runs one lambda when it starts and another when it ends, and that **requires** this subsystem, so two light commands cannot fight over the light (Section 19.5's one-command-per-subsystem rule).
+- **The RADIO light is an output**, so the color is recorded with `recordOutput` (Chapter 25) every loop. In a replay, `io.setRadioLed` does nothing, but the log still shows what the code asked for.
+- **Two package-private getters** exist only for tests (Chapter 23's table of who can see what): tests in `frc.robot.subsystems` can ask whether an alert is showing, and nothing else can.
 
 > **Alerts versus prints**
 >
@@ -792,7 +792,7 @@ import frc.robot.subsystems.RoboRioIO;
 import frc.robot.subsystems.RoboRioIOReal;
 import frc.robot.subsystems.RoboRioIOSim;
 
-/** Builds the Mini Swerve's subsystems and commands, and ties them to the controller (Chapter 20). */
+/** Builds the Mini Swerve's subsystems and commands, and ties them to the controller (Chapter 21). */
 public class RobotContainer {
     private final RoboRio roboRio;
 
@@ -814,7 +814,7 @@ public class RobotContainer {
      * @param mode which robot to build
      */
     RobotContainer(RobotMode mode) {
-        // Which hardware? Decide here, once. Nothing else needs to know (Chapter 24).
+        // Which hardware? Decide here, once. Nothing else needs to know (Chapter 25).
         RoboRioIO roboRioIO = switch (mode) {
             case REAL -> new RoboRioIOReal();
             case SIM -> new RoboRioIOSim();
@@ -848,7 +848,7 @@ public class RobotContainer {
 }
 ```
 
-If you put the Explorer's final `RobotContainer` beside this one, you will see the same bones: the two constructors chained with `this(...)` (Chapter 22), the switch expression that picks each IO (Chapter 24), the Javadoc controls table and `RobotModeTriggers` (Chapter 20), a named command factory, and `getAutonomousCommand()`. A small robot program with a big program's shape. As the Mini Swerve grows, each chapter adds a subsystem and its IO to that switch, and bindings to that table.
+If you put the Explorer's final `RobotContainer` beside this one, you will see the same bones: the two constructors chained with `this(...)` (Chapter 23), the switch expression that picks each IO (Chapter 25), the Javadoc controls table and `RobotModeTriggers` (Chapter 21), a named command factory, and `getAutonomousCommand()`. A small robot program with a big program's shape. As the Mini Swerve grows, each chapter adds a subsystem and its IO to that switch, and bindings to that table.
 
 ### Step 6: `Robot`
 
@@ -868,17 +868,17 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-/** The Mini Swerve's robot program. Template shape (Chapter 20), AdvantageKit first (Chapter 17). */
+/** The Mini Swerve's robot program. Template shape (Chapter 21), AdvantageKit first (Chapter 17). */
 public class Robot extends LoggedRobot {
     private final RobotContainer robotContainer;
     private Command autonomousCommand = Commands.none();
 
     public Robot() {
-        // AdvantageKit first, before anything else is created (Section 17.6).
+        // AdvantageKit first, before anything else is created (Section 17.3).
         Logger.recordMetadata("ProjectName", "Mini Swerve");
         Logger.recordMetadata("RobotMode", Constants.ROBOT_MODE.name());
 
-        // Which code made this log (Chapter 25): the commit, and whether it had uncommitted changes.
+        // Which code made this log (Chapter 26): the commit, and whether it had uncommitted changes.
         Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
         Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
         Logger.recordMetadata("GitDirty", switch (BuildConstants.DIRTY) {
@@ -889,7 +889,7 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
 
         if (Constants.ROBOT_MODE == RobotMode.REPLAY) {
-            // Replay (Chapter 24): take every input from a log, as fast as the laptop can.
+            // Replay (Chapter 25): take every input from a log, as fast as the laptop can.
             setUseTiming(false);
             String logPath = LogFileUtil.findReplayLog();
             Logger.setReplaySource(new WPILOGReader(logPath));
@@ -926,7 +926,7 @@ public class Robot extends LoggedRobot {
 }
 ```
 
-Most of this is copied, and that is the point. The metadata lines are Chapter 25's. The replay branch is Chapter 24's, unchanged. And the `else` branch is Chapter 17's two lines, **unchanged**, even though this program writes its log somewhere completely different. How? Because `WPILOGWriter` checks where it is running. Inside AdvantageKit's source, the no-argument constructor picks its folder like this:
+Most of this is copied, and that is the point. The metadata lines are Chapter 26's. The replay branch is Chapter 25's, unchanged. And the `else` branch is Chapter 17's two lines, **unchanged**, even though this program writes its log somewhere completely different. How? Because `WPILOGWriter` checks where it is running. Inside AdvantageKit's source, the no-argument constructor picks its folder like this:
 
 ```java
 this(RobotBase.isSimulation() ? defaultPathSim : defaultPathRio, ...);
@@ -934,7 +934,7 @@ this(RobotBase.isSimulation() ? defaultPathSim : defaultPathRio, ...);
 
 `defaultPathRio` is `"/U/logs"`, the USB stick, and `defaultPathSim` is `"logs"`, your project folder. The library made the decision for you, with the same question your `Constants` asks. That is what good library code looks like: the code that uses it does not have to change when it moves to a new robot.
 
-The template's other methods (`disabledInit`, `teleopPeriodic`, and the rest) can be deleted; `LoggedRobot` gives every one of them an empty body (Chapter 19's inherited methods). Keep the ones you use.
+The template's other methods (`disabledInit`, `teleopPeriodic`, and the rest) can be deleted; `LoggedRobot` gives every one of them an empty body (Chapter 20's inherited methods). Keep the ones you use.
 
 ### Step 7: Simulate first
 
@@ -944,32 +944,32 @@ The terminal (not RioLog: this program is on your laptop) shows `Robot mode: SIM
 
 ### Step 8: Deploy, and watch a real battery
 
-Back to the robot, on blocks, with the USB stick in. Deploy. RioLog shows the program starting, then AdvantageKit's line naming its log file on the USB stick, then your own `Robot mode: REAL`. If the line about the log file is missing and the Driver Station shows an AdvantageKit error about the log file, the USB stick is missing, unreadable, or not FAT32 (Section 26.11).
+Back to the robot, on blocks, with the USB stick in. Deploy. RioLog shows the program starting, then AdvantageKit's line naming its log file on the USB stick, then your own `Robot mode: REAL`. If the line about the log file is missing and the Driver Station shows an AdvantageKit error about the log file, the USB stick is missing, unreadable, or not FAT32 (Section 27.11).
 
 Now three tests on the real robot:
 
 1. **Autonomous.** Say "Enabling!", pick **Autonomous** in the Driver Station, and enable. The RADIO light on the roboRIO turns **green**. Disable: it goes off.
 2. **Teleop.** Plug in your controller (check **Joysticks** is green and the controller is in slot 0 on the **USB Devices** tab, Section 8.2). Enable in **TeleOperated**, hold A: **orange**. Let go: off.
-3. **The battery.** With the robot disabled, compare three numbers: the voltage in the Driver Station, `RoboRio/BatteryVolts` in AdvantageScope (**File** > **Connect to Robot**; Section 26.11 sets the address), and, if your team has one, a voltmeter or battery tester on the battery itself. The first two should agree to a few hundredths of a volt; the third will read a little higher, because it is measuring the battery with less load on it. Write all three in your notebook.
+3. **The battery.** With the robot disabled, compare three numbers: the voltage in the Driver Station, `RoboRio/BatteryVolts` in AdvantageScope (**File** > **Connect to Robot**; Section 27.11 sets the address), and, if your team has one, a voltmeter or battery tester on the battery itself. The first two should agree to a few hundredths of a volt; the third will read a little higher, because it is measuring the battery with less load on it. Write all three in your notebook.
 
-If your battery happens to be tired, the Elastic dashboard (Section 26.11) or AdvantageScope will show the yellow **Battery low** alert. Swap the battery and watch the alert go away.
+If your battery happens to be tired, the Elastic dashboard (Section 27.11) or AdvantageScope will show the yellow **Battery low** alert. Swap the battery and watch the alert go away.
 
 Commit:
 
 ```bash
 git add .
-git commit -m "Ch26: RoboRio subsystem with an IO layer, battery alerts, and the RADIO light"
+git commit -m "Ch27: RoboRio subsystem with an IO layer, battery alerts, and the RADIO light"
 ```
 
 > **The first real subsystem is the smallest**
 >
-> `RoboRio` is tiny, and that is deliberate. It is the whole Chapter 17 pattern (interface, real IO, sim IO, replay IO, subsystem, outputs, alerts) on hardware that cannot hurt anyone and cannot be wired backwards. In Chapter 27 you will build the same pattern around eight motor controllers on CAN, and every piece will already be familiar. Only the hardware will be new.
+> `RoboRio` is tiny, and that is deliberate. It is the whole Chapter 17 pattern (interface, real IO, sim IO, replay IO, subsystem, outputs, alerts) on hardware that cannot hurt anyone and cannot be wired backwards. In Chapter 28 you will build the same pattern around eight motor controllers on CAN, and every piece will already be familiar. Only the hardware will be new.
 
 ---
 
-## 26.9 Tests and CI Come Along
+## 27.9 Tests and CI Come Along
 
-The Explorer had 38 tests. They stay with the Explorer, because the code they test does. The Mini Swerve starts its own collection today, with the same tools and the same habits from Chapter 22: JUnit, HALSim, Arrange/Act/Assert, sentence-style names, and red first.
+The Explorer had 38 tests. They stay with the Explorer, because the code they test does. The Mini Swerve starts its own collection today, with the same tools and the same habits from Chapter 23: JUnit, HALSim, Arrange/Act/Assert, sentence-style names, and red first.
 
 ### The subsystem's tests
 
@@ -1065,14 +1065,14 @@ class RoboRioTest {
 }
 ```
 
-Most of this is Chapter 22 again: `HAL.initialize` before anything touches WPILib, `unregisterAllSubsystems()` after each test so the next test starts with a clean scheduler, and `DriverStationSim` to pretend the robot is enabled. Two things are new:
+Most of this is Chapter 23 again: `HAL.initialize` before anything touches WPILib, `unregisterAllSubsystems()` after each test so the next test starts with a clean scheduler, and `DriverStationSim` to pretend the robot is enabled. Two things are new:
 
 - **The tests call `periodic()` themselves.** A subsystem's `periodic()` is a public method like any other; the scheduler is just its usual caller. Calling it directly, once, is the simplest way to say "one loop goes by."
-- **The last test calls `initialize()` and `end(false)` on a command directly**, instead of scheduling it. For a command this simple (one thing at the start, one at the end), that tests exactly what matters without a scheduler, an enabled Driver Station, or a clock. `RoboRioSim.getRadioLEDState()` asks WPILib's pretend roboRIO what color its RADIO light is, the same way Chapter 22's course test asked the pretend LED.
+- **The last test calls `initialize()` and `end(false)` on a command directly**, instead of scheduling it. For a command this simple (one thing at the start, one at the end), that tests exactly what matters without a scheduler, an enabled Driver Station, or a clock. `RoboRioSim.getRadioLEDState()` asks WPILib's pretend roboRIO what color its RADIO light is, the same way Chapter 23's course test asked the pretend LED.
 
 ### The autonomous test
 
-Create `src/test/java/frc/robot/AutoLightTest.java`. This one builds the whole `RobotContainer`, the way Chapter 22's course test did, and checks that autonomous shows green:
+Create `src/test/java/frc/robot/AutoLightTest.java`. This one builds the whole `RobotContainer`, the way Chapter 23's course test did, and checks that autonomous shows green:
 
 ```java
 package frc.robot;
@@ -1124,11 +1124,11 @@ class AutoLightTest {
 }
 ```
 
-Run the tests (**WPILib: Test Robot Code**, or just build): **6 tests, all green**. Then do what Chapter 22 taught you never to skip: make one fail on purpose. Change `LOW_BATTERY_VOLTS` to `12.0`, run the tests, and read the failure: `aLowBatteryAtRestRaisesTheWarning` fails, because 12.2 volts is no longer "low." Put it back to `12.5`, and they are green again.
+Run the tests (**WPILib: Test Robot Code**, or just build): **6 tests, all green**. Then do what Chapter 23 taught you never to skip: make one fail on purpose. Change `LOW_BATTERY_VOLTS` to `12.0`, run the tests, and read the failure: `aLowBatteryAtRestRaisesTheWarning` fails, because 12.2 volts is no longer "low." Put it back to `12.5`, and they are green again.
 
 > **Where the one-container rule went**
 >
-> In Chapter 22, only one test could build the Explorer's whole `RobotContainer`, because the XRP's motors and sensors could only be created once per test run. `RoboRioIOSim` creates no hardware objects at all, so `AutoLightTest` can build `RobotContainer(RobotMode.SIM)` freely, and so could other tests. Keep an eye on that as the Mini Swerve grows. The moment a simulation IO class creates something WPILib only allows once, the old rule comes back, and the error will look like Chapter 10's `already allocated`.
+> In Chapter 23, only one test could build the Explorer's whole `RobotContainer`, because the XRP's motors and sensors could only be created once per test run. `RoboRioIOSim` creates no hardware objects at all, so `AutoLightTest` can build `RobotContainer(RobotMode.SIM)` freely, and so could other tests. Keep an eye on that as the Mini Swerve grows. The moment a simulation IO class creates something WPILib only allows once, the old rule comes back, and the error will look like Chapter 10's `already allocated`.
 
 ### CI, unchanged
 
@@ -1136,7 +1136,7 @@ Push your branch:
 
 ```bash
 git add .
-git commit -m "Ch26: Tests for the RoboRio subsystem and the autonomous light"
+git commit -m "Ch27: Tests for the RoboRio subsystem and the autonomous light"
 git push -u origin roborio-setup
 ```
 
@@ -1144,7 +1144,7 @@ On GitHub, open the **Actions** tab. The workflow you copied from the Explorer r
 
 ---
 
-## 26.10 New Java: When Code Throws on a Real Robot
+## 27.10 New Java: When Code Throws on a Real Robot
 
 In Chapter 10, you learned to read **exceptions**: the JVM's way of saying "I cannot do this line," with a type, a message, and a stack trace pointing at the line. On the Explorer, an exception stopped a program on your laptop, and you fixed it and ran again. Time to find out what one does to a real robot, while it is safely on blocks.
 
@@ -1159,9 +1159,9 @@ git checkout -b crash-drill
 In `RobotContainer.configureBindings()`, add a binding that throws an exception when you press B. You need one import, `edu.wpi.first.wpilibj2.command.Commands`:
 
 ```java
-// CRASH DRILL (Chapter 26). Never merge this.
+// CRASH DRILL (Chapter 27). Never merge this.
 controller.b().and(RobotModeTriggers.teleop()).onTrue(Commands.runOnce(() -> {
-    throw new IllegalStateException("Crash drill: this one is on purpose (Chapter 26)");
+    throw new IllegalStateException("Crash drill: this one is on purpose (Chapter 27)");
 }));
 ```
 
@@ -1173,7 +1173,7 @@ Deploy. Robot on blocks, say the word, enable TeleOperated, and press B. Watch t
 2. RioLog (and the Driver Station's message box) shows something like this:
 
 ```
-Unhandled exception: java.lang.IllegalStateException: Crash drill: this one is on purpose (Chapter 26)
+Unhandled exception: java.lang.IllegalStateException: Crash drill: this one is on purpose (Chapter 27)
 	at frc.robot.RobotContainer.lambda$configureBindings$0(RobotContainer.java:58)
 	at edu.wpi.first.wpilibj2.command. ... (several lines from WPILib's scheduler)
 	...
@@ -1185,7 +1185,7 @@ The startCompetition() method (or methods called by it) should have handled the 
 
 3. A few seconds later, the roboRIO starts your program again by itself. RioLog shows `********** Robot program starting **********`, then `Robot mode: REAL`, and **Robot Code** turns green. The robot is **disabled**, and stays that way until someone enables it.
 
-Read the stack trace the Chapter 10 way: the exception type and message, then the first line that names `frc.robot`. That is your lambda (`lambda$configureBindings$0`, Chapter 18), at the line of the `throw`. The rest is WPILib's scheduler, which called it.
+Read the stack trace the Chapter 10 way: the exception type and message, then the first line that names `frc.robot`. That is your lambda (`lambda$configureBindings$0`, Chapter 19), at the line of the `throw`. The rest is WPILib's scheduler, which called it.
 
 Now picture it in a match. The robot is halfway across the field in autonomous, a bug throws, and the robot goes dead. By the time the program is back, a 15-second autonomous could be over, and your robot has to be enabled again before teleop can use it. Nothing about the robot was broken. One line of code was.
 
@@ -1296,7 +1296,7 @@ try {
 isOpen = true;
 ```
 
-Opening a file can throw an `IOException`, a checked exception, and on a roboRIO the most likely reason is the one Section 24.12 warned about: no USB stick. AdvantageKit's authors decided what the robot should do then, and it is a good decision: **report it** to the Driver Station, where a person will see it, then **carry on without a log**. A robot that cannot write its log can still play the match. A robot that crashed because it could not write its log cannot. That is a failure from **outside** the program, handled in the way that keeps the robot safe and tells a person.
+Opening a file can throw an `IOException`, a checked exception, and on a roboRIO the most likely reason is the one Section 25.12 warned about: no USB stick. AdvantageKit's authors decided what the robot should do then, and it is a good decision: **report it** to the Driver Station, where a person will see it, then **carry on without a log**. A robot that cannot write its log can still play the match. A robot that crashed because it could not write its log cannot. That is a failure from **outside** the program, handled in the way that keeps the robot safe and tells a person.
 
 ### Step 5: When not to catch
 
@@ -1309,10 +1309,10 @@ The rules this book follows:
 1. **Catch only what you can handle.** "Handle" means you can do something sensible: use a default, try again, carry on without a feature. If you cannot say what the robot should do instead, do not catch it.
 2. **Never catch to hide.** An empty `catch` block (`catch (Exception e) {}`) is almost always a bug waiting to happen. At the very least, report what happened, the way AdvantageKit does, so a person finds out.
 3. **Catch checked exceptions near where they happen.** Opening a file, reading a network: wrap that one call, not the whole method.
-4. **Let bugs crash on the bench.** Find them with tests (Chapter 22) and simulation, so they never reach a match. That is the real defense against a crash at a competition, and it is the one you have been building since Chapter 22.
+4. **Let bugs crash on the bench.** Find them with tests (Chapter 23) and simulation, so they never reach a match. That is the real defense against a crash at a competition, and it is the one you have been building since Chapter 23.
 5. **When something must keep the robot safe, make the fallback safe.** If you ever do catch an exception around hardware, the "instead" must be the safe thing: motors stopped, not motors left running.
 
-Today, the Mini Swerve has **zero** `try` blocks, and that is correct: it has nothing that talks to the world outside the program except through WPILib and AdvantageKit, which already catch what they should. The first one you write will be in Chapter 31, where PathPlanner reads your robot's settings from a file with a method declared `throws IOException, ParseException`. The compiler will insist on a `try`, and now you will know what to put in the `catch`.
+Today, the Mini Swerve has **zero** `try` blocks, and that is correct: it has nothing that talks to the world outside the program except through WPILib and AdvantageKit, which already catch what they should. The first one you write will be in Chapter 32, where PathPlanner reads your robot's settings from a file with a method declared `throws IOException, ParseException`. The compiler will insist on a `try`, and now you will know what to put in the `catch`.
 
 > **Exceptions, in one sentence**
 >
@@ -1320,15 +1320,15 @@ Today, the Mini Swerve has **zero** `try` blocks, and that is correct: it has no
 
 ---
 
-## 26.11 Logs Live on the Robot Now
+## 27.11 Logs Live on the Robot Now
 
-Section 24.12 previewed this, and now it is real: the Mini Swerve's program writes its log on the robot, on the USB stick.
+Section 25.12 previewed this, and now it is real: the Mini Swerve's program writes its log on the robot, on the USB stick.
 
 ### The USB stick
 
 Every run with a USB stick in the roboRIO writes an `akit_` file to a `logs` folder on the stick. When a run starts, RioLog shows AdvantageKit's line `[AdvantageKit] Logging to "/U/logs/..."` with the file name. `/U` is the roboRIO's name for the USB stick, the way `C:` is a drive name on Windows.
 
-If there is no stick, or it is not formatted FAT32, the robot still runs, and the Driver Station shows AdvantageKit's error, `[AdvantageKit] Failed to open output log file.`: the `catch` from Section 26.10, doing its job. The run is not logged. Make "is the stick in?" part of your team's routine every time the robot is powered on, along with "is the battery charged?" Chapter 39's competition checklist will make it formal.
+If there is no stick, or it is not formatted FAT32, the robot still runs, and the Driver Station shows AdvantageKit's error, `[AdvantageKit] Failed to open output log file.`: the `catch` from Section 27.10, doing its job. The run is not logged. Make "is the stick in?" part of your team's routine every time the robot is powered on, along with "is the battery charged?" Chapter 40's competition checklist will make it formal.
 
 > **Do not pull the stick while the robot is on**
 >
@@ -1338,26 +1338,26 @@ If there is no stick, or it is not formatted FAT32, the robot still runs, and th
 
 In AdvantageScope, first tell it where your robot is: open the preferences (**App** > **Show Preferences...** on Windows, **AdvantageScope** > **Settings...** on a Mac), and set **Robot Address** to your roboRIO's `10.TE.AM.2` address (for team 3415, `10.34.15.2`). While you are on a USB cable, also click **File** > **Use USB roboRIO Address**, which switches AdvantageScope to `172.22.11.2` until you close it. Then:
 
-- **File** > **Download Logs...** connects to the roboRIO and lists its logs, newest first. Select the ones you want, and save them to your laptop. Open one like any log from Chapter 24.
+- **File** > **Download Logs...** connects to the roboRIO and lists its logs, newest first. Select the ones you want, and save them to your laptop. Open one like any log from Chapter 25.
 - **File** > **Connect to Robot** > **Default** shows the robot's data **live**, the same way **Connect to Simulator** did for the Explorer.
 
-Open the log from Section 26.8's tests. On the timeline, find the green autonomous stretch and the blue teleop stretch. Graph `RoboRio` > `BatteryVolts`. Then find the Explorer's old friends: `RealOutputs` > `RoboRio` > `RadioLed` going `kGreen` in autonomous and `kOrange` while you held A; the metadata tab with `GitSHA`, `GitDirty`, and `RobotMode` saying `REAL`. And one table the Explorer's logs never had: `SystemStats`, with the roboRIO's own reading of `BatteryVoltage`, `BrownedOut`, its CPU temperature, and the CAN bus. That table is all **outputs**, recorded by AdvantageKit for you to look at. Your `RoboRio/BatteryVolts` is an **input**, recorded for replay. They should show the same battery. Now you know why both exist.
+Open the log from Section 27.8's tests. On the timeline, find the green autonomous stretch and the blue teleop stretch. Graph `RoboRio` > `BatteryVolts`. Then find the Explorer's old friends: `RealOutputs` > `RoboRio` > `RadioLed` going `kGreen` in autonomous and `kOrange` while you held A; the metadata tab with `GitSHA`, `GitDirty`, and `RobotMode` saying `REAL`. And one table the Explorer's logs never had: `SystemStats`, with the roboRIO's own reading of `BatteryVoltage`, `BrownedOut`, its CPU temperature, and the CAN bus. That table is all **outputs**, recorded by AdvantageKit for you to look at. Your `RoboRio/BatteryVolts` is an **input**, recorded for replay. They should show the same battery. Now you know why both exist.
 
 If you did the crash drill with a stick in, find that log too, and open its **Console**: the stack trace is there, written by `LoggedRobot` on the way out.
 
 ### The dashboard, on a new robot
 
-Chapter 23 promised that the dashboard would come along with one change, and here it is. Open Elastic, click the gear, and set **IP Address Mode** to **Driver Station**: Elastic asks the Driver Station where the robot is, so it follows whatever connection the Driver Station is using. (On the Explorer, it was **localhost**, because the program ran on your laptop.) The bottom of the window turns green.
+Chapter 24 promised that the dashboard would come along with one change, and here it is. Open Elastic, click the gear, and set **IP Address Mode** to **Driver Station**: Elastic asks the Driver Station where the robot is, so it follows whatever connection the Driver Station is using. (On the Explorer, it was **localhost**, because the program ran on your laptop.) The bottom of the window turns green.
 
-The Mini Swerve has almost nothing to show yet, which makes it a good time to start its dashboard properly. Make a **Driver** tab with two widgets: the **Alerts** (find `SmartDashboard` > `Alerts` and show it as an Alerts widget), and the battery voltage. Then do Section 23.4's last steps: save, and export the layout to `src/main/deploy/elastic-layout.json`. Remember Section 26.5's `deploy` block: that file now gets copied to the robot on every deploy, and from there, Elastic's **File** > **Download From Robot** can fetch it (Chapter 23's Practice showed how). Commit the layout on a branch, through a pull request.
+The Mini Swerve has almost nothing to show yet, which makes it a good time to start its dashboard properly. Make a **Driver** tab with two widgets: the **Alerts** (find `SmartDashboard` > `Alerts` and show it as an Alerts widget), and the battery voltage. Then do Section 24.4's last steps: save, and export the layout to `src/main/deploy/elastic-layout.json`. Remember Section 27.5's `deploy` block: that file now gets copied to the robot on every deploy, and from there, Elastic's **File** > **Download From Robot** can fetch it (Chapter 24's Practice showed how). Commit the layout on a branch, through a pull request.
 
 > **The Driver Station keeps its own log**
 >
-> Separately from your code, the Driver Station records every match on the laptop: battery voltage, the roboRIO's CPU, every mode change, and every brownout, drawn as orange lines. Open it with the **FRC Driver Station Log File Viewer** that comes with the Game Tools. When the Mini Swerve does something strange in Chapter 27, check both: your AdvantageKit log tells you what your code thought, and the Driver Station log tells you what the robot and the network did.
+> Separately from your code, the Driver Station records every match on the laptop: battery voltage, the roboRIO's CPU, every mode change, and every brownout, drawn as orange lines. Open it with the **FRC Driver Station Log File Viewer** that comes with the Game Tools. When the Mini Swerve does something strange in Chapter 28, check both: your AdvantageKit log tells you what your code thought, and the Driver Station log tells you what the robot and the network did.
 
 ---
 
-## 26.12 What Survived the Move
+## 27.12 What Survived the Move
 
 ### What you built
 
@@ -1382,13 +1382,13 @@ Most of the right column is the hard part of robot programming, and you already 
 
 > **What comes next**
 >
-> The Mini Swerve has eight motors, and none of them has turned yet. Chapter 27 opens the **CAN bus**: the pair of yellow and green wires that links the roboRIO to every Kraken, CANcoder, and the Pigeon 2, how each device gets an ID, and how to check that the right motor spins the right way, one at a time, wheels in the air. Your `RoboRio` subsystem will be watching the battery while they do. The first time a drive motor spins up, look at `RoboRio/BatteryVolts`: that dip is sag, measured for real, the thing pretend volts could never show you.
+> The Mini Swerve has eight motors, and none of them has turned yet. Chapter 28 opens the **CAN bus**: the pair of yellow and green wires that links the roboRIO to every Kraken, CANcoder, and the Pigeon 2, how each device gets an ID, and how to check that the right motor spins the right way, one at a time, wheels in the air. Your `RoboRio` subsystem will be watching the battery while they do. The first time a drive motor spins up, look at `RoboRio/BatteryVolts`: that dip is sag, measured for real, the thing pretend volts could never show you.
 
 ---
 
 ## Chapter Summary
 
-> **What you learned in Chapter 26**
+> **What you learned in Chapter 27**
 >
 > * On the Explorer, your program ran on your **laptop**. On the Mini Swerve, it runs on the **roboRIO**: a **deploy** builds one jar, copies it (and the ARM native libraries, and `src/main/deploy`) to the roboRIO, and starts it there. Prints go to **RioLog**, logs go to a **USB stick**, NetworkTables lives on the robot, and the Driver Station is the only way to enable it.
 > * A real robot needs real habits: wheels in the air for new code, a word before you enable, **Enter** to disable and the **space bar** to emergency stop, one person at the Driver Station, and careful battery handling. A roboRIO needs an **image** for this year (imaged over USB on a roboRIO 1, onto a microSD card on a roboRIO 2) and a **team number**, which also gives its addresses: `roborio-TEAM-FRC.local`, `10.TE.AM.2`, and `172.22.11.2` over USB.
@@ -1433,7 +1433,7 @@ Now change `"7"` to `null`. What happens, and why does the `catch` not help? (Hi
 
 **2. Checked or unchecked?** For each of these, decide whether it is checked or unchecked, then look it up in the Java documentation to check: `NullPointerException`, `IOException`, `IllegalArgumentException`, `ArithmeticException` (try `5 / 0` with `int`s), `FileNotFoundException`, `InterruptedException`. For each, write one sentence in `reflections.md`: if robot code met this exception, should it be caught, and what should the robot do instead?
 
-**3. Read some bytecode.** Type the `Battery` class from Section 26.6 into a scratch folder. Compile it, and print its bytecode with the JDK that WPILib installed for you. On Windows, in a terminal in that folder:
+**3. Read some bytecode.** Type the `Battery` class from Section 27.6 into a scratch folder. Compile it, and print its bytecode with the JDK that WPILib installed for you. On Windows, in a terminal in that folder:
 
 ```bash
 & "C:\Users\Public\wpilib\2026\jdk\bin\javac.exe" Battery.java
@@ -1452,20 +1452,20 @@ Now change `"7"` to `null`. What happens, and why does the `catch` not help? (Hi
 
 Move your team's code onto the Mini Swerve, without moving the robot.
 
-1. Walk around the robot with your team and a mentor, and fill in the fact sheet table (Section 26.2), with "unknown" where you do not know yet.
-2. Check the roboRIO has a 2026 image and your team number, and the radio is set up (Section 26.4). If not, ask a mentor; do not image a shared robot on your own.
-3. The owner creates the `MiniSwerve` project (Command Robot, your team number, Desktop Support on), commits, creates the GitHub repository, pushes, and adds teammates as collaborators. Teammates clone it (Section 26.5, Steps 1 to 3).
-4. On branch `roborio-setup`, delete the examples, copy in AdvantageKit, gversion, and the CI workflow, and build after each step (Section 26.5, Steps 4 to 6).
-5. Robot on blocks, battery in, USB stick in, USB cable connected. Set the Driver Station's team number, deploy the near-empty project, and see `Robot program starting` in RioLog and **Robot Code** green. Enable TeleOperated, watch the RSL blink, disable (Section 26.7).
-6. Write `Constants`, `RoboRioIO`, `RoboRioIOReal`, `RoboRioIOSim`, `RoboRio`, `RobotContainer`, and `Robot` (Section 26.8). Run them in simulation first, and check `BatteryVolts` and `RadioLed` in AdvantageScope.
+1. Walk around the robot with your team and a mentor, and fill in the fact sheet table (Section 27.2), with "unknown" where you do not know yet.
+2. Check the roboRIO has a 2026 image and your team number, and the radio is set up (Section 27.4). If not, ask a mentor; do not image a shared robot on your own.
+3. The owner creates the `MiniSwerve` project (Command Robot, your team number, Desktop Support on), commits, creates the GitHub repository, pushes, and adds teammates as collaborators. Teammates clone it (Section 27.5, Steps 1 to 3).
+4. On branch `roborio-setup`, delete the examples, copy in AdvantageKit, gversion, and the CI workflow, and build after each step (Section 27.5, Steps 4 to 6).
+5. Robot on blocks, battery in, USB stick in, USB cable connected. Set the Driver Station's team number, deploy the near-empty project, and see `Robot program starting` in RioLog and **Robot Code** green. Enable TeleOperated, watch the RSL blink, disable (Section 27.7).
+6. Write `Constants`, `RoboRioIO`, `RoboRioIOReal`, `RoboRioIOSim`, `RoboRio`, `RobotContainer`, and `Robot` (Section 27.8). Run them in simulation first, and check `BatteryVolts` and `RadioLed` in AdvantageScope.
 7. Deploy to the robot. Check: `Robot mode: REAL` in RioLog, green RADIO light in autonomous, orange while you hold A in teleop, and the battery in three places.
-8. Write `RoboRioTest` and `AutoLightTest`: **6 tests, all green**. Make one fail on purpose, then put it back (Section 26.9).
+8. Write `RoboRioTest` and `AutoLightTest`: **6 tests, all green**. Make one fail on purpose, then put it back (Section 27.9).
 9. Push, open the pull request, have a teammate review it, wait for the green check, and merge.
-10. Do the crash drill on a throwaway branch, read the crash in RioLog and in the log's Console, and delete the branch (Section 26.10).
-11. Set up AdvantageScope's robot address, download your logs, and open one. Set up Elastic with **Driver Station** mode, a Driver tab with the Alerts and the battery, and export it to `src/main/deploy/elastic-layout.json` (Section 26.11).
+10. Do the crash drill on a throwaway branch, read the crash in RioLog and in the log's Console, and delete the branch (Section 27.10).
+11. Set up AdvantageScope's robot address, download your logs, and open one. Set up Elastic with **Driver Station** mode, a Driver tab with the Alerts and the battery, and export it to `src/main/deploy/elastic-layout.json` (Section 27.11).
 12. Turn your notebook fact sheet into `docs/robot.md`, through a pull request (Collab, below).
 
-If RioLog says `Robot mode: REAL`, the RADIO light turns green in autonomous, the Actions tab shows six green tests, and AdvantageScope can open a log from the robot's USB stick, the Mini Swerve has your code on it, and you are ready for Chapter 27.
+If RioLog says `Robot mode: REAL`, the RADIO light turns green in autonomous, the Actions tab shows six green tests, and AdvantageScope can open a log from the robot's USB stick, the Mini Swerve has your code on it, and you are ready for Chapter 28.
 
 ### Reflect
 
@@ -1476,19 +1476,19 @@ Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 3. The battery voltage is already in every log under `SystemStats`. Explain why `RoboRio` reads it through an IO layer anyway, using the words **input**, **output**, and **replay**.
 4. The low battery alert only looks while the robot is disabled, and the brownout alert never turns itself off. Explain why each choice is right, and what would go wrong if they were swapped.
 5. AdvantageKit catches the `IOException` from a missing USB stick and keeps the robot running. Nobody catches the crash drill's `IllegalStateException`. Explain the difference, using the words **checked**, **unchecked**, and **bug**.
-6. Look at the "What comes along" table in Section 26.5. Pick one row that says "never copied" or "stays with the Explorer," and explain what could go wrong on the Mini Swerve if someone copied it anyway.
+6. Look at the "What comes along" table in Section 27.5. Pick one row that says "never copied" or "stays with the Explorer," and explain what could go wrong on the Mini Swerve if someone copied it anyway.
 
-If any answer feels shaky, re-read Sections 26.1, 26.6, 26.8, and 26.10.
+If any answer feels shaky, re-read Sections 27.1, 27.6, 27.8, and 27.10.
 
 ### Git
 
-The owner starts the repository on `main` (Section 26.5):
+The owner starts the repository on `main` (Section 27.5):
 
 ```bash
 git init
 git branch -M main
 git add .
-git commit -m "Ch26: New Command Robot project for the Mini Swerve"
+git commit -m "Ch27: New Command Robot project for the Mini Swerve"
 git remote add origin https://github.com/OWNER-NAME/MiniSwerve.git
 git push -u origin main
 ```
@@ -1498,15 +1498,15 @@ The setup branch, with one commit per idea:
 ```bash
 git checkout -b roborio-setup
 git add .
-git commit -m "Ch26: AdvantageKit, gversion, and CI, copied from the Explorer"
+git commit -m "Ch27: AdvantageKit, gversion, and CI, copied from the Explorer"
 git add .
-git commit -m "Ch26: RoboRio subsystem with an IO layer, battery alerts, and the RADIO light"
+git commit -m "Ch27: RoboRio subsystem with an IO layer, battery alerts, and the RADIO light"
 git add .
-git commit -m "Ch26: Tests for the RoboRio subsystem and the autonomous light"
+git commit -m "Ch27: Tests for the RoboRio subsystem and the autonomous light"
 git push -u origin roborio-setup
 ```
 
-If two teammates wrote the code together at one keyboard, add the `Co-authored-by:` trailer from Chapter 25 to the commits. The crash drill branch is never pushed:
+If two teammates wrote the code together at one keyboard, add the `Co-authored-by:` trailer from Chapter 26 to the commits. The crash drill branch is never pushed:
 
 ```bash
 git checkout -b crash-drill
@@ -1521,17 +1521,17 @@ Before every commit, check `git status` for `BuildConstants.java` (it must not b
 
 ### Collab: Three First Pull Requests
 
-A team repository works when everyone on the team has used it, not just the owner. Before Chapter 27, each teammate opens one pull request, and a **different** teammate reviews it:
+A team repository works when everyone on the team has used it, not just the owner. Before Chapter 28, each teammate opens one pull request, and a **different** teammate reviews it:
 
 - **The fact sheet.** Turn the notebook table into `docs/robot.md`, with every row you know and "unknown" for the rest. The reviewer checks at least three rows against the real robot.
-- **The robot rules.** Copy the Explorer's `CONTRIBUTING.md` (Chapter 11) and add a section for the shared robot: how your team books robot time, your enable word, the safety rules from Section 26.3, "USB stick in, battery charged" before every session, and "never merge red." The reviewer checks it against what your mentors actually expect.
-- **The dashboard.** The Elastic layout from Section 26.11, exported to `src/main/deploy/elastic-layout.json`. The reviewer deploys it, opens Elastic on their own laptop, and loads the layout from the robot.
+- **The robot rules.** Copy the Explorer's `CONTRIBUTING.md` (Chapter 11) and add a section for the shared robot: how your team books robot time, your enable word, the safety rules from Section 27.3, "USB stick in, battery charged" before every session, and "never merge red." The reviewer checks it against what your mentors actually expect.
+- **The dashboard.** The Elastic layout from Section 27.11, exported to `src/main/deploy/elastic-layout.json`. The reviewer deploys it, opens Elastic on their own laptop, and loads the layout from the robot.
 
 If there are only two of you, split the third one. Afterward, write two sentences in `reflections.md`: which review found something the author missed, and what was it?
 
 ### Explore
 
-- Read WPILib's **roboRIO Brownout** page (link below). It suggests making a **power budget** for a robot. Estimate one for the Mini Swerve: if each of four drive motors can pull 40 amps while accelerating hard, what does that add up to, and what would it do to the battery's voltage? What could code do about it? (Chapter 27 has an answer called a current limit.)
+- Read WPILib's **roboRIO Brownout** page (link below). It suggests making a **power budget** for a robot. Estimate one for the Mini Swerve: if each of four drive motors can pull 40 amps while accelerating hard, what does that add up to, and what would it do to the battery's voltage? What could code do about it? (Chapter 28 has an answer called a current limit.)
 - Open the **FRC Driver Station Log File Viewer** and find the log from your crash drill. Can you see the moment the robot code was lost, and how long it took to come back?
 - Read AdvantageKit's **template projects** page, and open the **TalonFX Swerve** template's `Robot.java` on GitHub. Compare it with yours, line by line. What is the same? What does it do that yours does not yet?
 - WPILib 2027 is built for **SystemCore**. Find WPILib's page about what changed from the roboRIO to SystemCore, and list two things in this chapter that would be different on a SystemCore robot.
@@ -1552,4 +1552,4 @@ If there are only two of you, split the third one. Afterward, write two sentence
 
 ---
 
-*Next up, Chapter 27: CAN Bus and Real Motor Controllers. The Mini Swerve's code is on the robot; now you wire it to the motors, give every device on the CAN bus an ID, and spin each motor, alone, wheels in the air, until you trust which way it turns.*
+*Next up, Chapter 28: CAN Bus and Real Motor Controllers. The Mini Swerve's code is on the robot; now you wire it to the motors, give every device on the CAN bus an ID, and spin each motor, alone, wheels in the air, until you trust which way it turns.*

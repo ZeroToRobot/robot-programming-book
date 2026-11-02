@@ -1,10 +1,10 @@
-# Chapter 21: State Machines
+# Chapter 22: State Machines
 
-In Chapter 20 the Explorer became a fully command-based robot. `RobotContainer` declares every part, every button, and the obstacle course, and the course itself is one command: a sequence of steps with the LED running alongside it. At the end, you wrote down a control you wish the Explorer had. This chapter builds one that many drivers ask for first: **hold a button over a line of tape, and the robot follows the line by itself.** The same command becomes leg 3 of the obstacle course.
+In Chapter 21 the Explorer became a fully command-based robot. `RobotContainer` declares every part, every button, and the obstacle course, and the course itself is one command: a sequence of steps with the LED running alongside it. At the end, you wrote down a control you wish the Explorer had. This chapter builds one that many drivers ask for first: **hold a button over a line of tape, and the robot follows the line by itself.** The same command becomes leg 3 of the obstacle course.
 
-Following a line sounds like a job for a few `if` statements. Left sensor sees black, steer left; right sensor sees black, steer right. You will try exactly that in Section 21.1, and you will find the moment it breaks: when both sensors see white, the right thing to do depends on **what happened before**. A robot that needs to remember what it was doing, and act differently because of it, needs a **state machine**.
+Following a line sounds like a job for a few `if` statements. Left sensor sees black, steer left; right sensor sees black, steer right. You will try exactly that in Section 22.1, and you will find the moment it breaks: when both sensors see white, the right thing to do depends on **what happened before**. A robot that needs to remember what it was doing, and act differently because of it, needs a **state machine**.
 
-You have built state machines three times already without the name: the `autoStep` switch in Chapter 12, the `wasBlocked` field in Chapter 10, and the command sequence in Chapter 20. This chapter names the idea, shows you how to draw one before you code it, and builds a line follower whose insides are a state machine. Then it shows that a command group and a state machine are two ways of writing the same thing, and how to choose between them.
+You have built state machines three times already without the name: the `autoStep` switch in Chapter 12, the `wasBlocked` field in Chapter 10, and the command sequence in Chapter 21. This chapter names the idea, shows you how to draw one before you code it, and builds a line follower whose insides are a state machine. Then it shows that a command group and a state machine are two ways of writing the same thing, and how to choose between them.
 
 On the Java side, you finally write your own **enum**, the type Chapter 12 promised when it numbered the autonomous steps with `int`s and Chapter 16 previewed with WPILib's `SysIdRoutineLog.State`. You will also learn the **switch expression**, the arrow-shaped `switch` that hands back a value and refuses to compile if you forget a case. Together, they make a state machine that the compiler helps you keep correct.
 
@@ -12,7 +12,7 @@ You will need your XRP, the course from Chapter 12, and about a meter more of bl
 
 ---
 
-## 21.1 A Line That Bends
+## 22.1 A Line That Bends
 
 Lay a strip of black electrical tape on your floor, a meter or so long, with a gentle curve in it. Put the Explorer on one end, with the two reflectance sensors over the tape, and think about how you would drive it along by hand. You would watch where the tape goes, and steer to keep the robot on top of it.
 
@@ -54,7 +54,7 @@ That is the whole problem of this chapter, in one sentence: **the right action d
 
 ---
 
-## 21.2 States, Transitions, and Actions
+## 22.2 States, Transitions, and Actions
 
 A **state machine** (in full, a **finite state machine**) is a way of describing something that can be in one of a fixed list of situations, and moves between them according to rules. It has three parts:
 
@@ -100,15 +100,15 @@ That is a state machine with two states, "clear" and "blocked." The transitions 
 
 **`autoStep`, in Chapter 12.** The autonomous routine kept a number for which step it was on, a `switch` to do each step's work, and code that moved to the next step when a step was done. Chapter 12 said so in a callout: "Your steps are its **states**, and conditions like 'distance reached 0.5 m' are its **transitions**."
 
-**The course, in Chapter 20.** `Commands.sequence(...)` holds a list of commands and an index of which one is running, and moves to the next one when the current one finishes. Chapter 20 showed you its source. That is the same machine as `autoStep`, written once, inside WPILib. Section 21.7 comes back to this, because it is the key to the whole chapter.
+**The course, in Chapter 21.** `Commands.sequence(...)` holds a list of commands and an index of which one is running, and moves to the next one when the current one finishes. Chapter 21 showed you its source. That is the same machine as `autoStep`, written once, inside WPILib. Section 22.7 comes back to this, because it is the key to the whole chapter.
 
 > **State machines on a competition robot**
 >
-> On the Explorer, there is one subsystem and one line follower. A competition robot is full of state machines. An intake is "empty," "intaking," "holding a game piece," or "ejecting," and a beam-break sensor moves it from intaking to holding. A shooter is "idle," "spinning up," "at speed," and "firing," and must never fire before it is at speed. Many teams go further and write one state machine for the whole robot, often called a **superstructure**, so that the arm, elevator, and intake can never be told to do two things that collide. Chapter 34 builds the competition robot's mechanisms, and their state machines look exactly like the one you will draw in Section 21.5.
+> On the Explorer, there is one subsystem and one line follower. A competition robot is full of state machines. An intake is "empty," "intaking," "holding a game piece," or "ejecting," and a beam-break sensor moves it from intaking to holding. A shooter is "idle," "spinning up," "at speed," and "firing," and must never fire before it is at speed. Many teams go further and write one state machine for the whole robot, often called a **superstructure**, so that the arm, elevator, and intake can never be told to do two things that collide. Chapter 35 builds the competition robot's mechanisms, and their state machines look exactly like the one you will draw in Section 22.5.
 
 ---
 
-## 21.3 New Java: Enums
+## 22.3 New Java: Enums
 
 Before you code a state machine, you need a way to write down its states. Chapter 12 used numbers:
 
@@ -167,7 +167,7 @@ Walk through what changed compared to `int` steps:
 - **It prints its own name.** `"The light is " + light` gives `The light is GREEN`, not a number. That alone makes enums worth it: every log line says what it means.
 - **There is no arithmetic.** `TrafficLight.RED + 1` does not compile. If you want "the next one," you have to say what "next" means, which is a good thing (you will, in a moment).
 
-The constants are written with the type's name in front, `TrafficLight.RED`, the same way you write a `static final` constant with its class name in front. If the enum is declared **inside** another class, its full name includes that class too, exactly like `SysIdRoutineLog.State` and the nested `Constants` groups from Chapter 20. The line follower's enum will live inside its command, as `FollowLine.State`.
+The constants are written with the type's name in front, `TrafficLight.RED`, the same way you write a `static final` constant with its class name in front. If the enum is declared **inside** another class, its full name includes that class too, exactly like `SysIdRoutineLog.State` and the nested `Constants` groups from Chapter 21. The line follower's enum will live inside its command, as `FollowLine.State`.
 
 ### `switch` on an enum
 
@@ -246,7 +246,7 @@ Walk through it:
 - **`RED(30.0)`** creates the `RED` object by calling the constructor with `30.0`. Each constant is a constructor call that Java makes for you, once.
 - **The semicolon after `GREEN(25.0)`** ends the list of constants. It is required whenever the enum has anything after the list, and forgetting it is the most common enum compile error.
 - **`private final double durationSeconds`** is an ordinary field. Each of the three objects has its own copy. It is `final`, so the objects never change: an enum's constants should be as constant as their name says (the immutability idea from Chapter 14).
-- **The constructor has no `public`.** An enum's constructor is always `private`, whether you write the word or not. Nobody outside can call it: `new TrafficLight(10.0)` is a compile error, `enum classes may not be instantiated`. That is the same idea as Chapter 20's holder classes, a `private` constructor so nobody can make more objects, taken one step further: Java makes exactly the objects in the list, and no others, ever.
+- **The constructor has no `public`.** An enum's constructor is always `private`, whether you write the word or not. Nobody outside can call it: `new TrafficLight(10.0)` is a compile error, `enum classes may not be instantiated`. That is the same idea as Chapter 21's holder classes, a `private` constructor so nobody can make more objects, taken one step further: Java makes exactly the objects in the list, and no others, ever.
 - **`next()`** is an ordinary method. Inside it, `this` is whichever light you called it on, so `TrafficLight.RED.next()` is `GREEN`. Its body is a new kind of `switch`, with arrows instead of colons, that hands back a value. That is the next section.
 
 > **An enum, in one sentence**
@@ -255,11 +255,11 @@ Walk through it:
 
 > **Enums you have already used**
 >
-> WPILib is full of enums. `SysIdRoutine.Direction` (`kForward`, `kReverse`) told your SysId tests which way to drive in Chapter 19. `SysIdRoutineLog.State` named the four tests in Chapter 16. Every `Command` has a `getInterruptionBehavior()` that returns an `InterruptionBehavior` enum (`kCancelSelf` or `kCancelIncoming`), which decides what happens when another command wants the same subsystem. Now that you can read an enum, open any of them in VS Code (hold Ctrl and click the name) and you will recognize the shape: a list of constants, maybe a field or two.
+> WPILib is full of enums. `SysIdRoutine.Direction` (`kForward`, `kReverse`) told your SysId tests which way to drive in Chapter 20. `SysIdRoutineLog.State` named the four tests in Chapter 16. Every `Command` has a `getInterruptionBehavior()` that returns an `InterruptionBehavior` enum (`kCancelSelf` or `kCancelIncoming`), which decides what happens when another command wants the same subsystem. Now that you can read an enum, open any of them in VS Code (hold Ctrl and click the name) and you will recognize the shape: a list of constants, maybe a field or two.
 
 ---
 
-## 21.4 New Java: Switch Expressions
+## 22.4 New Java: Switch Expressions
 
 Look again at `next()`:
 
@@ -340,7 +340,7 @@ That is why the book's rule for state machines is: **switch on the state with a 
 
 ---
 
-## 21.5 Designing the Line Follower
+## 22.5 Designing the Line Follower
 
 Now back to the robot. This section designs the line follower on paper, the way you would at a whiteboard with your team, and the next section turns the design into code almost line for line.
 
@@ -363,11 +363,11 @@ First, give the line a home. The obstacle course from Chapter 12 ends at a strip
 
 1. Find the spot on the crossbar where your robot's sensors stop at the end of leg 2. Run autonomous once and mark it with a pencil. That is where the new strip starts, so the robot lands on top of it.
 2. Lay about **0.6 meters** of black electrical tape from that spot, straight on, with the tape's edge flat and no wrinkles. Start with a straight line. Once everything works, you will add a gentle bend.
-3. Measure the strip from the crossbar to its end. That is `FOLLOW_LINE_LENGTH_METERS`, which you will type in Section 21.8.
+3. Measure the strip from the crossbar to its end. That is `FOLLOW_LINE_LENGTH_METERS`, which you will type in Section 22.8.
 
 ### Steering: how hard to turn
 
-In `FOLLOWING`, the robot drives forward and steers toward the tape. How hard should it steer? The first try in Section 21.1 had three choices: hard left, straight, or hard right. That is called **bang-bang control**, after the sound a thermostat's switch makes: fully on, or fully off. It works, but the robot wiggles back and forth across the line, because it always overcorrects.
+In `FOLLOWING`, the robot drives forward and steers toward the tape. How hard should it steer? The first try in Section 22.1 had three choices: hard left, straight, or hard right. That is called **bang-bang control**, after the sound a thermostat's switch makes: fully on, or fully off. It works, but the robot wiggles back and forth across the line, because it always overcorrects.
 
 You know a better way from Chapter 15. Measure how far off you are, and steer in **proportion** to it. The two reflectance readings give you a measurement for free:
 
@@ -383,7 +383,7 @@ Then `turnRate = STEER_KP * error`. A positive turn rate is counterclockwise, wh
 
 > **Bang-bang, P, and everything between**
 >
-> Bang-bang control is not always wrong. A robot's compressor (Chapter 36) is bang-bang on purpose: on below a pressure, off above it, because "half on" is meaningless for a pump. For anything that should move smoothly, proportional control is better, and a full PID (Chapter 15) is better still when there is a steady error to wipe out. The line follower uses P only. Its job is to stay close to the line, not to sit exactly on its center, and the line is always moving under the robot anyway.
+> Bang-bang control is not always wrong. A robot's compressor (Chapter 37) is bang-bang on purpose: on below a pressure, off above it, because "half on" is meaningless for a pump. For anything that should move smoothly, proportional control is better, and a full PID (Chapter 15) is better still when there is a steady error to wipe out. The line follower uses P only. Its job is to stay close to the line, not to sit exactly on its center, and the line is always moving under the robot anyway.
 
 Notice the error also tells you **which side the line was on**. That is the memory the robot needs when it loses the line. If the last error before the line vanished was clearly positive, the line was under the left sensor when the robot lost it, so it went off to the left. Clearly negative: right. Close to zero: the line was centered, and then gone, so it ended.
 
@@ -431,7 +431,7 @@ Read it as sentences:
 - **`END_OF_LINE` and `GAVE_UP`** have no arrows out. Once there, the follower is finished.
 - **The start:** if the robot is on the line when the follower starts, it begins in `FOLLOWING`. If it is not, there is nothing to follow, and it begins in `GAVE_UP`.
 
-Now do the check from Section 21.2: for every state, is every input covered? `FOLLOWING` has "line seen" and "line lost" (split three ways by the error). The searches have "line seen," "not yet, still turning," and "turned too far." The finished states ignore everything. Every box, every input, has exactly one arrow. That is a design you can code.
+Now do the check from Section 22.2: for every state, is every input covered? `FOLLOWING` has "line seen" and "line lost" (split three ways by the error). The searches have "line seen," "not yet, still turning," and "turned too far." The finished states ignore everything. Every box, every input, has exactly one arrow. That is a design you can code.
 
 The same table, the way you will code it, is called a **transition table**. One row per state, and the next state for each situation:
 
@@ -445,7 +445,7 @@ The same table, the way you will code it, is called a **transition table**. One 
 
 Look closely at the search's "turned more than 120 degrees" arrow. To know how far it has turned, the robot needs the heading it had **when the search began**. And to choose a search direction, it needs the **last error** while it was following. Neither of those is a state; they are numbers. Real state machines almost always have a few of these remembered values alongside the state, sometimes called **extended state**. The rule for them is the same as for the state itself: each one belongs to the state machine, is reset when the machine starts, and has a clear moment when it is set.
 
-The search heading has an especially clear moment: it is set **once, at the instant the machine enters a search state**, never while it is searching. Something done once on the way into a state is called an **entry action**. It is the same idea as a command's `initialize()`: "once, when you start, not every loop" (Section 19.6).
+The search heading has an especially clear moment: it is set **once, at the instant the machine enters a search state**, never while it is searching. Something done once on the way into a state is called an **entry action**. It is the same idea as a command's `initialize()`: "once, when you start, not every loop" (Section 20.6).
 
 > **The finished states are not a formality**
 >
@@ -453,7 +453,7 @@ The search heading has an especially clear moment: it is set **once, at the inst
 
 ---
 
-## 21.6 The `FollowLine` Command
+## 22.6 The `FollowLine` Command
 
 Now the code. The line follower is a command, because it needs the drivetrain while it runs, and its insides are the state machine you just drew. Create `FollowLine.java` in the `commands` folder. Type it, do not paste:
 
@@ -639,15 +639,15 @@ It is the longest command you have written, but every piece of it is a piece of 
 
 ### The enum: the list of states
 
-`public enum State` is written **inside** the command, so its full name is `FollowLine.State`, just like `SysIdRoutineLog.State`. It belongs here because these states only make sense for this command. It is `public` so that other code can ask the follower what state it ended in (Section 21.7 and Practice 5 do).
+`public enum State` is written **inside** the command, so its full name is `FollowLine.State`, just like `SysIdRoutineLog.State`. It belongs here because these states only make sense for this command. It is `public` so that other code can ask the follower what state it ended in (Section 22.7 and Practice 5 do).
 
-Each constant carries one fact, `done`, through the constructor: `END_OF_LINE(true)`, `FOLLOWING(false)`. The method `isDone()` reads it. That moves the question "is this a finished state?" into the list of states itself, right next to each name, where nobody adding a sixth state can miss it. The comment on each constant is the state's one-line description from the table in Section 21.5.
+Each constant carries one fact, `done`, through the constructor: `END_OF_LINE(true)`, `FOLLOWING(false)`. The method `isDone()` reads it. That moves the question "is this a finished state?" into the list of states itself, right next to each name, where nobody adding a sixth state can miss it. The comment on each constant is the state's one-line description from the table in Section 22.5.
 
-An enum written inside a class is automatically `static`, like the nested `Constants` groups in Chapter 20, so you never need a `FollowLine` object to name a state: `FollowLine.State.GAVE_UP` works anywhere.
+An enum written inside a class is automatically `static`, like the nested `Constants` groups in Chapter 21, so you never need a `FollowLine` object to name a state: `FollowLine.State.GAVE_UP` works anywhere.
 
 ### The constants and fields
 
-The tuning numbers live at the top, `private static final`, because they describe this command's own behavior (Chapter 20's rule: a number lives with the thing it describes). They are untested starting points. You will tune `STEER_KP` and `FOLLOW_METERS_PER_SECOND` on your own tape in Section 21.9.
+The tuning numbers live at the top, `private static final`, because they describe this command's own behavior (Chapter 21's rule: a number lives with the thing it describes). They are untested starting points. You will tune `STEER_KP` and `FOLLOW_METERS_PER_SECOND` on your own tape in Section 22.9.
 
 Then come four fields that are **not** `final`, under the comment "The state machine's memory":
 
@@ -656,7 +656,7 @@ Then come four fields that are **not** `final`, under the comment "The state mac
 - **`searchStartHeadingDegrees`**, set by the search's entry action, to measure how far the search has turned.
 - **`startDistanceMeters`**, only for the log message at the end, the same `getTraveledMeters()` trick as `DriveDistance`.
 
-All four are set in `initialize()` (or by an entry action), never in the constructor. A `FollowLine` object will be bound to a button and run many times in one practice session, and every run must start fresh: Section 19.6's "once, or every time?" rule.
+All four are set in `initialize()` (or by an entry action), never in the constructor. A `FollowLine` object will be bound to a button and run many times in one practice session, and every run must start fresh: Section 20.6's "once, or every time?" rule.
 
 ### `initialize()`: choosing the start state
 
@@ -675,11 +675,11 @@ Both are switch expressions on `state` with no `default`, so if you add a sixth 
 
 > **Why build a `ChassisSpeeds`, instead of calling `drive()` in each case?**
 >
-> You could write a switch **statement** with `drivetrain.drive(...)` in each case. It would work, but a statement is not checked for missing cases (Section 21.4), and every case would repeat the call. Making the switch **produce** the speeds gets the compiler's check, and leaves exactly one line that touches the drivetrain. It is also exactly the shape that Chapter 13's `drive(ChassisSpeeds)` was made for.
+> You could write a switch **statement** with `drivetrain.drive(...)` in each case. It would work, but a statement is not checked for missing cases (Section 22.4), and every case would repeat the call. Making the switch **produce** the speeds gets the compiler's check, and leaves exactly one line that touches the drivetrain. It is also exactly the shape that Chapter 13's `drive(ChassisSpeeds)` was made for.
 
 ### `decideNextState()`: the transition table, in code
 
-Put the transition table from Section 21.5 next to this method:
+Put the transition table from Section 22.5 next to this method:
 
 ```java
 return switch (state) {
@@ -691,10 +691,10 @@ return switch (state) {
 
 Each row of the table is one case. Read the first aloud: "If we are following: if the line is seen, keep following; otherwise, work out where it went." The two helpers hold the parts of the table that need a few lines:
 
-- **`stateForLostLine()`** is the heart of the chapter: the same input (no line) gives three different answers, depending on the **remembered** error. This is the exact situation from Section 21.1 that plain `if`s could not handle.
+- **`stateForLostLine()`** is the heart of the chapter: the same input (no line) gives three different answers, depending on the **remembered** error. This is the exact situation from Section 22.1 that plain `if`s could not handle.
 - **`stateForSearch()`** compares the heading now with the heading when the search began. `Math.abs` makes it work for left and right searches alike. `getHeadingDegrees()` keeps counting past 360 instead of jumping back to 0 (Chapter 9), so the subtraction never jumps either.
 
-Notice what `decideNextState()` does **not** do: it does not drive, log, or change any field. It only answers a question. That makes it easy to reason about, and, in Chapter 22, easy to test.
+Notice what `decideNextState()` does **not** do: it does not drive, log, or change any field. It only answers a question. That makes it easy to reason about, and, in Chapter 23, easy to test.
 
 ### `changeState()`: the one door between states
 
@@ -705,7 +705,7 @@ Every change of state goes through this one method. That gives you two things fo
 
 ### `followSpeeds()`: the P controller
 
-This is the steering from Section 21.5: read the error, **remember** it in `lastSteeringError` for the next time the line is lost, multiply by `STEER_KP`, clamp to the drivetrain's turn limit (Chapter 15's `MathUtil.clamp`), and drive forward. The only line here that is about the state machine is the one that remembers.
+This is the steering from Section 22.5: read the error, **remember** it in `lastSteeringError` for the next time the line is lost, multiply by `STEER_KP`, clamp to the drivetrain's turn limit (Chapter 15's `MathUtil.clamp`), and drive forward. The only line here that is about the state machine is the one that remembers.
 
 ### `isFinished()` and `end()`
 
@@ -713,7 +713,7 @@ This is the steering from Section 21.5: read the error, **remember** it in `last
 
 ### `getState()`
 
-The one public method besides the four command methods. It lets other code read, but not change, the state: a getter, like the ones in Chapter 9. Section 21.7 uses it.
+The one public method besides the four command methods. It lets other code read, but not change, the state: a getter, like the ones in Chapter 9. Section 22.7 uses it.
 
 > **The command lifecycle is a state machine too**
 >
@@ -721,13 +721,13 @@ The one public method besides the four command methods. It lets other code read,
 
 > **Chatter: when a machine flickers between states**
 >
-> Right at the edge of the tape, a reflectance reading can wobble around `LINE_THRESHOLD` for a few loops (Section 20.6 used `debounce` on the line light for exactly this reason). A state machine whose transitions depend on that reading can flicker between two states, every loop or two. Engineers call it **chatter**. The line follower is protected from the worst of it, because a search ends the moment the line is seen and following does not care how faintly it is seen. If your robot ever logs a long run of `FOLLOWING -> SEARCHING_LEFT -> FOLLOWING -> ...`, the cure is the same as in Chapter 20: make a transition require its condition for a short time (a debounce), or use two thresholds, a higher one to say "found" and a lower one to say "lost." The two-threshold trick is called **hysteresis**, and a thermostat uses it so the furnace does not click on and off every few seconds.
+> Right at the edge of the tape, a reflectance reading can wobble around `LINE_THRESHOLD` for a few loops (Section 21.6 used `debounce` on the line light for exactly this reason). A state machine whose transitions depend on that reading can flicker between two states, every loop or two. Engineers call it **chatter**. The line follower is protected from the worst of it, because a search ends the moment the line is seen and following does not care how faintly it is seen. If your robot ever logs a long run of `FOLLOWING -> SEARCHING_LEFT -> FOLLOWING -> ...`, the cure is the same as in Chapter 21: make a transition require its condition for a short time (a debounce), or use two thresholds, a higher one to say "found" and a lower one to say "lost." The two-threshold trick is called **hysteresis**, and a thermostat uses it so the furnace does not click on and off every few seconds.
 
 ---
 
-## 21.7 A Sequence Is a State Machine
+## 22.7 A Sequence Is a State Machine
 
-Before `FollowLine` goes into the course, step back and look at the course itself. Here is Chapter 20's `buildObstacleCourse()`, drawn as a state diagram:
+Before `FollowLine` goes into the course, step back and look at the course itself. Here is Chapter 21's `buildObstacleCourse()`, drawn as a state diagram:
 
 ```
   [Reset Pose] --done--> [DriveDistance] --done--> [TurnToHeading] --done--> [DriveUntilLine] --done--> [Hold Still]
@@ -736,9 +736,9 @@ Before `FollowLine` goes into the course, step back and look at the course itsel
 
 Every box is a state. The "action" of each state is its command's `execute()`. Every arrow is the same kind of transition: "this command is finished." That is all a sequence is: **a state machine with no choices.** Each state has exactly one arrow out, and it always points to the next one.
 
-Put Chapter 12's hand-written state machine next to Chapter 20's sequence, and every part of one has a twin in the other:
+Put Chapter 12's hand-written state machine next to Chapter 21's sequence, and every part of one has a twin in the other:
 
-| State machine idea | Chapter 12: `switch` on `autoStep` | Chapter 20: a command sequence |
+| State machine idea | Chapter 12: `switch` on `autoStep` | Chapter 21: a command sequence |
 |---|---|---|
 | The list of states | The `STEP_` constants | The commands, in order |
 | The current state | `autoStep` | The group's `m_currentCommandIndex` |
@@ -762,9 +762,9 @@ It can. WPILib has a family of commands that choose, when they start, which comm
 | `Commands.select(map, selector)` | A fork with many arrows | When it starts, asks `selector` for a key, and runs the command the map stores under that key |
 | `a.onlyIf(condition)` | A fork where one arrow skips ahead | Runs `a` only if `condition` is true; otherwise ends at once |
 | `a.repeatedly()` | An arrow back to the start | Starts `a` over every time it ends, forever |
-| `a.until(condition)` | An extra arrow out of a state | Ends `a` early when `condition` becomes true (a race, Section 20.3) |
+| `a.until(condition)` | An extra arrow out of a state | Ends `a` early when `condition` becomes true (a race, Section 21.3) |
 
-`either` is the one the course needs. Look at `DriveUntilLine` from Chapter 19: it has **two** ways to finish, "line found" and "drove `LEG_2_MAX_DISTANCE_METERS` with no line." In a state diagram, those are two different arrows out of the same box, and they should lead to different places:
+`either` is the one the course needs. Look at `DriveUntilLine` from Chapter 20: it has **two** ways to finish, "line found" and "drove `LEG_2_MAX_DISTANCE_METERS` with no line." In a state diagram, those are two different arrows out of the same box, and they should lead to different places:
 
 ```
                                          line under the sensors
@@ -786,9 +786,9 @@ Commands.either(
 
 Read it aloud: "Either follow the line, or log a note, depending on whether the line is seen." Three things to know about `either`:
 
-- **The condition is checked when the `either` starts, not when it is built.** It is a `BooleanSupplier` (Chapter 18), asked once, in the `either`'s `initialize()`, at the moment `DriveUntilLine` hands over. That is the "now or later?" rule from Section 18.6 working in your favor: the course is built at startup, but the question is asked at the right moment, in the middle of autonomous.
+- **The condition is checked when the `either` starts, not when it is built.** It is a `BooleanSupplier` (Chapter 19), asked once, in the `either`'s `initialize()`, at the moment `DriveUntilLine` hands over. That is the "now or later?" rule from Section 19.6 working in your favor: the course is built at startup, but the question is asked at the right moment, in the middle of autonomous.
 - **It requires everything either branch requires.** WPILib cannot know in advance which branch will run, so the `either` holds the drivetrain (because `FollowLine` needs it) even if it ends up only logging a note. Inside a sequence that already holds the drivetrain, that changes nothing.
-- **Both branches belong to the `either`.** The one-owner rule from Section 20.4 applies: build each branch fresh, right there.
+- **Both branches belong to the `either`.** The one-owner rule from Section 21.4 applies: build each branch fresh, right there.
 
 `Commands.onlyIf` would also work here (`new FollowLine(...).onlyIf(this::isLineSeen)`), and it is shorter. The book uses `either` because the "no line" branch leaves a line in the log, and a log that says **why** a step was skipped is worth one extra line of code.
 
@@ -817,26 +817,26 @@ So when should a state machine live **inside** one command, as `FollowLine` does
 | Every state uses the same subsystem in a slightly different way | The states are whole actions you already have as commands, and may reuse elsewhere |
 | The transitions depend on sensor readings, loop by loop | The transitions are mostly "this one is finished" |
 
-`FollowLine` is the first column all the way down. Could you build it from commands anyway? You could: a "follow" command that runs `until` the line is lost, then a `select` that picks a search command by direction, all inside a `repeatedly()`. But the last error and the search heading would have to live in fields **outside** all of those commands, shared by them, which is exactly the scattered memory that Section 18.2 warned about. One command with a small state machine inside keeps all of that in one place.
+`FollowLine` is the first column all the way down. Could you build it from commands anyway? You could: a "follow" command that runs `until` the line is lost, then a `select` that picks a search command by direction, all inside a `repeatedly()`. But the last error and the search heading would have to live in fields **outside** all of those commands, shared by them, which is exactly the scattered memory that Section 19.2 warned about. One command with a small state machine inside keeps all of that in one place.
 
 The course is the second column all the way down. Writing it as one big `switch` was Chapter 12, and you saw where that went. The best robot code uses both, nested: **a state machine of commands, where some of the commands have a state machine inside.** That is the shape of the course after this chapter.
 
 > **Why the scheduler sees only one command**
 >
-> Chapter 20 pointed out that the Scheduler widget shows only `Obstacle Course`, never `DriveDistance` or `FollowLine`. Now you can say why in state machine words. The scheduler runs one state machine (the group), and the group runs its own states internally, the same way `FollowLine` runs its states internally. Nobody outside needs to know which state a machine is in, unless the machine chooses to tell them, which is what the `Line State` widget and the log messages are for.
+> Chapter 21 pointed out that the Scheduler widget shows only `Obstacle Course`, never `DriveDistance` or `FollowLine`. Now you can say why in state machine words. The scheduler runs one state machine (the group), and the group runs its own states internally, the same way `FollowLine` runs its states internally. Nobody outside needs to know which state a machine is in, unless the machine chooses to tell them, which is what the `Line State` widget and the log messages are for.
 
 ---
 
-## 21.8 Leg 3: Wiring It In
+## 22.8 Leg 3: Wiring It In
 
-Time to put `FollowLine` to work: on a button in teleop, and as leg 3 of the obstacle course. Everything here is in `Constants.java` and `RobotContainer.java`. `Robot.java` does not change at all, which is the Chapter 20 promise kept.
+Time to put `FollowLine` to work: on a button in teleop, and as leg 3 of the obstacle course. Everything here is in `Constants.java` and `RobotContainer.java`. `Robot.java` does not change at all, which is the Chapter 21 promise kept.
 
 ### Step 1: Course constants
 
 In `Constants.java`, add three constants to the end of `CourseConstants`, after `LINE_POSE`:
 
 ```java
-        // Leg 3 (Chapter 21): follow the line from the crossbar to its end.
+        // Leg 3 (Chapter 22): follow the line from the crossbar to its end.
         public static final double FOLLOW_LINE_LENGTH_METERS = 0.60;   // crossbar to end of tape, measured
         public static final double FOLLOW_TIMEOUT_SECONDS = 10.0;
         public static final Pose2d END_POSE = new Pose2d(
@@ -846,7 +846,7 @@ In `Constants.java`, add three constants to the end of `CourseConstants`, after 
 
 Use **your** measured length. `FOLLOW_TIMEOUT_SECONDS` is a safety net, like every step's timeout: 0.6 m at 0.10 m/s takes about 6 seconds, plus time for a search or two. `END_POSE` is where the robot should finish if your line is straight. It is only for the field map (and the simulated floor in Step 4), so a bent line just means the robot finishes somewhere else, which is fine. The follower itself never looks at it: it stops when the **tape** ends, not when it reaches a number.
 
-The step constants (`FollowLine`'s speeds, gains, and search limit) stay inside `FollowLine`, because they describe how the follower behaves, not the course. That is Chapter 20's rule again.
+The step constants (`FollowLine`'s speeds, gains, and search limit) stay inside `FollowLine`, because they describe how the follower behaves, not the course. That is Chapter 21's rule again.
 
 ### Step 2: The course, with leg 3
 
@@ -856,7 +856,7 @@ In `RobotContainer.java`, import the new command next to the others:
 import frc.robot.commands.FollowLine;
 ```
 
-Replace `buildObstacleCourse()` with this version. The only change in the code is the new last step of the sequence, the `either` from Section 21.7, and the Javadoc:
+Replace `buildObstacleCourse()` with this version. The only change in the code is the new last step of the sequence, the `either` from Section 22.7, and the Javadoc:
 
 ```java
 /**
@@ -926,9 +926,9 @@ and add its row to the controls table, right after the teleop `A` row:
  *            left bumper    follow the line (hold); let go to take the sticks back
 ```
 
-Follow it through, the way you followed the A button in Section 20.6. Hold the left bumper over the tape: `FollowLine` interrupts `DriveWithSticks` and follows. Let go: `whileTrue` cancels it, `end(true)` stops the motors, and the sticks are back. Hold it to the end of the line: the follower reaches `END_OF_LINE`, finishes, and the sticks come back even with your finger still on the bumper. Hold it with no line under the robot: it starts in `GAVE_UP`, finishes on its first loop, and nothing moves.
+Follow it through, the way you followed the A button in Section 21.6. Hold the left bumper over the tape: `FollowLine` interrupts `DriveWithSticks` and follows. Let go: `whileTrue` cancels it, `end(true)` stops the motors, and the sticks are back. Hold it to the end of the line: the follower reaches `END_OF_LINE`, finishes, and the sticks come back even with your finger still on the bumper. Hold it with no line under the robot: it starts in `GAVE_UP`, finishes on its first loop, and nothing moves.
 
-The left bumper was already bound in **Test** mode, to the bench cruise. `.and(teleop)` and `.and(test)` keep the two from ever meeting. (If your Chapter 20 pair lab left `X` and `B` bound in teleop, keep them; the left bumper was chosen because it is free in teleop for everyone.)
+The left bumper was already bound in **Test** mode, to the bench cruise. `.and(teleop)` and `.and(test)` keep the two from ever meeting. (If your Chapter 21 pair lab left `X` and `B` bound in teleop, keep them; the left bumper was chosen because it is free in teleop for everyone.)
 
 ### Step 4: Show leg 3 on the field map
 
@@ -942,7 +942,7 @@ field.getObject("Course").setPoses(
 
 ### Step 5: Give the simulated robot the tape
 
-The simulated Explorer from Chapter 17 has a very simple floor: both reflectance sensors read black as soon as the robot's **center** is past the crossbar. That was enough for `DriveUntilLine`, but it is useless for following a line, because both sensors always agree. To follow anything, each pretend sensor has to know where **it** is on the floor, and whether that spot is black.
+The simulated Explorer from Chapter 18 has a very simple floor: both reflectance sensors read black as soon as the robot's **center** is past the crossbar. That was enough for `DriveUntilLine`, but it is useless for following a line, because both sensors always agree. To follow anything, each pretend sensor has to know where **it** is on the floor, and whether that spot is black.
 
 Here is the idea, and it is one you will use for the rest of your robotics life. A sensor is bolted to the robot at a fixed spot: say 5 cm ahead of the robot's center and a centimeter to the left. That spot is measured in the **robot's frame** (Chapter 14's coordinate frames, with the robot at the origin facing along +x). To find where the sensor is on the **field**, you start at the robot's pose and move by that offset, turned to match the robot's heading. WPILib does that with one method: `pose.transformBy(transform)`, where a `Transform2d` is "a move, measured from the robot's point of view."
 
@@ -957,7 +957,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 Add these constants under the three `AnalogInputSim` fields:
 
 ```java
-// The pretend floor (Section 21.8): where the sensors sit, and how big the tape is.
+// The pretend floor (Section 22.8): where the sensors sit, and how big the tape is.
 private static final double SIM_SENSOR_AHEAD_METERS = 0.05;          // ahead of the robot's center
 private static final double SIM_SENSOR_SIDE_METERS = 0.01;           // each side of the center line
 private static final double SIM_TAPE_HALF_WIDTH_METERS = 0.02;       // 4 cm: wider than real tape
@@ -970,8 +970,8 @@ Then replace `simulationPeriodic()` with this, and add the helper below it:
 
 ```java
 /**
- * Give the simulated robot a simulated floor (Section 17.9), now with the whole
- * course's tape on it (Section 21.8). Robot calls this every loop; it does nothing
+ * Give the simulated robot a simulated floor (Section 18.5), now with the whole
+ * course's tape on it (Section 22.8). Robot calls this every loop; it does nothing
  * unless the robot is the simulated one.
  */
 public void simulationPeriodic() {
@@ -1023,13 +1023,13 @@ Then `simulationPeriodic()` asks once for each sensor, with the side offset flip
 
 > **Robot frame, field frame, everywhere**
 >
-> "Where on the field is a thing that is bolted to my robot?" is one of the most common questions in robot code. In Chapter 28, the Mini Swerve's four wheels are each at their own offset from the robot's center. In Chapter 33, the camera is mounted at an offset, and its view of an AprilTag has to be moved from the camera's frame, to the robot's, to the field's, before it can correct the robot's pose. Each of those steps is a `Transform2d` (or its 3D cousin), and each one is the same move you just made for a 1 cm sensor offset.
+> "Where on the field is a thing that is bolted to my robot?" is one of the most common questions in robot code. In Chapter 29, the Mini Swerve's four wheels are each at their own offset from the robot's center. In Chapter 34, the camera is mounted at an offset, and its view of an AprilTag has to be moved from the camera's frame, to the robot's, to the field's, before it can correct the robot's pose. Each of those steps is a `Transform2d` (or its 3D cousin), and each one is the same move you just made for a 1 cm sensor offset.
 
 Build. Then, before you test anything, make sure the old behavior is safe: the course's first four steps should not have changed at all. The next section checks everything.
 
 ---
 
-## 21.9 Run It: Follow the Line
+## 22.9 Run It: Follow the Line
 
 Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`. Keep Elastic open with `Line State`, `Line Error`, `Left Reflectance`, `Right Reflectance`, and the Scheduler (add the two new widgets and save the layout), and watch the terminal. Everything below says what the terminal should show; your numbers will differ.
 
@@ -1046,7 +1046,7 @@ FollowLine: FOLLOWING -> END_OF_LINE
 FollowLine finished in END_OF_LINE after 0.587 m
 ```
 
-`DriveWithSticks` is back in the list, even though you are still holding the bumper (`whileTrue` does not restart a finished command, Section 20.6).
+`DriveWithSticks` is back in the list, even though you are still holding the bumper (`whileTrue` does not restart a finished command, Section 21.6).
 
 3. Put it back, hold the bumper, and **let go halfway**. `FollowLine interrupted in FOLLOWING after ...`, and the sticks work at once.
 4. Hold the bumper with the robot **off** the tape: `FollowLine started in GAVE_UP`, then `finished in GAVE_UP after 0.0 m`. Nothing moves.
@@ -1061,7 +1061,7 @@ FollowLine: FOLLOWING -> SEARCHING_LEFT
 FollowLine: SEARCHING_LEFT -> FOLLOWING
 ```
 
-It lost the line with the error positive (the line was under the left sensor last), turned left in place, found the new piece, and carried on. That is the case Section 21.1's plain `if`s got wrong.
+It lost the line with the error positive (the line was under the left sensor last), turned left in place, found the new piece, and carried on. That is the case Section 22.1's plain `if`s got wrong.
 
 7. Force a **give up**. Start a follow on the sharp corner, and as soon as `Line State` says `SEARCHING_LEFT`, slide a sheet of white paper over the tape ahead of the robot. It turns, finds nothing, and after 120 degrees: `SEARCHING_LEFT -> GAVE_UP`, and it stops.
 
@@ -1077,11 +1077,11 @@ The numbers at the top of `FollowLine` are estimates. Tune them on your own tape
 | At the real end of the tape, it searches instead of stopping | Raise `SIDE_ERROR`, or check that the tape's end is cut square |
 | It searches past the line without stopping | Lower `SEARCH_RADIANS_PER_SECOND`: the sensors swept over the tape between two loops |
 
-Chapter 23 lets you change these numbers live, from the dashboard, without rebuilding. For now, change, build, and run.
+Chapter 24 lets you change these numbers live, from the dashboard, without rebuilding. For now, change, build, and run.
 
 ### The whole course
 
-8. Lay out the full course: leg 1, the crossbar, and your leg 3 strip starting where the robot stops. Press Y, then enable **Autonomous**. The robot drives leg 1, turns, drives to the crossbar, and follows the line to its end, with the LED on the whole way. Then the LED goes out and `Hold Still` holds the robot. The log reads like the diagram from Section 21.7:
+8. Lay out the full course: leg 1, the crossbar, and your leg 3 strip starting where the robot stops. Press Y, then enable **Autonomous**. The robot drives leg 1, turns, drives to the crossbar, and follows the line to its end, with the LED on the whole way. Then the LED goes out and `Hold Still` holds the robot. The log reads like the diagram from Section 22.7:
 
 ```
 Pose reset to start
@@ -1113,23 +1113,23 @@ Diagnose anything strange:
 | `';' expected` near the end of the enum's list | The semicolon after `GAVE_UP(true)` is missing |
 | `Line Error` is positive when the tape is under the **right** sensor | `getSteeringError()` subtracts the wrong way round, so the robot steers away from the line |
 | The robot spins forever and never gives up | The heading for the search is being set every loop instead of once: `searchStartHeadingDegrees` must be set only in `changeState()` |
-| The second follow in a session finishes instantly | `state` is only set in its field initializer, not in `initialize()` (the constructor trap from Section 19.6) |
+| The second follow in a session finishes instantly | `state` is only set in its field initializer, not in `initialize()` (the constructor trap from Section 20.6) |
 | `END_OF_LINE` on every bend | `SIDE_ERROR` is too high, or `STEER_KP` is too low, so the robot is never far enough off to one side |
 | Autonomous skips leg 3 even though the tape is there | The leg 3 strip does not start where the robot stops, so neither sensor is on tape when the `either` checks |
 | The left bumper does nothing in teleop | The binding is missing `.and(teleop)`, or uses `test` |
 
 ---
 
-## 21.10 State Machines Everywhere
+## 22.10 State Machines Everywhere
 
 Once you can see state machines, you see them in every robot program, at every size.
 
-- **Chapter 22, unit tests.** `decideNextState()` only answers a question: given a state and some sensor readings, which state comes next? That makes it the perfect first thing to test. Chapter 22 drives the follower through every arrow in the diagram, with pretend sensor readings, in a fraction of a second, without a robot.
-- **Chapter 23, live tuning.** `STEER_KP`, `SIDE_ERROR`, and the follow speed become dashboard sliders.
-- **Chapter 24, AdvantageScope.** A state that is logged by name every loop becomes a timeline you can scrub through after a run: you can see exactly which loop the follower went from `FOLLOWING` to `SEARCHING_LEFT`, and what the sensors read at that moment.
-- **Chapter 31, PathPlanner.** Autonomous routines become sequences of paths and commands, with branches like "if we are holding a game piece, score it; otherwise, go get one": `either` at competition scale.
-- **Chapter 33, auto-align.** Lining up on an AprilTag is a small state machine: "no tag in view, turn and look," "tag in view, drive toward it," "close enough, stop," with a search that gives up, just like `FollowLine`'s.
-- **Chapters 34 and 35, the competition robot.** The intake, the shooter, and the arm each have their own states, and the whole robot often has a superstructure state machine on top that makes sure no two mechanisms are ever told to collide.
+- **Chapter 23, unit tests.** `decideNextState()` only answers a question: given a state and some sensor readings, which state comes next? That makes it the perfect first thing to test. Chapter 23 drives the follower through every arrow in the diagram, with pretend sensor readings, in a fraction of a second, without a robot.
+- **Chapter 24, live tuning.** `STEER_KP`, `SIDE_ERROR`, and the follow speed become dashboard sliders.
+- **Chapter 25, AdvantageScope.** A state that is logged by name every loop becomes a timeline you can scrub through after a run: you can see exactly which loop the follower went from `FOLLOWING` to `SEARCHING_LEFT`, and what the sensors read at that moment.
+- **Chapter 32, PathPlanner.** Autonomous routines become sequences of paths and commands, with branches like "if we are holding a game piece, score it; otherwise, go get one": `either` at competition scale.
+- **Chapter 34, auto-align.** Lining up on an AprilTag is a small state machine: "no tag in view, turn and look," "tag in view, drive toward it," "close enough, stop," with a search that gives up, just like `FollowLine`'s.
+- **Chapters 35 and 36, the competition robot.** The intake, the shooter, and the arm each have their own states, and the whole robot often has a superstructure state machine on top that makes sure no two mechanisms are ever told to collide.
 
 Whenever you start a feature that has to remember what it was doing, draw the diagram first. It takes five minutes, and it finds the missing arrow before the robot does.
 
@@ -1137,7 +1137,7 @@ Whenever you start a feature that has to remember what it was doing, draw the di
 
 ## Chapter Summary
 
-> **What you learned in Chapter 21**
+> **What you learned in Chapter 22**
 >
 > * When two situations look the same to the sensors but need different actions (both reflectance sensors on white, at the end of the line or past a sharp corner), reactive code cannot decide. The robot needs to remember what it was doing: its **state**.
 > * A **state machine** has **states** (it is always in exactly one), **transitions** (rules for moving between states), and **actions** (what it does in each state, plus **entry actions** done once on the way in). Draw it as a **state diagram** first, and check that every state has an arrow for every input.
@@ -1152,7 +1152,7 @@ Whenever you start a feature that has to remember what it was doing, draw the di
 
 ### Practice
 
-**1. A traffic light of your own.** In a practice branch, create `TrafficLight.java` in `frc.robot` with the enum from Section 21.3 (durations and `next()`). In `RobotContainer`, add a field `private TrafficLight light = TrafficLight.RED;` and, at the end of `configureBindings()`, a Test mode binding that logs the light and moves to the next one each time you press Start:
+**1. A traffic light of your own.** In a practice branch, create `TrafficLight.java` in `frc.robot` with the enum from Section 22.3 (durations and `next()`). In `RobotContainer`, add a field `private TrafficLight light = TrafficLight.RED;` and, at the end of `configureBindings()`, a Test mode binding that logs the light and moves to the next one each time you press Start:
 
 ```java
 controller.start().and(RobotModeTriggers.test()).onTrue(
@@ -1182,8 +1182,8 @@ Press Start six times and check the log. Then: (a) add a `for` loop over `Traffi
 **3. Break it three ways.** In a practice branch, make each change on its own, predict what will happen, try it, and undo it:
 
 - (a) Delete the `SEARCHING_RIGHT` line from the act switch in `execute()`. Does it build? What does the error say?
-- (b) Move `searchStartHeadingDegrees = drivetrain.getHeadingDegrees();` out of `changeState()` and into the `SEARCHING_LEFT` case of the act switch (you will need a small helper method so the case can both record the heading and return speeds). Force a search with the white-paper trick from Section 21.9. Does the robot ever give up? Why not?
-- (c) Delete the line `state = isLineSeen() ? ...` from `initialize()`. Follow the line to its end once with the left bumper, then put the robot back at the start and hold the bumper again. What happens on the second try, and which section of Chapter 19 warned you about this?
+- (b) Move `searchStartHeadingDegrees = drivetrain.getHeadingDegrees();` out of `changeState()` and into the `SEARCHING_LEFT` case of the act switch (you will need a small helper method so the case can both record the heading and return speeds). Force a search with the white-paper trick from Section 22.9. Does the robot ever give up? Why not?
+- (c) Delete the line `state = isLineSeen() ? ...` from `initialize()`. Follow the line to its end once with the left bumper, then put the robot back at the start and hold the bumper again. What happens on the second try, and which section of Chapter 20 warned you about this?
 
 Write one sentence per change in `reflections.md`: "this is a decide bug," or "this is an act bug," or "this is a memory bug," and why.
 
@@ -1216,9 +1216,9 @@ Then replace `.andThen(holdStill())` with:
 
 (Import `java.util.Map`.) Run the course with the line, and with the white paper covering the end of leg 3 so the follower searches and gives up. Then answer in `reflections.md`: (a) Why is it fine to call `followLine::getState` when `followLine` belongs to the `either`? Does reading a command count as "using" it under the one-owner rule? (b) Why must `holdStill()` run **alongside** the signal, not before it or after it? (c) Remove the leg 3 tape entirely, so the `either` skips the follower. What key does `select` see, and what appears in the terminal? Fix it by adding an entry to the map, and decide what the robot should show for that case.
 
-**6. Corners and speed.** Lay out a test strip with a gentle bend, a sharper bend, and a right-angle corner. Run the follower over it five times at each of three speeds (`FOLLOW_METERS_PER_SECOND` of 0.06, 0.10, and 0.15), and record in a table how many runs reached the end, and how many searches the log shows. What happens to the right-angle corner as the speed goes up? Use Section 21.5's explanation of `SIDE_ERROR` to explain why.
+**6. Corners and speed.** Lay out a test strip with a gentle bend, a sharper bend, and a right-angle corner. Run the follower over it five times at each of three speeds (`FOLLOW_METERS_PER_SECOND` of 0.06, 0.10, and 0.15), and record in a table how many runs reached the end, and how many searches the log shows. What happens to the right-angle corner as the speed goes up? Use Section 22.5's explanation of `SIDE_ERROR` to explain why.
 
-**7. One question, one home.** `DriveUntilLine`, `FollowLine`, and `RobotContainer` each have a private `isLineSeen()` (see the callout in Section 21.8). Add a public `isEitherOnLine()` to `Sensors`, with a Javadoc comment, and make all three use it. Delete the three private copies. Build and run the course to check that nothing changed. In one sentence: why does this question belong in `Sensors`, and not in `Drivetrain` or a command?
+**7. One question, one home.** `DriveUntilLine`, `FollowLine`, and `RobotContainer` each have a private `isLineSeen()` (see the callout in Section 22.8). Add a public `isEitherOnLine()` to `Sensors`, with a Javadoc comment, and make all three use it. Delete the three private copies. Build and run the course to check that nothing changed. In one sentence: why does this question belong in `Sensors`, and not in `Drivetrain` or a command?
 
 **8. Challenge: the course the old way.** In a practice branch, write the **whole** course as one command class, `CourseAsOneCommand`, with its own `enum Step { RESET, DRIVE_LEG_1, TURN, DRIVE_TO_LINE, FOLLOW_LINE, DONE }` and a switch expression on it in `execute()`, the way Chapter 12 would have, if it had had enums. (You may use a `FollowLine` object inside it, calling its `initialize()`, `execute()`, and `isFinished()` yourself, exactly as a sequence does.) Get it to drive the course. Then count the lines in your class and in `buildObstacleCourse()`, and write three sentences in `reflections.md` comparing them: which is easier to read, which is easier to change, and which would you rather debug at a competition.
 
@@ -1227,30 +1227,30 @@ Then replace `.andThen(holdStill())` with:
 Give the Explorer a line follower, in teleop and as leg 3 of the course.
 
 1. Make a branch (see the Git exercise).
-2. Lay out leg 3 on your floor (Section 21.5): a strip of black tape about 0.6 m long, starting where the robot stops on the crossbar. Measure it.
-3. Create `FollowLine.java` in the `commands` folder (Section 21.6). Build.
-4. Add the teleop binding and its controls table row (Section 21.8, Step 3). Build.
-5. On a separate straight strip of tape, run checks 1 to 4 in Section 21.9. Then checks 5 to 7, with a bend and a corner. Tune `STEER_KP`, `FOLLOW_METERS_PER_SECOND`, and `SIDE_ERROR` for your tape and floor, and record your final values and why in `reflections.md`. Commit.
+2. Lay out leg 3 on your floor (Section 22.5): a strip of black tape about 0.6 m long, starting where the robot stops on the crossbar. Measure it.
+3. Create `FollowLine.java` in the `commands` folder (Section 22.6). Build.
+4. Add the teleop binding and its controls table row (Section 22.8, Step 3). Build.
+5. On a separate straight strip of tape, run checks 1 to 4 in Section 22.9. Then checks 5 to 7, with a bend and a corner. Tune `STEER_KP`, `FOLLOW_METERS_PER_SECOND`, and `SIDE_ERROR` for your tape and floor, and record your final values and why in `reflections.md`. Commit.
 6. Add the leg 3 constants (Step 1), the new `buildObstacleCourse()` and the `isLineSeen()` helper (Step 2), the line light's new trigger line, and `END_POSE` on the field map (Step 4). Build.
 7. On the real XRP, run checks 8 and 9: the whole course, with and without the tape.
 8. Add the pretend tape to the simulated floor (Step 5). On the simulated Explorer, run the course in autonomous and watch the Field view. Set `USE_SIMULATED_ROBOT = false` again.
 9. **Draw the course.** In `reflections.md`, draw the whole obstacle course as a state diagram, including the fork after `DriveUntilLine` and, inside the `FollowLine` box, a smaller copy of the follower's own diagram. Mark which parts are command groups and which part is a state machine inside a command. Commit.
 
-Diagnose anything strange with the table at the end of Section 21.9.
+Diagnose anything strange with the table at the end of Section 22.9.
 
-When the Explorer follows a line to its end, both on a button and as the last leg of the course, you are ready for Chapter 22.
+When the Explorer follows a line to its end, both on a button and as the last leg of the course, you are ready for Chapter 23.
 
 ### Reflect
 
 Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 
-1. Section 21.1's first try used four `if`s and no memory. Describe the exact situation where it does the wrong thing, and explain why no `if` about **this loop's** readings could ever fix it.
+1. Section 22.1's first try used four `if`s and no memory. Describe the exact situation where it does the wrong thing, and explain why no `if` about **this loop's** readings could ever fix it.
 2. `execute()` always decides first, then acts. Suppose the robot is in `FOLLOWING` and drives off the end of the line. Walk through that one loop: which method notices, which state the robot moves to, and what it does in that same loop. What would go wrong if `execute()` acted first and decided second?
 3. Why does the book say "no `default`" in a switch expression on a state? Describe what would happen, months later, if a teammate added a new state to an enum whose switch expressions all had a `default`.
-4. Give one example from a competition robot (an intake, a shooter, an arm, or an autonomous routine) that you would write as a state machine **inside** one command, and one that you would build **from** commands. Use the table in Section 21.7 to justify each.
+4. Give one example from a competition robot (an intake, a shooter, an arm, or an autonomous routine) that you would write as a state machine **inside** one command, and one that you would build **from** commands. Use the table in Section 22.7 to justify each.
 5. `Commands.either(..., this::isLineSeen)` asks its question when the `either` **starts**, not when `buildObstacleCourse()` runs. What would the course do if the question were answered when the course was built, at program startup? Which chapter's "now or later?" lesson is this?
 
-If any answer feels shaky, re-read Sections 21.1, 21.4, and 21.7.
+If any answer feels shaky, re-read Sections 22.1, 22.4, and 22.7.
 
 ### Git
 
@@ -1266,14 +1266,14 @@ After Build step 5, with the follower working on a button:
 
 ```bash
 git add .
-git commit -m "Ch21: FollowLine state machine command, on the left bumper in teleop"
+git commit -m "Ch22: FollowLine state machine command, on the left bumper in teleop"
 ```
 
 After Build step 9, with `USE_SIMULATED_ROBOT = false`:
 
 ```bash
 git add .
-git commit -m "Ch21: Leg 3 of the course follows the line, with a simulated floor"
+git commit -m "Ch22: Leg 3 of the course follows the line, with a simulated floor"
 git push -u origin line-follower
 ```
 
@@ -1281,9 +1281,9 @@ Open a pull request into `main`. In the description, paste your state diagram fr
 
 ### Collab: The Merge Git Cannot Check, but Java Can
 
-In Chapter 20's pair lab, Git merged two bindings onto one button without a complaint, and nothing caught it until someone pressed X. This lab sets up the same kind of collision in a state machine, and this time something catches it.
+In Chapter 21's pair lab, Git merged two bindings onto one button without a complaint, and nothing caught it until someone pressed X. This lab sets up the same kind of collision in a state machine, and this time something catches it.
 
-As before, the **owner** is the person whose Explorer repository you use, and the **teammate** is the other partner. Both: finish this chapter's Build and merge it into `main`. The teammate clones (or pulls) the owner's repository, as in Chapter 20. Both: `git checkout main` and `git pull`.
+As before, the **owner** is the person whose Explorer repository you use, and the **teammate** is the other partner. Both: finish this chapter's Build and merge it into `main`. The teammate clones (or pulls) the owner's repository, as in Chapter 21. Both: `git checkout main` and `git pull`.
 
 **Part A: two features at once.** Work at the same time. Nobody merges yet.
 
@@ -1369,20 +1369,20 @@ As before, the **owner** is the person whose Explorer repository you use, and th
    error: the switch expression does not cover all possible input values
    ```
 
-   pointing at `describeState()`. Git could not see the problem, but Java could: the owner's new state reached a switch expression that was written before the state existed. This is the same kind of **semantic conflict** as Chapter 20's double-bound button, and this time the compiler caught it, because the state is an enum and the switch is an expression with no `default`.
+   pointing at `describeState()`. Git could not see the problem, but Java could: the owner's new state reached a switch expression that was written before the state existed. This is the same kind of **semantic conflict** as Chapter 21's double-bound button, and this time the compiler caught it, because the state is an enum and the switch is an expression with no `default`.
 
 4. **Both:** decide what the status should say while waiting. Add the missing case (for example, `case WAITING_FOR_CLEAR -> "Something in the way, waiting";`), build, test, commit (`Describe WAITING_FOR_CLEAR in Line Status`), and push.
 5. **Owner:** review the PR. Check that every state in the enum appears in every switch. Approve, merge, and delete the branch. **Both:** `git checkout main`, `git pull`, build, and run.
 
 **Part C: swap.** Repeat Parts A and B in the other partner's repository, with roles reversed.
 
-Afterward, each of you writes two sentences in `reflections.md`. First: if the teammate had merged the PR on GitHub without building locally, what would have happened to `main`, and who would have found out, and when? Second: Chapter 22 sets up a robot (GitHub Actions) that builds every pull request automatically. How would it have changed this lab?
+Afterward, each of you writes two sentences in `reflections.md`. First: if the teammate had merged the PR on GitHub without building locally, what would have happened to `main`, and who would have found out, and when? Second: Chapter 23 sets up a robot (GitHub Actions) that builds every pull request automatically. How would it have changed this lab?
 
 ### Explore
 
 - Open WPILib's **Command Compositions** page (link below) and find the section on selecting compositions. It describes `select`, `either`, and one more decorator that this chapter did not use, the opposite of `onlyIf`. Which one is it, and when would the Explorer use it?
-- Open `ConditionalCommand` in VS Code (hold Ctrl and click `either`, then click through to the class it creates). Find where it asks the condition, and where it decides which subsystems it requires. Write two sentences in `reflections.md` connecting what you find to the bullets in Section 21.7.
-- Read the **Finite-state machine** article's turnstile example (link below). Draw the turnstile's state diagram in `reflections.md` in the same style as Section 21.5, then write it as a Java enum with a `next(boolean coin, boolean push)` method using a switch expression.
+- Open `ConditionalCommand` in VS Code (hold Ctrl and click `either`, then click through to the class it creates). Find where it asks the condition, and where it decides which subsystems it requires. Write two sentences in `reflections.md` connecting what you find to the bullets in Section 22.7.
+- Read the **Finite-state machine** article's turnstile example (link below). Draw the turnstile's state diagram in `reflections.md` in the same style as Section 22.5, then write it as a Java enum with a `next(boolean coin, boolean push)` method using a switch expression.
 - Find a top FRC team's robot code on GitHub (The Blue Alliance lists many teams' repositories), and search it for `enum`. Find one enum that names the states of a mechanism or of the whole robot. Copy its constants into `reflections.md`, and guess, from the names alone, what each state does.
 
 ---
@@ -1397,4 +1397,4 @@ Afterward, each of you writes two sentences in `reflections.md`. First: if the t
 
 ---
 
-*Next up, Chapter 22: Unit Testing Robot Code. You will write tests that drive `FollowLine` through every arrow of its state diagram, and run the obstacle course, all without a robot, and set up GitHub to build and test every pull request automatically.*
+*Next up, Chapter 23: Unit Testing Robot Code. You will write tests that drive `FollowLine` through every arrow of its state diagram, and run the obstacle course, all without a robot, and set up GitHub to build and test every pull request automatically.*

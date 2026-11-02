@@ -1,4 +1,4 @@
-# Chapter 25: XRP Capstone Project
+# Chapter 26: XRP Capstone Project
 
 Twenty-four chapters ago, the Explorer was an empty project that printed one line. Today it drives a whole obstacle course on its own: a measured leg, a turn to a heading, a drive to the tape, and a state machine that follows the line to its end. It is built from subsystems and commands, characterized with SysId, tuned live from a dashboard, guarded by thirty tests that run on every push, and it keeps a log of every run that you can replay on your laptop, loop by loop.
 
@@ -17,17 +17,17 @@ By the end of the chapter, you and your partner will have:
 
 On the Java side, you will learn **records**: a one-line way to write a small class that only holds values, like a decision with two parts. You have been using records since Chapter 16 without knowing it.
 
-The plan fits in **two lab meetings**, with the video finished at home. It works best with a partner at about the same point in the book. You will need your XRP, your strip of tape from Chapter 21, and something flat and hard to be the wall: a cardboard box, or a stack of books.
+The plan fits in **two lab meetings**, with the video finished at home. It works best with a partner at about the same point in the book. You will need your XRP, your strip of tape from Chapter 22, and something flat and hard to be the wall: a cardboard box, or a stack of books.
 
 ---
 
-## 25.1 What "Done" Looks Like
+## 26.1 What "Done" Looks Like
 
 Every chapter so far has told you exactly what to build. A capstone is different: the plan is part of the work. And a plan starts at the end, with a clear answer to one question: **how will we know we are done?**
 
 Engineers call that answer the **acceptance criteria**: a short list of checks that anyone could run, which all pass when the work is finished and not before. Writing them first does two things. It stops a project from growing forever ("while we are in here, let's also..."), and it turns "it works, I think" into "it passed all eight checks, and here is the proof."
 
-Here are the capstone's acceptance criteria. Read them now; Section 25.10 ends with you checking every one.
+Here are the capstone's acceptance criteria. Read them now; Section 26.10 ends with you checking every one.
 
 1. A **design doc** for leg 4 is merged into `main`, reviewed by your partner, before any leg 4 code.
 2. `ParkAtWall` decides with a **pure** method, and every arrow of its state machine has a test.
@@ -40,25 +40,25 @@ Here are the capstone's acceptance criteria. Read them now; Section 25.10 ends w
 
 > **"Done" is a list, not a feeling**
 >
-> Every team has a robot that "basically works." Basically works means it worked once, while someone watched, and nobody wrote down how. A list of checks makes "done" something you can prove to a mentor, a teammate, or yourself next month. You will see the same idea on a bigger scale in Chapter 39, where the competition-day checklist decides whether code is allowed onto the robot at all.
+> Every team has a robot that "basically works." Basically works means it worked once, while someone watched, and nobody wrote down how. A list of checks makes "done" something you can prove to a mentor, a teammate, or yourself next month. You will see the same idea on a bigger scale in Chapter 40, where the competition-day checklist decides whether code is allowed onto the robot at all.
 
 ### Who does what
 
 As in every Collab lab since Chapter 11, the **owner** is the partner whose Explorer repository you use, and the **teammate** is the other partner. The whole capstone happens in the owner's repository. Check that the teammate is still a collaborator on it (**Settings** > **Collaborators**, as in Chapter 11's Collab lab), and that the teammate has cloned it.
 
-The teammate's own Explorer stays as it is at the end of Chapter 24. That is fine: Chapter 26 starts a brand-new project for a new robot, and both partners' names go on the capstone release.
+The teammate's own Explorer stays as it is at the end of Chapter 25. That is fine: Chapter 27 starts a brand-new project for a new robot, and both partners' names go on the capstone release.
 
-Both partners need the owner's repository at the end of Chapter 24: **30 tests**, all green, merged into `main`. If one of you is not quite there, use the owner's, since that is the code you will build on.
+Both partners need the owner's repository at the end of Chapter 25: **30 tests**, all green, merged into `main`. If one of you is not quite there, use the owner's, since that is the code you will build on.
 
 ### The two meetings
 
 | When | What you do | Done when |
 |---|---|---|
-| **Meeting 1** | Write the design doc together (Section 25.3), open it as a PR, review, merge. Then write the tests and the code for leg 4, and the pretend wall (Sections 25.4 to 25.7). | The leg 4 pull request is open, with a green check |
-| **Meeting 2** | Merge leg 4 and tune it on the floor (Section 25.8). Prepare the release (Section 25.9), then run the course three times, check the logs, tag it, and publish it (Section 25.10). | `v1.0.0` is on GitHub |
+| **Meeting 1** | Write the design doc together (Section 26.3), open it as a PR, review, merge. Then write the tests and the code for leg 4, and the pretend wall (Sections 26.4 to 26.7). | The leg 4 pull request is open, with a green check |
+| **Meeting 2** | Merge leg 4 and tune it on the floor (Section 26.8). Prepare the release (Section 26.9), then run the course three times, check the logs, tag it, and publish it (Section 26.10). | `v1.0.0` is on GitHub |
 | **At home** | Edit and upload the demo video, and add its link to the release. | The release page has the video link |
 
-If meeting 1 runs over, the floor work in Section 25.8 can start with the pull request still open: tune on the leg 4 branch, and merge when the green check comes back.
+If meeting 1 runs over, the floor work in Section 26.8 can start with the pull request still open: tune on the leg 4 branch, and merge when the green check comes back.
 
 > **Ahead, or behind?**
 >
@@ -66,9 +66,9 @@ If meeting 1 runs over, the floor work in Section 25.8 can start with the pull r
 
 ---
 
-## 25.2 The Leg 4 Challenge
+## 26.2 The Leg 4 Challenge
 
-Here is the course as it stands, one row per step of the `Course/Step` timeline from Chapter 24:
+Here is the course as it stands, one row per step of the `Course/Step` timeline from Chapter 25:
 
 | Step | Command | Ends when |
 |---|---|---|
@@ -120,11 +120,11 @@ With `kP = 1.5`, a gap of 0.20 m asks for 0.30 m/s (capped at the Explorer's aut
 
 > **The same shape, with a camera**
 >
-> In Chapter 33, the Mini Swerve will drive up to an AprilTag and stop in front of it, using a camera instead of a rangefinder. Underneath, it is this leg: measure the gap to a target with a sensor, drive at a speed proportional to it, and stop inside a tolerance. The sensor gets much fancier. The idea does not change.
+> In Chapter 34, the Mini Swerve will drive up to an AprilTag and stop in front of it, using a camera instead of a rangefinder. Underneath, it is this leg: measure the gap to a target with a sensor, drive at a speed proportional to it, and stop inside a tolerance. The sensor gets much fancier. The idea does not change.
 
 ---
 
-## 25.3 Plan Before You Type: The Design Doc
+## 26.3 Plan Before You Type: The Design Doc
 
 On a team, nobody writes a new feature for the competition robot without telling anyone. Someone writes down what they plan to do, and the team reads it first. That written plan is a **design doc**. It is usually a page or two, it lives in the repository next to the code, and it is reviewed like code, in a pull request.
 
@@ -149,7 +149,7 @@ The checks that prove it works. Anyone should be able to run them.
 Every class that is new or changes, and how.
 
 ## States
-The state diagram and the transition table (Chapter 21), if there is a state machine.
+The state diagram and the transition table (Chapter 22), if there is a state machine.
 
 ## Tests
 Each test, as a sentence, before any code exists.
@@ -280,7 +280,7 @@ Create a folder named `docs` at the top of your project (next to `src`), and a f
 
 ```bash
 git add docs/leg-4-design.md
-git commit -m "Ch25: Design doc for leg 4, park at the wall"
+git commit -m "Ch26: Design doc for leg 4, park at the wall"
 git push -u origin design-leg-4
 ```
 
@@ -304,11 +304,11 @@ Fix what the review finds, in new commits on the same branch. Then the teammate 
 
 ---
 
-## 25.4 New Java: Records
+## 26.4 New Java: Records
 
 Look at the **States** section of your design doc again. On every loop, `ParkAtWall` has to answer two questions at once: **which state** should it be in, and **how fast** should it drive?
 
-In Chapter 22, you learned to put a command's decision into a **pure** method: every fact comes in as a parameter, and the answer comes out as the return value. A pure method can be tested by asking it questions, with no robot. That is exactly what you want here. But a Java method returns **one** value, and this decision has **two** parts.
+In Chapter 23, you learned to put a command's decision into a **pure** method: every fact comes in as a parameter, and the answer comes out as the return value. A pure method can be tested by asking it questions, with no robot. That is exactly what you want here. But a Java method returns **one** value, and this decision has **two** parts.
 
 `FollowLine` got around that with two steps: one method decides the state, and then a switch turns the state into speeds. That works when the speed depends only on the state. Here it does not: in `APPROACHING`, the speed depends on the gap, which is the same fact the state decision uses. You want one method that looks at the facts once and answers both parts together.
 
@@ -402,7 +402,7 @@ expected: <Decision[state=PARKED, speedMetersPerSecond=0.0]> but was: <Decision[
 
 > **Records compare doubles exactly**
 >
-> A record's `equals()` compares a `double` component **exactly**, with no tolerance. Remember Chapter 12: `0.1 + 0.2` is not exactly `0.3` in a computer. So `new Decision(State.APPROACHING, 0.1 + 0.2).equals(new Decision(State.APPROACHING, 0.3))` is `false`. Compare whole records when the numbers are exact, like `0.0` for "stopped" or a constant passed straight through. When a component is **computed**, check the parts separately, with a delta for the `double`: `assertEquals(State.APPROACHING, decision.state())` and `assertEquals(expected, decision.speedMetersPerSecond(), DELTA)`. You will see both kinds in Section 25.5.
+> A record's `equals()` compares a `double` component **exactly**, with no tolerance. Remember Chapter 12: `0.1 + 0.2` is not exactly `0.3` in a computer. So `new Decision(State.APPROACHING, 0.1 + 0.2).equals(new Decision(State.APPROACHING, 0.3))` is `false`. Compare whole records when the numbers are exact, like `0.0` for "stopped" or a constant passed straight through. When a component is **computed**, check the parts separately, with a delta for the `double`: `assertEquals(State.APPROACHING, decision.state())` and `assertEquals(expected, decision.speedMetersPerSecond(), DELTA)`. You will see both kinds in Section 26.5.
 
 ### What a record cannot do
 
@@ -410,9 +410,9 @@ A record is not a general-purpose class, on purpose:
 
 - **No extra fields.** Every value it holds must be a component. Add `private double extra;` inside the braces and Java says `field declaration must be static`, and suggests: `(consider replacing field with record component)`.
 - **No changing.** Every field is `final`. A record cannot be a robot part whose readings change every loop, or a command whose state moves. `Drivetrain` and `ParkAtWall` are classes, and always will be.
-- **No `extends`.** Every record secretly extends Java's `Record` class, the way every enum extends `Enum` (Section 24.4), so it cannot extend anything else. It **can** `implements` an interface.
+- **No `extends`.** Every record secretly extends Java's `Record` class, the way every enum extends `Enum` (Section 25.4), so it cannot extend anything else. It **can** `implements` an interface.
 
-It **can** have methods of its own in its braces, and `static` constants. And a record written inside another class is automatically `static`, just like a nested enum (Section 21.3), so `ParkAtWall.Decision` needs no `ParkAtWall` object.
+It **can** have methods of its own in its braces, and `static` constants. And a record written inside another class is automatically `static`, just like a nested enum (Section 22.3), so `ParkAtWall.Decision` needs no `ParkAtWall` object.
 
 The rule of thumb: **if a class only carries values from one place to another, and they never change, make it a record.** If it does things, or remembers things that change, it is a class.
 
@@ -431,13 +431,13 @@ A record with three components that implements an interface: every measure you m
 > `Logger.recordOutput` has a version that takes any record, and AdvantageScope shows its components as a folder of fields. It works well for records of numbers, booleans, enums, and WPILib types like `Pose2d`. There is one catch, from AdvantageKit's documentation: the **first** time a record type is logged, AdvantageKit has to work out how to store it, which can take more than 100 ms, five whole loops. Its advice is to log each record type for the first time while the robot is disabled. `ParkAtWall` runs in the middle of autonomous, so it logs the decision's two parts separately instead: an enum and a `double`, which cost nothing. Exercise 4 tries the record version.
 
 ---
-## 25.5 Tests First
+## 26.5 Tests First
 
-Your design doc lists six tests for `ParkAtWall`'s decisions, as sentences. Chapter 22 taught you to write a test, watch it fail, and only then make it pass. This time, go one step further: write **all** the tests for a new feature before its code exists. That way of working is called **test-driven development** (Chapter 22 named it), and a capstone is the perfect place to try it, because the design doc has already decided what every answer should be.
+Your design doc lists six tests for `ParkAtWall`'s decisions, as sentences. Chapter 23 taught you to write a test, watch it fail, and only then make it pass. This time, go one step further: write **all** the tests for a new feature before its code exists. That way of working is called **test-driven development** (Chapter 23 named it), and a capstone is the perfect place to try it, because the design doc has already decided what every answer should be.
 
 ### Two people, one keyboard
 
-From here to the end of Section 25.7, you write code together, on the owner's laptop. Teams do that with a habit called **pair programming**:
+From here to the end of Section 26.7, you write code together, on the owner's laptop. Teams do that with a habit called **pair programming**:
 
 - One partner is the **driver**: hands on the keyboard, typing.
 - The other is the **navigator**: reading every line as it appears, thinking one step ahead, checking it against the design doc, and catching typos before the compiler does.
@@ -462,7 +462,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-/** Leg 4: park in front of a wall (Chapter 25). Only the decision's outline, so far. */
+/** Leg 4: park in front of a wall (Chapter 26). Only the decision's outline, so far. */
 public class ParkAtWall extends Command {
 
     /** Everything the parking command can be doing. */
@@ -501,7 +501,7 @@ public class ParkAtWall extends Command {
 }
 ```
 
-The `State` enum follows `FollowLine.State` exactly (Section 21.6): each state carries whether it is a finished state. The record is the one from Section 25.4, nested in the command because it only makes sense here.
+The `State` enum follows `FollowLine.State` exactly (Section 22.6): each state carries whether it is a finished state. The record is the one from Section 26.4, nested in the command because it only makes sense here.
 
 Look at `decide()`'s parameters, because they are the design's most important choice. The robot knows two raw facts: what the rangefinder reads, and how far the robot has driven. The rules in the design doc do not care about either one directly. They care about **the gap** (reading minus park distance: positive is too far, negative is too close) and **the road left** (how much farther the safety limit allows). So the command will work out those two numbers from the robot, and hand them to `decide()`. That keeps the pure part as small as possible: it never needs to know the park distance or the safety limit, only how far from each the robot is.
 
@@ -574,17 +574,17 @@ class ParkAtWallTest {
 }
 ```
 
-Hold each test up against the design doc's list. They are the same six sentences, in the same order, turned into Arrange, Act, Assert (Section 22.2). A few details:
+Hold each test up against the design doc's list. They are the same six sentences, in the same order, turned into Arrange, Act, Assert (Section 23.2). A few details:
 
-- **`import frc.robot.commands.ParkAtWall.Decision;`** imports a nested type by its full name, exactly as Chapter 20 imported `CourseConstants`. After that, the test can say `Decision` and `State` instead of `ParkAtWall.Decision`.
+- **`import frc.robot.commands.ParkAtWall.Decision;`** imports a nested type by its full name, exactly as Chapter 21 imported `CourseConstants`. After that, the test can say `Decision` and `State` instead of `ParkAtWall.Decision`.
 - **Whole records where the answer is exact.** `Drivetrain.AUTO_DRIVE_METERS_PER_SECOND` is a constant passed straight through (the speed is capped at it), and `0.0` is `0.0`, so those tests compare the whole decision in one `assertEquals`.
-- **Parts with a delta where the answer is computed.** `aSmallGapMeansASlowApproach` multiplies, so it checks the state and the speed separately, with a delta, as Section 25.4's callout said.
+- **Parts with a delta where the answer is computed.** `aSmallGapMeansASlowApproach` multiplies, so it checks the state and the speed separately, with a delta, as Section 26.4's callout said.
 - **`tooCloseMeansBackUp` checks only the sign.** The design doc says "too close means back up." It does not say how fast, and the test should not promise more than the design does.
 - **`3.90` in `noRoadLeftAndNoWallGivesUp`** is what the gap looks like when the rangefinder reads its maximum, 4 meters, because there is no wall at all.
 
 ### Step 3: Watch them fail
 
-Run **WPILib: Test Robot Code**. The build fails, and the report (Section 22.2) shows **36 tests, 5 failed**. Click `ParkAtWallTest`:
+Run **WPILib: Test Robot Code**. The build fails, and the report (Section 23.2) shows **36 tests, 5 failed**. Click `ParkAtWallTest`:
 
 ```
 aFarWallMeansFullAutoSpeed()
@@ -611,7 +611,7 @@ Do not commit or push yet. A push would run CI, and CI would (correctly) go red.
 
 ---
 
-## 25.6 The `ParkAtWall` Command
+## 26.6 The `ParkAtWall` Command
 
 Switch drivers. Replace everything in `ParkAtWall.java` with the whole command:
 
@@ -628,7 +628,7 @@ import org.littletonrobotics.junction.Logger;
 
 /**
  * Drive straight at a wall and park a set distance in front of it, using the
- * rangefinder (Chapter 25): fast while the wall is far, slower as it gets close, and
+ * rangefinder (Chapter 26): fast while the wall is far, slower as it gets close, and
  * backing up if the robot ends up too close. Gives up if no wall turns up.
  */
 public class ParkAtWall extends Command {
@@ -659,7 +659,7 @@ public class ParkAtWall extends Command {
      */
     public record Decision(State state, double speedMetersPerSecond) {}
 
-    // Starting values: the Tuning tab can change the gain (Chapter 25). Package-private,
+    // Starting values: the Tuning tab can change the gain (Chapter 26). Package-private,
     // so ParkAtWallTest can use them.
     static final double PARK_KP = 1.5;                  // meters per second, per meter of gap left
     static final double PARK_TOLERANCE_METERS = 0.02;   // this close to the park distance counts
@@ -740,7 +740,7 @@ public class ParkAtWall extends Command {
     }
 
     /**
-     * The decision (Chapter 25): given the state we are in, how far the robot still is
+     * The decision (Chapter 26): given the state we are in, how far the robot still is
      * from where it should stop, and how far it may still drive, what next? A pure
      * function: every fact comes in as a parameter, and it changes nothing.
      *
@@ -784,13 +784,13 @@ public class ParkAtWall extends Command {
 
 Almost nothing in it is new. That is the point of a capstone: every piece comes from a chapter you have finished. Walk through it as a tour of the book:
 
-- **The shape is `FollowLine`'s** (Chapters 21 and 22): an enum of states with `isDone()`, decide then act in `execute()`, a pure static method for the decision, and a thin part that gathers the facts.
-- **The pure part returns a record** (Section 25.4), so it can answer "which state" and "how fast" together. The switch expression has no `default` (Section 21.4): add a fourth state, and it stops compiling until you decide what the new state does.
+- **The shape is `FollowLine`'s** (Chapters 22 and 23): an enum of states with `isDone()`, decide then act in `execute()`, a pure static method for the decision, and a thin part that gathers the facts.
+- **The pure part returns a record** (Section 26.4), so it can answer "which state" and "how fast" together. The switch expression has no `default` (Section 22.4): add a fourth state, and it stops compiling until you decide what the new state does.
 - **`approach()` is a P controller** (Chapter 15), written out by hand because it is one multiplication: `kP * gapMeters`, clamped to the autonomous speed with `MathUtil.clamp`. It checks "parked?" before "out of road?", so a robot that reaches the wall on the very last centimeter of its safety distance still counts as parked.
-- **The heading hold is `DriveUntilLine`'s** (Section 19.6): its own heading controller, from the factory, with the latest gains applied in `initialize()` (Chapter 23), holding the heading the command started with. The rangefinder only sees straight ahead, so driving straight matters.
-- **`parkKp` is a `TunableNumber`** (Chapter 23), read **every loop**, like the follower's steering gain, and for the same reason: a P controller has no memory, so a new gain can take effect mid-run without a jump. The constant `PARK_KP` is its starting value, and stays package-private so the tests can use it.
+- **The heading hold is `DriveUntilLine`'s** (Section 20.6): its own heading controller, from the factory, with the latest gains applied in `initialize()` (Chapter 24), holding the heading the command started with. The rangefinder only sees straight ahead, so driving straight matters.
+- **`parkKp` is a `TunableNumber`** (Chapter 24), read **every loop**, like the follower's steering gain, and for the same reason: a P controller has no memory, so a new gain can take effect mid-run without a jump. The constant `PARK_KP` is its starting value, and stays package-private so the tests can use it.
 - **The gap and the road left are worked out in the thin part,** from the rangefinder and the encoders, in two private helpers. Distances are measured from where the command started, never by resetting the encoders (Chapter 12's rule).
-- **Two outputs, every loop** (Chapter 24): the state, as an enum, and the speed the decision asked for. The rangefinder's reading is already in the log as an input, under `Sensors`.
+- **Two outputs, every loop** (Chapter 25): the state, as an enum, and the speed the decision asked for. The rangefinder's reading is already in the log as an input, under `Sensors`.
 - **`end()` stops the drivetrain** however the command ends. On the loop that decides `PARKED`, `execute()` still sends one drive call with a speed of zero; then `isFinished()` returns `true`, and `end()` stops the motors in the same loop.
 
 Run the tests. **36 tests, 0 failures.** Five red tests went green, and nothing else changed color.
@@ -799,14 +799,14 @@ Now commit, with both of your names on it. GitHub gives a commit to more than on
 
 ```bash
 git add .
-git commit -m "Ch25: ParkAtWall, its decisions tested first" -m "Co-authored-by: Alex Chen <alexchen@users.noreply.github.com>"
+git commit -m "Ch26: ParkAtWall, its decisions tested first" -m "Co-authored-by: Alex Chen <alexchen@users.noreply.github.com>"
 ```
 
 Use your partner's name, and the email address their GitHub account uses for commits. If they keep their email private, GitHub gives them a "noreply" address (they can find it in their GitHub **Settings** > **Emails**). Once pushed, the commit shows both partners' pictures on GitHub.
 
 ---
 
-## 25.7 A Wall for the Simulator, and Leg 4 in the Course
+## 26.7 A Wall for the Simulator, and Leg 4 in the Course
 
 `ParkAtWall` is written and tested, but nothing runs it yet. This section wires it into the course, and gives the simulated robot something to park in front of, so that `ObstacleCourseTest` can check all four legs.
 
@@ -815,7 +815,7 @@ Use your partner's name, and the email address their GitHub account uses for com
 Switch drivers. In `Constants.java`, add these to `CourseConstants`, after `END_POSE`:
 
 ```java
-// Leg 4 (Chapter 25): a wall past the end of the line, and parking in front of it.
+// Leg 4 (Chapter 26): a wall past the end of the line, and parking in front of it.
 public static final double WALL_GAP_METERS = 0.30;             // end of the tape to the wall, measured
 public static final double WALL_Y_METERS =                     // where the wall's face is, in field coordinates
     LINE_DISTANCE_METERS + FOLLOW_LINE_LENGTH_METERS + WALL_GAP_METERS;
@@ -829,12 +829,12 @@ The safety distance is twice the gap, which leaves room for leg 3 ending early, 
 
 ### Step 2: The pretend wall
 
-Open `SensorsIOSim.java`. Since Chapter 24, its rangefinder has always reported a clear road, 4 meters. Now it needs to see a wall.
+Open `SensorsIOSim.java`. Since Chapter 25, its rangefinder has always reported a clear road, 4 meters. Now it needs to see a wall.
 
 Add two constants, after `CLEAR_AHEAD_METERS`:
 
 ```java
-// Where the rangefinder sits, and how wide the wall is (Chapter 25). Package-private,
+// Where the rangefinder sits, and how wide the wall is (Chapter 26). Package-private,
 // so SensorsIOSimTest can use them.
 static final double RANGEFINDER_AHEAD_METERS = 0.07;             // ahead of the robot's center
 static final double WALL_HALF_WIDTH_METERS = 0.15;               // a 30 cm wall
@@ -850,7 +850,7 @@ and add this method, just before `isOnPretendTape()`:
 
 ```java
 /**
- * What the rangefinder reads on the pretend floor (Chapter 25). The wall runs across
+ * What the rangefinder reads on the pretend floor (Chapter 26). The wall runs across
  * the field at CourseConstants.WALL_Y_METERS, centered on the line to follow. The
  * rangefinder sees it only if a straight line out of its front hits the wall.
  *
@@ -877,15 +877,15 @@ private static double distanceToPretendWall(Pose2d robotPose) {
 
 Update the class's Javadoc to mention the wall, too ("the course's T of tape and the wall past its end are where `CourseConstants` says they are").
 
-It is the same trick as `isOnPretendTape()` from Chapter 21, with one more idea. Take it in three steps:
+It is the same trick as `isOnPretendTape()` from Chapter 22, with one more idea. Take it in three steps:
 
-1. **Where is the rangefinder?** `transformBy` moves from the robot's center to a point 7 cm ahead of it, in the robot's own frame, and gives back where that point is in the **field** frame (Section 21.8). The result is a `Pose2d`, so it also knows which way the rangefinder faces.
+1. **Where is the rangefinder?** `transformBy` moves from the robot's center to a point 7 cm ahead of it, in the robot's own frame, and gives back where that point is in the **field** frame (Section 22.8). The result is a `Pose2d`, so it also knows which way the rangefinder faces.
 2. **Is it facing the wall at all?** The wall runs across the field, and the robot faces it when it points up the y axis. `getSin()` of its heading says how much: 1.0 straight at the wall (90 degrees), 0 along it, and negative facing away. If it is not facing the wall, the beam can never reach it.
 3. **Where does the beam hit?** The wall is `WALL_Y_METERS - rangefinder.getY()` meters away **in y**. A beam that leaves at an angle has to travel farther than that to cover the same y distance, so divide by the sine: that is the distance along the beam. Then follow the beam that far in x, using the cosine, and check that it lands on the wall, within its half-width of the line.
 
-That is a tiny version of **ray casting**: follow a straight line out from a sensor, and find the first thing it hits. Robot simulators, video games, and the 3D view in AdvantageScope all use the same idea. The real rangefinder's beam is a cone, not a line (Section 25.2), so the pretend one is a little **pickier** than the real one. That is fine for a simulator: if the code parks with a picky sensor, it will park with a forgiving one.
+That is a tiny version of **ray casting**: follow a straight line out from a sensor, and find the first thing it hits. Robot simulators, video games, and the 3D view in AdvantageScope all use the same idea. The real rangefinder's beam is a cone, not a line (Section 26.2), so the pretend one is a little **pickier** than the real one. That is fine for a simulator: if the code parks with a picky sensor, it will park with a forgiving one.
 
-`RANGEFINDER_AHEAD_METERS` is a pretend number, like the reflectance sensors' 5 cm in Chapter 21. If you want the simulator to match your robot more closely, measure from the middle of the wheels to the front of the rangefinder, and use your number.
+`RANGEFINDER_AHEAD_METERS` is a pretend number, like the reflectance sensors' 5 cm in Chapter 22. If you want the simulator to match your robot more closely, measure from the middle of the wheels to the front of the rangefinder, and use your number.
 
 ### Step 3: Two tests for the wall
 
@@ -934,7 +934,7 @@ class SensorsIOSimTest {
 }
 ```
 
-Two small things to notice. `readAt()` is a **private static helper** inside a test class, which keeps each test to its Arrange, Act, Assert: tests are code, and the same rules for clean code apply. And `() -> pose` is a lambda that always supplies the same pose: a `Supplier<Pose2d>` (Section 18.6) that a test can build in eight characters.
+Two small things to notice. `readAt()` is a **private static helper** inside a test class, which keeps each test to its Arrange, Act, Assert: tests are code, and the same rules for clean code apply. And `() -> pose` is a lambda that always supplies the same pose: a `Supplier<Pose2d>` (Section 19.6) that a test can build in eight characters.
 
 ### Step 4: Leg 4 joins the course
 
@@ -985,14 +985,14 @@ autoChooser.addOption("Park At Wall Only",
         .withName("Park At Wall Only"));
 ```
 
-A brand-new `ParkAtWall` object, not the course's: Chapter 20's one-owner rule.
+A brand-new `ParkAtWall` object, not the course's: Chapter 21's one-owner rule.
 
 Finally, add one package-private method for the course test, next to `getPose()`:
 
 ```java
 /**
  * What the rangefinder reads right now. Package-private, for ObstacleCourseTest
- * (Chapter 25).
+ * (Chapter 26).
  *
  * @return the distance to whatever is ahead, in meters
  */
@@ -1036,11 +1036,11 @@ Why 3 cm? `ParkAtWall` stops the first loop the gap is within 2 cm of the target
 
 Run the tests: **38 tests**, all green. Open the report's **Standard output** for `ObstacleCourseTest`, and read the end of the story: `ParkAtWall started ...`, `ParkAtWall: APPROACHING -> PARKED`, and `ParkAtWall finished in PARKED`, about 0.12 m from the wall.
 
-Before you trust a green test, make it fail on purpose (Section 22.2). Set `WALL_GAP_METERS` to `1.00`: now the wall is farther than the safety distance, the robot gives up, and the test fails on its last line, because the rangefinder reads far more than 10 cm. Put it back.
+Before you trust a green test, make it fail on purpose (Section 23.2). Set `WALL_GAP_METERS` to `1.00`: now the wall is farther than the safety distance, the robot gives up, and the test fails on its last line, because the rangefinder reads far more than 10 cm. Put it back.
 
 ### Step 6: Watch it
 
-Set `ROBOT_MODE` to `SIM`, run the Explorer, and connect AdvantageScope live (**File** > **Connect to Simulator**). Run the course in autonomous. On your Chapter 24 layout's Line Graph, add `RealOutputs` > `ParkAtWall` > `State` to the discrete area and `Sensors` > `DistanceAheadMeters` to the left axis. Watch `Course/Step` reach `Leg 4`, the distance fall smoothly, then slower and slower, and the state flip to `PARKED` just above 0.12. Export the layout again, so leg 4 is in it from now on.
+Set `ROBOT_MODE` to `SIM`, run the Explorer, and connect AdvantageScope live (**File** > **Connect to Simulator**). Run the course in autonomous. On your Chapter 25 layout's Line Graph, add `RealOutputs` > `ParkAtWall` > `State` to the discrete area and `Sensors` > `DistanceAheadMeters` to the left axis. Watch `Course/Step` reach `Leg 4`, the distance fall smoothly, then slower and slower, and the state flip to `PARKED` just above 0.12. Export the layout again, so leg 4 is in it from now on.
 
 Then try teleop. Drive the simulated robot toward the pretend wall with the sticks: Chapter 9's wall stop, which lives in `DriveWithSticks` now, stops it 20 cm short, in the simulator, for the first time. The pretend wall did not only make leg 4 testable; it made an old feature testable too.
 
@@ -1053,7 +1053,7 @@ Commit, with both names, and push:
 ```bash
 git status
 git add .
-git commit -m "Ch25: Pretend wall, and leg 4 in the course" -m "Co-authored-by: Alex Chen <alexchen@users.noreply.github.com>"
+git commit -m "Ch26: Pretend wall, and leg 4 in the course" -m "Co-authored-by: Alex Chen <alexchen@users.noreply.github.com>"
 git push -u origin leg-4
 ```
 
@@ -1064,7 +1064,7 @@ The **owner** opens the pull request. Link the design doc in the description ("B
 Wait for the green check. If you have time, merge now. If not, merge at the start of meeting 2. That is the end of meeting 1.
 
 ---
-## 25.8 On the Floor: Tune It
+## 26.8 On the Floor: Tune It
 
 Meeting 2 starts on the floor. The simulator has proved that the logic is right. Only the real robot, on your real floor, in front of your real wall, can prove the numbers are.
 
@@ -1080,15 +1080,15 @@ Everything in this section and the next goes on this branch.
 
 ### Step 1: Build the course, and measure it
 
-Lay out the course exactly as Chapters 12 to 21 had it: the start line, the crossbar, and the line to follow. Stand your wall past the end of the tape, square to the line, centered on it. Measure from the end of the tape to the face of the wall, and put your number in `WALL_GAP_METERS`. Anywhere from 20 to 40 cm works; 30 is a good start.
+Lay out the course exactly as Chapters 12 to 22 had it: the start line, the crossbar, and the line to follow. Stand your wall past the end of the tape, square to the line, centered on it. Measure from the end of the tape to the face of the wall, and put your number in `WALL_GAP_METERS`. Anywhere from 20 to 40 cm works; 30 is a good start.
 
 Check `TUNING_MODE` is still `true`, and `ROBOT_MODE` is `REAL`. Turn the XRP on, run the Explorer, and open Elastic.
 
-Before driving anything, check the sensor. In teleop, drive the robot slowly toward the wall and watch `Distance Ahead (m)` on the dashboard. Does it fall smoothly as the robot gets closer? Does it read about 10 cm when a ruler says 10 cm? If it jumps around, or reads 4 m with the wall right there, fix the wall before you tune anything (Section 25.2): no gain can fix a sensor that cannot hear the echo.
+Before driving anything, check the sensor. In teleop, drive the robot slowly toward the wall and watch `Distance Ahead (m)` on the dashboard. Does it fall smoothly as the robot gets closer? Does it read about 10 cm when a ruler says 10 cm? If it jumps around, or reads 4 m with the wall right there, fix the wall before you tune anything (Section 26.2): no gain can fix a sensor that cannot hear the echo.
 
 ### Step 2: Tune Park kP
 
-Pick **Park At Wall Only** in the **Auto Routine** chooser. Put the robot on the line, facing the wall, about where leg 3 leaves it. In Elastic's **Tuning** tab, add **ParkAtWall/Park kP** (it is in the **Tuning** table, under **ParkAtWall**, next to your other tunable numbers). Then run autonomous, watch, disable, put the robot back, and run it again, changing one number at a time, exactly as you tuned the course in Section 23.10.
+Pick **Park At Wall Only** in the **Auto Routine** chooser. Put the robot on the line, facing the wall, about where leg 3 leaves it. In Elastic's **Tuning** tab, add **ParkAtWall/Park kP** (it is in the **Tuning** table, under **ParkAtWall**, next to your other tunable numbers). Then run autonomous, watch, disable, put the robot back, and run it again, changing one number at a time, exactly as you tuned the course in Section 24.10.
 
 What to look for:
 
@@ -1097,35 +1097,35 @@ What to look for:
 | Creeps the last few centimeters, very slowly, or stops short and never finishes | kP is too low: tiny gap, tiny speed, and friction wins | Raise Park kP |
 | Bumps the wall, or stops past 10 cm and then backs up | kP is too high: the robot cannot stop in time | Lower Park kP |
 | Rocks back and forth near the wall before parking | kP too high, or a noisy reading near the target | Lower Park kP; check the wall is hard and square |
-| Turns as it drives, and ends up crooked | The heading hold needs tuning, or a wheel is slipping | Re-check the heading gains from Chapter 23 on the bench |
-| Says `NO_WALL` right away, or drives on past the wall | The rangefinder is not hearing the wall | Check the wall (Section 25.2), and the reading in Step 1 |
+| Turns as it drives, and ends up crooked | The heading hold needs tuning, or a wheel is slipping | Re-check the heading gains from Chapter 24 on the bench |
+| Says `NO_WALL` right away, or drives on past the wall | The rangefinder is not hearing the wall | Check the wall (Section 26.2), and the reading in Step 1 |
 
-Write each try in your tuning log in `reflections.md`, the same table as Chapter 23: the value, what you saw, and what you will try next. Two or three tries is usually enough for one gain.
+Write each try in your tuning log in `reflections.md`, the same table as Chapter 24: the value, what you saw, and what you will try next. Two or three tries is usually enough for one gain.
 
 Then run the **whole course**, with **Obstacle Course** in the chooser, a few times. Leg 4 now starts wherever leg 3 really ended, which is a better test than any spot you placed it by hand.
 
 > **Why does it park a little long?**
 >
-> You will probably see the robot stop about 1 to 2 cm farther from the wall than 10 cm, every time. That is not a tuning problem. `ParkAtWall` stops the first loop the gap is inside the tolerance, and it arrives from the far side, so it stops near the far edge. The simulator does the same (Section 25.7). If you want it nearer 10 cm, a smaller tolerance helps, at the cost of a slower, fussier finish. Extension A in the Exercises gives it a smarter finish instead.
+> You will probably see the robot stop about 1 to 2 cm farther from the wall than 10 cm, every time. That is not a tuning problem. `ParkAtWall` stops the first loop the gap is inside the tolerance, and it arrives from the far side, so it stops near the far edge. The simulator does the same (Section 26.7). If you want it nearer 10 cm, a smaller tolerance helps, at the cost of a slower, fussier finish. Extension A in the Exercises gives it a smarter finish instead.
 
 ### Step 3: Write the numbers down
 
-Copy your tuned Park kP into `PARK_KP` in `ParkAtWall.java`. Also copy any other number you changed on the Tuning tab today. Build, and run the tests: still 38, still green. They now check the numbers you chose (Section 23.10's habit).
+Copy your tuned Park kP into `PARK_KP` in `ParkAtWall.java`. Also copy any other number you changed on the Tuning tab today. Build, and run the tests: still 38, still green. They now check the numbers you chose (Section 24.10's habit).
 
 ```bash
 git add .
-git commit -m "Ch25: Tuned Park kP and the wall gap on our floor" -m "Co-authored-by: Sam Rivera <samrivera@users.noreply.github.com>"
+git commit -m "Ch26: Tuned Park kP and the wall gap on our floor" -m "Co-authored-by: Sam Rivera <samrivera@users.noreply.github.com>"
 ```
 
 (The teammate is driving now, so the trailer names the owner.)
 
 ---
 
-## 25.9 Getting Ready to Ship
+## 26.9 Getting Ready to Ship
 
 A **release** is a version of your code that you are willing to stand behind: a specific commit, with a name, that you have proved works, and that anyone can get back exactly, any time. Until now, the Explorer has only had "whatever is on `main` right now," which changes every time anyone merges anything. A release does not change.
 
-Why does that matter for a robot? Picture a competition. Your robot won its morning matches. At lunch, someone merges "a small fix." In the afternoon, autonomous misses every time. What was on the robot this morning? If the morning's code was a release, the answer is one command away. If not, it is a guessing game. Chapter 39 builds a full release process for competition. This section is the first, small version of it.
+Why does that matter for a robot? Picture a competition. Your robot won its morning matches. At lunch, someone merges "a small fix." In the afternoon, autonomous misses every time. What was on the robot this morning? If the morning's code was a release, the answer is one command away. If not, it is a guessing game. Chapter 40 builds a full release process for competition. This section is the first, small version of it.
 
 Three things need to change before the Explorer can be released.
 
@@ -1134,19 +1134,19 @@ Three things need to change before the Explorer can be released.
 Open `Constants.java` and set:
 
 ```java
-// Live tuning from the dashboard (Chapter 23): true while developing, false at competition.
+// Live tuning from the dashboard (Chapter 24): true while developing, false at competition.
 public static final boolean TUNING_MODE = false;
 ```
 
-Chapter 23 explained why: with tuning off, no number on any dashboard can change a gain, so the robot runs exactly the numbers your tests checked. The Tuning tab in Elastic goes empty, which is how you know it worked. When you want to tune again, after the release, turn it back on in a branch.
+Chapter 24 explained why: with tuning off, no number on any dashboard can change a gain, so the robot runs exactly the numbers your tests checked. The Tuning tab in Elastic goes empty, which is how you know it worked. When you want to tune again, after the release, turn it back on in a branch.
 
 Check `ROBOT_MODE` while you are there. It must be `REAL`.
 
-Build and run the tests: still 38. `TunableNumber`'s test passes with tuning off too, because a tunable number with tuning off is its default (Section 23.8).
+Build and run the tests: still 38. `TunableNumber`'s test passes with tuning off too, because a tunable number with tuning off is its default (Section 24.8).
 
 ### Step 2: Every log knows its code
 
-In Chapter 24, a log told you everything about a run: every input, every output, every message. Except one thing: **which code made it?** Months from now, you will open a log, find something strange, and want to replay it. Replay only tells the truth with the same code that made the log (Section 24.6), so you need to know exactly which commit that was.
+In Chapter 25, a log told you everything about a run: every input, every output, every message. Except one thing: **which code made it?** Months from now, you will open a log, find something strange, and want to replay it. Replay only tells the truth with the same code that made the log (Section 25.6), so you need to know exactly which commit that was.
 
 Every commit already has a name that never changes: its **hash**, the long string of letters and numbers you have seen in `git log` since Chapter 3. So the fix is to write that hash into the log's metadata, on every run. AdvantageKit's documentation recommends a Gradle plugin called **gversion** for this, and AdvantageKit's own template projects use it. It runs Git every time you build, and writes what Git says into a small Java file.
 
@@ -1163,7 +1163,7 @@ plugins {
 Then add this block at the bottom of the file:
 
 ```groovy
-// Write the Git commit into BuildConstants.java on every build (Chapter 25).
+// Write the Git commit into BuildConstants.java on every build (Chapter 26).
 project.compileJava.dependsOn(createVersionFile)
 gversion {
     srcDir       = "src/main/java/"
@@ -1196,19 +1196,19 @@ public final class BuildConstants {
 }
 ```
 
-It is a holder class, like `Constants` (Chapter 20): `final`, a `private` constructor, and nothing but constants. `GIT_SHA` is the hash of the commit you built from. `DIRTY` is `1` if files Git tracks had changes you had not yet added or committed when you built, and `0` if not. (Yours says `1` right now, because you just changed `build.gradle`.)
+It is a holder class, like `Constants` (Chapter 21): `final`, a `private` constructor, and nothing but constants. `GIT_SHA` is the hash of the commit you built from. `DIRTY` is `1` if files Git tracks had changes you had not yet added or committed when you built, and `0` if not. (Yours says `1` right now, because you just changed `build.gradle`.)
 
 This file is **generated**: rewritten on every build. Never edit it, and never commit it, or every build would change a file in Git, and `DIRTY` would never be `0`. Open `.gitignore` and add a line at the bottom:
 
 ```
-# Written by gversion on every build (Chapter 25)
+# Written by gversion on every build (Chapter 26)
 src/main/java/frc/robot/BuildConstants.java
 ```
 
 Now record it. Open `Robot.java`, and right after the two `recordMetadata` lines at the top of the constructor, add:
 
 ```java
-// Which code made this log (Chapter 25): the commit, and whether it had uncommitted changes.
+// Which code made this log (Chapter 26): the commit, and whether it had uncommitted changes.
 Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
 Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
 Logger.recordMetadata("GitDirty", switch (BuildConstants.DIRTY) {
@@ -1219,9 +1219,9 @@ Logger.recordMetadata("GitDirty", switch (BuildConstants.DIRTY) {
 Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
 ```
 
-That is a switch expression (Section 21.4) on an `int`, which is why it needs a `default`: unlike an enum, an `int` has billions of possible values, and the compiler insists every one of them has an answer. It is the same code as AdvantageKit's template projects use. Metadata has to be recorded before `Logger.start()`, and these lines are.
+That is a switch expression (Section 22.4) on an `int`, which is why it needs a `default`: unlike an enum, an `int` has billions of possible values, and the compiler insists every one of them has an answer. It is the same code as AdvantageKit's template projects use. Metadata has to be recorded before `Logger.start()`, and these lines are.
 
-Build, run the Explorer for a few seconds, and stop. Open the new log in AdvantageScope, and add a **Metadata** tab (the **+** button). There they are: `GitSHA`, `GitBranch`, `GitDirty` saying `Uncommitted changes`, and your `ProjectName` and `RobotMode` from Chapters 17 and 24. Commit, build again, run again, and the new log's `GitDirty` says `All changes committed`. That is the state every release log should be in.
+Build, run the Explorer for a few seconds, and stop. Open the new log in AdvantageScope, and add a **Metadata** tab (the **+** button). There they are: `GitSHA`, `GitBranch`, `GitDirty` saying `Uncommitted changes`, and your `ProjectName` and `RobotMode` from Chapters 17 and 25. Commit, build again, run again, and the new log's `GitDirty` says `All changes committed`. That is the state every release log should be in.
 
 > **Why "dirty" matters**
 >
@@ -1233,7 +1233,7 @@ Build, run the Explorer for a few seconds, and stop. Open the new log in Advanta
 
 ### Step 3: A README for strangers
 
-Your `README.md` has grown since Chapter 3: a line about the project, maybe the CI badge from Chapter 22. A release needs a README that someone who has never met you could use. Rewrite it with these headings:
+Your `README.md` has grown since Chapter 3: a line about the project, maybe the CI badge from Chapter 23. A release needs a README that someone who has never met you could use. Rewrite it with these headings:
 
 - **What it does**: two or three sentences, and a picture of the course if you have one.
 - **The course**: every measurement, from `CourseConstants`, so someone can lay it out on their own floor.
@@ -1248,7 +1248,7 @@ Look at the whole diff before you commit: `git diff main` (Chapter 11). You shou
 
 ```bash
 git add .
-git commit -m "Ch25: Ready for v1.0.0: tuning off, Git info in every log, README" -m "Co-authored-by: Sam Rivera <samrivera@users.noreply.github.com>"
+git commit -m "Ch26: Ready for v1.0.0: tuning off, Git info in every log, README" -m "Co-authored-by: Sam Rivera <samrivera@users.noreply.github.com>"
 git push -u origin release-v1.0.0
 ```
 
@@ -1268,7 +1268,7 @@ Approve, merge, and delete the branch. Both partners: `git checkout main` and `g
 
 ---
 
-## 25.10 Prove It, Then Tag It
+## 26.10 Prove It, Then Tag It
 
 The code for v1.0.0 is on `main`. Before it gets a name, it has to pass acceptance criteria 5 and 6: three clean runs, with logs, and a replay that matches.
 
@@ -1278,11 +1278,11 @@ On the owner's laptop, on `main`, with no changes (`git status` says "nothing to
 
 **Clean** means: started from the start line, no hands on the robot until it is parked, and parked without touching the wall. If a run is not clean, the count starts over. That rule sounds harsh. It is what makes "three in a row" mean something: one lucky run is easy, three in a row means the robot does it on purpose.
 
-If you cannot get three in a row, that is a real finding, not a failure of the chapter. Open the failed run's log and find out why (Chapter 24's replay workflow). Then fix it in a new branch, with a pull request, and come back here. Every fix before the tag makes v1.0.0 better.
+If you cannot get three in a row, that is a real finding, not a failure of the chapter. Open the failed run's log and find out why (Chapter 25's replay workflow). Then fix it in a new branch, with a pull request, and come back here. Every fix before the tag makes v1.0.0 better.
 
 ### Step 2: Check the logs
 
-Open each of the three logs in AdvantageScope, with your layout from Section 25.7. For each one, check and write down in a table in `reflections.md`:
+Open each of the three logs in AdvantageScope, with your layout from Section 26.7. For each one, check and write down in a table in `reflections.md`:
 
 | Run | Log file | Course time (s) | Final distance (m) | Ended in | GitDirty |
 |---|---|---|---|---|---|
@@ -1294,9 +1294,9 @@ Open each of the three logs in AdvantageScope, with your layout from Section 25.
 - **Final distance**: `Sensors` > `DistanceAheadMeters` at the moment `ParkAtWall/State` turns to `PARKED`.
 - **GitDirty** and **GitSHA** from the Metadata tab. All three runs must show the **same** `GitSHA`, and it must match the newest commit on `main`: run `git log --oneline -1` and compare the first seven characters.
 
-Then replay one of the three runs (Section 24.9) and check it in a **Statistics** tab, as in Section 24.10: `RealOutputs` against `ReplayOutputs` for the requested volts, and now for `ParkAtWall/SpeedMetersPerSecond` too. Every error should be zero. A replay that matches is your proof that the log is complete, including the rangefinder you just used to park.
+Then replay one of the three runs (Section 25.9) and check it in a **Statistics** tab, as in Section 25.10: `RealOutputs` against `ReplayOutputs` for the requested volts, and now for `ParkAtWall/SpeedMetersPerSecond` too. Every error should be zero. A replay that matches is your proof that the log is complete, including the rangefinder you just used to park.
 
-Copy the three logs into the folder outside your project where you keep logs worth keeping (Chapter 24's Git exercise), named so you will know them in a year: `v1.0.0-run1.wpilog`, and so on.
+Copy the three logs into the folder outside your project where you keep logs worth keeping (Chapter 25's Git exercise), named so you will know them in a year: `v1.0.0-run1.wpilog`, and so on.
 
 ### Step 3: Name the version
 
@@ -1330,7 +1330,7 @@ git push origin v1.0.0
 
 Check it: `git tag` lists your tags, and `git show v1.0.0` shows the tag's message, then the commit it points at.
 
-Pushing the tag also starts your **Build and test** workflow from Chapter 22, because a workflow that runs `on: push` runs for tags as well as branches. Open the **Actions** tab on GitHub: there is a run for `v1.0.0`. One more green check, on the exact code you are releasing.
+Pushing the tag also starts your **Build and test** workflow from Chapter 23, because a workflow that runs `on: push` runs for tags as well as branches. Open the **Actions** tab on GitHub: there is a run for `v1.0.0`. One more green check, on the exact code you are releasing.
 
 ### Step 5: Publish the release on GitHub
 
@@ -1408,43 +1408,43 @@ Upload it wherever your team keeps videos, and add the link to the release notes
 >
 > Ask your mentor where team videos go before posting anything publicly, and leave out faces and names of anyone who has not said yes. A video only needs the robot, the course, and the screen.
 
-Look at the acceptance criteria in Section 25.1 one more time. Tick off all eight. The Explorer is released.
+Look at the acceptance criteria in Section 26.1 one more time. Tick off all eight. The Explorer is released.
 
 ---
 
-## 25.11 The Explorer, and What Comes Next
+## 26.11 The Explorer, and What Comes Next
 
 ### What you built
 
 Look back at what is in `v1.0.0`, and where each piece came from:
 
-- **A robot program shaped like a real team's.** Subsystems and commands (Chapter 19), wired in a `RobotContainer` (Chapter 20), with button bindings, a default command, and an autonomous chooser (Chapter 23).
-- **An autonomous routine built from parts.** Measured legs with PID (Chapter 15), a state machine that follows a line (Chapter 21), and a parking command that combines both ideas, all in one command group with a timeline of steps (Chapters 20 and 24).
+- **A robot program shaped like a real team's.** Subsystems and commands (Chapter 20), wired in a `RobotContainer` (Chapter 21), with button bindings, a default command, and an autonomous chooser (Chapter 24).
+- **An autonomous routine built from parts.** Measured legs with PID (Chapter 15), a state machine that follows a line (Chapter 22), and a parking command that combines both ideas, all in one command group with a timeline of steps (Chapters 21 and 25).
 - **Control grounded in physics.** Kinematics (Chapter 13), odometry (Chapter 14), and feedforward from SysId characterization (Chapter 16).
-- **A robot you can test without a robot.** IO layers for the drivetrain and the sensors (Chapters 17 and 24), a simulated floor with tape and a wall, and 38 tests that run on every push (Chapter 22).
-- **A robot that explains itself.** One log per run, with every input, every decision, and the code that made it, and replay to ask the log new questions (Chapter 24).
-- **A way of working.** Branches, pull requests, reviews, design docs, tests first, tuning logs, and a tagged release (Chapters 3, 11, 22, and 25).
+- **A robot you can test without a robot.** IO layers for the drivetrain and the sensors (Chapters 17 and 25), a simulated floor with tape and a wall, and 38 tests that run on every push (Chapter 23).
+- **A robot that explains itself.** One log per run, with every input, every decision, and the code that made it, and replay to ask the log new questions (Chapter 25).
+- **A way of working.** Branches, pull requests, reviews, design docs, tests first, tuning logs, and a tagged release (Chapters 3, 11, 23, and 26).
 
 Every one of those carries forward. That is the point of learning them on a robot that fits on a desk.
 
 ### From the Explorer to the Mini Swerve
 
-Chapter 26 starts Section VI and a new robot: the **Mini Swerve**, a team robot with a real roboRIO, Kraken X60 motors with Talon FX motor controllers on a CAN bus, CANcoder absolute encoders, a Pigeon 2 gyro, and a camera. It is shared, so you will work on it in a small team, with the habits from this chapter: design docs, reviews, and releases.
+Chapter 27 starts Section VI and a new robot: the **Mini Swerve**, a team robot with a real roboRIO, Kraken X60 motors with Talon FX motor controllers on a CAN bus, CANcoder absolute encoders, a Pigeon 2 gyro, and a camera. It is shared, so you will work on it in a small team, with the habits from this chapter: design docs, reviews, and releases.
 
 Here is how your Explorer maps onto it. Read the right column as a preview, not a promise of exact names:
 
 | On the Explorer | On the Mini Swerve |
 |---|---|
-| Your program runs on your laptop and talks to the XRP over Wi-Fi | Your program is deployed to the roboRIO and runs on the robot itself (Chapter 26) |
-| `XRPMotor` and "pretend volts" (Chapter 16) | Motor controllers on CAN, and real volts from a real battery (Chapters 26 and 27) |
-| `DrivetrainIOXRP`, `DrivetrainIOSim` | New IO implementations for each swerve module, real and simulated: the **same pattern** (Chapters 26 to 29) |
-| `DifferentialDriveKinematics` | `SwerveDriveKinematics`: the same idea, in two directions (Chapter 28) |
-| `DifferentialDriveOdometry` and the XRP gyro | A pose estimator, the Pigeon 2, and later the camera (Chapters 29, 30, and 33) |
-| A course built from commands | Paths drawn in PathPlanner (Chapter 31) |
-| SysId on pretend volts | SysId on brushless motors (Chapter 32) |
-| Parking with the rangefinder | Lining up on an AprilTag with the camera (Chapter 33) |
+| Your program runs on your laptop and talks to the XRP over Wi-Fi | Your program is deployed to the roboRIO and runs on the robot itself (Chapter 27) |
+| `XRPMotor` and "pretend volts" (Chapter 16) | Motor controllers on CAN, and real volts from a real battery (Chapters 27 and 28) |
+| `DrivetrainIOXRP`, `DrivetrainIOSim` | New IO implementations for each swerve module, real and simulated: the **same pattern** (Chapters 27 to 30) |
+| `DifferentialDriveKinematics` | `SwerveDriveKinematics`: the same idea, in two directions (Chapter 29) |
+| `DifferentialDriveOdometry` and the XRP gyro | A pose estimator, the Pigeon 2, and later the camera (Chapters 30, 31, and 34) |
+| A course built from commands | Paths drawn in PathPlanner (Chapter 32) |
+| SysId on pretend volts | SysId on brushless motors (Chapter 33) |
+| Parking with the rangefinder | Lining up on an AprilTag with the camera (Chapter 34) |
 | `ROBOT_MODE` set by hand, because the XRP's `isReal()` is always false | A roboRIO knows it is real, so the mode can follow `RobotBase.isReal()`, as AdvantageKit's templates do |
-| Logs in your project's `logs` folder | Logs on a USB stick in the roboRIO (Section 24.12) |
+| Logs in your project's `logs` folder | Logs on a USB stick in the roboRIO (Section 25.12) |
 | Subsystems, commands, `RobotContainer`, tests, CI, logging, replay, tags | **The same.** |
 
 Read the last row twice. The biggest things you learned on the Explorer, the shape of a command-based program, the IO layer, tests, logs, and how to work with a team in Git, do not change at all. What changes is underneath: the hardware, and the math of a drivetrain that can move in any direction.
@@ -1461,7 +1461,7 @@ Do not take your Explorer apart. It is still the fastest robot you have for tryi
 
 ## Chapter Summary
 
-> **What you learned in Chapter 25**
+> **What you learned in Chapter 26**
 >
 > * A capstone starts with **acceptance criteria**: a short list of checks that prove the work is done. A **design doc** (goal, done means, what changes, states, tests, simulation, logging, tuning, risks, who does what) is reviewed as a pull request before any code.
 > * **Leg 4** parks in front of a wall: the ultrasonic rangefinder measures the gap (distance = speed of sound x echo time / 2), and a **P controller** turns the gap into a speed, backing up if the robot is too close.
@@ -1511,7 +1511,7 @@ System.out.println(new ParkAtWall.Decision(ParkAtWall.State.APPROACHING, 0.1 + 0
     .equals(new ParkAtWall.Decision(ParkAtWall.State.APPROACHING, 0.3)));
 ```
 
-**4. Log the whole record.** In a practice branch, add `Logger.recordOutput("ParkAtWall/Decision", decision);` in `execute()`. Run the course and open the log: how does AdvantageScope show a record? Now graph `RealOutputs` > `LoggedRobot` > `FullCycleMS` (Section 24.11's Practice 2) around the moment leg 4 starts. Is the first loop of leg 4 slow? AdvantageKit's documentation says to log a record type for the first time while the robot is disabled. Try it: log a `Decision` once at the end of `RobotContainer`'s constructor, and compare. Delete the branch.
+**4. Log the whole record.** In a practice branch, add `Logger.recordOutput("ParkAtWall/Decision", decision);` in `execute()`. Run the course and open the log: how does AdvantageScope show a record? Now graph `RealOutputs` > `LoggedRobot` > `FullCycleMS` (Section 25.11's Practice 2) around the moment leg 4 starts. Is the first loop of leg 4 slow? AdvantageKit's documentation says to log a record type for the first time while the robot is disabled. Try it: log a `Decision` once at the end of `RobotContainer`'s constructor, and compare. Delete the branch.
 
 **5. Read a real release.** Open WPILib's GitHub repository (`wpilibsuite/allwpilib`) and find its **Releases**. Pick the newest one. What is its version, and which of its three numbers changed since the one before? Skim its notes: find one bug fix and one new feature. Then do the same for AdvantageKit. Which would you update to the day before a competition, and which would you wait on?
 
@@ -1521,28 +1521,28 @@ System.out.println(new ParkAtWall.Decision(ParkAtWall.State.APPROACHING, 0.1 + 0
 
 For pairs who finish early, and for the catch-up meetings at the end of the season. Each extension is a small project: a short design doc (as a pull request), the code with tests first, and a new release, `v1.1.0` (a new feature: minor version). Pick one.
 
-- **A. Settle, then park.** Right now, `ParkAtWall` parks the first loop the gap is in tolerance. Add a `SETTLING` state: the robot must stay in tolerance for 0.25 seconds before it counts as parked, and goes back to `APPROACHING` if it drifts out. You will need a remembered start time (or a `Debouncer`, Section 20.6) and new tests for every new arrow. Does it park nearer 10 cm?
+- **A. Settle, then park.** Right now, `ParkAtWall` parks the first loop the gap is in tolerance. Add a `SETTLING` state: the robot must stay in tolerance for 0.25 seconds before it counts as parked, and goes back to `APPROACHING` if it drifts out. You will need a remembered start time (or a `Debouncer`, Section 21.6) and new tests for every new arrow. Does it park nearer 10 cm?
 - **B. Come home.** After parking, turn around and drive back to the corner of leg 1, using odometry. Which existing commands can you reuse? Where does the robot think it is when it gets there, and how close is that to where it really is? (Chapter 14's "square that never closes" is back.)
 - **C. Beat the clock.** Record the course's total time as an output (`Course/ElapsedSeconds`), and make the course faster without losing three clean runs in a row: higher speeds, smarter timeouts, shorter searches. Keep a tuning log. What is your best time, and what finally stopped you going faster?
-- **D. Wait for the road to clear.** On leg 1, if something is within 15 cm of the rangefinder, wait until it moves, then carry on. (If your pair did Chapter 21's Collab lab, you have a head start: `WAITING_FOR_CLEAR`.) How do you test it in the simulator, where the only wall is at the end?
+- **D. Wait for the road to clear.** On leg 1, if something is within 15 cm of the rangefinder, wait until it moves, then carry on. (If your pair did Chapter 22's Collab lab, you have a head start: `WAITING_FOR_CLEAR`.) How do you test it in the simulator, where the only wall is at the end?
 - **E. Your own idea.** Anything that uses the Explorer's sensors in a new way. The design doc must be reviewed by a mentor or another pair before you start.
 
 ### Build (XRP Explorer)
 
 Design, build, prove, and release leg 4.
 
-1. Check that the teammate is a collaborator on the owner's repository, and both have `main` from the end of Chapter 24 (30 tests).
-2. Write the leg 4 design doc together in `docs/leg-4-design.md`, open it as a pull request, review it with the five questions, and merge it (Section 25.3).
-3. On branch `leg-4`, pair-program the outline of `ParkAtWall` and `ParkAtWallTest`. Run the tests: **36 tests, 5 failed** (Section 25.5).
-4. Write the whole `ParkAtWall`. Run the tests: **36, all green**. Commit with a `Co-authored-by:` trailer (Section 25.6).
-5. Add the leg 4 constants, the pretend wall and `SensorsIOSimTest`, leg 4 in the course and the chooser, `getDistanceAheadMeters()`, and the new `courseParksAtTheWall` test. Run the tests: **38**. Make it fail on purpose, then put it back. Watch leg 4 in AdvantageScope, and export the layout (Section 25.7).
+1. Check that the teammate is a collaborator on the owner's repository, and both have `main` from the end of Chapter 25 (30 tests).
+2. Write the leg 4 design doc together in `docs/leg-4-design.md`, open it as a pull request, review it with the five questions, and merge it (Section 26.3).
+3. On branch `leg-4`, pair-program the outline of `ParkAtWall` and `ParkAtWallTest`. Run the tests: **36 tests, 5 failed** (Section 26.5).
+4. Write the whole `ParkAtWall`. Run the tests: **36, all green**. Commit with a `Co-authored-by:` trailer (Section 26.6).
+5. Add the leg 4 constants, the pretend wall and `SensorsIOSimTest`, leg 4 in the course and the chooser, `getDistanceAheadMeters()`, and the new `courseParksAtTheWall` test. Run the tests: **38**. Make it fail on purpose, then put it back. Watch leg 4 in AdvantageScope, and export the layout (Section 26.7).
 6. Push, open the leg 4 pull request, review it against the design doc, wait for the green check, and merge.
-7. On branch `release-v1.0.0`, measure your wall gap, tune Park kP on the floor with a tuning log, and copy the values in (Section 25.8).
-8. Turn tuning off, add gversion and the Git metadata, ignore `BuildConstants.java`, and rewrite the README. Check the Metadata tab. Open the release pull request, review it with the release checklist, and merge (Section 25.9).
-9. On `main`, run the course three times in a row, clean. Check the three logs and replay one (Section 25.10).
+7. On branch `release-v1.0.0`, measure your wall gap, tune Park kP on the floor with a tuning log, and copy the values in (Section 26.8).
+8. Turn tuning off, add gversion and the Git metadata, ignore `BuildConstants.java`, and rewrite the README. Check the Metadata tab. Open the release pull request, review it with the release checklist, and merge (Section 26.9).
+9. On `main`, run the course three times in a row, clean. Check the three logs and replay one (Section 26.10).
 10. Tag `v1.0.0`, push the tag, check the Actions run, publish the GitHub release with notes, and add the demo video link when it is done.
 
-If your release page has a green check, three runs in its notes, and a video link, and `git checkout v1.0.0` builds and parks, the Explorer is finished, and you are ready for Chapter 26.
+If your release page has a green check, three runs in its notes, and a video link, and `git checkout v1.0.0` builds and parks, the Explorer is finished, and you are ready for Chapter 27.
 
 ### Reflect
 
@@ -1555,7 +1555,7 @@ Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 5. Why do you tag the exact commit your three logs name, and not just "whatever is on `main`"? Why must release runs be built with `GitDirty` saying "All changes committed"?
 6. Pick two classes from your Explorer. For each, say whether you expect it to carry over to the Mini Swerve unchanged, change a little, or be replaced, and why.
 
-If any answer feels shaky, re-read Sections 25.3, 25.4, 25.6, 25.9, and 25.11.
+If any answer feels shaky, re-read Sections 26.3, 26.4, 26.6, 26.9, and 26.11.
 
 ### Git
 
@@ -1566,7 +1566,7 @@ git checkout main
 git pull
 git checkout -b design-leg-4
 git add docs/leg-4-design.md
-git commit -m "Ch25: Design doc for leg 4, park at the wall"
+git commit -m "Ch26: Design doc for leg 4, park at the wall"
 git push -u origin design-leg-4
 ```
 
@@ -1577,9 +1577,9 @@ git checkout main
 git pull
 git checkout -b leg-4
 git add .
-git commit -m "Ch25: ParkAtWall, its decisions tested first" -m "Co-authored-by: Teammate Name <teammate@users.noreply.github.com>"
+git commit -m "Ch26: ParkAtWall, its decisions tested first" -m "Co-authored-by: Teammate Name <teammate@users.noreply.github.com>"
 git add .
-git commit -m "Ch25: Pretend wall, and leg 4 in the course" -m "Co-authored-by: Teammate Name <teammate@users.noreply.github.com>"
+git commit -m "Ch26: Pretend wall, and leg 4 in the course" -m "Co-authored-by: Teammate Name <teammate@users.noreply.github.com>"
 git push -u origin leg-4
 ```
 
@@ -1590,9 +1590,9 @@ git checkout main
 git pull
 git checkout -b release-v1.0.0
 git add .
-git commit -m "Ch25: Tuned Park kP and the wall gap on our floor" -m "Co-authored-by: Owner Name <owner@users.noreply.github.com>"
+git commit -m "Ch26: Tuned Park kP and the wall gap on our floor" -m "Co-authored-by: Owner Name <owner@users.noreply.github.com>"
 git add .
-git commit -m "Ch25: Ready for v1.0.0: tuning off, Git info in every log, README" -m "Co-authored-by: Owner Name <owner@users.noreply.github.com>"
+git commit -m "Ch26: Ready for v1.0.0: tuning off, Git info in every log, README" -m "Co-authored-by: Owner Name <owner@users.noreply.github.com>"
 git push -u origin release-v1.0.0
 ```
 
@@ -1629,7 +1629,7 @@ Afterward, write two sentences in `reflections.md`: what did the other pair's RE
 - Read AdvantageKit's **Version Control** page (link below), including the section on **event deploy**. What problem does it solve at a competition, where code changes between matches? Why does it make replay possible for every match, not just the ones you remembered to commit?
 - Read the summary on **semver.org**. What does it say about versions that start with `0.`, like `0.3.1`? Would that have been a better number for the Explorer before today?
 - Find a top FRC team's robot code on GitHub, and look at their **Releases** and **Tags**. Do they tag every competition? How do they name their tags? What is in their release notes?
-- Mermaid can draw more than state diagrams. Look up its **flowchart** syntax, and draw the scheduler loop from Section 18.5 in a Markdown file on GitHub.
+- Mermaid can draw more than state diagrams. Look up its **flowchart** syntax, and draw the scheduler loop from Section 19.5 in a Markdown file on GitHub.
 
 ---
 
@@ -1645,4 +1645,4 @@ Afterward, write two sentences in `reflections.md`: what did the other pair's RE
 
 ---
 
-*Next up, Chapter 26: From XRP to roboRIO. The Explorer is finished; now you meet the Mini Swerve, deploy your first program to a real roboRIO, and find out exactly which of your Explorer's classes survive the move, and which need a new IO layer.*
+*Next up, Chapter 27: From XRP to roboRIO. The Explorer is finished; now you meet the Mini Swerve, deploy your first program to a real roboRIO, and find out exactly which of your Explorer's classes survive the move, and which need a new IO layer.*

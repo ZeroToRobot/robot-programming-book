@@ -1,8 +1,8 @@
-# Chapter 22: Unit Testing Robot Code
+# Chapter 23: Unit Testing Robot Code
 
-In Chapter 21 the Explorer learned to follow a line. `FollowLine` is a state machine inside a command: it follows the tape, searches when it loses it, and knows the difference between a sharp corner and the end of the line. It runs on the left bumper in teleop and as leg 3 of the obstacle course. And at the very end of the chapter, in the pair lab, Git merged two branches without a single conflict and the build broke anyway. The compiler caught it that time. The chapter ended with a question: what if something checked every change for you, automatically, before it ever reached `main`?
+In Chapter 22 the Explorer learned to follow a line. `FollowLine` is a state machine inside a command: it follows the tape, searches when it loses it, and knows the difference between a sharp corner and the end of the line. It runs on the left bumper in teleop and as leg 3 of the obstacle course. And at the very end of the chapter, in the pair lab, Git merged two branches without a single conflict and the build broke anyway. The compiler caught it that time. The chapter ended with a question: what if something checked every change for you, automatically, before it ever reached `main`?
 
-This chapter answers that question in two steps. First, you will write **tests**: small pieces of code whose only job is to run your robot code with known inputs and check the answers. By the end, the Explorer has two dozen of them. They walk `FollowLine` through every arrow of its state diagram, check the drivetrain's math and its sign conventions, drive the commands on the simulated robot from Chapter 17, and run the **whole obstacle course** in autonomous, all without a robot, in a few seconds, every time you build. Second, you will hand those tests to **GitHub Actions**, a computer at GitHub that builds your code and runs every test on every push and every pull request, and puts a green check or a red X next to the change.
+This chapter answers that question in two steps. First, you will write **tests**: small pieces of code whose only job is to run your robot code with known inputs and check the answers. By the end, the Explorer has two dozen of them. They walk `FollowLine` through every arrow of its state diagram, check the drivetrain's math and its sign conventions, drive the commands on the simulated robot from Chapter 18, and run the **whole obstacle course** in autonomous, all without a robot, in a few seconds, every time you build. Second, you will hand those tests to **GitHub Actions**, a computer at GitHub that builds your code and runs every test on every push and every pull request, and puts a green check or a red X next to the change.
 
 On the Java side, you will learn how a testing framework called **JUnit** reads your code: test classes, the `@Test` annotation, and **assertions**, the one-line checks that make a test pass or fail. Then you will learn the most useful idea in the whole chapter, one that changes how you write ordinary robot code too: **testable code**. Code that takes everything it needs as parameters, and hands back an answer without touching anything else, is code you can check with a single line. You will refactor `FollowLine`'s brain into exactly that shape.
 
@@ -10,7 +10,7 @@ This chapter is mostly about code. You will need your XRP only once, near the st
 
 ---
 
-## 22.1 The Bug That Comes Back
+## 23.1 The Bug That Comes Back
 
 Here is a story that happens on every team, every season.
 
@@ -24,7 +24,7 @@ What went wrong is not that someone made a mistake. People always make mistakes.
 
 ### Testing by hand is real, and slow
 
-You have been testing by hand since Chapter 2, and it has served you well. Build, run, drive, watch, decide. Chapter 21's Section 21.9 was a long, careful hand test: nine numbered checks, a sharp corner, a sheet of white paper. That kind of testing is never going away, because some things can only be checked on a real floor.
+You have been testing by hand since Chapter 2, and it has served you well. Build, run, drive, watch, decide. Chapter 22's Section 22.9 was a long, careful hand test: nine numbered checks, a sharp corner, a sheet of white paper. That kind of testing is never going away, because some things can only be checked on a real floor.
 
 But count what a hand test costs:
 
@@ -39,7 +39,7 @@ And here is the expensive part: every time anyone changes anything, all of it ha
 
 A **test** is a small method that runs a piece of your robot code with inputs you choose, and checks that the answer is the one you expect. If the answer is right, the test **passes**. If it is wrong, the test **fails**, and tells you what it expected and what it got.
 
-Here is the whole idea in a few lines, written for the Tuesday bug. Do not type it yet; Section 22.5 builds the real version:
+Here is the whole idea in a few lines, written for the Tuesday bug. Do not type it yet; Section 23.5 builds the real version:
 
 ```java
 @Test
@@ -49,21 +49,21 @@ void lostLineOnTheLeftSearchesLeft() {
 }
 ```
 
-Read it aloud: "If the robot is following, and the line disappears, and it was last seen on the left, the next state should be searching left." That is one arrow from the Chapter 21 diagram, written as code that checks itself. It runs in a millionth of a second. It needs no robot, no tape, and no batteries. And because it is code, it runs **every time**, for everyone, forever, without anyone remembering to.
+Read it aloud: "If the robot is following, and the line disappears, and it was last seen on the left, the next state should be searching left." That is one arrow from the Chapter 22 diagram, written as code that checks itself. It runs in a millionth of a second. It needs no robot, no tape, and no batteries. And because it is code, it runs **every time**, for everyone, forever, without anyone remembering to.
 
 > **Tests are the pre-match inspection, automated**
 >
 > Before every match, a good drive team runs a checklist: battery voltage, bumpers, radio light, the arm moving to its home position. Nobody thinks the robot is broken; the checklist exists because checking takes one minute and a dead robot on the field costs the whole match. Tests are the same habit for code. You write each check once, and then the computer runs the whole list every time the code changes, faster than you could read it.
 
-A **unit test** tests one small piece (one "unit") of your code by itself: one method, or one class. That is where this chapter starts, and it is where most of your tests will live. By Section 22.8 you will also have bigger tests that check many pieces working together.
+A **unit test** tests one small piece (one "unit") of your code by itself: one method, or one class. That is where this chapter starts, and it is where most of your tests will live. By Section 23.8 you will also have bigger tests that check many pieces working together.
 
 ---
 
-## 22.2 Your First Test
+## 23.2 Your First Test
 
 Start with the smallest test that could possibly work, so the only new thing is the testing itself.
 
-`FollowLine.State` has a method, `isDone()`, that says which states are finished ones (Section 21.6). `END_OF_LINE` and `GAVE_UP` are done. The other three are not. That is a fact you can check without a robot, and nothing about it has to change for the check to work. Perfect for a first test.
+`FollowLine.State` has a method, `isDone()`, that says which states are finished ones (Section 22.6). `END_OF_LINE` and `GAVE_UP` are done. The other three are not. That is a fact you can check without a robot, and nothing about it has to change for the check to work. Perfect for a first test.
 
 ### Where tests live
 
@@ -86,7 +86,7 @@ XRPExplorer/
             FollowLineTest.java      <- the test for FollowLine, in the same package
 ```
 
-The test for `FollowLine` is named `FollowLineTest`, and it goes in `frc/robot/commands` under `test`, exactly mirroring where `FollowLine` lives under `main`. That mirroring is not just tidy. A Java package is a **name**, not a folder: `FollowLineTest` says `package frc.robot.commands;`, so it is in the very same package as `FollowLine`, even though the two files sit in different folders. Section 22.4 shows why that matters.
+The test for `FollowLine` is named `FollowLineTest`, and it goes in `frc/robot/commands` under `test`, exactly mirroring where `FollowLine` lives under `main`. That mirroring is not just tidy. A Java package is a **name**, not a folder: `FollowLineTest` says `package frc.robot.commands;`, so it is in the very same package as `FollowLine`, even though the two files sit in different folders. Section 23.4 shows why that matters.
 
 The two folders are also kept apart for a reason. Gradle compiles `src/test` only for testing. Nothing in it is ever part of the robot program, so a test can do things that robot code never should (like pretend to be the hardware), and the robot never carries the extra weight.
 
@@ -140,7 +140,7 @@ Walk through it:
 
 - **`package frc.robot.commands;`** puts the test in the same package as `FollowLine`.
 - **`import static ...assertTrue;`** brings in two of JUnit's checking methods, so you can call them by their short names. You met static imports in Chapter 16 (`Meters`, `Volts`).
-- **`import frc.robot.commands.FollowLine.State;`** imports the nested enum, so the test can say `State.GAVE_UP` instead of `FollowLine.State.GAVE_UP`. Nested types can be imported, just like the `Constants` groups in Chapter 20.
+- **`import frc.robot.commands.FollowLine.State;`** imports the nested enum, so the test can say `State.GAVE_UP` instead of `FollowLine.State.GAVE_UP`. Nested types can be imported, just like the `Constants` groups in Chapter 21.
 - **`class FollowLineTest`** has no `public`. JUnit can run classes and methods that are package-private, and WPILib's own examples write tests this way, so the book does too.
 - **`@Test`** marks `onlyTheEndingStatesAreDone()` as a test. Every method with `@Test` is one test.
 - **`assertTrue(...)`** checks that something is `true`, and **`assertFalse(...)`** that it is `false`. If any of the five checks is wrong, the test fails right there.
@@ -204,7 +204,7 @@ Now change `false` back to `true`, and run the tests again. `BUILD SUCCESSFUL`. 
 
 ---
 
-## 22.3 New Java: Annotations a Tool Reads, and Assertions
+## 23.3 New Java: Annotations a Tool Reads, and Assertions
 
 Your first test used three new pieces of Java: an annotation that JUnit looks for, assertions that check answers, and a shape that every good test follows. This section looks at each.
 
@@ -222,7 +222,7 @@ JUnit has a few more annotations you will use in this chapter:
 | `@BeforeEach` | sets up what every test in the class needs | before **each** `@Test` method, every time |
 | `@AfterEach` | cleans up after a test | after **each** `@Test` method, even if the test failed |
 
-A test method has no parameters and returns `void`. Each test runs on a **fresh object** of the test class: JUnit creates a new `FollowLineTest` for every `@Test` method, so one test can never leave a field changed for the next one. That is the same "every run starts fresh" rule as a command's `initialize()` (Section 19.6), built into the framework.
+A test method has no parameters and returns `void`. Each test runs on a **fresh object** of the test class: JUnit creates a new `FollowLineTest` for every `@Test` method, so one test can never leave a field changed for the next one. That is the same "every run starts fresh" rule as a command's `initialize()` (Section 20.6), built into the framework.
 
 ### Assertions
 
@@ -237,7 +237,7 @@ An **assertion** is a check that a test makes. If the check is true, nothing hap
 
 Every assertion can also take a message as its **last** argument, which JUnit prints when the check fails: `assertTrue(seconds < 5.0, "DriveDistance never finished")`. Use one whenever the failure would otherwise be a bare `expected: <true> but was: <false>`, which tells you nothing about **what** was not true.
 
-Import each one you use with its own static import line, as your first test did. JUnit's own examples often write `import static org.junit.jupiter.api.Assertions.*;`, which imports all of them at once. The book does not use wildcard static imports (Chapter 20): one line per assertion shows exactly where each name came from.
+Import each one you use with its own static import line, as your first test did. JUnit's own examples often write `import static org.junit.jupiter.api.Assertions.*;`, which imports all of them at once. The book does not use wildcard static imports (Chapter 21): one line per assertion shows exactly where each name came from.
 
 > **Expected first, actual second**
 >
@@ -260,7 +260,7 @@ Almost every good test has the same three parts, in the same order:
 2. **Act:** do the one thing you are testing. Usually a single method call.
 3. **Assert:** check the result.
 
-Here is the shape, written out with comments, as you will see it in Section 22.5:
+Here is the shape, written out with comments, as you will see it in Section 23.5:
 
 ```java
 @Test
@@ -289,11 +289,11 @@ A test's name is the first thing you read when it fails, often months later, oft
 
 ---
 
-## 22.4 New Java: Testable Code
+## 23.4 New Java: Testable Code
 
-Your first test was easy because `isDone()` is easy: it needs nothing but the enum. Now try the test you actually want, the one from Section 22.1. "When the robot is following and the line disappears, and it was last seen on the left, the next state is searching left."
+Your first test was easy because `isDone()` is easy: it needs nothing but the enum. Now try the test you actually want, the one from Section 23.1. "When the robot is following and the line disappears, and it was last seen on the left, the next state is searching left."
 
-Look at `decideNextState()` as Chapter 21 left it:
+Look at `decideNextState()` as Chapter 22 left it:
 
 ```java
 /** The transitions: given the state we are in and what the sensors say, where next? */
@@ -316,7 +316,7 @@ To ask it your question, a test would have to:
 
 Every one of those steps is a wall between the test and a question that is, underneath, very simple. The state machine's **rule** only needs four facts: the current state, whether the line is seen, the last steering error, and how far a search has turned. But the method goes and **fetches** those facts itself, from fields, from sensors, and from the drivetrain. Code that fetches its own inputs from the world can only be tested by setting up the world.
 
-Chapter 21 hinted at the way out, in Section 21.6: "Notice what `decideNextState()` does **not** do: it does not drive, log, or change any field. It only answers a question." It is already almost a pure question. It just needs its facts handed to it.
+Chapter 22 hinted at the way out, in Section 22.6: "Notice what `decideNextState()` does **not** do: it does not drive, log, or change any field. It only answers a question." It is already almost a pure question. It just needs its facts handed to it.
 
 ### Pure functions
 
@@ -327,7 +327,7 @@ A **pure function** is a method that:
 
 `Math.abs(-3)` is a pure function. So is `MathUtil.clamp`, and `Rotation2d.fromDegrees`. Ask a pure function the same question twice, and it gives the same answer twice, every time, on any computer. That makes it the easiest kind of code there is to test: call it with the inputs you choose, and check what comes back. No setup, no cleanup, no robot.
 
-Most robot code cannot be pure, because a robot's whole job is to read sensors and move motors. But a surprising amount of a robot's **thinking** can be. The trick is to split each job in two, the same way Chapter 21 split `execute()` into "decide" and "act":
+Most robot code cannot be pure, because a robot's whole job is to read sensors and move motors. But a surprising amount of a robot's **thinking** can be. The trick is to split each job in two, the same way Chapter 22 split `execute()` into "decide" and "act":
 
 - a **pure part** that does the thinking, and takes its facts as parameters, and
 - a **thin part** around it that gathers the facts from the robot, calls the pure part, and acts on the answer.
@@ -342,13 +342,13 @@ Open `FollowLine.java`. You are going to change how `decideNextState()` gets its
 
 ```java
 // Losing the line, and finding it again. SIDE_ERROR and SEARCH_MAX_DEGREES are
-// package-private (no access word) so the tests can use them (Chapter 22).
+// package-private (no access word) so the tests can use them (Chapter 23).
 static final double SIDE_ERROR = 0.2;   // an error bigger than this: the line was off to one side
 private static final double SEARCH_RADIANS_PER_SECOND = 1.5;
 static final double SEARCH_MAX_DEGREES = 120.0;
 ```
 
-Keep your own tuned values. The tests will use these constants **by name**, so when you tune them again (Chapter 23 makes that easy), the tests follow along.
+Keep your own tuned values. The tests will use these constants **by name**, so when you tune them again (Chapter 24 makes that easy), the tests follow along.
 
 **Step 2: Replace `decideNextState()`, `stateForLostLine()`, and `stateForSearch()`** with these four methods. They go in the same place, after `getState()`:
 
@@ -364,7 +364,7 @@ static State chooseStartState(boolean lineSeen) {
 }
 
 /**
- * The transitions (Section 21.5): given the state we are in and what the robot
+ * The transitions (Section 22.5): given the state we are in and what the robot
  * knows, where next? Everything it needs comes in through its parameters, and it
  * changes nothing, so a test can ask it any question it likes.
  *
@@ -427,7 +427,7 @@ Build. It should succeed, and the one test you wrote should still pass.
 
 Now look at what changed, and what did not.
 
-- **The rules did not change at all.** Every `case` line, every comparison, every return value is the one from Chapter 21. Only where the facts come from moved.
+- **The rules did not change at all.** Every `case` line, every comparison, every return value is the one from Chapter 22. Only where the facts come from moved.
 - **`decideNextState()` is now `static`.** It does not use any field of any `FollowLine` object, because every fact arrives as a parameter. The compiler enforces it: a `static` method cannot read `state` or `drivetrain` even by accident. (Chapter 7: `static` means "belongs to the class, not to an object.") So `static` here is more than a detail. It is a promise, checked by Java, that the method is pure.
 - **The two helpers took their facts as parameters too,** and became `private static` for the same reason. They stay `private`: they are pieces of the rule, and the tests check them through `decideNextState()`.
 - **`chooseStartState()` is new.** The start arrow ("on the line, follow; off the line, give up") was a ternary hiding inside `initialize()`. Now it is a pure function with a name, and it can be tested like every other arrow.
@@ -439,9 +439,9 @@ Now look at what changed, and what did not.
 
 ### Package-private: visible to the tests, and no further
 
-`decideNextState()` and `chooseStartState()` have no access word at all. Chapter 19 named that access level **package-private**: visible to every class in the same package, and to nothing outside it.
+`decideNextState()` and `chooseStartState()` have no access word at all. Chapter 20 named that access level **package-private**: visible to every class in the same package, and to nothing outside it.
 
-That is exactly the right size of door. `FollowLineTest` is in `frc.robot.commands` (Section 22.2), so it can call them. `RobotContainer`, in `frc.robot`, cannot, and has no reason to. Compare the other choices:
+That is exactly the right size of door. `FollowLineTest` is in `frc.robot.commands` (Section 23.2), so it can call them. `RobotContainer`, in `frc.robot`, cannot, and has no reason to. Compare the other choices:
 
 | If the method were... | The test could call it? | Who else could? |
 |---|---|---|
@@ -453,18 +453,18 @@ Package-private for testing is a common, deliberate choice, and it is why the te
 
 ### Check: the robot drives exactly as before
 
-You changed working code, so prove you did not break it on the floor, once. Build, switch on the XRP, run with `USE_SIMULATED_ROBOT = false`, and repeat checks 2 and 6 from Section 21.9: follow a straight strip to its end with the left bumper (`FOLLOWING -> END_OF_LINE`), then a right-angle corner (`FOLLOWING -> SEARCHING_LEFT -> FOLLOWING`). If both behave as they did in Chapter 21, commit (see the Git exercise). From here on, the tests will do most of the checking for you.
+You changed working code, so prove you did not break it on the floor, once. Build, switch on the XRP, run with `USE_SIMULATED_ROBOT = false`, and repeat checks 2 and 6 from Section 22.9: follow a straight strip to its end with the left bumper (`FOLLOWING -> END_OF_LINE`), then a right-angle corner (`FOLLOWING -> SEARCHING_LEFT -> FOLLOWING`). If both behave as they did in Chapter 22, commit (see the Git exercise). From here on, the tests will do most of the checking for you.
 
 > **If your `FollowLine` has `WAITING_FOR_CLEAR`**
 >
-> If your pair merged Chapter 21's Collab lab into `main`, your `FollowLine` has a sixth state and a `stateWhileFollowing()` helper that reads the rangefinder. That reading is one more fact, so it becomes one more parameter. Give `decideNextState()` a `boolean obstacleAhead` parameter right after `lineSeen`, pass `isObstacleAhead()` for it in `execute()`, and make `stateWhileFollowing(lineSeen, obstacleAhead, lastSteeringError)` a `private static` helper the same way. Its `WAITING_FOR_CLEAR` case becomes `obstacleAhead ? state : State.FOLLOWING`. In the tests in the next section, add a constant `private static final boolean NO_OBSTACLE = false;` and pass it as the third argument of every `decideNextState(...)` call. Practice 3 adds the tests for the new arrows.
+> If your pair merged Chapter 22's Collab lab into `main`, your `FollowLine` has a sixth state and a `stateWhileFollowing()` helper that reads the rangefinder. That reading is one more fact, so it becomes one more parameter. Give `decideNextState()` a `boolean obstacleAhead` parameter right after `lineSeen`, pass `isObstacleAhead()` for it in `execute()`, and make `stateWhileFollowing(lineSeen, obstacleAhead, lastSteeringError)` a `private static` helper the same way. Its `WAITING_FOR_CLEAR` case becomes `obstacleAhead ? state : State.FOLLOWING`. In the tests in the next section, add a constant `private static final boolean NO_OBSTACLE = false;` and pass it as the third argument of every `decideNextState(...)` call. Practice 3 adds the tests for the new arrows.
 
 
 ---
 
-## 22.5 Every Arrow in the Diagram
+## 23.5 Every Arrow in the Diagram
 
-Now the test Chapter 21 promised. Put the state diagram from Section 21.5 next to you, and you will write **one test for every arrow**, plus a few for the edges where bugs like to hide.
+Now the test Chapter 22 promised. Put the state diagram from Section 22.5 next to you, and you will write **one test for every arrow**, plus a few for the edges where bugs like to hide.
 
 Replace your whole `FollowLineTest.java` with this. Your first test is still in it, at the top. Type it, do not paste:
 
@@ -480,7 +480,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for FollowLine's state machine: one test for every arrow in the diagram in
- * Section 21.5, plus the edges where bugs like to hide. No robot, and no HAL: each
+ * Section 22.5, plus the edges where bugs like to hide. No robot, and no HAL: each
  * test asks the transition table one question and checks the answer.
  */
 class FollowLineTest {
@@ -611,7 +611,7 @@ That is fourteen tests. Walk through how it is built:
 - **The pretend errors are built from `FollowLine.SIDE_ERROR`,** not typed as numbers. `LINE_WAS_LEFT` is "a little more than `SIDE_ERROR`," whatever you tuned it to. If you change `SIDE_ERROR` to `0.15` tomorrow, every test still asks the right question. A test that copies a tuned number breaks every time you tune, and soon nobody trusts it.
 - **One test, one arrow.** Each test's name is the arrow's label from the diagram, as a sentence. Here is the diagram's list of arrows, and the test that checks each:
 
-| Arrow in Section 21.5's diagram | Test |
+| Arrow in Section 22.5's diagram | Test |
 |---|---|
 | start, on the line: `FOLLOWING` | `startsFollowingWhenOnTheLine` |
 | start, no line: `GAVE_UP` | `givesUpAtOnceWhenStartedOffTheLine` |
@@ -639,7 +639,7 @@ Run **WPILib: Test Robot Code**. Then open the report: fourteen green tests in `
 
 Now prove the tests are worth having. Make each change below on its own, **predict** which tests will fail, run the tests, and then undo the change before the next one.
 
-1. **Swap the searches.** In `stateForLostLine()`, return `SEARCHING_RIGHT` for the positive error and `SEARCHING_LEFT` for the negative one (the Tuesday bug from Section 22.1, in a new form). Two tests fail:
+1. **Swap the searches.** In `stateForLostLine()`, return `SEARCHING_RIGHT` for the positive error and `SEARCHING_LEFT` for the negative one (the Tuesday bug from Section 23.1, in a new form). Two tests fail:
 
    ```
    FollowLineTest > lostLineOnTheLeftSearchesLeft() FAILED
@@ -656,15 +656,15 @@ Undo all three and run the tests once more: green.
 
 > **Test the transitions, tune the actions**
 >
-> Notice what these tests do **not** check: how hard the robot steers, how fast it drives, whether 1.5 radians per second is a good search speed. Those are **actions** and **gains**, and they depend on your floor, your tape, and your batteries. The right place to judge them is the floor, and Chapter 23 gives you sliders to do it live. The tests check the **logic**: which state follows which, for every input. Logic is exactly what breaks silently when someone "cleans up" the code, and exactly what a computer can check perfectly.
+> Notice what these tests do **not** check: how hard the robot steers, how fast it drives, whether 1.5 radians per second is a good search speed. Those are **actions** and **gains**, and they depend on your floor, your tape, and your batteries. The right place to judge them is the floor, and Chapter 24 gives you sliders to do it live. The tests check the **logic**: which state follows which, for every input. Logic is exactly what breaks silently when someone "cleans up" the code, and exactly what a computer can check perfectly.
 
 ---
 
-## 22.6 Through the Seam: The Drivetrain on a Fake IO
+## 23.6 Through the Seam: The Drivetrain on a Fake IO
 
 `FollowLine`'s brain needed nothing from WPILib, so its tests needed nothing either. Most of the Explorer is not like that. `Drivetrain` turns chassis speeds into wheel speeds into volts, clamps them to the battery, tracks the pose, and zeroes its sensors in software. All of that is logic worth testing. But all of it sits on top of hardware.
 
-Or does it? Chapter 17 split the drivetrain in two at a **seam**: `Drivetrain` holds the logic, and talks to the hardware only through the `DrivetrainIO` interface. `DrivetrainIOXRP` is the real robot, and `DrivetrainIOSim` is a simulated one. Section 17.5 said one more thing about that seam that is about to pay off: any class that implements `DrivetrainIO` can stand in for the hardware. That includes a class written **just for tests**.
+Or does it? Chapter 17 split the drivetrain in two at a **seam**: `Drivetrain` holds the logic, and talks to the hardware only through the `DrivetrainIO` interface. `DrivetrainIOXRP` is the real robot, and `DrivetrainIOSim` is a simulated one. Section 18.3 (polymorphism) said one more thing about that seam that is about to pay off: any class that implements `DrivetrainIO` can stand in for the hardware. That includes a class written **just for tests**.
 
 ### A fake IO
 
@@ -724,9 +724,9 @@ Why could a fake slip in so easily? Look at `Drivetrain`'s constructor from Chap
 public Drivetrain(DrivetrainIO io) {
 ```
 
-`Drivetrain` does not create its own hardware. Whoever creates the drivetrain **hands it** the hardware, through the constructor. `RobotContainer` hands it a `DrivetrainIOXRP` or a `DrivetrainIOSim`; a test hands it a `FakeDrivetrainIO`. The drivetrain never knows the difference. That is polymorphism (Section 17.5) doing the job it is best at.
+`Drivetrain` does not create its own hardware. Whoever creates the drivetrain **hands it** the hardware, through the constructor. `RobotContainer` hands it a `DrivetrainIOXRP` or a `DrivetrainIOSim`; a test hands it a `FakeDrivetrainIO`. The drivetrain never knows the difference. That is polymorphism (Section 18.3) doing the job it is best at.
 
-This pattern has a name you will hear on every software team: **dependency injection**. The things a class depends on (its **dependencies**) are passed in from outside (**injected**), instead of being created inside. You have been doing it since Chapter 18 without the name: every command takes its `Drivetrain` and `Sensors` as constructor parameters, instead of making its own. Dependency injection is what makes a class testable: whatever a class creates for itself, a test cannot replace.
+This pattern has a name you will hear on every software team: **dependency injection**. The things a class depends on (its **dependencies**) are passed in from outside (**injected**), instead of being created inside. You have been doing it since Chapter 19 without the name: every command takes its `Drivetrain` and `Sensors` as constructor parameters, instead of making its own. Dependency injection is what makes a class testable: whatever a class creates for itself, a test cannot replace.
 
 Compare the class that **cannot** be tested this way. `Sensors` creates its own hardware, in its field initializers:
 
@@ -734,11 +734,11 @@ Compare the class that **cannot** be tested this way. `Sensors` creates its own 
 private final XRPReflectanceSensor reflectance = new XRPReflectanceSensor();
 ```
 
-Nothing can hand `Sensors` a pretend reflectance sensor. Section 22.8 shows what that costs, and Practice 6 fixes it.
+Nothing can hand `Sensors` a pretend reflectance sensor. Section 23.8 shows what that costs, and Practice 6 fixes it.
 
 ### HALSim: the simulated hardware layer
 
-`Drivetrain` is a subsystem, so creating one does more than run its own constructor. Section 19.4 showed that `SubsystemBase()` registers the subsystem with the command scheduler, and the scheduler, when it is created, reports itself to WPILib's **HAL**.
+`Drivetrain` is a subsystem, so creating one does more than run its own constructor. Section 20.4 showed that `SubsystemBase()` registers the subsystem with the command scheduler, and the scheduler, when it is created, reports itself to WPILib's **HAL**.
 
 The **HAL**, the **Hardware Abstraction Layer**, is the bottom of WPILib: the code that actually talks to hardware. Every WPILib object that touches a motor, an input, or the Driver Station goes through it. On a roboRIO, the HAL talks to real circuits. When you run **Simulate Robot Code**, WPILib swaps in a simulated HAL, usually called **HALSim**, where every "pin" and "port" is just a number in memory. The XRP has always worked this way: Chapter 2 explained that your code runs on your laptop, and that the XRP extension passes those simulated numbers to the real robot over Wi-Fi.
 
@@ -784,7 +784,7 @@ class DrivetrainTest {
 
     @AfterEach
     void tearDown() {
-        // The drivetrain registered itself with the scheduler (Section 19.4). Forget it.
+        // The drivetrain registered itself with the scheduler (Section 20.4). Forget it.
         CommandScheduler.getInstance().unregisterAllSubsystems();
     }
 
@@ -852,24 +852,24 @@ class DrivetrainTest {
 Walk through it:
 
 - **`@BeforeEach setUp()`** runs before every test: start the HAL, make a fresh fake, and make a fresh `Drivetrain` on top of it. Each test gets its own brand-new drivetrain, so no test can be confused by another's leftovers.
-- **`@AfterEach tearDown()`** runs after every test, even a failed one. Every `Drivetrain` registers itself with the scheduler, and the scheduler is a singleton (Chapter 18) that lives for the whole test run. `unregisterAllSubsystems()` tells it to forget them, so six tests do not leave six drivetrains behind.
+- **`@AfterEach tearDown()`** runs after every test, even a failed one. Every `Drivetrain` registers itself with the scheduler, and the scheduler is a singleton (Chapter 19) that lives for the whole test run. `unregisterAllSubsystems()` tells it to forget them, so six tests do not leave six drivetrains behind.
 - **`stopSendsZeroVolts` and `voltsAreLimitedToTheBattery`** check the two simplest promises: stop really means zero, and nothing over `NOMINAL_BATTERY_VOLTS` ever reaches the motors. The expected value is written as the constant, not as `6.0`.
 - **`drivingForwardUsesEachSidesFeedforward`** checks Chapter 16's feedforward equation, one side at a time: for 0.10 m/s, the left side should get `LEFT_KS + LEFT_KV * 0.10` volts. If someone swaps the left and right gains, or forgets kS, this fails. The delta is tiny (`1e-6`), because this is exact arithmetic.
 - **`turningLeftDrivesTheRightSideForward`** is the sign check from Chapter 8, made permanent: a positive turn rate is counterclockwise, so the right wheel goes forward and the left goes backward. Chapter 8 caught an earlier chapter with this sign backwards; a test like this one is how a team makes sure nobody gets it wrong again. The messages in the two `assertTrue`s say what was supposed to happen, because a bare `expected: <true>` would not.
 - **`aTinySpeedSendsNoVolts`** checks Chapter 16's deadband: ask for 1 mm per second, and the drivetrain sends nothing, instead of a kS-sized shove that would make the robot buzz.
-- **`resetPoseStartsCountingFromHere`** is the most interesting. Chapter 17 moved zeroing into software: the hardware's counters never reset, and `Drivetrain` remembers what they read at the last reset. The test pretends the encoders already read 1.0 m and the gyro 30 degrees, resets the pose, rolls 0.3 m, and checks that the drivetrain reports 0.3 m traveled, a heading of 0, and a pose 0.3 m along x. Notice the `drivetrain.periodic()` calls. On the robot, the scheduler calls `periodic()` every loop, and that is when the drivetrain reads its inputs (Section 19.3). With no scheduler running, the test calls it itself. Forget one, and the drivetrain is still looking at the old readings, exactly as it would be on the robot.
+- **`resetPoseStartsCountingFromHere`** is the most interesting. Chapter 17 moved zeroing into software: the hardware's counters never reset, and `Drivetrain` remembers what they read at the last reset. The test pretends the encoders already read 1.0 m and the gyro 30 degrees, resets the pose, rolls 0.3 m, and checks that the drivetrain reports 0.3 m traveled, a heading of 0, and a pose 0.3 m along x. Notice the `drivetrain.periodic()` calls. On the robot, the scheduler calls `periodic()` every loop, and that is when the drivetrain reads its inputs (Section 20.3). With no scheduler running, the test calls it itself. Forget one, and the drivetrain is still looking at the old readings, exactly as it would be on the robot.
 
 Run the tests. Twenty now, all green.
 
 > **Why not test on the real XRP hardware classes?**
 >
-> You could try: give the test a `DrivetrainIOXRP`, and its `XRPMotor`s would be created in HALSim with no XRP attached. But each `XRPMotor` can only be created **once** per program. The second test to try it would crash with `XRPMotor 0 already allocated`, the same error Chapter 10 planted on purpose. Fakes have no such limit: make a hundred, one per test. The IO seam is what makes that possible, and it is one of the two big reasons it exists (the other is AdvantageKit's replay, in Chapter 24).
+> You could try: give the test a `DrivetrainIOXRP`, and its `XRPMotor`s would be created in HALSim with no XRP attached. But each `XRPMotor` can only be created **once** per program. The second test to try it would crash with `XRPMotor 0 already allocated`, the same error Chapter 10 planted on purpose. Fakes have no such limit: make a hundred, one per test. The IO seam is what makes that possible, and it is one of the two big reasons it exists (the other is AdvantageKit's replay, in Chapter 25).
 
 ---
 
-## 22.7 Simulation Tests: Commands on a Simulated Clock
+## 23.7 Simulation Tests: Commands on a Simulated Clock
 
-The fake IO is perfect for checking the drivetrain's arithmetic. It cannot tell you whether `DriveDistance` actually **arrives**. That depends on the PID gains, the feedforward, and how the robot responds to volts: on physics. And Chapter 17 already gave you physics, built from your own SysId measurements: `DrivetrainIOSim`.
+The fake IO is perfect for checking the drivetrain's arithmetic. It cannot tell you whether `DriveDistance` actually **arrives**. That depends on the PID gains, the feedforward, and how the robot responds to volts: on physics. And Chapter 18 already gave you physics, built from your own SysId measurements: `DrivetrainIOSim`.
 
 A test that runs real robot code against a simulated robot is a **simulation test**. It checks bigger things than a unit test ("does this command reach its target?") and runs slower (thousands of loops instead of one call). Still far faster than the floor.
 
@@ -877,7 +877,7 @@ A test that runs real robot code against a simulated robot is a **simulation tes
 
 Running a command in a test raises two problems that never come up on the robot.
 
-**The scheduler only runs commands while the robot is enabled.** Section 18.5: when the robot is disabled, the scheduler cancels every command that does not run while disabled. In a test, nobody has pressed Enable on the Driver Station. So the test tells the simulated Driver Station to enable, with HALSim's `DriverStationSim`:
+**The scheduler only runs commands while the robot is enabled.** Section 19.5: when the robot is disabled, the scheduler cancels every command that does not run while disabled. In a test, nobody has pressed Enable on the Driver Station. So the test tells the simulated Driver Station to enable, with HALSim's `DriverStationSim`:
 
 ```java
 DriverStationSim.setEnabled(true);   // commands only run while the robot is enabled
@@ -997,7 +997,7 @@ class DriveCommandsTest {
 
 Walk through it:
 
-- **`setUp()`** starts the HAL, pauses the clock, enables the pretend Driver Station, and builds a `Drivetrain` on a `DrivetrainIOSim`: the simulated Explorer from Chapter 17, with your SysId gains inside it.
+- **`setUp()`** starts the HAL, pauses the clock, enables the pretend Driver Station, and builds a `Drivetrain` on a `DrivetrainIOSim`: the simulated Explorer from Chapter 18, with your SysId gains inside it.
 - **`tearDown()`** cancels any command still running, forgets the subsystem, puts the pretend Driver Station back to disabled with `resetData()`, and lets the clock run again, so the next test class starts clean.
 - **`runUntilFinished()`** is a **helper method**: not a test (no `@Test`), just code the tests share. It schedules the command, then runs the robot loop on the simulated clock until the command is no longer scheduled, or until `TIME_LIMIT_SECONDS`. It returns how many simulated seconds that took. Each turn of its loop is one loop of `robotPeriodic()`: the scheduler runs (subsystem `periodic()`, so `DrivetrainIOSim` moves its pretend robot 20 ms; then the command's `execute()` and `isFinished()`), and then the clock steps.
 - **`driveDistanceStopsAtItsTarget`** drives 0.30 m. It checks three things: that the command finished before the time limit (with a message, because a bare `expected: <true>` would be a puzzle), that the robot is within `DISTANCE_TOLERANCE_METERS` of 0.30 m, and that it held its heading. Those are the very same tolerances `DriveDistance` uses to decide it is done.
@@ -1008,23 +1008,23 @@ Run the tests. With the example gains, `DriveDistance` takes about 1.8 simulated
 
 > **What a simulation test can and cannot prove**
 >
-> These tests prove that your commands, your PID gains, and your feedforward work together **on the model of your robot**. They cannot prove that the model is right. If your SysId data was poor, or a wheel slips on your floor, the simulated robot arrives and the real one does not. That is still worth a great deal: when a test fails, the problem is in the code or the gains, never in the batteries or the carpet. And when the test passes but the robot misses, you know to look at the robot. Chapter 32 makes the model much better, with SysId on the Mini Swerve's brushless motors.
+> These tests prove that your commands, your PID gains, and your feedforward work together **on the model of your robot**. They cannot prove that the model is right. If your SysId data was poor, or a wheel slips on your floor, the simulated robot arrives and the real one does not. That is still worth a great deal: when a test fails, the problem is in the code or the gains, never in the batteries or the carpet. And when the test passes but the robot misses, you know to look at the robot. Chapter 33 makes the model much better, with SysId on the Mini Swerve's brushless motors.
 
 
 ---
 
-## 22.8 The Whole Course, Without a Robot
+## 23.8 The Whole Course, Without a Robot
 
-Every test so far checks one piece. The obstacle course is all the pieces at once: `RobotContainer` building the sequence, the per-step timeouts, `DriveUntilLine` stopping on the crossbar, the `either` choosing leg 3, `FollowLine` following the pretend tape, the LED, and `Hold Still`. A test that checks many pieces working together is an **integration test**. This one is the biggest test in the project, and the most satisfying: it runs the whole autonomous routine, on the simulated Explorer and its simulated floor from Chapter 21, start to finish, every time you build.
+Every test so far checks one piece. The obstacle course is all the pieces at once: `RobotContainer` building the sequence, the per-step timeouts, `DriveUntilLine` stopping on the crossbar, the `either` choosing leg 3, `FollowLine` following the pretend tape, the LED, and `Hold Still`. A test that checks many pieces working together is an **integration test**. This one is the biggest test in the project, and the most satisfying: it runs the whole autonomous routine, on the simulated Explorer and its simulated floor from Chapter 22, start to finish, every time you build.
 
 ### A container for the simulated robot
 
-There is one problem first. `RobotContainer` decides real or simulated by reading `Constants.USE_SIMULATED_ROBOT`, and that constant is `false` in your committed code (Section 21.9 reminded you to set it back). A test needs the **simulated** robot every time, whatever the constant says. And it would be a bad test that passed or failed depending on whether someone forgot to flip a constant back.
+There is one problem first. `RobotContainer` decides real or simulated by reading `Constants.USE_SIMULATED_ROBOT`, and that constant is `false` in your committed code (Section 22.9 reminded you to set it back). A test needs the **simulated** robot every time, whatever the constant says. And it would be a bad test that passed or failed depending on whether someone forgot to flip a constant back.
 
 So `RobotContainer` gets a second constructor, one that takes the choice as a parameter: dependency injection again, this time for a `boolean`. Open `RobotContainer.java`. Add a field after `obstacleCourse`:
 
 ```java
-// Real XRP or simulated? Robot asks Constants; a test can ask for either (Chapter 22).
+// Real XRP or simulated? Robot asks Constants; a test can ask for either (Chapter 23).
 private final boolean useSimulatedRobot;
 ```
 
@@ -1062,7 +1062,7 @@ Two pieces of Java are worth a closer look.
 
 **Two constructors.** A class can have more than one constructor, as long as their parameter lists differ: constructor **overloading**, the same idea as overloading `arcadeDrive` in Chapter 11. `new RobotContainer()` runs the first; `new RobotContainer(true)` runs the second.
 
-**`this(...)` calls the other constructor.** The no-parameter constructor's whole body is `this(Constants.USE_SIMULATED_ROBOT);`. Written as the **first line** of a constructor, `this(...)` means "run my other constructor, with these arguments." It is the twin of `super(...)` from Section 19.4, which runs the **parent's** constructor. The result: all the real building happens in one place, and the short constructor just supplies the usual choice. `Robot.java` still says `new RobotContainer()`, and does not change at all.
+**`this(...)` calls the other constructor.** The no-parameter constructor's whole body is `this(Constants.USE_SIMULATED_ROBOT);`. Written as the **first line** of a constructor, `this(...)` means "run my other constructor, with these arguments." It is the twin of `super(...)` from Section 20.4, which runs the **parent's** constructor. The result: all the real building happens in one place, and the short constructor just supplies the usual choice. `Robot.java` still says `new RobotContainer()`, and does not change at all.
 
 ```
 error: call to this must be first statement in constructor
@@ -1076,7 +1076,7 @@ The test also needs to know where the robot ended up. Add one more small method 
 
 ```java
 /**
- * Where the robot thinks it is. Package-private: only the tests need it (Chapter 22).
+ * Where the robot thinks it is. Package-private: only the tests need it (Chapter 23).
  *
  * @return the drivetrain's pose, from odometry
  */
@@ -1166,9 +1166,9 @@ class ObstacleCourseTest {
 Walk through it:
 
 - **`setUp()`** is the same as the command tests, plus one line: `DriverStationSim.setAutonomous(true)`. Without it, an enabled robot is in **teleop**, and the teleop bindings would come alive: the line light, for one, would turn the LED on and off as the robot crossed the tape.
-- **`tearDown()`** has one more line too: `getDefaultButtonLoop().clear()`. `RobotContainer` bound a dozen triggers to buttons and sensors (Chapter 20), and the scheduler keeps polling them every loop until it is told to forget them. Clearing the loop makes sure no later test is ever surprised by a leftover binding.
+- **`tearDown()`** has one more line too: `getDefaultButtonLoop().clear()`. `RobotContainer` bound a dozen triggers to buttons and sensors (Chapter 21), and the scheduler keeps polling them every loop until it is told to forget them. Clearing the loop makes sure no later test is ever surprised by a leftover binding.
 - **Arrange** builds the whole robot, simulated, with `new RobotContainer(true)`. Then it makes a `DIOSim` to watch the LED. The XRP's LED is digital output 1 (hold Ctrl and click `XRPOnBoardIO` in `RobotContainer` to see it in WPILib's source), and `DIOSim` reads what the program last set on that output, exactly as the Simulation GUI's DIO panel does.
-- **Act** schedules the autonomous command, as `autonomousInit()` does, and runs the loop until the **LED goes out**. Chapter 20 made the LED part of the course: `deadlineFor(lightTheLed())` keeps it on for exactly as long as the course runs, and turns it off the moment the last leg ends and `Hold Still` takes over. So "until the LED goes out" means "until the course is over." Each loop does what the real robot does every 20 ms: `CommandScheduler.getInstance().run()` (Robot's `robotPeriodic()`), then `simulationPeriodic()` (the pretend floor sets each reflectance sensor from the robot's pose), then 20 ms on the clock. `TIME_LIMIT_SECONDS` is 40, more than all the course's timeouts added up, so a stuck robot cannot run the test forever.
+- **Act** schedules the autonomous command, as `autonomousInit()` does, and runs the loop until the **LED goes out**. Chapter 21 made the LED part of the course: `deadlineFor(lightTheLed())` keeps it on for exactly as long as the course runs, and turns it off the moment the last leg ends and `Hold Still` takes over. So "until the LED goes out" means "until the course is over." Each loop does what the real robot does every 20 ms: `CommandScheduler.getInstance().run()` (Robot's `robotPeriodic()`), then `simulationPeriodic()` (the pretend floor sets each reflectance sensor from the robot's pose), then 20 ms on the clock. `TIME_LIMIT_SECONDS` is 40, more than all the course's timeouts added up, so a stuck robot cannot run the test forever.
 - **Assert** checks that the LED went out (the course finished, with a message saying so if not), and then that the robot is where leg 3 should leave it: within 5 cm of the line sideways, within 10 cm of `END_POSE` along the line, and facing up leg 3 within 10 degrees.
 
 Why these tolerances? The follower stops when its sensors, 5 cm ahead of the robot's center, run off the end of the tape, so the robot's center stops about 5 cm short of `END_POSE`. And the sideways check must allow for the pretend tape's 2 cm half-width. The tolerances say "the robot followed the line to its end," and nothing more precise than the course itself can promise.
@@ -1185,7 +1185,7 @@ and the report says the robot's y was about 0.66 m, not within 0.10 of 1.0. One 
 
 > **Only one test may build the whole robot**
 >
-> `ObstacleCourseTest` has exactly one test method, on purpose. `new RobotContainer(true)` creates a `Sensors`, and `Sensors` creates the XRP's reflectance sensors and rangefinder, on analog inputs 0, 1, and 2. Like `XRPMotor` in Section 22.6, each input can only be created once per program, and Gradle runs **all** your test classes in one program. A second `new RobotContainer(...)` anywhere in your tests would fail with an `AllocationException` whose message begins `Analog Input 0 previously allocated`. WPILib's answer is to `close()` hardware objects after each test, but the XRP's sensor classes do not have a `close()` method. So the rule for the Explorer is simple: **one test builds the whole robot; every other test uses fakes and the simulation.** Practice 6 gives `Sensors` an IO layer, which removes the limit.
+> `ObstacleCourseTest` has exactly one test method, on purpose. `new RobotContainer(true)` creates a `Sensors`, and `Sensors` creates the XRP's reflectance sensors and rangefinder, on analog inputs 0, 1, and 2. Like `XRPMotor` in Section 23.6, each input can only be created once per program, and Gradle runs **all** your test classes in one program. A second `new RobotContainer(...)` anywhere in your tests would fail with an `AllocationException` whose message begins `Analog Input 0 previously allocated`. WPILib's answer is to `close()` hardware objects after each test, but the XRP's sensor classes do not have a `close()` method. So the rule for the Explorer is simple: **one test builds the whole robot; every other test uses fakes and the simulation.** Practice 6 gives `Sensors` an IO layer, which removes the limit.
 
 > **The test pyramid**
 >
@@ -1193,9 +1193,9 @@ and the report says the robot's y was about 0.66 m, not within 0.10 of 1.0. One 
 
 ---
 
-## 22.9 A Robot That Checks Every Push: GitHub Actions
+## 23.9 A Robot That Checks Every Push: GitHub Actions
 
-You have twenty-four tests, and they run every time **you** build. But your teammates build on their own laptops, maybe with their own tests failing, maybe without running the tests at all. Chapter 21's pair lab showed what happens next: a pull request that looks fine on GitHub, merges cleanly, and breaks `main`.
+You have twenty-four tests, and they run every time **you** build. But your teammates build on their own laptops, maybe with their own tests failing, maybe without running the tests at all. Chapter 22's pair lab showed what happens next: a pull request that looks fine on GitHub, merges cleanly, and breaks `main`.
 
 The fix is to have the tests run somewhere that **nobody can skip**: on GitHub itself, on every push and every pull request, with the result shown right on the pull request. That is called **continuous integration**, or **CI**: every change is built and tested as soon as it is pushed, before it is merged. GitHub's way of doing it is **GitHub Actions**.
 
@@ -1272,7 +1272,7 @@ Now open a pull request (the Git exercise does). At the bottom of the pull reque
 
 ### See it go red
 
-Make one more practice branch, and do what Section 22.5 did on your laptop, on GitHub instead: swap the two searches in `stateForLostLine()`. Commit, push, and open a pull request. Do **not** run the tests on your laptop first; pretend you are the teammate from Section 22.1 who could not test at home.
+Make one more practice branch, and do what Section 23.5 did on your laptop, on GitHub instead: swap the two searches in `stateForLostLine()`. Commit, push, and open a pull request. Do **not** run the tests on your laptop first; pretend you are the teammate from Section 23.1 who could not test at home.
 
 A few minutes later, the pull request shows a **red X**: "Some checks were not successful." Click **Details**, open the **Build and run the tests** step, and scroll near the end. The same lines you saw in your own terminal are there:
 
@@ -1297,7 +1297,7 @@ GitHub only enforces rulesets on **public** repositories for free accounts. If y
 
 ---
 
-## 22.10 What Tests Can and Cannot Tell You
+## 23.10 What Tests Can and Cannot Tell You
 
 You started this chapter with no tests and ended it with twenty-four, a pyramid of them, running on every build and every push. Before you go on, be clear about what they promise.
 
@@ -1323,16 +1323,16 @@ A test written this way is called a **regression test**, and it is why mature te
 
 ### Tests from here on
 
-- **Chapter 23** makes `FollowLine`'s gains live-tunable from the dashboard. The tests use `SIDE_ERROR` and `SEARCH_MAX_DEGREES` by name, so they follow along with any value you choose.
-- **Chapter 25**, the capstone, tags a release of the Explorer. A release with a red X is not a release.
-- **Chapters 26 to 33** bring a new robot. Swerve math is much harder to get right than tank drive, and much harder to check on the floor: `SwerveModule` and the kinematics get unit tests from the first day, on fake IO layers, exactly like `DrivetrainTest`.
-- **Chapter 39** makes a green CI run part of the competition-day release checklist.
+- **Chapter 24** makes `FollowLine`'s gains live-tunable from the dashboard. The tests use `SIDE_ERROR` and `SEARCH_MAX_DEGREES` by name, so they follow along with any value you choose.
+- **Chapter 26**, the capstone, tags a release of the Explorer. A release with a red X is not a release.
+- **Chapters 27 to 34** bring a new robot. Swerve math is much harder to get right than tank drive, and much harder to check on the floor: `SwerveModule` and the kinematics get unit tests from the first day, on fake IO layers, exactly like `DrivetrainTest`.
+- **Chapter 40** makes a green CI run part of the competition-day release checklist.
 
 ---
 
 ## Chapter Summary
 
-> **What you learned in Chapter 22**
+> **What you learned in Chapter 23**
 >
 > * Testing by hand is slow, easy to forget, and covers one path per run. A **test** is code that runs your code with chosen inputs and checks the answer, every time, automatically; it stops **regressions**, bugs that come back after a later change.
 > * New Java: **JUnit** finds methods marked **`@Test`** in classes under `src/test/java` and runs each on a fresh object, after `@BeforeEach` and before `@AfterEach`. **Assertions** (`assertEquals(expected, actual)`, `assertEquals` with a **delta** for `double`s, `assertTrue`, `assertFalse`, each with an optional message) fail the test when an answer is wrong. Good tests follow **Arrange, Act, Assert**, have sentence names, and are seen **red** before they are trusted green.
@@ -1356,11 +1356,11 @@ A test written this way is called a **regression test**, and it is why mature te
 
 For any change where **no** test failed, write one sentence: is that a missing test, or a change that really does not matter? If it is a missing test, write it.
 
-**2. Make the first test fail three ways.** `onlyTheEndingStatesAreDone` has five assertions. Break `isDone()` for `GAVE_UP` instead of `END_OF_LINE`. Which line does the failure point at now? Now break both. Does JUnit report one failure or two? Explain what you see using this sentence from Section 22.3: "the test stops right there."
+**2. Make the first test fail three ways.** `onlyTheEndingStatesAreDone` has five assertions. Break `isDone()` for `GAVE_UP` instead of `END_OF_LINE`. Which line does the failure point at now? Now break both. Does JUnit report one failure or two? Explain what you see using this sentence from Section 23.3: "the test stops right there."
 
-**3. The waiting state (if you have it).** If your `FollowLine` has `WAITING_FOR_CLEAR` from Chapter 21's Collab lab, you added an `obstacleAhead` parameter in Section 22.4. Draw its new arrows on your diagram, then add one test for each: following with an obstacle ahead waits, waiting with the obstacle still there keeps waiting, and waiting with the way clear goes back to following. Then answer: when the robot is waiting and the line is **not** seen, what does your code do? Is that what you want? Write a test that holds whichever answer you choose.
+**3. The waiting state (if you have it).** If your `FollowLine` has `WAITING_FOR_CLEAR` from Chapter 22's Collab lab, you added an `obstacleAhead` parameter in Section 23.4. Draw its new arrows on your diagram, then add one test for each: following with an obstacle ahead waits, waiting with the obstacle still there keeps waiting, and waiting with the way clear goes back to following. Then answer: when the robot is waiting and the line is **not** seen, what does your code do? Is that what you want? Write a test that holds whichever answer you choose.
 
-**4. Three strikes, test first.** Chapter 21's Practice 4 asked for a rule: give up after the third search in one run. This time, write the tests **before** the code. Add a parameter `int searchesSoFar` to `decideNextState()` (just the parameter: pass `0` from `execute()` for now), then write two tests: losing the line on the left with `searchesSoFar` of 2 still searches left, and with `searchesSoFar` of 3 gives up. Run them and see red. Now make them green: add the rule to `stateForLostLine()`, and in `FollowLine` add a `searchCount` field that `initialize()` resets and `changeState()` counts. Run every test. In `reflections.md`: did writing the tests first change how you designed the rule?
+**4. Three strikes, test first.** Chapter 22's Practice 4 asked for a rule: give up after the third search in one run. This time, write the tests **before** the code. Add a parameter `int searchesSoFar` to `decideNextState()` (just the parameter: pass `0` from `execute()` for now), then write two tests: losing the line on the left with `searchesSoFar` of 2 still searches left, and with `searchesSoFar` of 3 gives up. Run them and see red. Now make them green: add the rule to `stateForLostLine()`, and in `FollowLine` add a `searchCount` field that `initialize()` resets and `changeState()` counts. Run every test. In `reflections.md`: did writing the tests first change how you designed the rule?
 
 **5. Many questions, one test.** JUnit can run one test method many times with different inputs, called a **parameterized test**. Add these imports to `FollowLineTest`:
 
@@ -1385,7 +1385,7 @@ void lostLineGoesWhereTheLastErrorPoints(double lastError, State expected) {
 
 Each line in `@CsvSource` is one run; JUnit turns `"0.5"` into a `double` and `"SEARCHING_LEFT"` into the enum for you. Run it and find all three runs in the report. Add rows for `0.15`, `0.25`, `-0.15`, and `-0.25`. Then answer: this test types the numbers in, instead of building them from `SIDE_ERROR`. What happens to it the next time you tune `SIDE_ERROR`? When is that a good thing, and when a bad one? (The Collab lab comes back to this question.)
 
-**6. Give `Sensors` an IO layer.** Section 22.8's callout says only one test may build the whole robot, because `Sensors` creates its own hardware. Fix that the Chapter 17 way: create `SensorsIO` (with an `@AutoLog` inputs class holding the left and right reflectance, the distance ahead, and the three accelerations), `SensorsIOXRP` (the three hardware objects, moved from `Sensors`), and give `Sensors` a constructor that takes a `SensorsIO` and a `periodic()`-style `update()` that `RobotContainer` calls every loop. (Chapter 17's Practice 6 started this; finish it.) Then write `SensorsTest` with a `FakeSensorsIO` that checks `isLeftOnLine()` just above and just below `LINE_THRESHOLD`, and `isObstacleWithin()` at the boundary. Can `RobotContainer` now be built twice in one test run? What else in it still creates hardware?
+**6. Give `Sensors` an IO layer.** Section 23.8's callout says only one test may build the whole robot, because `Sensors` creates its own hardware. Fix that the Chapter 17 way: create `SensorsIO` (with an `@AutoLog` inputs class holding the left and right reflectance, the distance ahead, and the three accelerations), `SensorsIOXRP` (the three hardware objects, moved from `Sensors`), and give `Sensors` a constructor that takes a `SensorsIO` and a `periodic()`-style `update()` that `RobotContainer` calls every loop. (Chapter 17's Practice 4 started this; finish it.) Then write `SensorsTest` with a `FakeSensorsIO` that checks `isLeftOnLine()` just above and just below `LINE_THRESHOLD`, and `isObstacleWithin()` at the boundary. Can `RobotContainer` now be built twice in one test run? What else in it still creates hardware?
 
 **7. A badge for your README.** GitHub can draw your workflow's latest result as a small picture. Add this line near the top of your `README.md` (from Chapter 3), with your own username and repository name:
 
@@ -1400,18 +1400,18 @@ Commit, push, and look at your repository's front page. What does the badge show
 Give the Explorer a test suite, and a robot at GitHub that runs it.
 
 1. Make a branch (see the Git exercise).
-2. Check that `build.gradle` has the JUnit lines from Section 22.2. Create `src/test/java/frc/robot/commands/FollowLineTest.java` with the first test. Run **WPILib: Test Robot Code** and open the HTML report. Break `END_OF_LINE`'s `done` value, see it fail, and fix it.
-3. Refactor `FollowLine` (Section 22.4, Steps 1 to 4). Build. On the real XRP, repeat checks 2 and 6 from Section 21.9. Commit.
-4. Replace `FollowLineTest` with the full listing (Section 22.5). Run it, then break it the three ways in "Break it three ways," predicting each result first. Undo them all.
-5. Create `FakeDrivetrainIO` and `DrivetrainTest` (Section 22.6). Run the tests.
-6. Create `DriveCommandsTest` (Section 22.7). Run the tests. Commit.
-7. Give `RobotContainer` its second constructor, the `useSimulatedRobot` field, and `getPose()` (Section 22.8). Build, and check that the robot still starts both simulated and real.
+2. Check that `build.gradle` has the JUnit lines from Section 23.2. Create `src/test/java/frc/robot/commands/FollowLineTest.java` with the first test. Run **WPILib: Test Robot Code** and open the HTML report. Break `END_OF_LINE`'s `done` value, see it fail, and fix it.
+3. Refactor `FollowLine` (Section 23.4, Steps 1 to 4). Build. On the real XRP, repeat checks 2 and 6 from Section 22.9. Commit.
+4. Replace `FollowLineTest` with the full listing (Section 23.5). Run it, then break it the three ways in "Break it three ways," predicting each result first. Undo them all.
+5. Create `FakeDrivetrainIO` and `DrivetrainTest` (Section 23.6). Run the tests.
+6. Create `DriveCommandsTest` (Section 23.7). Run the tests. Commit.
+7. Give `RobotContainer` its second constructor, the `useSimulatedRobot` field, and `getPose()` (Section 23.8). Build, and check that the robot still starts both simulated and real.
 8. Create `ObstacleCourseTest`. Run all the tests, and read the course's log under **Standard output** in the report. Try the `FOLLOW_LINE_LENGTH_METERS` experiment, then put it back. Commit.
-9. Create `.github/workflows/build.yml` (Section 22.9). Commit, push, and watch the run on the **Actions** tab until it shows a green check.
+9. Create `.github/workflows/build.yml` (Section 23.9). Commit, push, and watch the run on the **Actions** tab until it shows a green check.
 10. Open a pull request into `main` and find the **Checks** box. Merge it once it is green.
-11. Do the "See it go red" check from Section 22.9, on a separate branch. Close that pull request without merging.
+11. Do the "See it go red" check from Section 23.9, on a separate branch. Close that pull request without merging.
 
-If the HTML report shows **24 tests, 0 failures**, and your latest commit on GitHub has a green check, you are ready for Chapter 23.
+If the HTML report shows **24 tests, 0 failures**, and your latest commit on GitHub has a green check, you are ready for Chapter 24.
 
 Diagnose anything strange:
 
@@ -1424,7 +1424,7 @@ Diagnose anything strange:
 | `expected: <true> but was: <false>` with nothing else to go on | Give the `assertTrue` a message as its last argument |
 | `DriveDistance never finished` | The pretend Driver Station is not enabled (`setEnabled(true)` and `notifyNewData()`), or `SimHooks.stepTiming` is missing from the loop |
 | A command test passes alone but fails when every test runs | An `@AfterEach` is missing `cancelAll()` or `unregisterAllSubsystems()`, so an earlier test's drivetrain or command is still around |
-| `Analog Input 0 previously allocated` | Two tests build a `RobotContainer` (or a `Sensors`). Only `ObstacleCourseTest` may (Section 22.8) |
+| `Analog Input 0 previously allocated` | Two tests build a `RobotContainer` (or a `Sensors`). Only `ObstacleCourseTest` may (Section 23.8) |
 | `the course never finished` | The robot never reached leg 3, or the LED never went out: check that `setAutonomous(true)` is in `setUp()`, and read the course log in the report |
 | The course test fails on `getY()` by about 0.5 m | The robot stopped at the crossbar: the `either` took its "no line" branch. Check `simulationPeriodic()` and the `SIM_` tape constants |
 | On GitHub: `Permission denied` on `./gradlew` | The `chmod +x gradlew` step is missing, or is after the build step |
@@ -1441,7 +1441,7 @@ Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 4. Why do the simulation tests pause the clock and step it 20 ms at a time? Describe what would happen to `withTimeout(STEP_TIMEOUT_SECONDS)` in `ObstacleCourseTest` if the clock ran at normal speed.
 5. Your test passes on your laptop, and the same commit gets a red X on GitHub. Give two different causes, and explain why, in both cases, GitHub is the one telling the truth.
 
-If any answer feels shaky, re-read Sections 22.4, 22.7, and 22.10.
+If any answer feels shaky, re-read Sections 23.4, 23.7, and 23.10.
 
 ### Git
 
@@ -1457,21 +1457,21 @@ After Build step 3, with the refactored `FollowLine` checked on the robot:
 
 ```bash
 git add .
-git commit -m "Ch22: FollowLine decisions as pure functions, ready to test"
+git commit -m "Ch23: FollowLine decisions as pure functions, ready to test"
 ```
 
 After Build step 6:
 
 ```bash
 git add .
-git commit -m "Ch22: Unit tests for FollowLine and Drivetrain, simulation tests for the drive commands"
+git commit -m "Ch23: Unit tests for FollowLine and Drivetrain, simulation tests for the drive commands"
 ```
 
 After Build step 8, with `USE_SIMULATED_ROBOT = false`:
 
 ```bash
 git add .
-git commit -m "Ch22: Integration test runs the whole obstacle course on the simulated robot"
+git commit -m "Ch23: Integration test runs the whole obstacle course on the simulated robot"
 ```
 
 After Build step 9:
@@ -1479,7 +1479,7 @@ After Build step 9:
 ```bash
 git status
 git add .
-git commit -m "Ch22: Build and test every push with GitHub Actions"
+git commit -m "Ch23: Build and test every push with GitHub Actions"
 git push -u origin unit-tests
 ```
 
@@ -1487,13 +1487,13 @@ Run `git status` before that last `git add`, and check that `.github/workflows/b
 
 ### Collab: The Merge That Only a Test Can Catch
 
-In Chapter 20's pair lab, Git merged two bindings onto one button, and nothing noticed until someone pressed it. In Chapter 21's, Git merged a new state into a switch that did not know about it, and the compiler noticed. This lab sets up a third kind of collision: the code compiles perfectly, and only a **test** knows it is wrong. And this time CI is watching.
+In Chapter 21's pair lab, Git merged two bindings onto one button, and nothing noticed until someone pressed it. In Chapter 22's, Git merged a new state into a switch that did not know about it, and the compiler noticed. This lab sets up a third kind of collision: the code compiles perfectly, and only a **test** knows it is wrong. And this time CI is watching.
 
 As before, the **owner** is the person whose Explorer repository you use, and the **teammate** is the other partner. Both: finish this chapter's Build and merge it, so the owner's `main` has the tests and the workflow. The teammate pulls the owner's `main`.
 
 **Part A: two reasonable changes.** Work at the same time. Nobody merges yet.
 
-1. **Owner:** create a `sharper-corners` branch. The drive coach says the follower misses sharp corners on the practice field, and the tuning table in Section 21.9 says to lower `SIDE_ERROR`. In `FollowLine.java`, change it to `0.1`. Run the tests: all green, because every test in `FollowLineTest` builds its errors from `SIDE_ERROR`. Commit (`Lower SIDE_ERROR for sharp corners`), push, and open a pull request. Watch its check go green.
+1. **Owner:** create a `sharper-corners` branch. The drive coach says the follower misses sharp corners on the practice field, and the tuning table in Section 22.9 says to lower `SIDE_ERROR`. In `FollowLine.java`, change it to `0.1`. Run the tests: all green, because every test in `FollowLineTest` builds its errors from `SIDE_ERROR`. Commit (`Lower SIDE_ERROR for sharp corners`), push, and open a pull request. Watch its check go green.
 
 2. **Teammate:** create a `centered-spec` branch. The drive coach also said: "On our tape, an error of 0.15 means the robot was centered. If it loses the line then, the line ended, so stop." Write that down as a test. In `FollowLineTest.java`, add:
 
@@ -1523,9 +1523,9 @@ As before, the **owner** is the person whose Explorer repository you use, and th
 5. **Both:** now the real conversation. A failing test is a **question**, not an order: which is right, the coach's rule or the new tuning? You might decide 0.15 really is centered, and set `SIDE_ERROR` back to a value above it. You might decide the coach's rule was about the old tape, and change the test to say so (and rename it). Or you might decide the test should be built from `SIDE_ERROR` after all. Agree, make the change on `centered-spec`, run the tests, commit, and push. Wait for green.
 6. **Owner:** review the pull request. Read the test **and** the decision. Merge, and delete the branch. **Both:** `git checkout main`, `git pull`, and run the tests.
 
-**Part C: swap.** Repeat Parts A and B in the other partner's repository, with roles reversed, and this time turn on the ruleset from Section 22.9 first (if the repository is public, or you have GitHub Pro). In Part B step 2, try to merge the stale pull request after the owner's merge. Does GitHub let you? What does the **Merge** button say?
+**Part C: swap.** Repeat Parts A and B in the other partner's repository, with roles reversed, and this time turn on the ruleset from Section 23.9 first (if the repository is public, or you have GitHub Pro). In Part B step 2, try to merge the stale pull request after the owner's merge. Does GitHub let you? What does the **Merge** button say?
 
-Afterward, each of you writes two sentences in `reflections.md`. First: in Chapters 20, 21, and 22, three merges went wrong without a Git conflict; what caught each one, and when? Second: the teammate's test typed in `0.15` on purpose. When does a number in a test describe a **requirement** that should be hard to change, and when is it just a copy of a tuning value?
+Afterward, each of you writes two sentences in `reflections.md`. First: in Chapters 21, 22, and 23, three merges went wrong without a Git conflict; what caught each one, and when? Second: the teammate's test typed in `0.15` on purpose. When does a number in a test describe a **requirement** that should be hard to change, and when is it just a copy of a tuning value?
 
 ### Explore
 
@@ -1540,10 +1540,10 @@ Afterward, each of you writes two sentences in `reflections.md`. First: in Chapt
 >
 > * **Unit Testing (WPILib)**: [docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/unit-testing.html](https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/unit-testing.html) WPILib's guide to JUnit tests with HALSim, the `close()` pattern, and the Test Robot Code command
 > * **JUnit 5 User Guide (version 5.10.1)**: [docs.junit.org/5.10.1/user-guide](https://docs.junit.org/5.10.1/user-guide/) the version in the WPILib template: annotations, assertions, test lifecycle, and parameterized tests
-> * **Building and testing Java with Gradle (GitHub Docs)**: [docs.github.com/en/actions/tutorials/build-and-test-code/java-with-gradle](https://docs.github.com/en/actions/tutorials/build-and-test-code/java-with-gradle) GitHub's own guide to the kind of workflow you wrote in Section 22.9
+> * **Building and testing Java with Gradle (GitHub Docs)**: [docs.github.com/en/actions/tutorials/build-and-test-code/java-with-gradle](https://docs.github.com/en/actions/tutorials/build-and-test-code/java-with-gradle) GitHub's own guide to the kind of workflow you wrote in Section 23.9
 > * **Available rules for rulesets (GitHub Docs)**: [docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets) how "Require status checks to pass before merging" works, and which plans can use it
 > * **The Practical Test Pyramid**: [martinfowler.com/articles/practical-test-pyramid.html](https://martinfowler.com/articles/practical-test-pyramid.html) Ham Vocke's long, friendly tour of unit, integration, and end-to-end tests, and why most tests should be small
 
 ---
 
-*Next up, Chapter 23: Live Tuning and the Autonomous Chooser. You will turn `FollowLine`'s gains and the PID values into dashboard controls, tune the course while it runs, and let your new tests stand guard while the numbers change.*
+*Next up, Chapter 24: Live Tuning and the Autonomous Chooser. You will turn `FollowLine`'s gains and the PID values into dashboard controls, tune the course while it runs, and let your new tests stand guard while the numbers change.*

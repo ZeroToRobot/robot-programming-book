@@ -513,7 +513,7 @@ It also means you can give the controller the gyro's raw, ever-counting heading.
 
 > **Where continuous input shows up next**
 >
-> Every swerve module (Chapter 28) has a wheel that steers to an angle, and that angle is a circle too. Without continuous input, a module asked to go from `179` degrees to `-179` would spin the whole way around instead of nudging 2 degrees. You will call `enableContinuousInput` for every steering motor on the Mini Swerve. Learn it here, on one gyro, and it will feel familiar there.
+> Every swerve module (Chapter 29) has a wheel that steers to an angle, and that angle is a circle too. Without continuous input, a module asked to go from `179` degrees to `-179` would spin the whole way around instead of nudging 2 degrees. You will call `enableContinuousInput` for every steering motor on the Mini Swerve. Learn it here, on one gyro, and it will feel familiar there.
 
 ### Live tuning: `putData`
 
@@ -589,7 +589,7 @@ Leg 2 does the same thing, holding 90 degrees while it drives to the line. Leg 2
 
 > **Straight is not the same as on the line**
 >
-> Holding the heading keeps the robot **pointed** the right way. It does not bring it back to the line `y = 0` if it already drifted sideways before the correction kicked in. A robot that is 1 cm to the left, facing perfectly straight, will drive the whole leg 1 cm to the left. To fix that, you need the pose from Chapter 14: if odometry says `y` is positive (left of the line), aim the heading slightly to the right until `y` comes back to zero. Using one controller's output as another controller's setpoint like this is called a **cascade**, and it is how path followers work. Practice 5 has you build a small one. In Chapter 31, PathPlanner does it for every point along a curved path.
+> Holding the heading keeps the robot **pointed** the right way. It does not bring it back to the line `y = 0` if it already drifted sideways before the correction kicked in. A robot that is 1 cm to the left, facing perfectly straight, will drive the whole leg 1 cm to the left. To fix that, you need the pose from Chapter 14: if odometry says `y` is positive (left of the line), aim the heading slightly to the right until `y` comes back to zero. Using one controller's output as another controller's setpoint like this is called a **cascade**, and it is how path followers work. Practice 5 has you build a small one. In Chapter 32, PathPlanner does it for every point along a curved path.
 
 ### The helpers
 
@@ -1077,7 +1077,7 @@ The widget has no box for the I zone. To edit it, open the **Heading PID** folde
 
 Two cautions:
 
-- **The change is not saved in your code.** The moment you restart the program, the controller is created again from `HEADING_KP` and friends. When you find gains you like, **write them down**, and copy them into the constants before you stop. Every team has lost a good tune by forgetting this. Chapter 23 shows you more ways to make live tuning convenient.
+- **The change is not saved in your code.** The moment you restart the program, the controller is created again from `HEADING_KP` and friends. When you find gains you like, **write them down**, and copy them into the constants before you stop. Every team has lost a good tune by forgetting this. Chapter 24 shows you more ways to make live tuning convenient.
 - **Ignore the Setpoint box.** Your code passes the setpoint to `calculate` every loop, so anything you type there is overwritten 20 milliseconds later. Use the buttons to change targets.
 
 Also, the robot does not see a gain until you click **Publish Values**, and then it sees all four boxes at once. For a big change, disable the robot first, type and publish, then enable.
@@ -1171,7 +1171,7 @@ Then measure the truth with your tape measure, exactly as you did in Chapter 14'
 
 > **Accuracy is a chain**
 >
-> Notice where the remaining error comes from now. The controllers stop the robot exactly where the **sensors** say the target is. If the encoders think the wheels are 60 mm when they are really 59 mm (Chapter 14), the robot will stop precisely at the wrong place. PID makes the robot obey its sensors; it cannot make the sensors right. That is why calibration (measuring your real wheel size and trackwidth) and pose correction (Chapter 33) still matter on a perfectly tuned robot.
+> Notice where the remaining error comes from now. The controllers stop the robot exactly where the **sensors** say the target is. If the encoders think the wheels are 60 mm when they are really 59 mm (Chapter 14), the robot will stop precisely at the wrong place. PID makes the robot obey its sensors; it cannot make the sensors right. That is why calibration (measuring your real wheel size and trackwidth) and pose correction (Chapter 34) still matter on a perfectly tuned robot.
 
 ---
 
@@ -1180,13 +1180,13 @@ Then measure the truth with your tape measure, exactly as you did in Chapter 14'
 You will write PID code, or tune someone else's, on every robot for the rest of this book. Here is where it shows up next:
 
 - **Chapter 16, feedforward.** SysId measures what it takes to move your XRP, including the friction term **kS**. Then the output becomes **feedforward plus PID**: feedforward predicts most of the power, and PID only corrects what is left. The steady-state gaps that needed `kI` in this chapter mostly disappear.
-- **Chapter 19, commands.** These two controllers move into commands called `DriveDistance` and `TurnToAngle`, which own their own controllers and use `atSetpoint()` to decide when they are finished. The ideas do not change; only where the code lives.
-- **Chapter 23, live tuning.** More ways to tune from the dashboard, and to keep the tuned numbers.
-- **Chapter 27, motor controllers.** A Talon FX can run its own PID loop on its own processor, much faster than 50 times a second, right next to the motor. You give it gains and a setpoint over the CAN bus.
-- **Chapter 28, swerve.** Every swerve module steers its wheel to an angle with a PID controller with continuous input, exactly like your heading controller.
-- **Chapter 31, path following.** PathPlanner's controller takes **two** sets of PID gains: one that pushes the robot back onto the path's position, and one that holds the path's heading. That is your leg 1 drive, plus the cascade from Practice 5, in every direction at once.
-- **Chapter 33, vision.** Auto-align turns the robot until a camera says the target is centered: a heading controller whose measurement comes from a camera instead of a gyro.
-- **Chapter 34, mechanisms.** Arms and elevators use a cousin called `ProfiledPIDController`, which moves the setpoint smoothly instead of letting it jump. A smooth setpoint means no derivative kick, and no slamming a heavy arm into motion.
+- **Chapter 20, commands.** These two controllers move into commands called `DriveDistance` and `TurnToAngle`, which own their own controllers and use `atSetpoint()` to decide when they are finished. The ideas do not change; only where the code lives.
+- **Chapter 24, live tuning.** More ways to tune from the dashboard, and to keep the tuned numbers.
+- **Chapter 28, motor controllers.** A Talon FX can run its own PID loop on its own processor, much faster than 50 times a second, right next to the motor. You give it gains and a setpoint over the CAN bus.
+- **Chapter 29, swerve.** Every swerve module steers its wheel to an angle with a PID controller with continuous input, exactly like your heading controller.
+- **Chapter 32, path following.** PathPlanner's controller takes **two** sets of PID gains: one that pushes the robot back onto the path's position, and one that holds the path's heading. That is your leg 1 drive, plus the cascade from Practice 5, in every direction at once.
+- **Chapter 34, vision.** Auto-align turns the robot until a camera says the target is centered: a heading controller whose measurement comes from a camera instead of a gyro.
+- **Chapter 35, mechanisms.** Arms and elevators use a cousin called `ProfiledPIDController`, which moves the setpoint smoothly instead of letting it jump. A smooth setpoint means no derivative kick, and no slamming a heavy arm into motion.
 
 It is all the same three terms. The measurement changes, the output changes, the units change. Error now, error over time, error rate. Once you can tune a turn on a desk robot, you can tune almost anything.
 

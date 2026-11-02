@@ -105,7 +105,7 @@ The XRP is a small educational robot designed by WPI specifically for learning F
 
 Here's why the XRP matters: it uses the same WPILib APIs as a full competition robot. The code you write for the XRP is not "beginner code" that you'll throw away later. It's the same architecture, the same classes, and the same patterns used by championship-winning FRC teams. The only difference is the scale.
 
-In Phase 1 of this book (Chapters 1-25), the XRP is your primary hardware. You can run code on it from your own laptop, in your own home, without needing access to a shop or a team robot.
+In Phase 1 of this book (Chapters 1-26), the XRP is your primary hardware. You can run code on it from your own laptop, in your own home, without needing access to a shop or a team robot.
 
 > **Draw this from memory**
 > 
@@ -195,7 +195,7 @@ FRC programming is real engineering. The stakes are low enough that you can make
 
 ## 1.5 Your Learning Platform: The XRP
 
-Let's look more closely at the hardware you'll be using for the first 25 chapters.
+Let's look more closely at the hardware you'll be using for the first 26 chapters.
 
 The XRP (Experiential Robotics Platform) was designed by WPI specifically to teach FRC-style programming without requiring access to a full competition robot. Here's what it has:
 
@@ -214,18 +214,18 @@ The XRP runs WPILib's WebSockets-based hardware abstraction layer, which means y
 
 This book follows a deliberate hardware progression:
 
-**Phase 1: XRP (Chapters 1-25)**
+**Phase 1: XRP (Chapters 1-26)**
 Personal hardware. Run your code from your desk. Crash it without worrying about a $10,000 mechanism. This is where you learn everything: Java, robot structure, sensors, control theory, command-based architecture, simulation, and testing.
 
-**Phase 2: Mini Swerve Bot (Chapters 26-33)**
+**Phase 2: Mini Swerve Bot (Chapters 27-34)**
 A shared team robot with real competition hardware: roboRIO, Kraken X60 motors with Talon FX motor controllers, CANcoder absolute encoders, a Pigeon 2 gyro, and a camera. This is where you graduate to the full FRC hardware stack, learn swerve drive kinematics, and add vision-based pose estimation.
 
-**Phase 3: Competition Robot (Chapters 34-39)**
+**Phase 3: Competition Robot (Chapters 35-40)**
 Your actual competition robot. The skills from Phases 1 and 2 transfer directly. Phase 3 adds mechanisms, full autonomous routines, pneumatics, and competition-day process.
 
 > **The XRP is not a toy**
 > 
-> Some students are surprised to find themselves spending 25 chapters on a small robot, the size of a paperback book. Here's the reasoning: 
+> Some students are surprised to find themselves spending 26 chapters on a small robot, the size of a paperback book. Here's the reasoning: 
 > 
 > The XRP lets you make mistakes cheaply and often. You'll crash it into walls. You'll run broken code and watch it spin in circles. You'll tune PID gains until something clicks. All of that learning happens before you're anywhere near a $20,000 competition robot. By the time you get to Phase 2, you'll have real confidence, because you'll have actually debugged real problems.
 
@@ -244,23 +244,23 @@ Two things matter about that structure:
 
 Think of it as building a house one room at a time, where every room is fully livable before you start on the next one. You always have a working robot. It just does more things each week.
 
-### XRP Explorer (Chapters 5-25)
+### XRP Explorer (Chapters 5-26)
 
 Your first complete robot program. The XRP Explorer navigates an obstacle course autonomously: driving to specific distances, turning to specific headings, following a line, and stopping at a target. Along the way, you'll add teleop control, sensor feedback, PID tuning, a state machine, unit tests, and simulation support.
 
-By Chapter 25, the Explorer will be a full command-based robot program with AdvantageKit IO layers, the same architecture used by top FRC teams.
+By Chapter 26, the Explorer will be a full command-based robot program with AdvantageKit IO layers, the same architecture used by top FRC teams.
 
-### Mini Swerve Bot (Chapters 26-33)
+### Mini Swerve Bot (Chapters 27-34)
 
 Swerve drive is the gold standard for FRC mobility: each wheel can rotate independently, letting the robot strafe sideways, spin in place, and follow precise field-relative paths. In Section VI, you'll program a full swerve drivetrain from scratch, add PathPlanner for autonomous path following, characterize the motors with SysId, and fuse AprilTag vision measurements into the pose estimator.
 
-### Competition Bot (Chapters 34-39)
+### Competition Bot (Chapters 35-40)
 
 The final phase brings everything together on your team's actual competition robot. You'll add mechanism subsystems, full field autonomous routines with event markers, pneumatics control, and the competition-day deployment process that real teams use at regionals and championships.
 
 ### One Glimpse of Real Code
 
-Here's a five-line snippet of WPILib Java, the kind of code you'll be writing by Chapter 20. Don't worry about understanding it yet. Just notice that it's readable:
+Here's a five-line snippet of WPILib Java, the kind of code you'll be writing by Chapter 21. Don't worry about understanding it yet. Just notice that it's readable:
 
 ```java
 // When the driver holds A, drive forward at half speed
@@ -305,7 +305,7 @@ public class DriveForwardCommand extends Command {
 
 You don't need to understand any of this right now. But notice: it reads almost like English. `initialize` runs once at the start. `execute` runs every loop. `isFinished` says when to stop. `end` cleans up.
 
-By Chapter 19, you'll understand every line of this. By Chapter 25, you'll be writing code more sophisticated than this from memory.
+By Chapter 20, you'll understand every line of this. By Chapter 26, you'll be writing code more sophisticated than this from memory.
 
 Let's get started.
 
@@ -317,7 +317,7 @@ Let's get started.
 >  - A robot program is a **50 Hz loop** that reads inputs and writes outputs on every tick. This is the mental model everything else builds on
 > - The FRC hardware ecosystem has a fixed set of components (roboRIO, radio, Driver Station, motor controllers, sensors) that your code talks to through **WPILib**
 > - Every FRC robot program has two modes: **autonomous** (robot acts alone) and **teleop** (driver controls the robot)
-> - The **XRP** is your personal learning platform for the first 25 chapters, it uses the same WPILib APIs as a competition robot, just at a smaller scale
+> - The **XRP** is your personal learning platform for the first 26 chapters, it uses the same WPILib APIs as a competition robot, just at a smaller scale
 > - You'll build **three complete robot programs** over the course of this book: XRP Explorer, Mini Swerve Bot, and Competition Bot
 
 ---
@@ -330,7 +330,7 @@ Read the two code snippets at the end of Section 1.6. For each one, write down:
 - Every word or phrase you recognize and what you think it might mean
 - Every word or phrase you don't recognize at all
 
-Save this list. After Chapter 19, read it again and see how much has changed.
+Save this list. After Chapter 20, read it again and see how much has changed.
 
 ### Practice
 

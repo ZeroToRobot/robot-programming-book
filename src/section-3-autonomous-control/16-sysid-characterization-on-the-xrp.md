@@ -135,7 +135,7 @@ Chapter 13's `speedToPower` is a line that starts at zero. The real robot's line
 >
 > This chapter uses **pretend volts**: power times a fixed number, `NOMINAL_BATTERY_VOLTS = 6.0`, which is about what four fresh AA batteries give. When you record a test, you log pretend volts. When you drive, you divide pretend volts by the same 6.0 to get power. Because the same number is used both ways, it cancels out. You could pick 1.0 and the robot would drive exactly the same, but every gain would be harder to compare with the rest of the FRC world, where kS is usually written in volts.
 >
-> The catch is batteries. As they drain, a given power produces less real voltage, so the robot gets slower, and a model measured on fresh batteries will over-promise. That is why you put fresh batteries in for the tests, and why PID stays in the loop to cover the drift. A roboRIO **can** measure its battery, and its motor controllers can compensate on every loop, which you will use in Chapter 26 and again when you repeat SysId on real brushless motors in Chapter 32.
+> The catch is batteries. As they drain, a given power produces less real voltage, so the robot gets slower, and a model measured on fresh batteries will over-promise. That is why you put fresh batteries in for the tests, and why PID stays in the loop to cover the drift. A roboRIO **can** measure its battery, and its motor controllers can compensate on every loop, which you will use in Chapter 27 and again when you repeat SysId on real brushless motors in Chapter 33.
 
 ---
 
@@ -428,7 +428,7 @@ State.kDynamicReverse
 State.kNone
 ```
 
-`State` is an **enum**, short for enumeration: a type with a fixed list of named values, and nothing else. A `State` variable can hold exactly one of those five, never a typo, never a sixth. In Chapter 12 you named your autonomous steps with `static final int` constants, and promised enums for later. This is a preview of why. Chapter 21 teaches you to write your own; for now, you only use WPILib's. Three things to know:
+`State` is an **enum**, short for enumeration: a type with a fixed list of named values, and nothing else. A `State` variable can hold exactly one of those five, never a typo, never a sixth. In Chapter 12 you named your autonomous steps with `static final int` constants, and promised enums for later. This is a preview of why. Chapter 22 teaches you to write your own; for now, you only use WPILib's. Three things to know:
 
 - You compare enum values with `==`, just like `int`s: `if (sysIdTest == State.kNone)`.
 - `State` lives **inside** `SysIdRoutineLog`, so its full name is `SysIdRoutineLog.State`. Importing `edu.wpi.first.wpilibj.sysid.SysIdRoutineLog.State` lets you write just `State`.
@@ -766,7 +766,7 @@ Each name is the data, then the motor name from `logSysId` (`left`, `right`), th
 ### Step 2: Tell SysId which entries are which
 
 1. Drag **`sysid-test-state-drive`** from the Log Loader into the **Test State** slot in the Data Selector. SysId reads the test names and should report all four tests. If it lists one as missing, that test is not in this file; you will have to run all four again.
-2. Set **Analysis Type** to **Simple**. "Simple" is the plain kS, kV, kA model from Section 16.2. (The others, Elevator and Arm, add a gravity term, which you will need in Chapter 34.)
+2. Set **Analysis Type** to **Simple**. "Simple" is the plain kS, kV, kA model from Section 16.2. (The others, Elevator and Arm, add a gravity term, which you will need in Chapter 35.)
 3. Drag **`velocity-left-drive`** into **Velocity**, **`position-left-drive`** into **Position**, and **`voltage-left-drive`** into **Voltage**.
 4. Set **Units** to **Meters**. Leave both scaling boxes at `1`: your positions and speeds are already in meters, because `setDistancePerPulse` did the conversion back in Chapter 9.
 5. Click **Load**.
@@ -823,7 +823,7 @@ Compare the two sides. They will not match exactly. If your robot curved slightl
 
 > **The Feedback Analysis section**
 >
-> Below the feedforward gains, SysId also offers **Feedback Analysis**: suggested PID gains, calculated from your model. Skip it for now. SysId's gains assume the PID output is in **volts**, and the Explorer's controllers output **speeds** (meters per second and radians per second), which `drive()` then turns into volts. Different units, so the numbers would not mean what SysId thinks. In Chapter 32, you will build a velocity controller that does output volts, and SysId's suggestions will be a great starting point there.
+> Below the feedforward gains, SysId also offers **Feedback Analysis**: suggested PID gains, calculated from your model. Skip it for now. SysId's gains assume the PID output is in **volts**, and the Explorer's controllers output **speeds** (meters per second and radians per second), which `drive()` then turns into volts. Different units, so the numbers would not mean what SysId thinks. In Chapter 33, you will build a velocity controller that does output volts, and SysId's suggestions will be a great starting point there.
 
 ---
 
@@ -851,7 +851,7 @@ Unlike a `PIDController`, a feedforward has **no memory**. It does not remember 
 
 > **Older code you might see**
 >
-> In code written before 2025, you will often see `feedforward.calculate(velocity, acceleration)` with two arguments. That version is **deprecated** in WPILib 2026 and marked for removal. For a speed that changes over time, the replacement is `calculateWithVelocities(currentVelocity, nextVelocity)`, which works out the acceleration term from where the speed is now and where it should be next loop. The Explorer does not plan its speeds ahead of time yet, so it uses one-argument `calculate`. You will need the acceleration term when your speeds come from a motion profile (Chapter 34) or a path (Chapter 31).
+> In code written before 2025, you will often see `feedforward.calculate(velocity, acceleration)` with two arguments. That version is **deprecated** in WPILib 2026 and marked for removal. For a speed that changes over time, the replacement is `calculateWithVelocities(currentVelocity, nextVelocity)`, which works out the acceleration term from where the speed is now and where it should be next loop. The Explorer does not plan its speeds ahead of time yet, so it uses one-argument `calculate`. You will need the acceleration term when your speeds come from a motion profile (Chapter 35) or a path (Chapter 32).
 
 ### Replacing the guess
 
@@ -1299,13 +1299,13 @@ Your SysId tests drove straight. When the XRP spins in place, its wheels scrub s
 
 ### Where you will see it next
 
-- **Chapter 17, simulation.** A simulated robot needs a model of how voltage turns into motion. kV and kA are exactly that model, and they are what WPILib's drivetrain simulation is built from.
-- **Chapters 18 to 20, commands.** WPILib's `SysIdRoutine` class does what your Test mode code does, as ready-made commands. Now that you have written the four tests yourself, you will know exactly what it is doing when you meet it.
-- **Chapter 23, live tuning.** Feedforward gains can be published and adjusted live, like your PID gains.
-- **Chapter 26, the roboRIO.** A real robot can measure its battery, and its motors can be given volts that stay volts as the battery sags. Pretend volts become real volts.
-- **Chapter 31, path following.** PathPlanner plans a speed for every moment along a path, and feedforward turns each one into volts, with PID correcting the drift.
-- **Chapter 32, SysId on the Mini Swerve.** The same four tests, on brushless motors with real voltages, through `SysIdRoutine`, and this time SysId's suggested PID gains will fit.
-- **Chapter 34, mechanisms.** Arms and elevators add one more term, **kG**, the volts to hold the mechanism up against gravity. WPILib has `ArmFeedforward` and `ElevatorFeedforward` for those, and SysId's Arm and Elevator analysis types measure them.
+- **Chapter 18, simulation.** A simulated robot needs a model of how voltage turns into motion. kV and kA are exactly that model, and they are what WPILib's drivetrain simulation is built from.
+- **Chapters 19 to 21, commands.** WPILib's `SysIdRoutine` class does what your Test mode code does, as ready-made commands. Now that you have written the four tests yourself, you will know exactly what it is doing when you meet it.
+- **Chapter 24, live tuning.** Feedforward gains can be published and adjusted live, like your PID gains.
+- **Chapter 27, the roboRIO.** A real robot can measure its battery, and its motors can be given volts that stay volts as the battery sags. Pretend volts become real volts.
+- **Chapter 32, path following.** PathPlanner plans a speed for every moment along a path, and feedforward turns each one into volts, with PID correcting the drift.
+- **Chapter 33, SysId on the Mini Swerve.** The same four tests, on brushless motors with real voltages, through `SysIdRoutine`, and this time SysId's suggested PID gains will fit.
+- **Chapter 35, mechanisms.** Arms and elevators add one more term, **kG**, the volts to hold the mechanism up against gravity. WPILib has `ArmFeedforward` and `ElevatorFeedforward` for those, and SysId's Arm and Elevator analysis types measure them.
 
 Every one of them is the same idea as this chapter. Know your robot, in numbers. Predict what it needs. Let feedback clean up the rest.
 
@@ -1381,7 +1381,7 @@ Diagnose anything strange:
 - **The robot curves more than it did before:** the left and right gains may be swapped. Each side's numbers come from its own entries (`-left-drive`, `-right-drive`).
 - **Teleop feels exactly the same as before:** that is expected. Teleop still uses `arcadeDrive`, which sends power straight from the sticks. Feedforward only affects `drive()`.
 
-When the Explorer cruises within about 10% of the speed you ask for with no PID, and runs the course at least as accurately as in Chapter 15 but faster, your robot is characterized. In Chapter 17, you will use what it now knows about itself to build a robot that runs without the robot.
+When the Explorer cruises within about 10% of the speed you ask for with no PID, and runs the course at least as accurately as in Chapter 15 but faster, your robot is characterized. In Chapter 18, you will use what it now knows about itself to build a robot that runs without the robot.
 
 ### Reflect
 
@@ -1444,4 +1444,4 @@ WPILib's documentation has an interactive simulation, **Tuning a Flywheel Veloci
 
 ---
 
-*Next up, Chapter 17: Simulation and AdvantageKit on the XRP. You will split the drivetrain into an IO layer so the same code can run on the real XRP or a simulated one, and see how the model you just measured can make a simulated robot behave like yours.*
+*Next up, Chapter 17: AdvantageKit and the IO Layer. You will give the Explorer a flight recorder that remembers every reading its hardware sent, and split the drivetrain along a seam so that, in Chapter 18, the model you just measured can stand in for the real robot.*

@@ -28,7 +28,7 @@ Imagine you are a coach giving instructions to a runner on a track. "Run at 70 p
 
 1. **You cannot plan with it.** How long will a 0.5 meter drive take at `0.5` power? You do not know until you try it, and the answer changes with the batteries. If you knew the robot was going 0.2 meters per second, you could compute the answer: 2.5 seconds.
 2. **The turn number is not tied to anything physical.** `rotation = 0.5` on the XRP and `rotation = 0.5` on a 50 kg competition robot produce completely different turns. Even on the same robot, combining `0.5` forward with `0.2` rotation does not tell you how tight the curve will be.
-3. **The rest of WPILib does not speak it.** Odometry (Chapter 14), path following with PathPlanner (Chapter 31), and swerve drive (Chapters 28 to 30) all describe motion in meters per second and radians per second. To use any of them, your drivetrain has to understand those units.
+3. **The rest of WPILib does not speak it.** Odometry (Chapter 14), path following with PathPlanner (Chapter 32), and swerve drive (Chapters 29 to 31) all describe motion in meters per second and radians per second. To use any of them, your drivetrain has to understand those units.
 
 So the robot needs to accept instructions like "drive forward at 0.2 meters per second while turning left at 1 radian per second," and figure out for itself what that means for each wheel.
 
@@ -47,7 +47,7 @@ You use inverse kinematics to **command** the robot and forward kinematics to **
 
 > **Why "inverse" is the one you command with**
 >
-> The names come from how a mechanism is usually analyzed. "Forward" goes in the direction physics goes: the wheels turn, so the robot moves. "Inverse" runs that backward: you start from the motion you want and work back to what the wheels must do. Robot arms use the same words. Forward kinematics of an arm says "given these joint angles, where is the hand?" Inverse kinematics says "I want the hand *here*; what angles do the joints need?" You will meet arm angles in Chapter 34.
+> The names come from how a mechanism is usually analyzed. "Forward" goes in the direction physics goes: the wheels turn, so the robot moves. "Inverse" runs that backward: you start from the motion you want and work back to what the wheels must do. Robot arms use the same words. Forward kinematics of an arm says "given these joint angles, where is the hand?" Inverse kinematics says "I want the hand *here*; what angles do the joints need?" You will meet arm angles in Chapter 35.
 
 ---
 
@@ -767,7 +767,7 @@ Notice what did **not** change: `arcadeDrive`, `stop`, and every getter. Teleop 
 
 > **Why does the drivetrain own the kinematics?**
 >
-> You could have put the `DifferentialDriveKinematics` object in `Robot.java`. But the trackwidth is a fact about the drivetrain, and the conversion from speed to power is a fact about the drivetrain's motors. If you ever change the wheels or the motors, every one of those facts changes together, in one file. `Robot.java` only needs to say how it wants the robot to move. This is encapsulation from Chapter 7: callers describe **what** they want, and the class decides **how**. When you build a swerve drive in Chapter 28, its `drive` method will take the very same `ChassisSpeeds`, and its insides will be completely different.
+> You could have put the `DifferentialDriveKinematics` object in `Robot.java`. But the trackwidth is a fact about the drivetrain, and the conversion from speed to power is a fact about the drivetrain's motors. If you ever change the wheels or the motors, every one of those facts changes together, in one file. `Robot.java` only needs to say how it wants the robot to move. This is encapsulation from Chapter 7: callers describe **what** they want, and the class decides **how**. When you build a swerve drive in Chapter 29, its `drive` method will take the very same `ChassisSpeeds`, and its insides will be completely different.
 
 ### See it on the dashboard
 
@@ -900,15 +900,15 @@ Every FRC drivetrain, no matter how complicated, works the same way: the rest of
 |---|---|---|
 | Differential (XRP, tank drive) | `DifferentialDriveKinematics` | A speed for the left and right sides |
 | Mecanum | `MecanumDriveKinematics` | A speed for each of four angled-roller wheels |
-| Swerve (Mini Swerve, Chapters 28 to 30) | `SwerveDriveKinematics` | A speed **and** a steering angle for each module |
+| Swerve (Mini Swerve, Chapters 29 to 31) | `SwerveDriveKinematics` | A speed **and** a steering angle for each module |
 
-For swerve, the idea is the same as the marching band, in two dimensions. Each module is at a different spot on the robot, so when the robot spins, each module has to move in a different direction to go around the turn center. Swerve kinematics adds the robot's forward and sideways motion to each module's "spinning" motion, the way you added `vx` and `(L/2) × ω` in this chapter, and gets one arrow per module: how fast, and which way to point. In Chapter 28 you will meet `SwerveDriveKinematics`, and you will recognize it.
+For swerve, the idea is the same as the marching band, in two dimensions. Each module is at a different spot on the robot, so when the robot spins, each module has to move in a different direction to go around the turn center. Swerve kinematics adds the robot's forward and sideways motion to each module's "spinning" motion, the way you added `vx` and `(L/2) × ω` in this chapter, and gets one arrow per module: how fast, and which way to point. In Chapter 29 you will meet `SwerveDriveKinematics`, and you will recognize it.
 
-The same goes for the tools that come later. PathPlanner (Chapter 31) follows a path by producing a `ChassisSpeeds` fifty times a second and handing it to your drivetrain's `drive` method. Field-oriented driving (Chapter 29) is just a conversion from one `ChassisSpeeds` to another before it reaches kinematics. Once your drivetrain can take a `ChassisSpeeds`, all of that plugs in.
+The same goes for the tools that come later. PathPlanner (Chapter 32) follows a path by producing a `ChassisSpeeds` fifty times a second and handing it to your drivetrain's `drive` method. Field-oriented driving (Chapter 30) is just a conversion from one `ChassisSpeeds` to another before it reaches kinematics. Once your drivetrain can take a `ChassisSpeeds`, all of that plugs in.
 
 > **The interface that never changes**
 >
-> Notice what this means for your code. A teammate writing an autonomous routine only needs to know one thing about the drivetrain: "call `drive` with a `ChassisSpeeds`." They do not need to know whether it has two wheels or four modules, or what the trackwidth is. That separation between **what you want** and **how the hardware does it** is the most important design idea in robot code, and you will see it again in Chapter 17, when the AdvantageKit IO layer separates the drivetrain's logic from its hardware, and in Chapter 19, when the drivetrain becomes a command-based subsystem.
+> Notice what this means for your code. A teammate writing an autonomous routine only needs to know one thing about the drivetrain: "call `drive` with a `ChassisSpeeds`." They do not need to know whether it has two wheels or four modules, or what the trackwidth is. That separation between **what you want** and **how the hardware does it** is the most important design idea in robot code, and you will see it again in Chapter 17, when the AdvantageKit IO layer separates the drivetrain's logic from its hardware, and in Chapter 20, when the drivetrain becomes a command-based subsystem.
 
 ---
 

@@ -39,43 +39,43 @@
 
 # IV. Command-Based Programming
 
-- [18. Why Command-Based?](section-4-command-based/18-why-command-based.md)
-- [19. Subsystems and Commands on the XRP](section-4-command-based/19-subsystems-and-commands-on-the-xrp.md)
-- [20. Button Bindings, RobotContainer, and Command Groups](section-4-command-based/20-button-bindings-robotcontainer-and-command-groups.md)
-- [21. State Machines](section-4-command-based/21-state-machines.md)
-- [22. Unit Testing Robot Code](section-4-command-based/22-unit-testing-robot-code.md)
-- [23. Live Tuning and the Autonomous Chooser](section-4-command-based/23-smartdashboard-shuffleboard-and-live-tuning.md)
+- [19. Why Command-Based?](section-4-command-based/19-why-command-based.md)
+- [20. Subsystems and Commands on the XRP](section-4-command-based/20-subsystems-and-commands-on-the-xrp.md)
+- [21. Button Bindings, RobotContainer, and Command Groups](section-4-command-based/21-button-bindings-robotcontainer-and-command-groups.md)
+- [22. State Machines](section-4-command-based/22-state-machines.md)
+- [23. Unit Testing Robot Code](section-4-command-based/23-unit-testing-robot-code.md)
+- [24. Live Tuning and the Autonomous Chooser](section-4-command-based/24-smartdashboard-shuffleboard-and-live-tuning.md)
 
 ---
 
 # V. AdvantageKit Deep Dive and XRP Capstone
 
-- [24. AdvantageScope: Visualizing and Replaying Logs](section-5-advantagekit-capstone/24-advantagescope-visualizing-and-replaying-logs.md)
-- [25. XRP Capstone Project](section-5-advantagekit-capstone/25-xrp-capstone-project.md)
+- [25. AdvantageScope: Visualizing and Replaying Logs](section-5-advantagekit-capstone/25-advantagescope-visualizing-and-replaying-logs.md)
+- [26. XRP Capstone Project](section-5-advantagekit-capstone/26-xrp-capstone-project.md)
 
 ---
 
 # VI. Real Robot Hardware, Swerve Drive, and Vision
 
-- [26. From XRP to roboRIO](section-6-mini-swerve/26-from-xrp-to-roborio.md)
-- [27. CAN Bus and Real Motor Controllers](section-6-mini-swerve/27-can-bus-and-real-motor-controllers.md)
-- [28. Swerve Kinematics](section-6-mini-swerve/28-swerve-kinematics.md)
-- [29. Swerve Teleop and Field-Oriented Drive](section-6-mini-swerve/29-swerve-teleop-and-field-oriented-drive.md)
-- [30. Swerve Odometry and Pose Estimation](section-6-mini-swerve/30-swerve-odometry-and-pose-estimation.md)
-- [31. Path Following with PathPlanner](section-6-mini-swerve/31-path-following-with-pathplanner.md)
-- [32. SysId on the Mini Swerve](section-6-mini-swerve/32-sysid-on-the-mini-swerve.md)
-- [33. Vision: AprilTags, Auto-Align, and Pose Fusion](section-6-mini-swerve/33-vision-apriltags-auto-align-and-pose-fusion.md)
+- [27. From XRP to roboRIO](section-6-mini-swerve/27-from-xrp-to-roborio.md)
+- [28. CAN Bus and Real Motor Controllers](section-6-mini-swerve/28-can-bus-and-real-motor-controllers.md)
+- [29. Swerve Kinematics](section-6-mini-swerve/29-swerve-kinematics.md)
+- [30. Swerve Teleop and Field-Oriented Drive](section-6-mini-swerve/30-swerve-teleop-and-field-oriented-drive.md)
+- [31. Swerve Odometry and Pose Estimation](section-6-mini-swerve/31-swerve-odometry-and-pose-estimation.md)
+- [32. Path Following with PathPlanner](section-6-mini-swerve/32-path-following-with-pathplanner.md)
+- [33. SysId on the Mini Swerve](section-6-mini-swerve/33-sysid-on-the-mini-swerve.md)
+- [34. Vision: AprilTags, Auto-Align, and Pose Fusion](section-6-mini-swerve/34-vision-apriltags-auto-align-and-pose-fusion.md)
 
 ---
 
 # VII. Mechanisms, Full Auto, and Competition Systems
 
-- [34. Mechanisms and Subsystems](section-7-competition/34-mechanisms-and-subsystems.md)
-- [35. Full Field Auto Routines](section-7-competition/35-full-field-auto-routines.md)
-- [36. Pneumatics and Solenoids](section-7-competition/36-pneumatics-and-solenoids.md)
-- [37. AdvantageKit on the Competition Robot](section-7-competition/37-advantagekit-on-the-competition-robot.md)
-- [38. Full SysId and Competition Tuning](section-7-competition/38-full-sysid-and-competition-tuning.md)
-- [39. Competition Day Checklist and Release Process](section-7-competition/39-competition-day-checklist-and-release-process.md)
+- [35. Mechanisms and Subsystems](section-7-competition/35-mechanisms-and-subsystems.md)
+- [36. Full Field Auto Routines](section-7-competition/36-full-field-auto-routines.md)
+- [37. Pneumatics and Solenoids](section-7-competition/37-pneumatics-and-solenoids.md)
+- [38. AdvantageKit on the Competition Robot](section-7-competition/38-advantagekit-on-the-competition-robot.md)
+- [39. Full SysId and Competition Tuning](section-7-competition/39-full-sysid-and-competition-tuning.md)
+- [40. Competition Day Checklist and Release Process](section-7-competition/40-competition-day-checklist-and-release-process.md)
 
 ---
 

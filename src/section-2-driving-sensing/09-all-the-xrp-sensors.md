@@ -48,7 +48,7 @@ The XRP's encoders produce **12 counts per revolution of the motor shaft**. But 
 
 > **Gear ratios: trading speed for strength**
 >
-> The XRP motor spins very fast but very weakly. Connected straight to a wheel, it could not push the robot across a carpet. So the gearbox slows it down: the motor turns **48.75 times** for every one turn of the wheel. That is a **48.75:1 gear ratio**. You trade speed for torque (turning strength), the same way a bicycle's lowest gear makes a hill easy but slow. Every FRC mechanism has a gear ratio, and you will multiply and divide by them constantly: on the Mini Swerve's brushless motors in Chapter 27, and when you characterize real mechanisms in Chapter 32.
+> The XRP motor spins very fast but very weakly. Connected straight to a wheel, it could not push the robot across a carpet. So the gearbox slows it down: the motor turns **48.75 times** for every one turn of the wheel. That is a **48.75:1 gear ratio**. You trade speed for torque (turning strength), the same way a bicycle's lowest gear makes a hill easy but slow. Every FRC mechanism has a gear ratio, and you will multiply and divide by them constantly: on the Mini Swerve's brushless motors in Chapter 28, and when you characterize real mechanisms in Chapter 33.
 
 So for every turn of the **wheel**, the encoder sees:
 
@@ -230,7 +230,7 @@ For a two-minute FRC match, a good gyro drifts only a little, and that is fine. 
 
 > **Every sensor lies a little, in its own way**
 >
-> Drift is the gyro's characteristic error: small, slow, and growing. Encoders have a different one: they are precise about how far the wheel **turned**, but if the wheel slips on a smooth floor, the robot did not actually move that far. In Chapter 14 you will combine encoders and the gyro to track the robot's position on the field (**odometry**), and in Chapter 30 you will add camera measurements to correct the slow errors of both. Combining sensors so each covers the others' weaknesses is called **sensor fusion**, and it is how every serious robot knows where it is.
+> Drift is the gyro's characteristic error: small, slow, and growing. Encoders have a different one: they are precise about how far the wheel **turned**, but if the wheel slips on a smooth floor, the robot did not actually move that far. In Chapter 14 you will combine encoders and the gyro to track the robot's position on the field (**odometry**), and in Chapter 31 you will add camera measurements to correct the slow errors of both. Combining sensors so each covers the others' weaknesses is called **sensor fusion**, and it is how every serious robot knows where it is.
 
 ### The accelerometer
 
@@ -494,7 +494,7 @@ Halfway gives you the most margin in both directions. If your "white" floor is a
 >
 > The reflectance sensors are designed to sit just a few millimeters above the floor. Lift the robot and every reading changes. Bright sunlight contains a lot of infrared light and can confuse them too. If your readings look strange, check that the robot is sitting flat on the floor and not in a sunbeam.
 
-With two sensors, the robot can tell more than "on the line or not." If the left sensor sees black and the right sees white, the line is drifting off to the left, so the robot should steer left. That one idea is the heart of line following, and it is exactly the kind of decision you will turn into a **state machine** in Chapter 21.
+With two sensors, the robot can tell more than "on the line or not." If the left sensor sees black and the right sees white, the line is drifting off to the left, so the robot should steer left. That one idea is the heart of line following, and it is exactly the kind of decision you will turn into a **state machine** in Chapter 22.
 
 ---
 
@@ -721,7 +721,7 @@ Why read the Y button in `robotPeriodic()` instead of `teleopPeriodic()`? Becaus
 
 Run the program, open Elastic, and add the new sensor widgets (**Add Widget**, **SmartDashboard**). Arrange them into groups: encoders in one column, gyro next to it, then the rangefinder, the line sensors, and the accelerometer. Drag a widget to move it and drag its edges to resize it. To change how a value is displayed, right-click the widget, choose **Edit Properties**, and change its **Widget Type**. A **Graph** is especially good for watching the rangefinder's noise and the gyro's drift over time.
 
-Now save the layout **in your project**, so it is committed with your code and a teammate who clones your repository gets the same dashboard. Choose **File** > **Save As**, go to your project folder, then `src`, `main`, `deploy`, and save it as `elastic-layout.json`. (Delete the template's `example.txt` from that folder while you are there.) From now on, **File** > **Save** updates that file. If Elastic ever opens empty, use **File** > **Open Layout** and pick it. The file is JSON, a text format Elastic writes and reads; you never edit it by hand. Chapter 23 explains why `deploy` is the right home for it.
+Now save the layout **in your project**, so it is committed with your code and a teammate who clones your repository gets the same dashboard. Choose **File** > **Save As**, go to your project folder, then `src`, `main`, `deploy`, and save it as `elastic-layout.json`. (Delete the template's `example.txt` from that folder while you are there.) From now on, **File** > **Save** updates that file. If Elastic ever opens empty, use **File** > **Open Layout** and pick it. The file is JSON, a text format Elastic writes and reads; you never edit it by hand. Chapter 24 explains why `deploy` is the right home for it.
 
 This is your **sensor dashboard**: one screen showing everything the Explorer can feel. Keep it open whenever the robot runs. When something goes wrong, the first question is always "what did the sensors say?", and now you can answer it at a glance.
 
@@ -751,7 +751,7 @@ Notice how often the "weakness" of one sensor is the "strength" of another. The 
 > heading (radians) = (rightDistance - leftDistance) / 0.155
 > ```
 >
-> Multiply by `180 / pi` (or use `Math.toDegrees(...)`) to get degrees. Try it in Practice 3 and compare the result to the gyro. The relationship between wheel speeds and robot motion is called **kinematics**, and it gets its own chapter (Chapter 13). On a swerve drive in Chapter 28, the same kind of math handles four wheels that can each point in any direction.
+> Multiply by `180 / pi` (or use `Math.toDegrees(...)`) to get degrees. Try it in Practice 3 and compare the result to the gyro. The relationship between wheel speeds and robot motion is called **kinematics**, and it gets its own chapter (Chapter 13). On a swerve drive in Chapter 29, the same kind of math handles four wheels that can each point in any direction.
 
 ---
 

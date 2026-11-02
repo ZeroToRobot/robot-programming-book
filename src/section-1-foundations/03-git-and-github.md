@@ -23,11 +23,11 @@ Version control fixes that by giving every meaningful state of your project a na
 
 Git is the version control tool. GitHub is a website that hosts Git repositories online so you and your teammates can share them. Together, they're the standard tools used by essentially every professional software team in the world, and by every successful FRC team's programming subgroup.
 
-> **Why this is in Chapter 3, not Chapter 23**
+> **Why this is in Chapter 3, not Chapter 24**
 >
 > Some textbooks treat version control as an "advanced topic" you learn after you can already program. This book disagrees. Without version control, you spend hours re-creating work you've already done, and you lose the ability to confidently experiment.
 >
-> You'll use Git in every single chapter from here on. By Chapter 25, it will be as automatic as saving a file.
+> You'll use Git in every single chapter from here on. By Chapter 26, it will be as automatic as saving a file.
 
 ---
 

@@ -253,7 +253,7 @@ Our plan: build a small `Drivetrain` class that owns the two `XRPMotor` objects 
 
 > **Why not use `DifferentialDrive` directly in `Robot.java`?**
 >
-> We could. But then `Robot.java` would hold the motors, the inversion setting, and the drive object, and every future drive detail would pile up there too. Wrapping it in our own `Drivetrain` class gives us one obvious home for everything about driving, and it is the exact shape we will formalize as a "subsystem" in Chapter 19. We are building the good habit early.
+> We could. But then `Robot.java` would hold the motors, the inversion setting, and the drive object, and every future drive detail would pile up there too. Wrapping it in our own `Drivetrain` class gives us one obvious home for everything about driving, and it is the exact shape we will formalize as a "subsystem" in Chapter 20. We are building the good habit early.
 
 ---
 
@@ -469,7 +469,7 @@ public void autonomousPeriodic() {
 
 > **Know how to stop before you start**
 >
-> This is the first time your code moves the robot. Before you click Enable, put your finger on the stop. In the Simulation GUI, that is the **Disabled** button in the Robot State panel: one click and the motors stop. Keep the XRP on the floor, never on a table where it can drive off the edge, and if all else fails, flip its power switch. Every time you enable a robot, from this XRP to a competition robot, you should already know how you will stop it. Chapter 26 adds the Driver Station's keyboard stops for the bigger robot.
+> This is the first time your code moves the robot. Before you click Enable, put your finger on the stop. In the Simulation GUI, that is the **Disabled** button in the Robot State panel: one click and the motors stop. Keep the XRP on the floor, never on a table where it can drive off the edge, and if all else fails, flip its power switch. Every time you enable a robot, from this XRP to a competition robot, you should already know how you will stop it. Chapter 27 adds the Driver Station's keyboard stops for the bigger robot.
 
 3. Put the XRP on the floor with room ahead of it. Build and run it. With your finger on **Disabled**, click **Autonomous** in the Simulation GUI's Robot State panel.
 

@@ -1,24 +1,24 @@
-# Chapter 23: Live Tuning and the Autonomous Chooser
+# Chapter 24: Live Tuning and the Autonomous Chooser
 
-In Chapter 22 the Explorer got a safety net. Twenty-four tests walk `FollowLine` through every arrow of its state diagram, check the drivetrain's math, drive the commands on the simulated robot, and run the whole obstacle course in autonomous, every time you build. GitHub Actions runs them again on every push, and puts a green check or a red X on every pull request.
+In Chapter 23 the Explorer got a safety net. Twenty-four tests walk `FollowLine` through every arrow of its state diagram, check the drivetrain's math, drive the commands on the simulated robot, and run the whole obstacle course in autonomous, every time you build. GitHub Actions runs them again on every push, and puts a green check or a red X on every pull request.
 
 What has not changed since Chapter 2 is how you **tune**. You change `STEER_KP` from `3.0` to `2.5`, build, wait for the program to start, put the robot back on the tape, enable, watch, disable, and do it all again. Every number you try costs you a minute, and most of that minute is waiting. Choosing a different autonomous routine is the same: you edit `getAutonomousCommand()`, and rebuild.
 
 This chapter makes the dashboard talk **back**. By the end, the Explorer has a real dashboard with two tabs: a **Driver** tab with a dropdown that picks the autonomous routine, and a **Tuning** tab with every PID gain and all three of `FollowLine`'s promised tuning numbers, which you can change while the robot is running. You will tune the whole obstacle course that way, live, and then copy the winning numbers back into your code, where your tests stand guard over them.
 
-Along the way, you will find out what a dashboard really is underneath (NetworkTables), and why the book has used Elastic since Chapter 2 even though your code says `SmartDashboard`. Section 23.3 tells the full story: WPILib changed its advice about dashboards for 2026, and the old SmartDashboard and Shuffleboard **apps** are on their way out.
+Along the way, you will find out what a dashboard really is underneath (NetworkTables), and why the book has used Elastic since Chapter 2 even though your code says `SmartDashboard`. Section 24.3 tells the full story: WPILib changed its advice about dashboards for 2026, and the old SmartDashboard and Shuffleboard **apps** are on their way out.
 
-On the Java side, you will learn **generics**: the angle brackets in `SendableChooser<Command>` that you have been seeing since Chapter 19 and quietly skipping past. And you will learn what it means for a `static final` field to point at an object that **changes**, which is exactly what a tunable number is.
+On the Java side, you will learn **generics**: the angle brackets in `SendableChooser<Command>` that you have been seeing since Chapter 20 and quietly skipping past. And you will learn what it means for a `static final` field to point at an object that **changes**, which is exactly what a tunable number is.
 
 You will need your XRP for most of this chapter, and a strip of tape for the line follower.
 
 ---
 
-## 23.1 Edit, Build, Run, Repeat
+## 24.1 Edit, Build, Run, Repeat
 
-Here is a tuning session from Chapter 21, timed.
+Here is a tuning session from Chapter 22, timed.
 
-You are tuning `STEER_KP` on a gentle bend. The robot wiggles, so you lower the gain from `3.0` to `2.5`. You stop the program, edit the number, and run **WPILib: Simulate Robot Code**. Gradle compiles the code and runs the tests (Chapter 22 made every build do that). The program starts, the Simulation GUI opens, and the Explorer reconnects. You put the robot back at the start of the tape, enable teleop, hold the left bumper, and watch. Better, but now it drifts wide on the bend. Try `2.8`. Stop, edit, build, start, reconnect, place, enable, watch.
+You are tuning `STEER_KP` on a gentle bend. The robot wiggles, so you lower the gain from `3.0` to `2.5`. You stop the program, edit the number, and run **WPILib: Simulate Robot Code**. Gradle compiles the code and runs the tests (Chapter 23 made every build do that). The program starts, the Simulation GUI opens, and the Explorer reconnects. You put the robot back at the start of the tape, enable teleop, hold the left bumper, and watch. Better, but now it drifts wide on the bend. Try `2.8`. Stop, edit, build, start, reconnect, place, enable, watch.
 
 Each try takes about a minute, and you spend maybe five seconds of that minute actually watching the robot. Tuning one number well can take ten tries. The follower has three numbers, the drivetrain has six PID gains, and each one affects the others. That is an afternoon, spent mostly watching Gradle.
 
@@ -28,7 +28,7 @@ There is a worse cost, too. Between two tries, a minute passes and the robot is 
 
 In Chapter 15 you tuned the heading PID controller **live**. `SmartDashboard.putData("Heading PID", headingController)` put the controller itself on the dashboard, and you changed its P, I, and D in Elastic while the robot turned. No rebuilding.
 
-Chapter 19 took that away, and Section 19.5 explained why. Each command now owns its own PID controllers, created from `Drivetrain`'s factories, because a PID controller remembers (its error sum, its last error), and two jobs must never share one. Count how many heading controllers the Explorer has today:
+Chapter 20 took that away, and Section 20.5 explained why. Each command now owns its own PID controllers, created from `Drivetrain`'s factories, because a PID controller remembers (its error sum, its last error), and two jobs must never share one. Count how many heading controllers the Explorer has today:
 
 - the obstacle course's `DriveDistance`, `TurnToHeading`, and `DriveUntilLine`,
 - the teleop A button's `TurnToHeading`,
@@ -36,21 +36,21 @@ Chapter 19 took that away, and Section 19.5 explained why. Each command now owns
 
 Eight heading controllers, eight separate objects, and that is before this chapter adds any more. Put one of them on the dashboard and change its gain, and you have changed one command out of eight. The other seven still use the old number.
 
-So the question for live tuning is not "how do I put a controller on the dashboard?" It is: **where does a gain live, so that one change on the dashboard reaches every command that uses it?** Section 23.8 answers that with a small class of your own and one well-placed `static`.
+So the question for live tuning is not "how do I put a controller on the dashboard?" It is: **where does a gain live, so that one change on the dashboard reaches every command that uses it?** Section 24.8 answers that with a small class of your own and one well-placed `static`.
 
 ### And choosing a routine means editing code
 
-Since Chapter 20, `getAutonomousCommand()` has been one line: `return obstacleCourse;`. That is fine for running the course. But when you are tuning leg 1, you want autonomous to drive **only** leg 1, over and over. When you are tuning the follower, you want to start the robot on the tape and run **only** `FollowLine`. Right now, each of those means editing `getAutonomousCommand()` and rebuilding, and remembering to change it back before you commit.
+Since Chapter 21, `getAutonomousCommand()` has been one line: `return obstacleCourse;`. That is fine for running the course. But when you are tuning leg 1, you want autonomous to drive **only** leg 1, over and over. When you are tuning the follower, you want to start the robot on the tape and run **only** `FollowLine`. Right now, each of those means editing `getAutonomousCommand()` and rebuilding, and remembering to change it back before you commit.
 
-Every FRC team solves this the same way: a dropdown on the dashboard, called a **chooser**, that lists the autonomous routines. The drive team picks one before the match, and the robot runs whatever was picked. Chapter 20 promised you one. Section 23.6 builds it.
+Every FRC team solves this the same way: a dropdown on the dashboard, called a **chooser**, that lists the autonomous routines. The drive team picks one before the match, and the robot runs whatever was picked. Chapter 21 promised you one. Section 24.6 builds it.
 
 > **Tune on the robot, keep it in the code**
 >
-> Live tuning changes numbers while the program runs. When the program stops, those changes are gone, and the next run starts from the numbers in your code again. That is on purpose. The dashboard is a **scratchpad** for experiments; your code, in Git, is the **notebook** where results are written down. Section 23.10 ends every tuning session the same way: copy the numbers that worked into your constants, run the tests, and commit.
+> Live tuning changes numbers while the program runs. When the program stops, those changes are gone, and the next run starts from the numbers in your code again. That is on purpose. The dashboard is a **scratchpad** for experiments; your code, in Git, is the **notebook** where results are written down. Section 24.10 ends every tuning session the same way: copy the numbers that worked into your constants, run the tests, and commit.
 
 ---
 
-## 23.2 What a Dashboard Really Is: NetworkTables
+## 24.2 What a Dashboard Really Is: NetworkTables
 
 Since Chapter 4, you have been calling `SmartDashboard.putNumber("Heading (deg)", ...)` and watching the number appear on your laptop. Before you can send numbers the **other** way, it helps to know what actually happens when you call `putNumber`.
 
@@ -64,7 +64,7 @@ Where does the server run? Wherever the robot program runs. Chapter 2 explained 
 
 > **On a real FRC robot, the server is on the robot**
 >
-> In Chapter 26 your program moves onto the Mini Swerve's **roboRIO**, and the NetworkTables server goes with it. The dashboard then runs on the Driver Station laptop and connects over the robot's radio, to an address built from your team number (for team 3415, `10.34.15.2`). Everything in this chapter still works; only the address changes. At competitions, the field limits how much data each robot may send, so a team that publishes a thousand values every loop can find its dashboard lagging. That is one more reason to keep the driver's dashboard small (Section 23.11).
+> In Chapter 27 your program moves onto the Mini Swerve's **roboRIO**, and the NetworkTables server goes with it. The dashboard then runs on the Driver Station laptop and connects over the robot's radio, to an address built from your team number (for team 3415, `10.34.15.2`). Everything in this chapter still works; only the address changes. At competitions, the field limits how much data each robot may send, so a team that publishes a thousand values every loop can find its dashboard lagging. That is one more reason to keep the driver's dashboard small (Section 24.11).
 
 ### Topics: names like folders
 
@@ -92,7 +92,7 @@ That is exactly how Chapter 15's live PID widget worked. When you typed a new P 
 
 ---
 
-## 23.3 Why This Book Uses Elastic
+## 24.3 Why This Book Uses Elastic
 
 Since Chapter 2 you have used **Elastic** for your dashboard, while your code calls a class named `SmartDashboard`. Now that you know what a dashboard really is, here is the full story behind that choice.
 
@@ -106,7 +106,7 @@ The documentation for the 2027 season (still in development as this is written) 
 
 ### What it means for your code: nothing
 
-What is going away is the **app** called SmartDashboard. The **class** called `SmartDashboard`, the one in your code, is a different thing with the same name. It is a helper for writing into the `/SmartDashboard` table on the NetworkTables server (Section 23.2), and it is **not** deprecated: WPILib 2026's Java documentation for `SmartDashboard` has no deprecation notice on the class or any of its methods. Elastic, AdvantageScope, the Simulation GUI, and Glass all read the `/SmartDashboard` table. So every `SmartDashboard.putNumber` you have written since Chapter 4 keeps working, with any dashboard you choose.
+What is going away is the **app** called SmartDashboard. The **class** called `SmartDashboard`, the one in your code, is a different thing with the same name. It is a helper for writing into the `/SmartDashboard` table on the NetworkTables server (Section 24.2), and it is **not** deprecated: WPILib 2026's Java documentation for `SmartDashboard` has no deprecation notice on the class or any of its methods. Elastic, AdvantageScope, the Simulation GUI, and Glass all read the `/SmartDashboard` table. So every `SmartDashboard.putNumber` you have written since Chapter 4 keeps working, with any dashboard you choose.
 
 Shuffleboard has a Java side too: a `Shuffleboard` class that lets code arrange widgets on Shuffleboard tabs. You will see it in older robot code on GitHub, looking like this:
 
@@ -130,7 +130,7 @@ All of these come with the WPILib 2026 installer, and open from **WPILib: Start 
 | Shuffleboard | Driver and programmer dashboard with tabs | Deprecated; removed for 2027 | Not used |
 | Simulation GUI (and Glass) | A programmer's tool: the robot's mode, the simulated joystick, a raw NetworkTables view | Current | The XRP's control window: Robot State, Joysticks, DIO |
 | **Elastic** | A modern driver dashboard, made by FRC Team 353 | Current; WPILib's recommended driver dashboard | Every dashboard value since Chapter 2, the Scheduler and Drivetrain widgets, and this chapter's Driver and Tuning tabs |
-| **AdvantageScope** | Logs, graphs, field views, and replay, made by FRC Team 6328 | Current; WPILib's recommended tool for debugging and data | The XRP's map (Chapter 14), PID graphs (Chapter 15), AdvantageKit (Chapter 17), and all of Chapter 24 |
+| **AdvantageScope** | Logs, graphs, field views, and replay, made by FRC Team 6328 | Current; WPILib's recommended tool for debugging and data | The XRP's map (Chapter 14), PID graphs (Chapter 15), AdvantageKit (Chapter 17), and all of Chapter 25 |
 
 Elastic and AdvantageScope are both made by FRC teams, and both are open source. WPILib now ships them with every installation.
 
@@ -140,7 +140,7 @@ Elastic and AdvantageScope are both made by FRC teams, and both are open source.
 
 ---
 
-## 23.4 A Dashboard with Two Tabs
+## 24.4 A Dashboard with Two Tabs
 
 You have been adding widgets to one Elastic grid since Chapter 2, and saving it in your project since Chapter 9. Now give it some structure: one tab for the drive team, and one for tuning.
 
@@ -150,7 +150,7 @@ Run the Explorer, with the XRP switched on and `USE_SIMULATED_ROBOT = false`, an
 
 ### Step 2: Two tabs
 
-Along the top of the grid is a row of **tabs**, like the tabs in a web browser. Right-click the first one and rename it **Driver**. Then click **+** to add a second tab, and name it **Tuning**. Leave it empty for now; Section 23.9 fills it.
+Along the top of the grid is a row of **tabs**, like the tabs in a web browser. Right-click the first one and rename it **Driver**. Then click **+** to add a second tab, and name it **Tuning**. Leave it empty for now; Section 24.9 fills it.
 
 On the **Driver** tab, keep only what the drive team needs: `Mode`, `Line State`, `Heading (deg)`, `Wall Close`, `Blocked`, and `Scheduler`. Right-click everything else and choose **Remove**; the values are still published, and you can add them back on another tab any time. To change how a widget looks, right-click it, choose **Edit Properties**, and change its **Widget Type** under **Container Settings**. Make `Wall Close` and `Blocked` **Boolean Box**es if they are not already: they turn a color when `true`, which is easy to see from a step back.
 
@@ -170,7 +170,7 @@ Why `src/main/deploy`? That folder is where a WPILib project keeps files that tr
 
 ---
 
-## 23.5 New Java: Generics
+## 24.5 New Java: Generics
 
 The dashboard is ready for its first control: the autonomous chooser. WPILib's chooser class is declared like this:
 
@@ -188,9 +188,9 @@ Those angle brackets are not new to you. You have seen them three times already,
 
 | Where | What you wrote or read | What the brackets said |
 |---|---|---|
-| Chapter 19, SysId | `Consumer<Voltage>` | a function that takes a `Voltage` |
-| Chapter 20, groups | `List<Command>` | a list of `Command`s |
-| Chapter 21, `Commands.select` | `Map<State, Command>` | a map from `State`s to `Command`s |
+| Chapter 20, SysId | `Consumer<Voltage>` | a function that takes a `Voltage` |
+| Chapter 21, groups | `List<Command>` | a list of `Command`s |
+| Chapter 22, `Commands.select` | `Map<State, Command>` | a map from `State`s to `Command`s |
 
 ### A box with a label on it
 
@@ -293,13 +293,13 @@ You will not write your own generic class in this book. Reading and using them i
 
 ---
 
-## 23.6 An Autonomous Chooser
+## 24.6 An Autonomous Chooser
 
 WPILib's documentation shows the standard way to pick an autonomous routine from the dashboard: a `SendableChooser<Command>`, filled with routines, published with `SmartDashboard.putData`, and asked for its selection in `getAutonomousCommand()`. The Explorer will do exactly that, with one change: it uses **AdvantageKit's** version of the chooser.
 
 ### Why AdvantageKit's chooser?
 
-In Chapter 17 you split the drivetrain into an IO layer, so that AdvantageKit could record every **input** the robot read: every encoder count, every gyro angle. Section 17.6 explained the reason. If AdvantageKit records every input, then a log can later be **replayed**: the same code is run again on the recorded inputs, and makes exactly the same decisions (that is Chapter 24).
+In Chapter 17 you split the drivetrain into an IO layer, so that AdvantageKit could record every **input** the robot read: every encoder count, every gyro angle. Section 17.3 explained the reason. If AdvantageKit records every input, then a log can later be **replayed**: the same code is run again on the recorded inputs, and makes exactly the same decisions (that is Chapter 25).
 
 A dashboard selection is an input too. If the drive team picked "Leg 1 Only," the robot did something completely different from the obstacle course. AdvantageKit's documentation is direct about this: anything your code reads from NetworkTables has to be treated as input data, or replay will not behave correctly. A plain `SendableChooser` reads straight from NetworkTables, and AdvantageKit never sees it. So AdvantageKit provides `LoggedDashboardChooser<V>`, a chooser that records which option was selected every loop, and plays it back during a replay.
 
@@ -325,7 +325,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 Add the chooser as a field, right after `obstacleCourse`:
 
 ```java
-// The dashboard's autonomous dropdown (Chapter 23). AdvantageKit records the choice.
+// The dashboard's autonomous dropdown (Chapter 24). AdvantageKit records the choice.
 private final LoggedDashboardChooser<Command> autoChooser =
     new LoggedDashboardChooser<>("Auto Routine");
 ```
@@ -358,7 +358,7 @@ private void configureAutoChooser() {
 
 /**
  * Just leg 1 of the course: reset the pose and drive to the corner, then hold still.
- * Run it again and again while tuning the distance gains (Section 23.10).
+ * Run it again and again while tuning the distance gains (Section 24.10).
  *
  * @return the routine, ready to schedule
  */
@@ -375,8 +375,8 @@ private Command buildLeg1Only() {
 Walk through it:
 
 - **Four options.** The whole course, as the default. **Leg 1 Only**, for tuning the distance controller. **Follow Line Only**, for tuning the follower in autonomous: place the robot on the tape first. And **Sit Still**, which holds the drivetrain and does nothing else, for the match where the safest autonomous is none at all.
-- **`addDefaultOption`** marks the course as the option the chooser starts on. If nobody touches the dropdown, autonomous runs the course, just as it has since Chapter 20.
-- **Every option is a new object.** Chapter 20's one-owner rule says a command that is part of a group cannot be scheduled alone or put in a second group. `buildLeg1Only()` builds a brand-new `DriveDistance`, separate from the course's, and `holdStill()` is a factory that returns a new command every call. If "Leg 1 Only" and "Follow Line Only" shared one `Hold Still` command object in their two `andThen`s, the second `andThen` would fail with Chapter 20's "Commands that have been composed may not be added to another composition or scheduled individually!" the moment the program started.
+- **`addDefaultOption`** marks the course as the option the chooser starts on. If nobody touches the dropdown, autonomous runs the course, just as it has since Chapter 21.
+- **Every option is a new object.** Chapter 21's one-owner rule says a command that is part of a group cannot be scheduled alone or put in a second group. `buildLeg1Only()` builds a brand-new `DriveDistance`, separate from the course's, and `holdStill()` is a factory that returns a new command every call. If "Leg 1 Only" and "Follow Line Only" shared one `Hold Still` command object in their two `andThen`s, the second `andThen` would fail with Chapter 21's "Commands that have been composed may not be added to another composition or scheduled individually!" the moment the program started.
 - **"Sit Still" is `holdStill()`, not `Commands.none()`.** Remember that `DriveWithSticks` is the drivetrain's default command in every mode. A routine that does nothing would let the default command run, and then a bumped joystick could move the robot in autonomous. `Hold Still` requires the drivetrain, so the sticks stay quiet.
 
 ### Step 2: Ask the chooser
@@ -401,15 +401,15 @@ public Command getAutonomousCommand() {
 
 `autoChooser.get()` returns a `Command`, because the chooser holds `Command`s. No cast. That is generics paying off.
 
-But why the `null` check, when the course is already the default? Because of **when** `LoggedDashboardChooser` reads the dashboard. AdvantageKit updates its dashboard inputs once per loop, just before `robotPeriodic()` runs, and records what it found. Until the first loop, the chooser has not read anything yet, and `get()` answers `null`: "I have no answer." On the robot that window is a fraction of a second at startup, long before anyone enables autonomous. But a **test** has no robot loop at all, and Chapter 22's `ObstacleCourseTest` calls `getAutonomousCommand()` directly. Without the check, it would get `null`.
+But why the `null` check, when the course is already the default? Because of **when** `LoggedDashboardChooser` reads the dashboard. AdvantageKit updates its dashboard inputs once per loop, just before `robotPeriodic()` runs, and records what it found. Until the first loop, the chooser has not read anything yet, and `get()` answers `null`: "I have no answer." On the robot that window is a fraction of a second at startup, long before anyone enables autonomous. But a **test** has no robot loop at all, and Chapter 23's `ObstacleCourseTest` calls `getAutonomousCommand()` directly. Without the check, it would get `null`.
 
-What would `null` do? Section 20.7's `Robot.autonomousInit()` stores the command in `autonomousCommand` and schedules it. The scheduler ignores a `null` with a warning (`Tried to schedule a null command`), so nothing would run. Then `teleopInit()` calls `autonomousCommand.cancel()`, and Chapter 10's `NullPointerException` crashes the program. The check turns "no answer yet" into the safest answer you have, the routine that was the default all along. It is the same habit as Chapter 20's `Commands.none()` in `Robot`: never hand anyone a `null` they will call a method on.
+What would `null` do? Section 21.7's `Robot.autonomousInit()` stores the command in `autonomousCommand` and schedules it. The scheduler ignores a `null` with a warning (`Tried to schedule a null command`), so nothing would run. Then `teleopInit()` calls `autonomousCommand.cancel()`, and Chapter 10's `NullPointerException` crashes the program. The check turns "no answer yet" into the safest answer you have, the routine that was the default all along. It is the same habit as Chapter 21's `Commands.none()` in `Robot`: never hand anyone a `null` they will call a method on.
 
 ### Step 3: Run the tests, then use it
 
 Build. The build runs your tests, and all twenty-four should pass: `ObstacleCourseTest` still gets the obstacle course, through the `null` check.
 
-Make it fail on purpose, as Chapter 22 taught you. Delete the three lines of the `if`, so `getAutonomousCommand()` just returns `autoChooser.get()`, and run the tests:
+Make it fail on purpose, as Chapter 23 taught you. Delete the three lines of the `if`, so `getAutonomousCommand()` just returns `autoChooser.get()`, and run the tests:
 
 ```
 ObstacleCourseTest > courseEndsAtTheEndOfTheLine() FAILED
@@ -427,11 +427,11 @@ Press Y to reset the pose, put the XRP at the start line, and enable **Autonomou
 
 > **The chooser is in the log**
 >
-> Because the chooser is AdvantageKit's, every run's log records which routine was selected. In AdvantageScope, or in Chapter 24's replay, you will find it under `NetworkInputs`, as `SmartDashboard/Auto Routine`. Months from now, when someone asks "which auto did we run in qualification 14?", the log knows.
+> Because the chooser is AdvantageKit's, every run's log records which routine was selected. In AdvantageScope, or in Chapter 25's replay, you will find it under `NetworkInputs`, as `SmartDashboard/Auto Routine`. Months from now, when someone asks "which auto did we run in qualification 14?", the log knows.
 
 ---
 
-## 23.7 Live Tuning: The Old Way, and Its Traps
+## 24.7 Live Tuning: The Old Way, and Its Traps
 
 Now the numbers. Here is how live tuning has been done on many FRC teams for years, with nothing but the `SmartDashboard` class. It is worth seeing, because you will find it in a lot of robot code, and because it has four traps that are worth learning to spot.
 
@@ -455,7 +455,7 @@ Now you type `2.5` into the dashboard, and 20 milliseconds later your own code p
 
 **Trap 2: the typo nobody notices.** The key is a `String`, typed twice: once to publish, once to read. Type `"Steer KP"` in one place and `"Steer kP"` in the other, and you get **two** topics. You tune one; the code reads the other, which never changes. Java cannot help, because to the compiler both are just text.
 
-**Trap 3: the log cannot see it.** `SmartDashboard.getNumber` reads NetworkTables directly, the way a plain `SendableChooser` does. AdvantageKit never records the value. Tune the follower down to `2.5`, and the log of that run says nothing about it. Replay the log in Chapter 24, and the code runs with `3.0`, steers differently, and the replay no longer matches what the robot did.
+**Trap 3: the log cannot see it.** `SmartDashboard.getNumber` reads NetworkTables directly, the way a plain `SendableChooser` does. AdvantageKit never records the value. Tune the follower down to `2.5`, and the log of that run says nothing about it. Replay the log in Chapter 25, and the code runs with `3.0`, steers differently, and the replay no longer matches what the robot did.
 
 **Trap 4: no off switch.** At a competition, the tuning numbers are still on the dashboard, and still change the robot. A mis-click on the wrong tab in the pit, or a dashboard that loads an old layout with old values, and the robot drives a match with gains nobody chose.
 
@@ -474,9 +474,9 @@ The other two are yours to write: a small class that types the key once, adds th
 
 ---
 
-## 23.8 New Java: One Object, Shared by Every Command
+## 24.8 New Java: One Object, Shared by Every Command
 
-Go back to Section 23.1's question. The Explorer has eight heading controllers, in eight command objects. You want **one** number on the dashboard, `Heading kP`, and every one of the eight to use it.
+Go back to Section 24.1's question. The Explorer has eight heading controllers, in eight command objects. You want **one** number on the dashboard, `Heading kP`, and every one of the eight to use it.
 
 ### Instance or static?
 
@@ -529,7 +529,7 @@ import frc.robot.Constants;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 /**
- * A number you can change from a dashboard while the robot runs (Chapter 23). It
+ * A number you can change from a dashboard while the robot runs (Chapter 24). It
  * appears in the Tuning table in Elastic and AdvantageScope, and AdvantageKit logs
  * every change. With Constants.TUNING_MODE off, it is simply its default value.
  */
@@ -591,7 +591,7 @@ Walk through it, trap by trap:
 
 ---
 
-## 23.9 Every Gain on One Tab
+## 24.9 Every Gain on One Tab
 
 Now wire it in: one switch in `Constants`, six tunable gains in `Drivetrain`, one line in each driving command, and three tunable numbers in `FollowLine`. Work through the steps in order, building after each one.
 
@@ -600,13 +600,13 @@ Now wire it in: one switch in `Constants`, six tunable gains in `Drivetrain`, on
 In `Constants.java`, add a second top-level constant, right after `USE_SIMULATED_ROBOT`:
 
 ```java
-// Live tuning from the dashboard (Chapter 23): true while developing, false at competition.
+// Live tuning from the dashboard (Chapter 24): true while developing, false at competition.
 public static final boolean TUNING_MODE = true;
 ```
 
 ### Step 2: `TunableNumber`
 
-Create `frc/robot/util/TunableNumber.java` from Section 23.8, if you have not already. Build.
+Create `frc/robot/util/TunableNumber.java` from Section 24.8, if you have not already. Build.
 
 ### Step 3: The drivetrain's gains
 
@@ -616,10 +616,10 @@ Open `Drivetrain.java` and import the new class:
 import frc.robot.util.TunableNumber;
 ```
 
-Find the PID constants that Chapter 19 moved here, and add this block right after the last of them, `HEADING_RATE_TOLERANCE_DEGREES_PER_SECOND`:
+Find the PID constants that Chapter 20 moved here, and add this block right after the last of them, `HEADING_RATE_TOLERANCE_DEGREES_PER_SECOND`:
 
 ```java
-// Live-tunable copies of the six PID gains (Chapter 23): one of each, shared by every
+// Live-tunable copies of the six PID gains (Chapter 24): one of each, shared by every
 // command that drives this drivetrain. The constants above are their starting values.
 private static final TunableNumber distanceKp =
     new TunableNumber("Drivetrain/Distance kP", DISTANCE_KP);
@@ -694,11 +694,11 @@ public static void useLatestHeadingGains(PIDController controller) {
 
 The factories changed in one way only: each controller starts with the **latest** gains instead of the constants. The two new methods do the same for a controller that already exists, with `PIDController.setPID(p, i, d)`. The tolerances, continuous input, and I zone are not tunable; they stay exactly as they were.
 
-The public `DISTANCE_KP` and `HEADING_KP` constants do not change, and are still `public`. Chapter 22's tests use the tolerance constants, and you will copy your tuned values back into all of them at the end of Section 23.10.
+The public `DISTANCE_KP` and `HEADING_KP` constants do not change, and are still `public`. Chapter 23's tests use the tolerance constants, and you will copy your tuned values back into all of them at the end of Section 24.10.
 
 ### Step 4: Every driving command uses the latest gains
 
-Each command creates its controllers once, when the command object is created at program start (Section 19.5). So a gain typed into the dashboard later would never reach a controller that already exists. The fix is one line per controller, in `initialize()`, which runs **every time** the command starts: Section 19.6's "once, or every time?" rule again.
+Each command creates its controllers once, when the command object is created at program start (Section 20.5). So a gain typed into the dashboard later would never reach a controller that already exists. The fix is one line per controller, in `initialize()`, which runs **every time** the command starts: Section 20.6's "once, or every time?" rule again.
 
 In `TurnToHeading.java`, `initialize()` becomes:
 
@@ -706,7 +706,7 @@ In `TurnToHeading.java`, `initialize()` becomes:
 @Override
 public void initialize() {
     headingController.reset();                            // a new job: forget the last one
-    Drivetrain.useLatestHeadingGains(headingController);  // with the latest gains (Chapter 23)
+    Drivetrain.useLatestHeadingGains(headingController);  // with the latest gains (Chapter 24)
     DataLogManager.log("TurnToHeading " + targetHeadingDegrees + " deg started");
 }
 ```
@@ -716,7 +716,7 @@ In `DriveDistance.java`, add two lines after the two `reset()` calls:
 ```java
 distanceController.reset();
 headingController.reset();
-Drivetrain.useLatestDistanceGains(distanceController);   // the latest gains (Chapter 23)
+Drivetrain.useLatestDistanceGains(distanceController);   // the latest gains (Chapter 24)
 Drivetrain.useLatestHeadingGains(headingController);
 ```
 
@@ -724,7 +724,7 @@ And in `DriveUntilLine.java`, one line after its `reset()`:
 
 ```java
 headingController.reset();
-Drivetrain.useLatestHeadingGains(headingController);   // the latest gains (Chapter 23)
+Drivetrain.useLatestHeadingGains(headingController);   // the latest gains (Chapter 24)
 ```
 
 That is every PID controller in the Explorer. Build.
@@ -735,7 +735,7 @@ That is every PID controller in the Explorer. Build.
 
 ### Step 5: The line follower's three numbers
 
-Chapter 21 promised that `STEER_KP`, `SIDE_ERROR`, and the follow speed would become live controls. Open `FollowLine.java` and import:
+Chapter 22 promised that `STEER_KP`, `SIDE_ERROR`, and the follow speed would become live controls. Open `FollowLine.java` and import:
 
 ```java
 import frc.robot.util.TunableNumber;
@@ -744,13 +744,13 @@ import frc.robot.util.TunableNumber;
 Change the comment above `FOLLOW_METERS_PER_SECOND` and `STEER_KP`:
 
 ```java
-// Driving along the line. Starting values: the Tuning tab can change them (Chapter 23).
+// Driving along the line. Starting values: the Tuning tab can change them (Chapter 24).
 ```
 
 Then add this block after `SEARCH_MAX_DEGREES`:
 
 ```java
-// Live-tunable copies of three of the numbers above (Chapter 23): one of each, shared
+// Live-tunable copies of three of the numbers above (Chapter 24): one of each, shared
 // by every FollowLine, and read every loop. The constants are their starting values.
 private static final TunableNumber followSpeed =
     new TunableNumber("FollowLine/Follow Speed (m per s)", FOLLOW_METERS_PER_SECOND);
@@ -777,13 +777,13 @@ The follower reads these two **every loop**. That is the right choice here, and 
 
 ### Step 6: `SIDE_ERROR` without breaking the tests
 
-`SIDE_ERROR` is different. It is used inside `decideNextState()`, which Chapter 22 made a **pure function**: every fact comes in as a parameter, and it reads nothing else. A tunable side error is a new fact, so it must come in as a new parameter. If `decideNextState()` read `sideError.get()` itself, it would no longer be pure.
+`SIDE_ERROR` is different. It is used inside `decideNextState()`, which Chapter 23 made a **pure function**: every fact comes in as a parameter, and it reads nothing else. A tunable side error is a new fact, so it must come in as a new parameter. If `decideNextState()` read `sideError.get()` itself, it would no longer be pure.
 
-But fourteen tests call `decideNextState()` with four arguments, and they should not all have to change. Chapter 11's **overloading** solves it, exactly the way Chapter 22 used two constructors for `RobotContainer`. Replace `decideNextState()` and `stateForLostLine()` with these three methods:
+But fourteen tests call `decideNextState()` with four arguments, and they should not all have to change. Chapter 11's **overloading** solves it, exactly the way Chapter 23 used two constructors for `RobotContainer`. Replace `decideNextState()` and `stateForLostLine()` with these three methods:
 
 ```java
 /**
- * The transitions, using the side error from the code, SIDE_ERROR. Chapter 22's
+ * The transitions, using the side error from the code, SIDE_ERROR. Chapter 23's
  * tests ask this version their questions.
  *
  * @param state the state the follower is in now
@@ -798,8 +798,8 @@ static State decideNextState(
 }
 
 /**
- * The transitions (Section 21.5): given the state we are in and what the robot
- * knows, where next? Every fact, including the side error (tunable since Chapter 23),
+ * The transitions (Section 22.5): given the state we are in and what the robot
+ * knows, where next? Every fact, including the side error (tunable since Chapter 24),
  * comes in through a parameter, and it changes nothing.
  *
  * @param state the state the follower is in now
@@ -845,14 +845,14 @@ Build. All twenty-four tests should still pass.
 
 > **If your `FollowLine` has `WAITING_FOR_CLEAR`**
 >
-> If your pair merged Chapter 21's Collab lab, and you gave `decideNextState()` an `obstacleAhead` parameter in Section 22.4, keep it: the long version takes `obstacleAhead` and then `sideError` last, and the short version passes `SIDE_ERROR` for it. Pass `sideError` on to `stateWhileFollowing()`, and from there to `stateForLostLine()`.
+> If your pair merged Chapter 22's Collab lab, and you gave `decideNextState()` an `obstacleAhead` parameter in Section 23.4, keep it: the long version takes `obstacleAhead` and then `sideError` last, and the short version passes `SIDE_ERROR` for it. Pass `sideError` on to `stateWhileFollowing()`, and from there to `stateForLostLine()`.
 
 ### Step 7: Three more tests
 
-The tests from Chapter 22 still check every rule, with `SIDE_ERROR`. Now check the new parameter. Add these two tests at the end of `FollowLineTest`:
+The tests from Chapter 23 still check every rule, with `SIDE_ERROR`. Now check the new parameter. Add these two tests at the end of `FollowLineTest`:
 
 ```java
-// Live tuning (Chapter 23): the side error can come from the dashboard.
+// Live tuning (Chapter 24): the side error can come from the dashboard.
 
 @Test
 void aSmallerSideErrorTurnsTheSameLossIntoASearch() {
@@ -880,7 +880,7 @@ void theShortVersionUsesSideErrorFromTheCode() {
 }
 ```
 
-The first test types its numbers in, on purpose. It is not checking your tuned side error; it is checking the **rule** that a parameter is used at all: the same lost line is "the end" with a side error of 0.2, and "search left" with 0.1. Chapter 22's Collab asked when a number in a test is a requirement rather than a copy of a tuning value. This is a requirement. The second test checks that the short version really does pass `SIDE_ERROR` along: for a line lost on the left, in the middle, and on the right, asking the short version gives the same answer as asking the long one with `SIDE_ERROR`. Notice that this `assertEquals` compares two answers from the code with each other, instead of an answer with a value you typed. That is a useful trick when the exact answer does not matter, only that two ways of asking agree.
+The first test types its numbers in, on purpose. It is not checking your tuned side error; it is checking the **rule** that a parameter is used at all: the same lost line is "the end" with a side error of 0.2, and "search left" with 0.1. Chapter 23's Collab asked when a number in a test is a requirement rather than a copy of a tuning value. This is a requirement. The second test checks that the short version really does pass `SIDE_ERROR` along: for a line lost on the left, in the middle, and on the right, asking the short version gives the same answer as asking the long one with `SIDE_ERROR`. Notice that this `assertEquals` compares two answers from the code with each other, instead of an answer with a value you typed. That is a useful trick when the exact answer does not matter, only that two ways of asking agree.
 
 Then a test for the new class. Create `src/test/java/frc/robot/util/TunableNumberTest.java`:
 
@@ -909,7 +909,7 @@ Run **WPILib: Test Robot Code**. The report shows **27 tests**, all green.
 
 > **Tuning never leaks into the tests**
 >
-> A `LoggedNetworkNumber` reads the dashboard only when AdvantageKit's logger runs its loop, at the start of every robot loop. Tests never start the logger, and there is no dashboard on GitHub's runner anyway. So in every test, every `TunableNumber` is exactly its default, the number in your code. That is what keeps the tests deterministic (Chapter 22): what you typed into Elastic this afternoon can never make a test pass on your laptop and fail on GitHub. It also means the tests check the numbers you **committed**, not the ones you are trying. Section 23.10 turns that into a habit.
+> A `LoggedNetworkNumber` reads the dashboard only when AdvantageKit's logger runs its loop, at the start of every robot loop. Tests never start the logger, and there is no dashboard on GitHub's runner anyway. So in every test, every `TunableNumber` is exactly its default, the number in your code. That is what keeps the tests deterministic (Chapter 23): what you typed into Elastic this afternoon can never make a test pass on your laptop and fail on GitHub. It also means the tests check the numbers you **committed**, not the ones you are trying. Section 24.10 turns that into a habit.
 
 ### Step 8: The Tuning tab
 
@@ -930,7 +930,7 @@ Try one change before you go on. Make sure `Heading kP` shows `0.3` (or your own
 
 ---
 
-## 23.10 Tune the Course, Live
+## 24.10 Tune the Course, Live
 
 Now the payoff. You will tune the Explorer's turn, its drive, its line follower, and then the whole course, with the robot running the entire time.
 
@@ -945,17 +945,17 @@ Live tuning makes it easy to change numbers fast. That is exactly its danger: ch
 
 > **Reading a step response**
 >
-> When you ask a controller to go somewhere new (face 90 degrees instead of 0), and graph where the robot actually is, the curve is called a **step response**, and engineers describe it with four numbers. **Rise time**: how long it takes to get most of the way there. **Overshoot**: how far it swings past the target. **Settling time**: how long until it stays within the tolerance. **Steady-state error**: how far off it ends up, if it never quite gets there. Raising kP usually shortens the rise time and adds overshoot; kD reduces overshoot; kI removes steady-state error, and adds overshoot if there is too much of it. Every PID controller on every robot, from the XRP's heading to a competition arm in Chapter 34, is tuned by looking at these four things. Chapter 38 measures them properly, on a competition robot, with AdvantageScope.
+> When you ask a controller to go somewhere new (face 90 degrees instead of 0), and graph where the robot actually is, the curve is called a **step response**, and engineers describe it with four numbers. **Rise time**: how long it takes to get most of the way there. **Overshoot**: how far it swings past the target. **Settling time**: how long until it stays within the tolerance. **Steady-state error**: how far off it ends up, if it never quite gets there. Raising kP usually shortens the rise time and adds overshoot; kD reduces overshoot; kI removes steady-state error, and adds overshoot if there is too much of it. Every PID controller on every robot, from the XRP's heading to a competition arm in Chapter 35, is tuned by looking at these four things. Chapter 39 measures them properly, on a competition robot, with AdvantageScope.
 
 ### Session 1: The turn
 
 1. Enable **Test** mode. On the Tuning tab, look at the `Heading (deg)` graph.
-2. Press **B**. The robot turns to heading 90 (Chapter 19's tuning bench). Watch the graph: how quickly does it rise, does it go past 90, and how long until it settles?
+2. Press **B**. The robot turns to heading 90 (Chapter 20's tuning bench). Watch the graph: how quickly does it rise, does it go past 90, and how long until it settles?
 3. Press **A** to turn back to 0. That run is another step, in the other direction.
 4. Now change **one** gain. If the turn is slow and lazy, raise `Heading kP` a little (try 0.4 for 0.3). If it overshoots and swings back, lower it. Press B, then A. Compare the graph with the last run.
 5. Repeat until the turn is quick and settles with little or no overshoot. If it stops a degree or two short and stays there, that is steady-state error: Chapter 15's kI is the tool for that, and Chapter 16's feedforward may have made it less necessary (many readers found kI could be 0 after Chapter 16). If it overshoots no matter what kP is, try a small kD.
 
-Each change takes effect the **next** time a command starts (Section 23.9), so every press of A or B is a clean run with the gains on the screen.
+Each change takes effect the **next** time a command starts (Section 24.9), so every press of A or B is a clean run with the gains on the screen.
 
 ### Session 2: The drive
 
@@ -969,7 +969,7 @@ Each change takes effect the **next** time a command starts (Section 23.9), so e
 2. Watch the `Line Error` graph as it follows. A wiggle along a straight line shows as a wave in the graph.
 3. While it is following, lower `Steer kP` (try 2.5 for 3.0) and press Enter. The follower reads it on the very next loop: you can watch the wave in the graph get smaller, and the robot settle down, in the middle of one run.
 4. Try `Follow Speed (m per s)` the same way. Faster runs are tempting, but the follower has less time to react on a bend.
-5. Last, `Side Error`, on a right-angle corner. If the robot logs `END_OF_LINE` at the corner instead of searching (Section 21.9's tuning table), lower `Side Error` and try again. Then check the real end of the tape: it should still say `END_OF_LINE` there, not search.
+5. Last, `Side Error`, on a right-angle corner. If the robot logs `END_OF_LINE` at the corner instead of searching (Section 22.9's tuning table), lower `Side Error` and try again. Then check the real end of the tape: it should still say `END_OF_LINE` there, not search.
 
 ### Session 4: The whole course
 
@@ -980,7 +980,7 @@ Pick **Obstacle Course**, press Y, and run autonomous. Run it three times withou
 Every change goes in a table in `reflections.md`, as you make it:
 
 ```markdown
-## Tuning log, Chapter 23
+## Tuning log, Chapter 24
 
 Surface: kitchen floor, tape: black electrical. Battery: fresh.
 
@@ -1002,11 +1002,11 @@ When the course runs well, the numbers that make it work exist only on the dashb
 3. Run the Explorer again, and check the Tuning tab: every number should now start at your new value.
 4. Commit and push (see the Git exercise). GitHub runs the tests again. The green check now means "these are the numbers we tuned, and they still pass everything."
 
-If a test goes **red** after you copy your numbers in, do not just change the test. Chapter 22 said a failing test is a question. Maybe your new heading gains overshoot on the simulated robot by more than the tolerance, because the model is lighter than your real Explorer (or heavier). That is worth knowing, and worth one sentence in your tuning log, before you decide what to change.
+If a test goes **red** after you copy your numbers in, do not just change the test. Chapter 23 said a failing test is a question. Maybe your new heading gains overshoot on the simulated robot by more than the tolerance, because the model is lighter than your real Explorer (or heavier). That is worth knowing, and worth one sentence in your tuning log, before you decide what to change.
 
 > **Tuning the simulated Explorer**
 >
-> Everything in this section works on the simulated robot too: set `USE_SIMULATED_ROBOT = true`, and the Tuning tab tunes the model from Chapter 17. That is a great way to practice the routine without tape and batteries. But numbers tuned on the model are tuned for the model. The real Explorer has friction the model does not, a battery that sags, and wheels that slip. Tune on the floor, and use the simulator to practice and to check that nothing is broken.
+> Everything in this section works on the simulated robot too: set `USE_SIMULATED_ROBOT = true`, and the Tuning tab tunes the model from Chapter 18. That is a great way to practice the routine without tape and batteries. But numbers tuned on the model are tuned for the model. The real Explorer has friction the model does not, a battery that sags, and wheels that slip. Tune on the floor, and use the simulator to practice and to check that nothing is broken.
 
 Diagnose anything strange:
 
@@ -1015,7 +1015,7 @@ Diagnose anything strange:
 | Elastic says **Network Tables: Disconnected** | The robot program is not running, or the **IP Address Mode** is not **localhost** |
 | The **Tuning** table is missing in Add Widget | `TUNING_MODE` is `false`, or the program has not created any command or drivetrain yet. Check that the program started |
 | You type a new gain and the robot does not change at all | For the PID gains: the command was already running, and the new value applies at its next start. Press the button again. If it never applies, the `useLatest...Gains` line is missing from that command's `initialize()` |
-| A value snaps back to the old number a moment after you type it | Something is publishing over it every loop: a leftover `SmartDashboard.putNumber` with the same name (Section 23.7's Trap 1) |
+| A value snaps back to the old number a moment after you type it | Something is publishing over it every loop: a leftover `SmartDashboard.putNumber` with the same name (Section 24.7's Trap 1) |
 | The Tuning tab shows an old tuned value after you copied new numbers into the code and restarted | A dashboard can keep the last value it was given and send it again when it reconnects. Close and reopen Elastic, and check the value again |
 | `Auto Routine` is missing from the SmartDashboard table | `autoChooser` is not created, or the program crashed while starting. Read the terminal from the top |
 | Autonomous runs the obstacle course whatever you pick | The dropdown was changed after autonomous was enabled (it is read once, in `autonomousInit()`), or `getAutonomousCommand()` still returns `obstacleCourse` |
@@ -1025,7 +1025,7 @@ Diagnose anything strange:
 
 ---
 
-## 23.11 Dashboards at Competition
+## 24.11 Dashboards at Competition
 
 Everything in this chapter so far is for the pit, the shop, and your kitchen floor. A competition is different, and so is the dashboard.
 
@@ -1035,17 +1035,17 @@ On the field, the dashboard has one main job: make sure the robot does what the 
 
 ### Turn tuning off
 
-Before an event, set `TUNING_MODE` to `false`, build, run the tests, and commit. With tuning off, no tunable number is published at all, so nothing typed into a dashboard, by anyone, can change a gain during a match, and the robot runs exactly the numbers that your tests checked and your commit recorded. Chapter 39's competition-day checklist includes this switch, along with tagging the release that goes on the robot.
+Before an event, set `TUNING_MODE` to `false`, build, run the tests, and commit. With tuning off, no tunable number is published at all, so nothing typed into a dashboard, by anyone, can change a gain during a match, and the robot runs exactly the numbers that your tests checked and your commit recorded. Chapter 40's competition-day checklist includes this switch, along with tagging the release that goes on the robot.
 
 ### On the Mini Swerve
 
-When your code moves to the roboRIO in Chapter 26, the NetworkTables server moves with it (Section 23.2), and Elastic connects with **IP Address Mode** set to **Driver Station** instead of **localhost**. The Driver tab, the chooser, `TunableNumber`, and the Tuning tab all come along unchanged. That is one advantage of keeping the dashboard layout in your repository: the next robot starts with a working dashboard.
+When your code moves to the roboRIO in Chapter 27, the NetworkTables server moves with it (Section 24.2), and Elastic connects with **IP Address Mode** set to **Driver Station** instead of **localhost**. The Driver tab, the chooser, `TunableNumber`, and the Tuning tab all come along unchanged. That is one advantage of keeping the dashboard layout in your repository: the next robot starts with a working dashboard.
 
-WPILib also has a class called `Preferences`, which saves named values in a file on the roboRIO, so they survive a reboot. Some teams tune with it. The book does not, for the reason in Section 23.1: the place a tuned number belongs is your code, in Git, where the tests check it and the history explains it.
+WPILib also has a class called `Preferences`, which saves named values in a file on the roboRIO, so they survive a reboot. Some teams tune with it. The book does not, for the reason in Section 24.1: the place a tuned number belongs is your code, in Git, where the tests check it and the history explains it.
 
 > **AdvantageScope can tune too**
 >
-> AdvantageScope, which you will spend all of Chapter 24 in, has a **tuning mode**. When it is connected with the **NetworkTables 4 (AdvantageKit)** live source, it shows values in the `/Tuning` table, and clicking the slider icon next to its search bar makes them editable, right next to its graphs. That is why `TunableNumber` puts everything in `/Tuning`: Elastic and AdvantageScope both find your numbers there. AdvantageScope's graphs are far more powerful than Elastic's, so many programmers tune there and drive from Elastic. Try it in Practice 7.
+> AdvantageScope, which you will spend all of Chapter 25 in, has a **tuning mode**. When it is connected with the **NetworkTables 4 (AdvantageKit)** live source, it shows values in the `/Tuning` table, and clicking the slider icon next to its search bar makes them editable, right next to its graphs. That is why `TunableNumber` puts everything in `/Tuning`: Elastic and AdvantageScope both find your numbers there. AdvantageScope's graphs are far more powerful than Elastic's, so many programmers tune there and drive from Elastic. Try it in Practice 7.
 
 ### What you built
 
@@ -1058,7 +1058,7 @@ WPILib also has a class called `Preferences`, which saves named values in a file
 
 ## Chapter Summary
 
-> **What you learned in Chapter 23**
+> **What you learned in Chapter 24**
 >
 > * A dashboard is a **NetworkTables** client. The robot program runs the server (on your laptop for the XRP, on the roboRIO later), values live in **topics** with folder-like names such as `/SmartDashboard/Heading (deg)`, and any client can publish a new value that the robot reads back.
 > * For 2026, WPILib's documentation calls the **SmartDashboard and Shuffleboard apps** deprecated, to be removed for 2027, and recommends **Elastic** as the driver dashboard and **AdvantageScope** for debugging and data. The **`SmartDashboard` class** in your code is not deprecated; it writes into the `/SmartDashboard` table, which every dashboard reads.
@@ -1106,7 +1106,7 @@ double slow = speedsAgain.getSelected();
 
 One of the lines that compiles could still crash **when the program runs**, on a robot where nobody has picked anything yet. Which one, and why? (Hint: these choosers have no default option. What does `getSelected()` return when there is no default and no selection, and what happens when Java tries to unbox that into a `double`?) Which line returns the same thing, but does not crash?
 
-**4. One more knob.** Make `SEARCH_RADIANS_PER_SECOND` tunable too. First decide: should it take effect every loop, like `Steer kP`, or only when a search starts? Write one sentence defending your choice. Then implement it, add it to the Tuning tab, and test it on a right-angle corner. Does a faster search find the corner more reliably, or does it sweep past the tape between two loops (Section 21.9)?
+**4. One more knob.** Make `SEARCH_RADIANS_PER_SECOND` tunable too. First decide: should it take effect every loop, like `Steer kP`, or only when a search starts? Write one sentence defending your choice. Then implement it, add it to the Tuning tab, and test it on a right-angle corner. Does a faster search find the corner more reliably, or does it sweep past the tape between two loops (Section 22.9)?
 
 **5. A button on the dashboard.** Every `Command` can be put on the dashboard with `putData`, and Elastic draws it as a button. In a practice branch, add this to the end of the `RobotContainer` constructor:
 
@@ -1114,7 +1114,7 @@ One of the lines that compiles could still crash **when the program runs**, on a
 SmartDashboard.putData("Run Leg 1", buildLeg1Only());
 ```
 
-Put `Run Leg 1` on an Elastic tab, and click it while the robot is **disabled**. What happens, and why? (Section 18.5.) Now enable teleop and click it. Then answer: why would a drive team not want a button like this on the **Driver** tab? Why is it handy on a programmer's tab?
+Put `Run Leg 1` on an Elastic tab, and click it while the robot is **disabled**. What happens, and why? (Section 19.5.) Now enable teleop and click it. Then answer: why would a drive team not want a button like this on the **Driver** tab? Why is it handy on a programmer's tab?
 
 **6. Download the layout from the robot.** Elastic can fetch a layout from a web server in the robot program. In a practice branch, add these imports and this line at the end of the `RobotContainer` constructor:
 
@@ -1137,17 +1137,17 @@ Run the Explorer. In Elastic, choose **File** > **Download From Robot**. Does it
 Give the Explorer a real dashboard, an autonomous chooser, and live tuning, then tune the whole course.
 
 1. Make a branch (see the Git exercise).
-2. Open Elastic and your saved layout, and build the **Driver** tab (Section 23.4). Add the empty **Tuning** tab. Save the layout to `src/main/deploy/elastic-layout.json`. Commit.
-3. Add the autonomous chooser to `RobotContainer` (Section 23.6, Steps 1 and 2). Build: 24 tests pass. Delete the `null` check, see `ObstacleCourseTest` fail, and put it back. Add `Auto Routine` to the Driver tab, and run **Leg 1 Only** and **Obstacle Course** in autonomous. Export the layout again. Commit.
-4. Add `TUNING_MODE` and `TunableNumber`, and wire in the six drivetrain gains, the `useLatest...Gains` lines in the three commands, and `FollowLine`'s three numbers (Section 23.9, Steps 1 to 6). Build. Drive the robot in teleop, run the bench in Test mode, and run the course: nothing should behave differently, because every tunable starts at its constant.
+2. Open Elastic and your saved layout, and build the **Driver** tab (Section 24.4). Add the empty **Tuning** tab. Save the layout to `src/main/deploy/elastic-layout.json`. Commit.
+3. Add the autonomous chooser to `RobotContainer` (Section 24.6, Steps 1 and 2). Build: 24 tests pass. Delete the `null` check, see `ObstacleCourseTest` fail, and put it back. Add `Auto Routine` to the Driver tab, and run **Leg 1 Only** and **Obstacle Course** in autonomous. Export the layout again. Commit.
+4. Add `TUNING_MODE` and `TunableNumber`, and wire in the six drivetrain gains, the `useLatest...Gains` lines in the three commands, and `FollowLine`'s three numbers (Section 24.9, Steps 1 to 6). Build. Drive the robot in teleop, run the bench in Test mode, and run the course: nothing should behave differently, because every tunable starts at its constant.
 5. Add the three new tests (Step 7). Run them: **27 tests**, all green.
 6. Build the **Tuning** tab (Step 8). Change `Heading kP` and check that the Simulation GUI's NetworkTables window agrees. Save the layout. Commit.
-7. Tune: Sessions 1 to 4 of Section 23.10, on your real floor, with a tuning log in `reflections.md`.
+7. Tune: Sessions 1 to 4 of Section 24.10, on your real floor, with a tuning log in `reflections.md`.
 8. Copy the values you kept into your constants. Build (every test runs with your new numbers). Restart the Explorer and check that the Tuning tab starts at the new values. Run the whole course three times. Commit, push, open a pull request, wait for the green check, and merge.
 
-Leave `TUNING_MODE` set to `true` for now. Chapter 25, the capstone, turns it off for the release.
+Leave `TUNING_MODE` set to `true` for now. Chapter 26, the capstone, turns it off for the release.
 
-If the HTML report shows **27 tests, 0 failures**, your Driver tab picks the autonomous routine, and the course runs with numbers you tuned live, you are ready for Chapter 24.
+If the HTML report shows **27 tests, 0 failures**, your Driver tab picks the autonomous routine, and the course runs with numbers you tuned live, you are ready for Chapter 25.
 
 ### Reflect
 
@@ -1157,9 +1157,9 @@ Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 2. A `SendableChooser` from before generics held plain `Object`s, and `getSelected()` needed a cast. Describe a mistake that the old way would only catch while the robot was running, and say how `SendableChooser<Command>` catches it earlier.
 3. `headingKp` is declared `static final`, yet its value changes while the robot runs. Explain how both can be true, and why it is named `headingKp` and not `HEADING_KP_TUNABLE`.
 4. The drivetrain's PID gains take effect when a command starts, but `Steer kP` takes effect every loop. Give one reason for each choice. What could go wrong if you applied a new `Heading kI` in the middle of a turn?
-5. You tuned `Steer kP` down to 2.4 on the dashboard and the follower is perfect. You commit and push, and your teammate pulls and runs it. The follower wiggles again. What happened, and which step of Section 23.10 would have prevented it? Why is it a good thing that the tests never see a value typed into the dashboard?
+5. You tuned `Steer kP` down to 2.4 on the dashboard and the follower is perfect. You commit and push, and your teammate pulls and runs it. The follower wiggles again. What happened, and which step of Section 24.10 would have prevented it? Why is it a good thing that the tests never see a value typed into the dashboard?
 
-If any answer feels shaky, re-read Sections 23.2, 23.5, 23.8, and 23.9.
+If any answer feels shaky, re-read Sections 24.2, 24.5, 24.8, and 24.9.
 
 ### Git
 
@@ -1175,21 +1175,21 @@ After Build step 2:
 
 ```bash
 git add .
-git commit -m "Ch23: Elastic dashboard with a Driver tab, saved in the project"
+git commit -m "Ch24: Elastic dashboard with a Driver tab, saved in the project"
 ```
 
 After Build step 3:
 
 ```bash
 git add .
-git commit -m "Ch23: Autonomous chooser on the dashboard"
+git commit -m "Ch24: Autonomous chooser on the dashboard"
 ```
 
 After Build step 6:
 
 ```bash
 git add .
-git commit -m "Ch23: Live-tunable PID gains and line follower numbers"
+git commit -m "Ch24: Live-tunable PID gains and line follower numbers"
 ```
 
 After Build step 8, with your tuned values in the constants and your tuning log in `reflections.md`:
@@ -1197,7 +1197,7 @@ After Build step 8, with your tuned values in the constants and your tuning log 
 ```bash
 git status
 git add .
-git commit -m "Ch23: Gains from the live tuning session"
+git commit -m "Ch24: Gains from the live tuning session"
 git push -u origin live-tuning
 ```
 
@@ -1256,4 +1256,4 @@ Afterward, each of you adds a rule to the project's `CONTRIBUTING.md` (Chapter 1
 
 ---
 
-*Next up, Chapter 24: AdvantageScope: Visualizing and Replaying Logs. You will open the logs AdvantageKit has been writing since Chapter 17, scrub through a course run loop by loop, watch `FollowLine` change state on a timeline, and replay a run, chooser selection and tuned values included, to find a bug without the robot.*
+*Next up, Chapter 25: AdvantageScope: Visualizing and Replaying Logs. You will open the logs AdvantageKit has been writing since Chapter 17, scrub through a course run loop by loop, watch `FollowLine` change state on a timeline, and replay a run, chooser selection and tuned values included, to find a bug without the robot.*

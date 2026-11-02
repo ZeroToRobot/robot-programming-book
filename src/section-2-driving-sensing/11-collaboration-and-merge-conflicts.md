@@ -561,7 +561,7 @@ Notice what would have happened with a lazy resolution. Clicking "keep mine" wou
 
 > **What `TURN_SCALE` does to the robot's path**
 >
-> Scaling rotation does not just make turns "slower." It makes them **wider**. In Chapter 8 you saw that arcade drive turns forward and rotation into wheel speeds: forward `0.5` with rotation `0.2` gives left `0.3` and right `0.7`. The robot curves around a point beside it, and how far away that point is depends on how different the two wheel speeds are compared to their total. On the Explorer, whose wheels are 155 mm apart, `0.3` and `0.7` curve around a circle about 19 cm in radius. Shrink that rotation to `0.14` and the wheels become `0.36` and `0.64`, and the circle grows to about 28 cm. Same stick, wider arc. (Because `arcadeDrive` squares its inputs, multiplying the stick by `0.7` actually shrinks the turn even more than this, to about half.) Chapter 13 turns this into exact formulas with `DifferentialDriveKinematics`, and Chapter 28 does the same for a swerve drive.
+> Scaling rotation does not just make turns "slower." It makes them **wider**. In Chapter 8 you saw that arcade drive turns forward and rotation into wheel speeds: forward `0.5` with rotation `0.2` gives left `0.3` and right `0.7`. The robot curves around a point beside it, and how far away that point is depends on how different the two wheel speeds are compared to their total. On the Explorer, whose wheels are 155 mm apart, `0.3` and `0.7` curve around a circle about 19 cm in radius. Shrink that rotation to `0.14` and the wheels become `0.36` and `0.64`, and the circle grows to about 28 cm. Same stick, wider arc. (Because `arcadeDrive` squares its inputs, multiplying the stick by `0.7` actually shrinks the turn even more than this, to about half.) Chapter 13 turns this into exact formulas with `DifferentialDriveKinematics`, and Chapter 29 does the same for a swerve drive.
 
 ### Step 4: Resolve it in VS Code
 
@@ -662,7 +662,7 @@ Three habits protect you:
 
 > **Robots that check every merge for you**
 >
-> Remembering to build after every merge is a habit, and habits slip at 11 PM. In Chapter 22 you will set up **continuous integration** (CI) with GitHub Actions: every time anyone pushes to a pull request, a computer on GitHub automatically builds the code and runs your tests, and puts a green check or a red X on the PR. A semantic conflict like this one gets a red X before anyone can merge it. Until then, you are the CI.
+> Remembering to build after every merge is a habit, and habits slip at 11 PM. In Chapter 23 you will set up **continuous integration** (CI) with GitHub Actions: every time anyone pushes to a pull request, a computer on GitHub automatically builds the code and runs your tests, and puts a green check or a red X on the PR. A semantic conflict like this one gets a red X before anyone can merge it. Until then, you are the CI.
 
 ---
 
@@ -675,11 +675,11 @@ You cannot avoid every conflict, and you should not try. But a few habits keep t
 - **Merge `main` into your branch often.** If your branch has to live longer, run `git fetch origin` and `git merge origin/main` every day. Five small conflicts spread over a week are much easier than one giant conflict at the end.
 - **Say what you are working on.** "I am in `teleopPeriodic` this afternoon" in the team chat lets a teammate wait an hour or pick a different task. Many teams track this with a list of GitHub Issues, one per task, each with one person's name on it.
 - **Do not reformat whole files.** If your editor re-indents or reorders every line of `Robot.java` as part of a small change, every line now counts as changed, and every teammate's branch conflicts with yours. Keep formatting changes in their own PR, agreed on by the team.
-- **Put each kind of code in its own place.** Remember Chapter 9: encoders and the gyro live in `Drivetrain`, other sensors in `Sensors`, decisions in `Robot`. When each class has one job, two people working on two different jobs rarely touch the same file. In Chapter 18, command-based programming takes this even further.
+- **Put each kind of code in its own place.** Remember Chapter 9: encoders and the gyro live in `Drivetrain`, other sensors in `Sensors`, decisions in `Robot`. When each class has one job, two people working on two different jobs rarely touch the same file. In Chapter 19, command-based programming takes this even further.
 
 ### Where the team's code lives
 
-Your XRP Explorer lives in your own GitHub account, because it is your personal project. A competition robot's code belongs to the **team**, so most FRC teams create a **GitHub organization**: a shared account, like a club, that owns the team's repositories. Mentors and student leads manage who belongs to it, and when a student graduates, the code stays with the team instead of leaving on that student's account. When you reach the Mini Swerve in Chapter 26, its code will live in your team's organization.
+Your XRP Explorer lives in your own GitHub account, because it is your personal project. A competition robot's code belongs to the **team**, so most FRC teams create a **GitHub organization**: a shared account, like a club, that owns the team's repositories. Mentors and student leads manage who belongs to it, and when a student graduates, the code stays with the team instead of leaving on that student's account. When you reach the Mini Swerve in Chapter 27, its code will live in your team's organization.
 
 Organizations also make it easier to enforce the rules in this chapter. A team can **protect** its `main` branch with a rule that requires a pull request, and an approving review, before anything merges. Then "nobody commits directly to `main`" stops being a promise and becomes something GitHub enforces. (On GitHub's free plans, protected branches work on public repositories; private repositories need a paid plan. Ask your mentor how your team is set up.)
 
@@ -699,7 +699,7 @@ Organizations also make it easier to enforce the rules in this chapter. A team c
 > * **Javadoc comments** (`/** ... */`, with `@param` and `@return`) document how to use a class or method. VS Code shows them on hover, and they are how the WPILib documentation is made. Always include units, ranges, and directions.
 > * A method's **signature** is its name plus its parameter types. Changing it breaks every caller. **Overloading** (same name, different parameters) adds an ability without breaking anyone, and **deprecating** renames a method politely.
 > * Git merges by comparing both branches to their **merge base**. A **merge conflict** happens when both sides changed the same lines differently. Read the markers (`<<<<<<<` yours, `=======`, `>>>>>>>` theirs), then **keep both**, **combine**, or **choose one** so both people's intent survives. Build, `git add`, `git commit`. `git merge --abort` always backs out safely.
-> * A merge with no conflicts can still break: a **semantic conflict**. Build and test after every merge. Continuous integration (Chapter 22) will automate the check.
+> * A merge with no conflicts can still break: a **semantic conflict**. Build and test after every merge. Continuous integration (Chapter 23) will automate the check.
 
 ---
 
@@ -810,7 +810,7 @@ Diagnose anything strange:
 - **The build fails after resolving:** a leftover conflict marker, a deleted line, or a missing semicolon in your combined line. Read the first compile error (Chapter 10).
 - **One feature is missing after the merge:** the conflict was resolved with "keep mine" or "keep theirs." Fix forward: on a new branch, add the missing part back, and open a new PR.
 
-In every chapter from here on, your code will grow with other people's ideas in it. In Chapter 20 you will do a pair lab again, this time in command-based code, and in Chapter 33 you will merge three people's vision work at once. The steps you just did will be the same every time.
+In every chapter from here on, your code will grow with other people's ideas in it. In Chapter 21 you will do a pair lab again, this time in command-based code, and in Chapter 34 you will merge three people's vision work at once. The steps you just did will be the same every time.
 
 ### Collab: The Three-Person Review Lab
 

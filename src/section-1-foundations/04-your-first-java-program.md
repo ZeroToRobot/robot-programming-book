@@ -290,7 +290,7 @@ Connect to the XRP's Wi-Fi (you remember the drill from Chapter 2). Then `WPILib
 
 ### Step 5: Find the Output
 
-Your program runs on your laptop (Chapter 2), so its prints appear right in VS Code, in the **terminal** panel at the bottom of the window (open it with `` Ctrl+` `` if it's hidden). On a real roboRIO you'd use a tool called **RioLog** instead; you'll meet it in Chapter 26.
+Your program runs on your laptop (Chapter 2), so its prints appear right in VS Code, in the **terminal** panel at the bottom of the window (open it with `` Ctrl+` `` if it's hidden). On a real roboRIO you'd use a tool called **RioLog** instead; you'll meet it in Chapter 27.
 
 The program just started with your new code, and the `Robot()` constructor ran exactly once at startup. You should see your print messages in the terminal, mixed in with some WPILib startup lines:
 

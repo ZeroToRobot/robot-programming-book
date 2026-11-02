@@ -220,9 +220,9 @@ If you run this and watch Elastic, the `Time` value will tick upward smoothly. I
 
 ## 5.6 Building the XRP Explorer Skeleton
 
-Time to put this knowledge to work. You're going to set up the XRP Explorer project skeleton, which is the foundation we'll add to in every chapter from here through Chapter 25.
+Time to put this knowledge to work. You're going to set up the XRP Explorer project skeleton, which is the foundation we'll add to in every chapter from here through Chapter 26.
 
-The Explorer is a robot that, by Chapter 25, will navigate an autonomous obstacle course on its own: drive a measured distance, turn to a heading, follow a line, stop at a target. We won't build any of that yet. We're just laying the groundwork.
+The Explorer is a robot that, by Chapter 26, will navigate an autonomous obstacle course on its own: drive a measured distance, turn to a heading, follow a line, stop at a target. We won't build any of that yet. We're just laying the groundwork.
 
 ### Step 1: Confirm Your Project Exists
 

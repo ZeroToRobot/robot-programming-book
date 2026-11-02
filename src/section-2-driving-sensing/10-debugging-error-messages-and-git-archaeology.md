@@ -232,7 +232,7 @@ That is the whole skill. Type of problem, plain-English message, the first line 
 
 In Chapter 4 you saw your prints in VS Code's terminal, and heard about RioLog, the window that shows what a robot program prints on a full FRC robot. RioLog connects to a **roboRIO**, the computer on that robot. Your XRP program works differently. As the Chapter 2 "Why firmware?" callout described, your Java code actually runs on your **laptop** and talks to the XRP over Wi-Fi. So when you run the Explorer, its prints, warnings, and stack traces appear in the **terminal panel** at the bottom of VS Code, the same place the build output appears.
 
-When you move to the Mini Swerve in Chapter 26, the program will run on a real roboRIO, and the same text will show up in RioLog and in the Driver Station's console. The format of the errors is identical everywhere, so the reading skills you learn here carry straight over.
+When you move to the Mini Swerve in Chapter 27, the program will run on a real roboRIO, and the same text will show up in RioLog and in the Driver Station's console. The format of the errors is identical everywhere, so the reading skills you learn here carry straight over.
 
 > **When asking for help, send the whole thing**
 >
@@ -387,7 +387,7 @@ On a real robot, plenty of "bugs" are not in the code at all. Before you spend a
 | Heading creeps while sitting still | Gyro calibrated while the robot was moving (Chapter 9) | Power-cycle the XRP flat and still |
 | Nothing updates at all | Laptop not on the XRP's Wi-Fi | Check your Wi-Fi connection |
 
-This is a habit real FRC programmers lean on constantly. On a competition robot, a motor that will not spin might be a code bug, a bad CAN connection (Chapter 27), a tripped breaker, or a battery that sagged under load. Your dashboard is how you tell them apart: if the code's output to the motor is correct and the motor still does not move, stop reading code and go look at the robot.
+This is a habit real FRC programmers lean on constantly. On a competition robot, a motor that will not spin might be a code bug, a bad CAN connection (Chapter 28), a tripped breaker, or a battery that sagged under load. Your dashboard is how you tell them apart: if the code's output to the motor is correct and the motor still does not move, stop reading code and go look at the robot.
 
 > **You cannot fix what you cannot see**
 >
@@ -454,7 +454,7 @@ if (!blocked && wasBlocked) {
 wasBlocked = blocked;
 ```
 
-Read it aloud: "If we are blocked now but were not last loop, the wall stop just turned on: log it. If we are not blocked now but were last loop, it just turned off: log that. Then remember this loop's value for next time." This is the same "did it just change?" idea as `getYButtonPressed()` from Chapter 8, written by hand. You will use it again when you build state machines in Chapter 21.
+Read it aloud: "If we are blocked now but were not last loop, the wall stop just turned on: log it. If we are not blocked now but were last loop, it just turned off: log that. Then remember this loop's value for next time." This is the same "did it just change?" idea as `getYButtonPressed()` from Chapter 8, written by hand. You will use it again when you build state machines in Chapter 22.
 
 ### The updated `Robot.java`
 
@@ -620,7 +620,7 @@ Walk through what changed since Chapter 9:
 >
 > When your program runs on your laptop, as the Explorer does, the log files go in a folder called `logs` inside your project folder. Each run makes a new file whose name starts with `FRC_` and ends in `.wpilog`. The WPILib project template's `.gitignore` already lists `logs/`, so these files will not end up in your commits (check yours: if `git status` shows `logs/` as untracked, add a line `logs/` to `.gitignore`). On a roboRIO, logs go to a USB drive if one is plugged in.
 
-You can open a `.wpilog` file in **AdvantageScope**, a log viewer that comes with WPILib (`WPILib: Start Tool` > `AdvantageScope`). Take a peek if you are curious: you will find every one of your dashboard values, graphed over time, and your event messages in order. Chapter 24 is all about AdvantageScope, and Chapter 17 turns this simple flight recorder into AdvantageKit's full logging, where you can even **replay** a run through your code after the fact.
+You can open a `.wpilog` file in **AdvantageScope**, a log viewer that comes with WPILib (`WPILib: Start Tool` > `AdvantageScope`). Take a peek if you are curious: you will find every one of your dashboard values, graphed over time, and your event messages in order. Chapter 25 is all about AdvantageScope, and Chapter 17 turns this simple flight recorder into AdvantageKit's full logging, where you can even **replay** a run through your code after the fact.
 
 ---
 

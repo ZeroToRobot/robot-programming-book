@@ -1,4 +1,4 @@
-# Chapter 18: Why Command-Based?
+# Chapter 19: Why Command-Based?
 
 In Chapter 17 you split the drivetrain along a seam. The thinking stayed in `Drivetrain`, the hardware moved into `DrivetrainIOXRP` and `DrivetrainIOSim`, and the Explorer learned to drive a robot made of math. That was a big change to how one class is organized. This chapter is about how the **whole program** is organized.
 
@@ -6,7 +6,7 @@ Open `Robot.java` and scroll. Slowly. It has an autonomous routine written as a 
 
 None of that is wrong. All of it works. But you have probably noticed that each new feature is harder to add than the last, and that every feature has to know about the others. This chapter starts with one small feature request and follows it until the problem is impossible to miss. Then it shows you how nearly every FRC team solves that problem: **command-based programming**, where the robot is described as **subsystems** (the parts) and **commands** (the actions), and a **scheduler** runs them for you.
 
-This is a "why" chapter. You will not rebuild the Explorer here; that is the job of Chapters 19 and 20, one careful piece at a time. Here you will learn the ideas, so the rebuild makes sense, and you will make two small changes that every later chapter needs: you will start WPILib's command scheduler, and you will run your very first command on the Explorer, alongside all of your old code.
+This is a "why" chapter. You will not rebuild the Explorer here; that is the job of Chapters 20 and 21, one careful piece at a time. Here you will learn the ideas, so the rebuild makes sense, and you will make two small changes that every later chapter needs: you will start WPILib's command scheduler, and you will run your very first command on the Explorer, alongside all of your old code.
 
 On the Java side, you will learn the one piece of Java that command-based code uses on nearly every line: the **lambda**, a way to hand a piece of code to someone else to run later.
 
@@ -14,13 +14,13 @@ You will need your XRP for the Build exercise. Most of the chapter is reading an
 
 ---
 
-## 18.1 One Small Feature Request
+## 19.1 One Small Feature Request
 
 Here is a request your drive coach might make on any Tuesday:
 
 > "When I hold A in teleop, can the robot turn itself to face the tape, at heading 90, and then give me the sticks back?"
 
-It is a reasonable request. Real FRC drivers ask for exactly this kind of thing, usually called **auto-align**: the driver gets the robot close, holds a button, and the code lines it up perfectly with the goal. (In Chapter 33 the Mini Swerve does it for real, using a camera to find the target.) And you already have every piece you need: the heading PID controller, the `calculateTurnRate()` helper, and the constant `TURN_HEADING_DEGREES`.
+It is a reasonable request. Real FRC drivers ask for exactly this kind of thing, usually called **auto-align**: the driver gets the robot close, holds a button, and the code lines it up perfectly with the goal. (In Chapter 34 the Mini Swerve does it for real, using a camera to find the target.) And you already have every piece you need: the heading PID controller, the `calculateTurnRate()` helper, and the constant `TURN_HEADING_DEGREES`.
 
 So you write it. It goes in `teleopPeriodic()`, before the driver's sticks are read, because while the robot is aligning, the sticks should be ignored:
 
@@ -68,7 +68,7 @@ None of these are beginner mistakes. They are what happens to **every** robot pr
 
 ---
 
-## 18.2 Five Growing Pains
+## 19.2 Five Growing Pains
 
 Step back from the align feature and look at the whole of `Robot.java`. The trouble with the align code is not that you wrote it badly. It is that the program's **structure** gave you no good place to put it. The same five problems show up again and again.
 
@@ -108,7 +108,7 @@ That `return` exists for one reason: without it, the SysId test and the PID benc
 
 ### 4. Every action needs a cleanup, in every way it can end
 
-An action can end in two ways: it **finishes** (the turn reached 90 degrees) or it is **interrupted** (the driver let go, the robot was disabled, a different mode started). Both need cleanup: stop the motors, reset a controller, log the end, clear the "I am running" field. In your code, the finish cleanup lives next to the action, and the interrupted cleanup lives wherever you remembered to put it: `disabledInit()`, the top of `testPeriodic()`, `changeSysIdTest()`. The align bug in Section 18.1 was a missing interrupted cleanup.
+An action can end in two ways: it **finishes** (the turn reached 90 degrees) or it is **interrupted** (the driver let go, the robot was disabled, a different mode started). Both need cleanup: stop the motors, reset a controller, log the end, clear the "I am running" field. In your code, the finish cleanup lives next to the action, and the interrupted cleanup lives wherever you remembered to put it: `disabledInit()`, the top of `testPeriodic()`, `changeSysIdTest()`. The align bug in Section 19.1 was a missing interrupted cleanup.
 
 ### 5. The mode methods do everything
 
@@ -120,13 +120,13 @@ An action can end in two ways: it **finishes** (the turn reached 90 degrees) or 
 
 ---
 
-## 18.3 Nouns and Verbs: Subsystems and Commands
+## 19.3 Nouns and Verbs: Subsystems and Commands
 
 Command-based programming starts by sorting the robot into two kinds of things.
 
-**Subsystems are the nouns.** A **subsystem** is a part of the robot that can do one thing at a time: the drivetrain, an arm, an intake, a shooter. It owns its hardware (through its IO layer, if it has one), it knows its own state, and it offers methods to make it do things: `drive()`, `setVolts()`, `getPose()`. You have already built one. `Drivetrain` is a subsystem in everything but name, and in Chapter 19 it gets the name.
+**Subsystems are the nouns.** A **subsystem** is a part of the robot that can do one thing at a time: the drivetrain, an arm, an intake, a shooter. It owns its hardware (through its IO layer, if it has one), it knows its own state, and it offers methods to make it do things: `drive()`, `setVolts()`, `getPose()`. You have already built one. `Drivetrain` is a subsystem in everything but name, and in Chapter 20 it gets the name.
 
-**Commands are the verbs.** A **command** is one action the robot can take: drive 0.5 meters, turn to heading 90, follow the line until the tape, drive with the sticks, run a SysId test. A command uses one or more subsystems for as long as it runs, and then it ends. Each command is its own object, so the align from Section 18.1 is not a few lines tangled into `teleopPeriodic()`; it is a thing, with a name, that you can run from a button in teleop, as a step in autonomous, or from the tuning bench, and it is written exactly once.
+**Commands are the verbs.** A **command** is one action the robot can take: drive 0.5 meters, turn to heading 90, follow the line until the tape, drive with the sticks, run a SysId test. A command uses one or more subsystems for as long as it runs, and then it ends. Each command is its own object, so the align from Section 19.1 is not a few lines tangled into `teleopPeriodic()`; it is a thing, with a name, that you can run from a button in teleop, as a step in autonomous, or from the tuning bench, and it is written exactly once.
 
 Here is the Explorer, sorted:
 
@@ -140,7 +140,7 @@ Notice that most of the verbs need the same noun. That is normal: on most robots
 
 > **What about `Sensors`?**
 >
-> A subsystem is something a command needs to **control**, so that two commands do not fight over it. Nobody fights over a rangefinder: any number of commands can read it at the same time. Many teams still make sensor classes into subsystems, to get the `periodic()` method you will meet in Section 18.5, but they rarely make commands "require" them. Chapter 19 decides what the Explorer's `Sensors` should be.
+> A subsystem is something a command needs to **control**, so that two commands do not fight over it. Nobody fights over a rangefinder: any number of commands can read it at the same time. Many teams still make sensor classes into subsystems, to get the `periodic()` method you will meet in Section 19.5, but they rarely make commands "require" them. Chapter 20 decides what the Explorer's `Sensors` should be.
 
 ### The third piece: the scheduler
 
@@ -150,7 +150,7 @@ Nouns and verbs need a third piece to work: someone to decide which verbs run, e
 - Each **order ticket** says what to make, and which stations it needs. A burger with fries needs the grill and the fryer. These are the commands.
 - The **head chef** walks the line, over and over. For each ticket on the rail, the chef checks that its stations are free, tells the cooks to keep going, and pulls the ticket when the dish is done. If a rush order needs the grill, the chef **bumps** whatever was on it, and the grill gets cleaned before the rush order starts. When the kitchen closes, every ticket comes down. The head chef is the scheduler.
 
-The cooks never argue over the grill, because only the head chef assigns it. That is the "nobody else touch the motors" rule from Section 18.2, built into the kitchen instead of hand-written with `return` statements.
+The cooks never argue over the grill, because only the head chef assigns it. That is the "nobody else touch the motors" rule from Section 19.2, built into the kitchen instead of hand-written with `return` statements.
 
 > **Command-based, in one sentence**
 >
@@ -158,7 +158,7 @@ The cooks never argue over the grill, because only the head chef assigns it. Tha
 
 ---
 
-## 18.4 The Life of a Command
+## 19.4 The Life of a Command
 
 Every command, from the simplest to the most complicated, has the same life, in four parts. WPILib's `Command` class names them as four methods:
 
@@ -197,7 +197,7 @@ The `switch` statement, `autoStep`, and `startStep()` were a small, hand-built s
 
 ### The same turn, as a command
 
-Here is a preview of what the turn looks like as a command class. **Do not type this yet.** It will not compile until Chapter 19, when `Drivetrain` becomes a subsystem and you write your own command classes. Just read it, and match each method to the table:
+Here is a preview of what the turn looks like as a command class. **Do not type this yet.** It will not compile until Chapter 20, when `Drivetrain` becomes a subsystem and you write your own command classes. Just read it, and match each method to the table:
 
 ```java
 public class TurnToHeading extends Command {
@@ -237,7 +237,7 @@ public class TurnToHeading extends Command {
 }
 ```
 
-Four things to notice, all of them answers to Section 18.2:
+Four things to notice, all of them answers to Section 19.2:
 
 - **Its state is its own.** The target and the PID controller are fields of **this command**, not of `Robot`. No other job can touch them. The scattered-fields problem is gone, because every action keeps its memory inside itself.
 - **It has its own PID controller.** Chapter 15's rule was "one controller per job." In `Robot.java`, three jobs had to share one heading controller because it was a field of `Robot`. Here, every `TurnToHeading` object brings its own.
@@ -246,11 +246,11 @@ Four things to notice, all of them answers to Section 18.2:
 
 > **A controller's life is a command's life**
 >
-> Look at where the PID calls landed. `reset()` is in `initialize()`, `calculate()` is in `execute()`, `atSetpoint()` is `isFinished()`, and stopping is `end()`. That is not a coincidence. A feedback controller doing one job **is** an action with a start, a loop, a finish line, and a cleanup. Chapter 15's rule "clear the sum when the job changes" becomes automatic: a new job is a new command, and a new command calls `initialize()`. In Chapter 23 you will tune these controllers live, and in Chapter 31 PathPlanner will hand you whole path-following commands built the same way.
+> Look at where the PID calls landed. `reset()` is in `initialize()`, `calculate()` is in `execute()`, `atSetpoint()` is `isFinished()`, and stopping is `end()`. That is not a coincidence. A feedback controller doing one job **is** an action with a start, a loop, a finish line, and a cleanup. Chapter 15's rule "clear the sum when the job changes" becomes automatic: a new job is a new command, and a new command calls `initialize()`. In Chapter 24 you will tune these controllers live, and in Chapter 32 PathPlanner will hand you whole path-following commands built the same way.
 
 ---
 
-## 18.5 The Scheduler: One Head Chef
+## 19.5 The Scheduler: One Head Chef
 
 The command scheduler is a WPILib class called `CommandScheduler`. There is exactly one of it in the whole program, and you reach it with `CommandScheduler.getInstance()`. (A class designed to have exactly one object, reached through a `static` method like this, is called a **singleton**. It makes sense here: a kitchen with two head chefs giving different orders is worse than a kitchen with none.)
 
@@ -262,11 +262,11 @@ CommandScheduler.getInstance().run();
 
 That one line is the head chef's walk down the line. Here is what happens inside it, in order, every 20 milliseconds. (This list comes straight from WPILib's source code for `CommandScheduler.run()`.)
 
-1. **Subsystems check in.** Every subsystem's `periodic()` method runs. In Chapter 17 you gave `Drivetrain` a method named `periodic()` that reads the inputs and updates odometry, and you call it yourself in `robotPeriodic()`. In Chapter 19, once `Drivetrain` is a subsystem, the scheduler calls it for you, and you will delete your own call.
-2. **Buttons are checked.** Any button or condition you have tied to a command is checked, and commands are started if their button was just pressed. (Chapter 20 is all about this.)
+1. **Subsystems check in.** Every subsystem's `periodic()` method runs. In Chapter 17 you gave `Drivetrain` a method named `periodic()` that reads the inputs and updates odometry, and you call it yourself in `robotPeriodic()`. In Chapter 20, once `Drivetrain` is a subsystem, the scheduler calls it for you, and you will delete your own call.
+2. **Buttons are checked.** Any button or condition you have tied to a command is checked, and commands are started if their button was just pressed. (Chapter 21 is all about this.)
 3. **Commands run.** For each running command: if the robot is disabled, the command is **cancelled**. Otherwise its `execute()` runs, then its `isFinished()` is asked, and if the answer is `true`, its `end(false)` runs and it is removed.
 4. **Changes are applied.** Commands that were started or cancelled during this loop are started or cancelled now.
-5. **Idle subsystems get their default.** A subsystem with no command using it can have a **default command**, which starts automatically. "Drive with the sticks" is the classic default command for a drivetrain: whenever nothing else needs the drivetrain, the driver has it. (Chapter 19.)
+5. **Idle subsystems get their default.** A subsystem with no command using it can have a **default command**, which starts automatically. "Drive with the sticks" is the classic default command for a drivetrain: whenever nothing else needs the drivetrain, the driver has it. (Chapter 20.)
 
 ### Requirements: one command per subsystem
 
@@ -275,7 +275,7 @@ The heart of the scheduler is one rule: **at most one running command may requir
 - If none of its subsystems are in use, it simply starts. Its `initialize()` runs.
 - If a subsystem it needs is already in use, the command already using it is **interrupted**: its `end(true)` runs, and then the new command starts. (A command can ask not to be interrupted, and then the newcomer is refused instead. That is rare, and you will not need it on the Explorer.)
 
-Run the align feature through these rules, written as a command. The driver presses A, and the align command starts. It requires the drivetrain, so the "drive with the sticks" default command is interrupted, and its `end(true)` stops the motors. The align runs. When it finishes, its `end(false)` stops the motors, the drivetrain is free, and at step 5 of the very same loop, the default command starts again and the driver has the sticks back. If the robot is disabled in the middle, step 3 cancels the align and its `end(true)` runs. Nothing remembers "I was aligning," because there is no `aligning` field. The bug from Section 18.1 cannot happen.
+Run the align feature through these rules, written as a command. The driver presses A, and the align command starts. It requires the drivetrain, so the "drive with the sticks" default command is interrupted, and its `end(true)` stops the motors. The align runs. When it finishes, its `end(false)` stops the motors, the drivetrain is free, and at step 5 of the very same loop, the default command starts again and the driver has the sticks back. If the robot is disabled in the middle, step 3 cancels the align and its `end(true)` runs. Nothing remembers "I was aligning," because there is no `aligning` field. The bug from Section 19.1 cannot happen.
 
 And the wall stop? It would live in the drive-with-the-sticks command, so it runs whenever that command runs and is simply not running while the align has the drivetrain. Nothing to skip with a `return`, nothing to freeze.
 
@@ -295,7 +295,7 @@ This is Chapter 12's rule, "check, do not wait," and it matters even more now. N
 
 ---
 
-## 18.6 New Java: Lambdas, Code You Can Hand to Someone
+## 19.6 New Java: Lambdas, Code You Can Hand to Someone
 
 Before you can run your first command, you need one more piece of Java, and it is the one you will see most often in command-based code.
 
@@ -455,7 +455,7 @@ The rule: **anything that should be fresh each loop must be read inside the lamb
 
 ---
 
-## 18.7 Your First Commands
+## 19.7 Your First Commands
 
 Time to run a command on the Explorer. You will not rewrite anything you already have. Your autonomous `switch`, your teleop drive, your tuning bench, and your SysId tests all stay exactly as they are. You will add the scheduler next to them, and give it one small job.
 
@@ -494,7 +494,7 @@ Commands.startEnd(
 
 Read it aloud: "A command that turns the LED on when it starts and off when it ends, that ends when the autonomous step is `STEP_DONE`, named Auto Light." That is three lambdas: two `Runnable`s and one `BooleanSupplier`. The last one reads the **field** `autoStep`, so it sees the current step every time the scheduler asks.
 
-It is a small job, but it shows off everything from Section 18.4: the start and the end are kept together in one place, and the LED is turned off **however** the command stops: when autonomous finishes, when the robot is disabled in the middle, or when teleop starts.
+It is a small job, but it shows off everything from Section 19.4: the start and the end are kept together in one place, and the LED is turned off **however** the command stops: when autonomous finishes, when the robot is disabled in the middle, or when teleop starts.
 
 ### Step 1: Check that you have the command library
 
@@ -515,7 +515,7 @@ Notice the package: `wpilibj2`, not `wpilibj`. Every class in the command librar
 
 ### Step 3: The LED and the command fields
 
-In Chapter 4 you blinked the XRP's onboard LED with an `XRPOnBoardIO` object. If your `Robot.java` still has one, keep it and skip the first line below. If any old Chapter 4 code still sets the LED (in `robotPeriodic()`, say), **delete it**: two pieces of code setting the same LED is exactly the "two pieces of code driving the same motors" problem from Section 18.2, and the last one to write would win.
+In Chapter 4 you blinked the XRP's onboard LED with an `XRPOnBoardIO` object. If your `Robot.java` still has one, keep it and skip the first line below. If any old Chapter 4 code still sets the LED (in `robotPeriodic()`, say), **delete it**: two pieces of code setting the same LED is exactly the "two pieces of code driving the same motors" problem from Section 19.2, and the last one to write would win.
 
 Add to "The robot's parts, created once" group:
 
@@ -526,7 +526,7 @@ private final XRPOnBoardIO onBoardIO = new XRPOnBoardIO();   // the LED (Chapter
 And add a new group after the two PID controllers:
 
 ```java
-// Commands (Chapter 18). Created in the constructor.
+// Commands (Chapter 19). Created in the constructor.
 private final Command autoLight;
 ```
 
@@ -535,7 +535,7 @@ private final Command autoLight;
 At the very end of the `Robot()` constructor, add:
 
 ```java
-// Commands (Section 18.7): the LED is on while the autonomous routine runs.
+// Commands (Section 19.7): the LED is on while the autonomous routine runs.
 autoLight = Commands.startEnd(
         () -> onBoardIO.setLed(true),     // start: LED on
         () -> onBoardIO.setLed(false))    // end: LED off, however it ends
@@ -568,7 +568,7 @@ public void robotPeriodic() {
         DataLogManager.log("Pose reset to start");
     }
 
-    // The command scheduler: runs every scheduled command, once per loop (Section 18.5).
+    // The command scheduler: runs every scheduled command, once per loop (Section 19.5).
     CommandScheduler.getInstance().run();
 
     updateDashboard();
@@ -582,7 +582,7 @@ Without this line, nothing in the command library works at all. Commands could s
 To **schedule** a command means to hand it to the scheduler and say "start this now." At the end of `autonomousInit()`, after `startStep(STEP_DRIVE_LEG_1)`, add:
 
 ```java
-// Light the LED for as long as the routine runs (Section 18.7).
+// Light the LED for as long as the routine runs (Section 19.7).
 CommandScheduler.getInstance().schedule(autoLight);
 ```
 
@@ -604,14 +604,14 @@ autoLight.cancel();
 Build, switch on your XRP, and run the program with `USE_SIMULATED_ROBOT = false`.
 
 1. In Elastic, click **Add Widget**, open **SmartDashboard**, and drag **Scheduler** onto the grid. Elastic makes it a **Scheduler** widget: a list of the commands that are running right now, with a button to cancel each. Before autonomous, the list is empty. Save the layout.
-2. Press Y to reset the pose, and start **Autonomous**. The LED comes on, the Explorer drives the course exactly as it did in Chapter 17, and `Auto Light` appears in the Scheduler list.
+2. Press Y to reset the pose, and start **Autonomous**. The LED comes on, the Explorer drives the course exactly as it did in Chapter 18, and `Auto Light` appears in the Scheduler list.
 3. When the robot finds the tape and `autoStep` reaches `STEP_DONE`, the LED goes out and `Auto Light` disappears from the list. Its `until` condition came true, so the scheduler ended it.
 4. Run autonomous again, and this time **disable** the robot in the middle of leg 1. The LED goes out immediately. You never wrote a single line about the LED in `disabledInit()`. The scheduler saw that the robot was disabled, cancelled the command, and ran its end action.
 5. Run autonomous again, and switch straight to **Teleoperated** partway through. The LED goes out, because `teleopInit()` cancelled the command.
 
-Then try it on the simulated Explorer from Chapter 17 (`USE_SIMULATED_ROBOT = true`, XRP off). There is no real LED, but the Simulation GUI's **DIO** window shows the LED's channel (DIO 1) turning on and off at the same moments.
+Then try it on the simulated Explorer from Chapter 18 (`USE_SIMULATED_ROBOT = true`, XRP off). There is no real LED, but the Simulation GUI's **DIO** window shows the LED's channel (DIO 1) turning on and off at the same moments.
 
-Your Explorer is now a command-based robot in the smallest possible way: the scheduler runs every loop, and one command uses it. Everything else is still the old structure. That is fine, and it is on purpose. Chapter 19 moves the drivetrain over, and Chapter 20 moves the rest.
+Your Explorer is now a command-based robot in the smallest possible way: the scheduler runs every loop, and one command uses it. Everything else is still the old structure. That is fine, and it is on purpose. Chapter 20 moves the drivetrain over, and Chapter 21 moves the rest.
 
 > **Did the LED stay on after you disabled?**
 >
@@ -619,9 +619,9 @@ Your Explorer is now a command-based robot in the smallest possible way: the sch
 
 ---
 
-## 18.8 What Changes, and What Stays
+## 19.8 What Changes, and What Stays
 
-Before Chapter 19 starts moving code around, it helps to know what command-based will change about the Explorer, and what it will not touch.
+Before Chapter 20 starts moving code around, it helps to know what command-based will change about the Explorer, and what it will not touch.
 
 ### What stays
 
@@ -632,10 +632,10 @@ Before Chapter 19 starts moving code around, it helps to know what command-based
 
 ### What changes
 
-- **`Drivetrain` becomes a subsystem** (Chapter 19). It gets a one-word change to its first line, and its `periodic()` is called by the scheduler.
-- **Every action becomes a command** (Chapters 19 to 21). The autonomous steps, the tuning bench targets, the SysId tests, and the drive with the sticks.
-- **Autonomous becomes a chain of commands** (Chapter 20). The `switch` statement, `autoStep`, and `startStep()` go away (see the preview below).
-- **A new class, `RobotContainer`** (Chapter 20), becomes the place where subsystems and commands are created and buttons are tied to commands. `Robot.java` shrinks to a few lines, like the WPILib template.
+- **`Drivetrain` becomes a subsystem** (Chapter 20). It gets a one-word change to its first line, and its `periodic()` is called by the scheduler.
+- **Every action becomes a command** (Chapters 20 to 22). The autonomous steps, the tuning bench targets, the SysId tests, and the drive with the sticks.
+- **Autonomous becomes a chain of commands** (Chapter 21). The `switch` statement, `autoStep`, and `startStep()` go away (see the preview below).
+- **A new class, `RobotContainer`** (Chapter 21), becomes the place where subsystems and commands are created and buttons are tied to commands. `Robot.java` shrinks to a few lines, like the WPILib template.
 - **The "Remembered from loop to loop" group empties out.** Each command keeps its own memory, inside itself.
 
 Here is a preview of that autonomous chain, again not for typing yet:
@@ -651,28 +651,28 @@ Read it aloud: "drive half a meter, and then turn to heading 90, and then drive 
 Command-based is not free, and it is worth being honest about that before you commit to it.
 
 - **More files.** One `Robot.java` becomes a `Robot`, a `RobotContainer`, a `Constants`, a subsystem or two, and a file per command. Each file is short and does one thing, but there are more of them to find.
-- **"Where does this run?"** In `TimedRobot` code, you can read `teleopPeriodic()` from top to bottom and know exactly what happens every loop. In command-based code, the loop is inside the scheduler, so you have to learn to think in commands: which ones are running, and what each one does. The Scheduler widget and AdvantageKit's logs (Chapter 24) help a lot.
+- **"Where does this run?"** In `TimedRobot` code, you can read `teleopPeriodic()` from top to bottom and know exactly what happens every loop. In command-based code, the loop is inside the scheduler, so you have to learn to think in commands: which ones are running, and what each one does. The Scheduler widget and AdvantageKit's logs (Chapter 25) help a lot.
 - **New ways to be confused.** "My command never ran" has a few classic causes: the scheduler's `run()` is missing, the robot is disabled, another command took its subsystem, or (Practice 5) the command was used inside another command and then scheduled on its own. You will learn them all, and Appendix D lists them.
 
 Teams accept these costs because of what they buy: features that do not break each other, actions written once and reused everywhere, and cleanup that cannot be forgotten. On a robot with six subsystems and five programmers, that trade is not close.
 
 > **Do you have to use command-based?**
 >
-> No. WPILib supports both, and some excellent teams write `TimedRobot` code with their own structure. But command-based is what WPILib's documentation, templates, and examples are built around, it is what PathPlanner (Chapter 31) expects, and it is what you will find in most FRC teams' code on GitHub. Learning it means you can read their code, and they can read yours.
+> No. WPILib supports both, and some excellent teams write `TimedRobot` code with their own structure. But command-based is what WPILib's documentation, templates, and examples are built around, it is what PathPlanner (Chapter 32) expects, and it is what you will find in most FRC teams' code on GitHub. Learning it means you can read their code, and they can read yours.
 
 ---
 
-## 18.9 Command-Based Everywhere
+## 19.9 Command-Based Everywhere
 
 From here on, command-based is how every robot in this book is organized.
 
-- **Chapter 19, subsystems and commands.** `Drivetrain` becomes a subsystem, and the autonomous steps become command classes like the `TurnToHeading` preview in Section 18.4. Drive with the sticks becomes the drivetrain's default command.
-- **Chapter 20, button bindings and command groups.** Buttons are tied to commands in `RobotContainer`, and the obstacle course becomes one command built from smaller ones, including two things happening at once. Your pair merge-conflict lab happens there too.
-- **Chapter 21, state machines.** The line-follower becomes a command that is also a state machine, and you will see that a chain of commands is really a state machine written a different way.
-- **Chapter 22, unit tests.** A command is a small object with a clear start and finish, which makes it easy to test: create a `Drivetrain(new DrivetrainIOSim())`, run a command on it, and check where it ended up.
-- **Chapter 26, the roboRIO.** The Mini Swerve starts life as a command-based project, using everything from this section of the book.
-- **Chapter 31, PathPlanner.** PathPlanner turns paths you draw into commands, and lets you trigger your own commands at points along a path.
-- **Chapters 34 and 35, the competition robot.** An arm, an intake, and a shooter each become a subsystem. A real autonomous routine is a long chain of commands, some running at the same time ("drive to the next game piece **while** lowering the intake"), and the scheduler's one-command-per-subsystem rule keeps them from fighting.
+- **Chapter 20, subsystems and commands.** `Drivetrain` becomes a subsystem, and the autonomous steps become command classes like the `TurnToHeading` preview in Section 19.4. Drive with the sticks becomes the drivetrain's default command.
+- **Chapter 21, button bindings and command groups.** Buttons are tied to commands in `RobotContainer`, and the obstacle course becomes one command built from smaller ones, including two things happening at once. Your pair merge-conflict lab happens there too.
+- **Chapter 22, state machines.** The line-follower becomes a command that is also a state machine, and you will see that a chain of commands is really a state machine written a different way.
+- **Chapter 23, unit tests.** A command is a small object with a clear start and finish, which makes it easy to test: create a `Drivetrain(new DrivetrainIOSim())`, run a command on it, and check where it ended up.
+- **Chapter 27, the roboRIO.** The Mini Swerve starts life as a command-based project, using everything from this section of the book.
+- **Chapter 32, PathPlanner.** PathPlanner turns paths you draw into commands, and lets you trigger your own commands at points along a path.
+- **Chapters 35 and 36, the competition robot.** An arm, an intake, and a shooter each become a subsystem. A real autonomous routine is a long chain of commands, some running at the same time ("drive to the next game piece **while** lowering the intake"), and the scheduler's one-command-per-subsystem rule keeps them from fighting.
 
 The kitchen gets busier, but the head chef's rules never change.
 
@@ -680,7 +680,7 @@ The kitchen gets busier, but the head chef's rules never change.
 
 ## Chapter Summary
 
-> **What you learned in Chapter 18**
+> **What you learned in Chapter 19**
 >
 > * As a `TimedRobot` program grows, five problems grow with it: "what am I doing now" fields scattered across the class, the same action written in several places, two pieces of code driving the same motors, cleanups forgotten when an action is interrupted, and mode methods that do everything.
 > * **Command-based programming** sorts the robot into **subsystems** (the nouns: parts that do one thing at a time) and **commands** (the verbs: actions that use subsystems until they end), run by the **command scheduler**.
@@ -705,7 +705,7 @@ double headingAtStartDegrees = drivetrain.getHeadingDegrees();
 turnedQuarter = () -> drivetrain.getHeadingDegrees() - headingAtStartDegrees >= 90.0;
 ```
 
-and in `teleopPeriodic()`, publish `turnedQuarter.getAsBoolean()` as `Turned Quarter`. Before running, predict: what does the widget show as you turn left slowly through a full circle? Run it and check. Then change the lambda to the buggy version from Section 18.6 (read the heading into a local first, compare the local inside the lambda), predict again, and run it. In `reflections.md`, write two sentences explaining the difference in your own words, using the words "now" and "later."
+and in `teleopPeriodic()`, publish `turnedQuarter.getAsBoolean()` as `Turned Quarter`. Before running, predict: what does the widget show as you turn left slowly through a full circle? Run it and check. Then change the lambda to the buggy version from Section 19.6 (read the heading into a local first, compare the local inside the lambda), predict again, and run it. In `reflections.md`, write two sentences explaining the difference in your own words, using the words "now" and "later."
 
 **3. Commands on the bench.** At the end of `teleopInit()`, schedule three commands, one at a time, and watch each one in the Scheduler widget:
 
@@ -718,7 +718,7 @@ CommandScheduler.getInstance().schedule(
 
 For each, predict how long it will stay in the Scheduler list before you run it. Then: disable the robot while `Waiting for A` is listed and enable again. Is it still there? Why? Finally, add `.withTimeout(3.0)` to the `waitUntil` command and try again without pressing A. Remove the test code when you are done.
 
-**4. Label the parts.** Print out (or copy into `reflections.md`) your `autonomousPeriodic()`, `startStep()`, and `autonomousInit()`. For **each** of the three driving steps, label which lines are its `initialize()`, its `execute()`, its `isFinished()`, and its `end()`, as Section 18.4 did for the turn. Which step has **two** ways to finish? Then do the same for one SysId test in Test mode, using `changeSysIdTest()` and `updateSysIdTest()`. Where is its interrupted cleanup?
+**4. Label the parts.** Print out (or copy into `reflections.md`) your `autonomousPeriodic()`, `startStep()`, and `autonomousInit()`. For **each** of the three driving steps, label which lines are its `initialize()`, its `execute()`, its `isFinished()`, and its `end()`, as Section 19.4 did for the turn. Which step has **two** ways to finish? Then do the same for one SysId test in Test mode, using `changeSysIdTest()` and `updateSysIdTest()`. Where is its interrupted cleanup?
 
 **5. Break it on purpose.** Two experiments, read the Chapter 10 way:
 
@@ -730,37 +730,37 @@ For each, predict how long it will stay in the Scheduler list before you run it.
 Start the command scheduler, run the Explorer's first command, and plan the rest.
 
 1. Make a branch (see the Git exercise).
-2. Check that `vendordeps/WPILibNewCommands.json` exists, and install WPILib-New-Commands if it does not (Section 18.7, Step 1).
+2. Check that `vendordeps/WPILibNewCommands.json` exists, and install WPILib-New-Commands if it does not (Section 19.7, Step 1).
 3. Add the four imports, the `onBoardIO` field (if you do not have one already) and the `autoLight` field. Delete any old Chapter 4 code that still sets the LED (Steps 2 and 3).
 4. Create `autoLight` and publish the scheduler at the end of the constructor (Step 4).
 5. Add `CommandScheduler.getInstance().run();` to `robotPeriodic()`, before `updateDashboard()` (Step 5).
 6. Schedule `autoLight` at the end of `autonomousInit()`, and cancel it at the end of `teleopInit()` (Step 6).
-7. On the real XRP, run the five checks in Step 7: empty Scheduler list, LED on and `Auto Light` listed during autonomous, LED off at the tape, LED off when disabled mid-route, LED off when switching straight to teleop. Confirm that the course itself runs exactly as it did in Chapter 17.
+7. On the real XRP, run the five checks in Step 7: empty Scheduler list, LED on and `Auto Light` listed during autonomous, LED off at the tape, LED off when disabled mid-route, LED off when switching straight to teleop. Confirm that the course itself runs exactly as it did in Chapter 18.
 8. Repeat the autonomous checks on the simulated Explorer, watching DIO 1 in the Simulation GUI. Set `USE_SIMULATED_ROBOT = false` again before you commit.
-9. **Plan the rebuild.** In `reflections.md`, make a table with two columns, "Subsystem" and "Commands that require it," for the whole Explorer. List every action the robot can take today (every autonomous step, every Test mode button, the bumper cruise, the D-pad SysId tests, driving with the sticks, the Y pose reset, the LED). For each command, also write its finish condition, or "never" if it only ends when interrupted. Chapter 19 starts from this list.
+9. **Plan the rebuild.** In `reflections.md`, make a table with two columns, "Subsystem" and "Commands that require it," for the whole Explorer. List every action the robot can take today (every autonomous step, every Test mode button, the bumper cruise, the D-pad SysId tests, driving with the sticks, the Y pose reset, the LED). For each command, also write its finish condition, or "never" if it only ends when interrupted. Chapter 20 starts from this list.
 
 Diagnose anything strange:
 
 - **The build fails with `package edu.wpi.first.wpilibj2.command does not exist`:** the WPILib-New-Commands vendor library is missing (Step 1).
 - **`error: illegal forward reference` on the `autoLight` line:** you created the command where the field is declared. Move it into the constructor (Step 4).
-- **The LED comes on but never goes off:** the scheduler is not running. See "Did the LED stay on after you disabled?" in Section 18.7.
+- **The LED comes on but never goes off:** the scheduler is not running. See "Did the LED stay on after you disabled?" in Section 19.7.
 - **The LED never comes on:** check that `autonomousInit()` really schedules `autoLight`, and that nothing else (old Chapter 4 code in `robotPeriodic()`, for example) sets the LED back to `false` every loop.
 - **The LED goes off the moment autonomous starts:** `autoStep` is already `STEP_DONE` when the command is scheduled. Schedule it **after** `startStep(STEP_DRIVE_LEG_1)`, not before.
 - **The Scheduler widget is missing:** check the `SmartDashboard.putData("Scheduler", ...)` line, and look in the **SmartDashboard** folder of Elastic's **Add Widget**.
 - **VS Code shows `schedule()` crossed out:** you wrote `autoLight.schedule()`. Use `CommandScheduler.getInstance().schedule(autoLight)` (the "`schedule()` the old way" callout).
 
-When the LED tracks the autonomous routine on both robots, and your plan table lists every action the Explorer can take, you are ready for Chapter 19.
+When the LED tracks the autonomous routine on both robots, and your plan table lists every action the Explorer can take, you are ready for Chapter 20.
 
 ### Reflect
 
 Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 
-1. In Section 18.1, why did the robot start spinning by itself after being disabled in the middle of an align? Explain how the same feature, written as a command, avoids that bug, naming the scheduler rule that does it.
+1. In Section 19.1, why did the robot start spinning by itself after being disabled in the middle of an align? Explain how the same feature, written as a command, avoids that bug, naming the scheduler rule that does it.
 2. In Chapter 16, `testPeriodic()` needed `if (updateSysIdTest()) { return; }`. Which of the five growing pains was that line working around, and what replaces it in command-based code?
 3. Why does `.until(() -> autoStep == STEP_DONE)` work, when `.until(autoStep == STEP_DONE)` would not even compile? What would go wrong if Java did allow the second one?
 4. Command-based has real costs. Name one that worries you, and one reason a team with five programmers would accept it anyway.
 
-If any answer feels shaky, re-read Sections 18.2, 18.5, and 18.6.
+If any answer feels shaky, re-read Sections 19.2, 19.5, and 19.6.
 
 ### Git
 
@@ -776,13 +776,13 @@ After Build step 8, with `USE_SIMULATED_ROBOT = false`:
 
 ```bash
 git add .
-git commit -m "Ch18: command scheduler and auto light command"
+git commit -m "Ch19: command scheduler and auto light command"
 git push -u origin command-scheduler
 ```
 
 Open a pull request into `main`. In the description, paste your plan table from Build step 9: it is the to-do list for the next two chapters, and a pull request description is a good place for a team to agree on a plan before the code is written. Review **Files changed**: only `Robot.java` should have changed (and `vendordeps/WPILibNewCommands.json`, if you had to install it). Merge, delete the branch, then `git checkout main` and `git pull`.
 
-Why commit something this small? Because it is a safe place to stand. The scheduler is now running, and everything else behaves exactly as it did. If anything strange happens while you rebuild in Chapter 19, you can come back here and know the scheduler was not the cause.
+Why commit something this small? Because it is a safe place to stand. The scheduler is now running, and everything else behaves exactly as it did. If anything strange happens while you rebuild in Chapter 20, you can come back here and know the scheduler was not the cause.
 
 ### Collab: Be the Scheduler
 
@@ -790,16 +790,16 @@ This one needs no computer. Work in a group of three or four.
 
 1. Write each of these commands on an index card, with its **requirements** and its **finish condition**: "Drive with sticks (requires Drivetrain; never finishes)", "Auto-align (requires Drivetrain; finishes at heading 90)", "Drive 0.5 m (requires Drivetrain; finishes at 0.5 m)", "Auto Light (requires nothing; finishes when autonomous is done)", "Blink warning (requires LED; finishes after 2 s)".
 2. One person is the **scheduler**. One is the **Drivetrain**, and one is the **LED**: each can hold one card at a time. The last person is the **driver**, calling out events: "teleop starts," "A pressed," "heading reaches 90," "disabled," and so on.
-3. Every clap is one loop. On each clap, the scheduler walks through the five steps of Section 18.5 out loud: subsystems check in, buttons, run each command and ask if it is finished, apply changes, start default commands. When a command ends, its holder says "end, interrupted" or "end, finished," and acts out the cleanup.
+3. Every clap is one loop. On each clap, the scheduler walks through the five steps of Section 19.5 out loud: subsystems check in, buttons, run each command and ask if it is finished, apply changes, start default commands. When a command ends, its holder says "end, interrupted" or "end, finished," and acts out the cleanup.
 4. Play three scenarios: a normal align in teleop; an align that gets disabled halfway; and the driver pressing A while "Drive 0.5 m" is running.
 
-Afterward, each of you writes two sentences in `reflections.md`: which rule surprised you most, and which bug from Section 18.1 the scheduler prevented in your scenarios.
+Afterward, each of you writes two sentences in `reflections.md`: which rule surprised you most, and which bug from Section 19.1 the scheduler prevented in your scenarios.
 
 ### Explore
 
 WPILib ships an XRP example that is already command-based. In VS Code, run **WPILib: Create a new project**, choose **Example**, then **XRP Reference**, and create it in a scratch folder (not inside your Explorer project). Open `RobotContainer.java` and the `commands` folder. Find:
 
-- a command class with all four methods, and match each one to Section 18.4's table;
+- a command class with all four methods, and match each one to Section 19.4's table;
 - a call to `addRequirements(...)`;
 - at least two lambdas and one method reference, and the functional interface each one fills in;
 - the line that makes driving with the sticks the drivetrain's default command.
@@ -810,8 +810,8 @@ Then open `TurnDegrees.java` and compare how it decides it is finished with how 
 
 > **Additional Resources**
 >
-> * **What Is "Command-Based" Programming?**: [docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html](https://docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html) WPILib's introduction to subsystems, commands, and the scheduler, with a `TimedRobot` comparison much like Section 18.1
-> * **Commands**: [docs.wpilib.org/en/stable/docs/software/commandbased/commands.html](https://docs.wpilib.org/en/stable/docs/software/commandbased/commands.html) the four methods of a command, the `Commands` factories, and the decorators from Section 18.7
+> * **What Is "Command-Based" Programming?**: [docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html](https://docs.wpilib.org/en/stable/docs/software/commandbased/what-is-command-based.html) WPILib's introduction to subsystems, commands, and the scheduler, with a `TimedRobot` comparison much like Section 19.1
+> * **Commands**: [docs.wpilib.org/en/stable/docs/software/commandbased/commands.html](https://docs.wpilib.org/en/stable/docs/software/commandbased/commands.html) the four methods of a command, the `Commands` factories, and the decorators from Section 19.7
 > * **The Command Scheduler**: [docs.wpilib.org/en/stable/docs/software/commandbased/command-scheduler.html](https://docs.wpilib.org/en/stable/docs/software/commandbased/command-scheduler.html) what happens inside `run()`, step by step, and how interruption works
 > * **Treating Functions as Data**: [docs.wpilib.org/en/stable/docs/software/basic-programming/functions-as-data.html](https://docs.wpilib.org/en/stable/docs/software/basic-programming/functions-as-data.html) WPILib's own explanation of `Runnable`, lambdas, method references, and capturing, written for robot programmers
 > * **Lambda Expressions (The Java Tutorials)**: [docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html](https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html) Java's official tutorial on lambdas and functional interfaces
@@ -819,4 +819,4 @@ Then open `TurnDegrees.java` and compare how it decides it is finished with how 
 
 ---
 
-*Next up, Chapter 19: Subsystems and Commands on the XRP. You will turn `Drivetrain` into a real subsystem, write your first command classes for the obstacle course, and make driving with the sticks a default command, so the scheduler, not `teleopPeriodic()`, decides who drives.*
+*Next up, Chapter 20: Subsystems and Commands on the XRP. You will turn `Drivetrain` into a real subsystem, write your first command classes for the obstacle course, and make driving with the sticks a default command, so the scheduler, not `teleopPeriodic()`, decides who drives.*

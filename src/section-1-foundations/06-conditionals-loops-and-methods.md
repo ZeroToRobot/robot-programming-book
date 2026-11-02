@@ -214,7 +214,7 @@ This will blink the LED five times, then stop. Read it line by line: start count
 >
 > Remember: those methods run 50 times per second. They are expected to finish quickly and return. If you put a `while` loop with `Timer.delay()` inside `teleopPeriodic()`, the entire robot freezes for the duration of the loop. Driver Station inputs are ignored. Other code does not run. The watchdog will start barking.
 >
-> `while` loops with delays belong in standalone test code, in the `Robot()` constructor (which runs once at startup), or in command-based code, which we get to in Chapter 19. Until then, when you want loop-like behavior in periodic code, you use a counter variable that is checked on each tick. We will see this pattern later in the book.
+> `while` loops with delays belong in standalone test code, in the `Robot()` constructor (which runs once at startup), or in command-based code, which we get to in Chapter 20. Until then, when you want loop-like behavior in periodic code, you use a counter variable that is checked on each tick. We will see this pattern later in the book.
 
 ### The `for` Loop
 
@@ -470,7 +470,7 @@ That is the goal. Code that reads like a description of what the robot is doing,
 
 > **The foundation of clean robot code**
 >
-> This is the foundation of every clean robot program in this book. By Chapter 19, when you learn the command-based framework, you will see that commands are essentially a more powerful version of the same pattern: each command names a piece of behavior, and the robot composes them into something coordinated. The skill of breaking logic into well-named methods, the one you are practicing right now, is exactly what makes command-based code work later.
+> This is the foundation of every clean robot program in this book. By Chapter 20, when you learn the command-based framework, you will see that commands are essentially a more powerful version of the same pattern: each command names a piece of behavior, and the robot composes them into something coordinated. The skill of breaking logic into well-named methods, the one you are practicing right now, is exactly what makes command-based code work later.
 
 ---
 

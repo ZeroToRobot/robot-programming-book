@@ -116,7 +116,7 @@ Forward is negative. That is not a bug in your code or your controller. It is ho
 >
 > Controllers inherited their axes from computer screens, where y grows downward (row 0 is the top of the screen). So "up" on the stick is negative. Robots use a different convention. WPILib's robot coordinate frame says +x points forward out of the front of the robot, +y points to the robot's left, and positive rotation is **counterclockwise** when seen from above.
 >
-> Two devices, two **coordinate frames**, and your code sits between them. Every time you pass a stick value to the drivetrain, you are translating from the controller's frame to the robot's frame. Usually that translation is a single minus sign. You will meet coordinate frames again and again: when you track the robot's position on the field in Chapter 14, and when you build field-oriented swerve drive in Chapter 29, where "forward" means "away from the driver" no matter which way the robot is facing.
+> Two devices, two **coordinate frames**, and your code sits between them. Every time you pass a stick value to the drivetrain, you are translating from the controller's frame to the robot's frame. Usually that translation is a single minus sign. You will meet coordinate frames again and again: when you track the robot's position on the field in Chapter 14, and when you build field-oriented swerve drive in Chapter 30, where "forward" means "away from the driver" no matter which way the robot is facing.
 
 Now take your hands off the controller completely and look again. Is `Left Y` exactly `0.0`? On a brand new controller it might be. On a controller that has been through a season of practice, it probably reads something like `0.03` or `-0.06`, and it may change a little every time you let go of the stick. Keep that in mind. It is the subject of the next section.
 
@@ -214,7 +214,7 @@ Java has a naming convention for constants: **ALL_CAPS with underscores** betwee
 
 > **When should a number become a constant?**
 >
-> A good rule: if a number is something you might **tune** (a deadband, a speed limit, a distance to a wall) or something with a **meaning** (a controller port, a motor channel), give it a name. Numbers that are just math, like the `2` in "divide by 2 to find the middle," can stay as they are. By Chapter 20 your constants will move into their own `Constants.java` file, so the whole team has one place to look for every tunable value on the robot.
+> A good rule: if a number is something you might **tune** (a deadband, a speed limit, a distance to a wall) or something with a **meaning** (a controller port, a motor channel), give it a name. Numbers that are just math, like the `2` in "divide by 2 to find the middle," can stay as they are. By Chapter 21 your constants will move into their own `Constants.java` file, so the whole team has one place to look for every tunable value on the robot.
 
 ---
 
@@ -337,7 +337,7 @@ Build and run it, put the XRP on the floor with some room around it, and click *
 > right = forward + rotation
 > ```
 >
-> Forward `0.5` with rotation `0.2` (a gentle left turn) gives left `0.3`, right `0.7`. The right side outruns the left, and the robot curves left. If a sum goes past `1.0`, WPILib scales both sides down together so the turn keeps its shape. Turning "how fast and how much turn" into "what each wheel does" is called **inverse kinematics**, and it is the whole subject of Chapter 13. In Chapter 28 you will do the same thing for swerve drive, where each of four wheels also gets its own steering angle.
+> Forward `0.5` with rotation `0.2` (a gentle left turn) gives left `0.3`, right `0.7`. The right side outruns the left, and the robot curves left. If a sum goes past `1.0`, WPILib scales both sides down together so the turn keeps its shape. Turning "how fast and how much turn" into "what each wheel does" is called **inverse kinematics**, and it is the whole subject of Chapter 13. In Chapter 29 you will do the same thing for swerve drive, where each of four wheels also gets its own steering angle.
 
 > **Why small stick movements feel gentle**
 >
@@ -391,7 +391,7 @@ Every button has all three versions (`getBButtonPressed()`, `getRightBumperButto
 >
 > Use the held version when the robot should do something **while** the button is down: run an intake while A is held, drive slowly while the bumper is held. Use the pressed version when something should happen **once** per press: toggle a mode on and off, count a scored game piece, switch cameras. Mixing them up is one of the most common teleop bugs. A toggle written with `getAButton()` flips fifty times a second, so where it ends up depends on how long you held the button.
 
-The idea of reacting to the moment something changes, rather than to its current state, is called **edge detection**, and it shows up all over robotics. In Chapter 20 you will bind commands to buttons, and WPILib will let you choose between "while held" and "on press" with a single method name.
+The idea of reacting to the moment something changes, rather than to its current state, is called **edge detection**, and it shows up all over robotics. In Chapter 21 you will bind commands to buttons, and WPILib will let you choose between "while held" and "on press" with a single method name.
 
 ---
 
@@ -470,7 +470,7 @@ Keeping them apart gives you a clean split:
 - **Decisions** (deadband, sign flips, slow mode) happen in `Robot.java`.
 - **Hardware** (motors, `DifferentialDrive`) is hidden inside `Drivetrain`.
 
-This is the same idea as encapsulation from Chapter 7, applied one level up: each class has one job. In Chapter 20, the input-reading part moves into a dedicated class called `RobotContainer`, and you will see that the split you made here is exactly the shape the command-based framework expects.
+This is the same idea as encapsulation from Chapter 7, applied one level up: each class has one job. In Chapter 21, the input-reading part moves into a dedicated class called `RobotContainer`, and you will see that the split you made here is exactly the shape the command-based framework expects.
 
 > **A controller is a sensor for the driver**
 >

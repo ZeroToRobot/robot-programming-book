@@ -6,7 +6,7 @@ That last one is worth thinking about. The robot knows how far it has driven. It
 
 This chapter gives the Explorer that answer. You will combine the encoders and the gyro into a running estimate of the robot's position and heading on the floor, updated fifty times a second. That estimate is called the robot's **pose**, and the process of keeping it up to date is called **odometry**. Then you will put a map of the floor on your screen and watch a little robot icon drive around it, in step with the real one.
 
-You will also find out what odometry cannot do. A robot that drives a perfect square should end up exactly where it started, and you will discover that its odometry never quite agrees. Understanding why is the start of everything from PID control (Chapter 15) to camera-based pose correction (Chapter 33).
+You will also find out what odometry cannot do. A robot that drives a perfect square should end up exactly where it started, and you will discover that its odometry never quite agrees. Understanding why is the start of everything from PID control (Chapter 15) to camera-based pose correction (Chapter 34).
 
 On the Java side, you will learn about **objects made of other objects** (a pose *has* a position and *has* a heading), and about **immutable objects**, ones that can never change after they are created. Chapter 13 warned you about methods that quietly change an object you share with someone else. Immutable objects are the cure.
 
@@ -38,7 +38,7 @@ To know position, the robot needs to combine **how far** it moved with **which w
 
 > **What a pose is for**
 >
-> Almost every advanced thing an FRC robot does depends on knowing its pose. Path following (Chapter 31) compares where the robot is to where the path says it should be. Auto-aim at a goal needs to know the angle from the robot to the goal, which needs the robot's position. Vision (Chapter 33) uses AprilTags to correct the pose. Even something as simple as "drive back to where we started" is impossible without one. A robot that knows its pose can make decisions about the field. A robot that only knows its wheel distances can only follow a script.
+> Almost every advanced thing an FRC robot does depends on knowing its pose. Path following (Chapter 32) compares where the robot is to where the path says it should be. Auto-aim at a goal needs to know the angle from the robot to the goal, which needs the robot's position. Vision (Chapter 34) uses AprilTags to correct the pose. Even something as simple as "drive back to where we started" is impossible without one. A robot that knows its pose can make decisions about the field. A robot that only knows its wheel distances can only follow a script.
 
 ---
 
@@ -105,7 +105,7 @@ Notice the turn. The robot's position did not change at all, only its heading. A
 
 > **Two frames, one robot**
 >
-> It is easy to mix these up, so say it out loud: **robot frame** is "forward and left, from where I am facing right now." **Field frame** is "along and across the floor, from the start line, no matter where I am facing." Chassis speeds (Chapter 13) live in the robot frame. Poses live in the field frame. On a real FRC field, WPILib puts the field origin at a corner of the field, with +x pointing away from the blue alliance wall, so every team's code agrees on where (0, 0) is. Your desk has no blue alliance wall, so the start line will do. You will meet the full FRC field frame in Chapter 29, when field-oriented driving turns the driver's stick into field-frame motion.
+> It is easy to mix these up, so say it out loud: **robot frame** is "forward and left, from where I am facing right now." **Field frame** is "along and across the floor, from the start line, no matter where I am facing." Chassis speeds (Chapter 13) live in the robot frame. Poses live in the field frame. On a real FRC field, WPILib puts the field origin at a corner of the field, with +x pointing away from the blue alliance wall, so every team's code agrees on where (0, 0) is. Your desk has no blue alliance wall, so the start line will do. You will meet the full FRC field frame in Chapter 30, when field-oriented driving turns the driver's stick into field-frame motion.
 
 ---
 
@@ -661,7 +661,7 @@ Walk through what changed since Chapter 13:
 
 > **Why not just update odometry inside `getPose()`?**
 >
-> It is tempting to make `getPose()` call `odometry.update(...)` first, so the pose is always fresh. Do not. Odometry needs to be updated **exactly once per loop**, at a steady rhythm. If `getPose()` updated it, then calling `getPose()` three times in one loop would update three times (harmless here, but confusing), and **not** calling it during some loop would skip an update (and if the robot moved, that move is folded into the next update less accurately). Keep "update" and "read" separate: one call to `updateOdometry()` per loop, as many calls to `getPose()` as you like. In Chapter 19, when `Drivetrain` becomes a command-based subsystem, the update will move into a method called `periodic()` that WPILib calls for you once per loop.
+> It is tempting to make `getPose()` call `odometry.update(...)` first, so the pose is always fresh. Do not. Odometry needs to be updated **exactly once per loop**, at a steady rhythm. If `getPose()` updated it, then calling `getPose()` three times in one loop would update three times (harmless here, but confusing), and **not** calling it during some loop would skip an update (and if the robot moved, that move is folded into the next update less accurately). Keep "update" and "read" separate: one call to `updateOdometry()` per loop, as many calls to `getPose()` as you like. In Chapter 20, when `Drivetrain` becomes a command-based subsystem, the update will move into a method called `periodic()` that WPILib calls for you once per loop.
 
 ---
 
@@ -700,11 +700,11 @@ Elastic has a field widget, but it only draws full-size FRC fields, more than 16
 
 On the FTC field, the origin, `(0, 0)`, is in the **center** of the field, so your robot starts in the middle, pointing along +x (to the right), with +y up the screen. If you drive forward, it moves right. Turn left, and it rotates counterclockwise to point up. Same frame as Section 14.2, now on screen. The robot is drawn at FTC size, more than twice as wide as an XRP; watch where it goes, not how big it is. Zoom in with the mouse wheel.
 
-AdvantageScope remembers its tabs for next time. Chapter 24 shows you how to save them in your project as well.
+AdvantageScope remembers its tabs for next time. Chapter 25 shows you how to save them in your project as well.
 
 > **One map, many viewers**
 >
-> `Field2d` does not care who draws it. The same object can be shown in **AdvantageScope**, in **Elastic** (full-size FRC fields only, which suits the Mini Swerve in Chapter 26), and in the Simulation GUI's **NetworkTables** menu. Because your data log records everything published to the dashboard, AdvantageScope can even replay a run from the log file and show the robot driving across the map after the fact. Chapter 24 does exactly that.
+> `Field2d` does not care who draws it. The same object can be shown in **AdvantageScope**, in **Elastic** (full-size FRC fields only, which suits the Mini Swerve in Chapter 27), and in the Simulation GUI's **NetworkTables** menu. Because your data log records everything published to the dashboard, AdvantageScope can even replay a run from the log file and show the robot driving across the map after the fact. Chapter 25 does exactly that.
 
 ### Drawing the plan, too
 
@@ -1061,7 +1061,7 @@ Every number odometry uses comes from a sensor, and every sensor is a little bit
 
 > **Small angle, big miss**
 >
-> Of all the errors, heading errors do the most damage, because they get **multiplied** by distance. If the robot thinks it is facing 0 degrees but is really facing 2 degrees, then after driving 0.5 m it is off to the side by `0.5 × sin(2°)`, about 1.7 cm. After driving 5 meters, it is off by about 17 cm. A distance error stays the same size; a heading error grows with every meter you drive. This is why FRC teams spend real money on good gyros, and why the Pigeon 2 on the Mini Swerve (Chapter 29) matters so much.
+> Of all the errors, heading errors do the most damage, because they get **multiplied** by distance. If the robot thinks it is facing 0 degrees but is really facing 2 degrees, then after driving 0.5 m it is off to the side by `0.5 × sin(2°)`, about 1.7 cm. After driving 5 meters, it is off by about 17 cm. A distance error stays the same size; a heading error grows with every meter you drive. This is why FRC teams spend real money on good gyros, and why the Pigeon 2 on the Mini Swerve (Chapter 30) matters so much.
 
 ### Can you reset your way out of it?
 
@@ -1069,7 +1069,7 @@ Drift is unavoidable, but there is a clever trick to limit it: **reset the pose 
 
 The same idea works in the middle of a routine, if the robot can sense a **landmark** whose position you know. Your course already has one: the black tape line. When the line sensors see it, the robot knows its y position is exactly `LINE_DISTANCE_METERS`, whatever the odometry thought. Correcting the pose at a landmark is how navigation has worked for centuries: sailors reckoned their position by arithmetic, then corrected it every time they sighted a lighthouse.
 
-On a real FRC field, the lighthouses are **AprilTags**: printed square markers at known spots around the field. A camera that sees one can work out the robot's pose directly, and WPILib's **pose estimators** blend that camera pose with odometry, trusting odometry for smooth moment-to-moment tracking and trusting the camera to pull the slow drift back into line. You will build exactly that in Chapters 30 and 33.
+On a real FRC field, the lighthouses are **AprilTags**: printed square markers at known spots around the field. A camera that sees one can work out the robot's pose directly, and WPILib's **pose estimators** blend that camera pose with odometry, trusting odometry for smooth moment-to-moment tracking and trusting the camera to pull the slow drift back into line. You will build exactly that in Chapters 31 and 34.
 
 > **Odometry is a belief, not a fact**
 >
@@ -1082,10 +1082,10 @@ On a real FRC field, the lighthouses are **AprilTags**: printed square markers a
 You built odometry on a two-wheel robot on your desk. Here is where it goes from here.
 
 - **Chapter 15, PID control.** Your routine still drives "until the encoders say 0.5 m" and turns "until the gyro says 90." With a pose, you can steer the robot to stay on the line `y = 0` during leg 1, correcting the curve you saw in the log. PID control is the tool that turns "I am 1 cm left of where I should be" into "steer a little right."
-- **Chapter 17, simulation.** A simulated XRP produces simulated encoder and gyro readings, and your odometry and `Field2d` work on them without a single change. You will compare a simulated run with a real one on the same map.
-- **Chapter 30, swerve odometry.** `SwerveDriveOdometry` takes four wheel distances **and** four wheel angles instead of two distances, and does the same "add up tiny moves" job. Everything you learned about poses, the field frame, drift, and resetting carries straight over. Only the "how far did I move this loop" part changes.
-- **Chapter 31, path following.** PathPlanner compares the robot's pose to where the path says it should be, fifty times a second, and produces a `ChassisSpeeds` to close the gap. That is your `drive(ChassisSpeeds)` from Chapter 13, fed by your `getPose()` from this chapter.
-- **Chapter 33, vision.** AprilTag cameras correct the pose, as in Section 14.8.
+- **Chapter 18, simulation.** A simulated XRP produces simulated encoder and gyro readings, and your odometry and `Field2d` work on them without a single change. You will compare a simulated run with a real one on the same map.
+- **Chapter 31, swerve odometry.** `SwerveDriveOdometry` takes four wheel distances **and** four wheel angles instead of two distances, and does the same "add up tiny moves" job. Everything you learned about poses, the field frame, drift, and resetting carries straight over. Only the "how far did I move this loop" part changes.
+- **Chapter 32, path following.** PathPlanner compares the robot's pose to where the path says it should be, fifty times a second, and produces a `ChassisSpeeds` to close the gap. That is your `drive(ChassisSpeeds)` from Chapter 13, fed by your `getPose()` from this chapter.
+- **Chapter 34, vision.** AprilTag cameras correct the pose, as in Section 14.8.
 
 Look at how your code is set up for all of this. `Robot.java` asks the drivetrain two questions, "where are you?" (`getPose()`) and "please be here" (`resetPose(...)`), and gives it one instruction, "move like this" (`drive(...)`). It does not know how the drivetrain answers. That is the same separation of **what** from **how** that Chapter 13 ended on, and it is about to pay off for the rest of the book.
 
@@ -1148,7 +1148,7 @@ Fill in a table:
 | 3 | | | | | |
 | 5 | | | | | |
 
-The position error is the straight-line distance from `(0, 0)`: `Math.hypot(x, y)`, times 100. Then answer: Is the final pose `(0, 0, 0°)`? Why not? Does the error grow with laps? Steadily, or in jumps? Why does `Pose Heading` read near `0` while `Heading (deg)` reads near `360`, `1080`, or `1800`? Finally, compute the error **per meter driven** (each lap is 2 meters). Keep this number: in Chapter 30, you will compare it with the Mini Swerve's.
+The position error is the straight-line distance from `(0, 0)`: `Math.hypot(x, y)`, times 100. Then answer: Is the final pose `(0, 0, 0°)`? Why not? Does the error grow with laps? Steadily, or in jumps? Why does `Pose Heading` read near `0` while `Heading (deg)` reads near `360`, `1080`, or `1800`? Finally, compute the error **per meter driven** (each lap is 2 meters). Keep this number: in Chapter 31, you will compare it with the Mini Swerve's.
 
 **3. Build an immutable class.** Write a small immutable class called `Waypoint` that holds a name (a `String`) and a `Pose2d`:
 
@@ -1168,7 +1168,7 @@ System.out.println(b);
 System.out.println(c);
 ```
 
-Explain in two sentences why `a` and `b` still print the same thing, and why that is no longer a problem the way it was with `desaturate` in Chapter 13. Then try adding a `setName` method that changes the `name` field. What does the compiler say, and why? (You can delete `Waypoint.java` afterward, or keep it; Chapter 20 has a use for something like it.)
+Explain in two sentences why `a` and `b` still print the same thing, and why that is no longer a problem the way it was with `desaturate` in Chapter 13. Then try adding a `setName` method that changes the `name` field. What does the compiler say, and why? (You can delete `Waypoint.java` afterward, or keep it; Chapter 21 has a use for something like it.)
 
 **4. Fool the odometry.** With the robot disabled and the Field window open, try to make the odometry wrong in as many different ways as you can in five minutes. Some ideas: lift the robot and spin a wheel, slide it sideways, rotate it while it is lifted, push it while holding one wheel still. For each trick, write one line: what you did, what the map showed, and which sensor was fooled (or which assumption odometry made). Then, as a final trick, temporarily make `resetEncoders()` public again, call it from the Y button **instead of** `resetPose`, drive forward 30 cm, and press Y. Describe what the robot icon does, and use Section 14.6 to explain why. Put `resetPose` back and make `resetEncoders()` private again when you are done.
 
