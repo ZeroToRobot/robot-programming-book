@@ -166,7 +166,7 @@ git branch -d gentle-turns
 
 ## 11.4 Code Review: A Second Pair of Eyes
 
-In Chapter 10, the planted bug's commit was called `Tidy up encoder setup`. It swapped two numbers in `new Encoder(4, 5)`. One reflection question asked whether an honest message would have helped the bug get caught "in review." This is what that meant.
+In Chapter 10, the planted bug's commit was called `Tidy up encoder setup`. It added one minus sign to `getLeftDistanceMeters()`, so the left wheel counted backward. One reflection question asked whether an honest message would have helped the bug get caught "in review." This is what that meant.
 
 **Code review** means that before code merges into `main`, at least one other person reads every changed line. It is the single best bug-catching tool a team has, and it costs almost nothing: ten minutes of a teammate's attention, before the bug ever reaches the robot. Professional software companies require it for every change. Strong FRC teams do too.
 

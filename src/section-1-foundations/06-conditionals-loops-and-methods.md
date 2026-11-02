@@ -35,12 +35,12 @@ A conditional is how you give your program a choice. It is the difference betwee
 Here is the simplest possible conditional in Java:
 
 ```java
-if (distance < 20.0) {
+if (distance < 0.20) {
     stopMotors();
 }
 ```
 
-Let's read that out loud. "If distance is less than twenty point zero, stop motors." That is almost identical to the English version. Java is unusually readable for a programming language, and `if` statements are where that readability shines.
+Let's read that out loud. "If distance is less than zero point two zero, stop motors." That is almost identical to the English version. Java is unusually readable for a programming language, and `if` statements are where that readability shines.
 
 The structure is always:
 
@@ -56,20 +56,20 @@ If the condition is false, the body is skipped entirely. The program just keeps 
 
 ### A Concrete XRP Example
 
-Open up a chapter scratch project and try this in `teleopPeriodic()`:
+Open up a chapter scratch project and try this in `teleopPeriodic()`. It uses the XRP's rangefinder, so first add the rangefinder line and its import from Section 6.8, Step 1:
 
 ```java
-double distance = rangefinder.getDistance();
+double distance = rangefinder.getDistanceMeters();  // in meters
 SmartDashboard.putNumber("Distance", distance);
 
-if (distance < 20.0) {
+if (distance < 0.20) {
     SmartDashboard.putString("Status", "Wall ahead, stopping");
 } else {
     SmartDashboard.putString("Status", "Clear, can drive");
 }
 ```
 
-Deploy this and slowly push the XRP toward a wall while watching SmartDashboard. The status string will switch the moment you cross the 20 cm threshold.
+Run this and slowly push the XRP toward a wall while watching SmartDashboard. The status string will switch the moment you cross the 20 cm threshold.
 
 That switch is your conditional firing. Notice that the program does not have to do anything special to detect the switch. It just runs the `if` check 50 times per second, and one of those 50 ticks happens to be the first one where the condition becomes true.
 
@@ -87,7 +87,7 @@ To write a useful condition, you need to be able to compare values. Java has six
 | --- | --- | --- |
 | `==` | equal to | `mode == 1` |
 | `!=` | not equal to | `state != "DONE"` |
-| `<` | less than | `distance < 20.0` |
+| `<` | less than | `distance < 0.20` |
 | `>` | greater than | `voltage > 11.5` |
 | `<=` | less than or equal to | `ticks <= 1000` |
 | `>=` | greater than or equal to | `angle >= 90.0` |
@@ -121,7 +121,7 @@ The full shape of an `if` statement has two more pieces.
 `else` runs when the condition is false:
 
 ```java
-if (distance < 20.0) {
+if (distance < 0.20) {
     stopMotors();
 } else {
     driveForward();
@@ -131,9 +131,9 @@ if (distance < 20.0) {
 `else if` lets you check more conditions in order:
 
 ```java
-if (distance < 10.0) {
+if (distance < 0.10) {
     SmartDashboard.putString("Status", "Very close, stop now");
-} else if (distance < 30.0) {
+} else if (distance < 0.30) {
     SmartDashboard.putString("Status", "Slowing down");
 } else {
     SmartDashboard.putString("Status", "All clear");
@@ -142,7 +142,7 @@ if (distance < 10.0) {
 
 Java checks each condition top to bottom. As soon as one is true, it runs that block and skips the rest. If none are true and there is an `else` at the end, the `else` block runs. If there is no `else`, nothing runs.
 
-Order matters. If you flipped the first two conditions in the example above, the `< 30.0` block would always run first, even when you were 5 cm from the wall, because 5 is also less than 30. Always order your conditions from most specific to most general.
+Order matters. If you flipped the first two conditions in the example above, the `< 0.30` block would always run first, even when you were 5 cm (0.05 m) from the wall, because 0.05 is also less than 0.30. Always order your conditions from most specific to most general.
 
 ---
 
@@ -162,12 +162,12 @@ A few examples in robot terms:
 
 ```java
 // Only drive forward if the path is clear AND the driver wants to drive
-if (distance > 30.0 && controller.getRightTrigger() > 0.1) {
+if (distance > 0.30 && controller.getRightTriggerAxis() > 0.1) {
     driveForward();
 }
 
 // Stop if the wall is too close OR the driver pulled the brake
-if (distance < 20.0 || controller.getLeftBumper()) {
+if (distance < 0.20 || controller.getLeftBumperButton()) {
     stopMotors();
 }
 
@@ -355,7 +355,7 @@ private boolean isAButtonPressed() {
 }
 
 private boolean isWallClose() {
-    return rangefinder.getDistance() < 20.0;
+    return rangefinder.getDistanceMeters() < 0.20;
 }
 ```
 
@@ -370,7 +370,7 @@ if (isWallClose() && !isAButtonPressed()) {
 Compare that to:
 
 ```java
-if (rangefinder.getDistance() < 20.0 && !controller.getAButton()) {
+if (rangefinder.getDistanceMeters() < 0.20 && !controller.getAButton()) {
     stopMotors();
 }
 ```
@@ -392,10 +392,39 @@ Let's combine everything in this chapter into one realistic snippet. Here is a t
 * Stops automatically if the wall is too close
 * Reports its state to SmartDashboard
 
+### Step 1: The robot parts this code talks to
+
+The examples in this chapter have been using four things, `controller`, `rangefinder`, `leftMotor`, and `rightMotor`, without saying where they come from. In your Explorer project they have to exist before any of this code will build. Add these imports at the top of `Robot.java`, next to the ones you already have:
+
+```java
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.xrp.XRPMotor;
+import edu.wpi.first.wpilibj.xrp.XRPRangefinder;
+```
+
+Then add these four lines inside the class, right under `public class Robot extends TimedRobot {`, the same way you added `onBoardIO` in Chapter 4:
+
+```java
+    private final XboxController controller = new XboxController(0);  // the controller in slot 0
+    private final XRPRangefinder rangefinder = new XRPRangefinder();   // the distance sensor on the front
+    private final XRPMotor leftMotor = new XRPMotor(0);                // left drive motor
+    private final XRPMotor rightMotor = new XRPMotor(1);               // right drive motor
+```
+
+Finally, add one line inside the `Robot()` constructor:
+
+```java
+    rightMotor.setInverted(true);  // the right motor is mounted facing the other way
+```
+
+The two motors face opposite directions on the chassis, so "forward" for one is "backward" for the other. Without that line, sending both the same speed spins the robot in place. As in Chapter 4, don't worry yet about `private final` or `new`; Chapter 7 explains both, and Chapter 9 explains every sensor in detail.
+
+### Step 2: The teleop logic
+
 ```java
 @Override
 public void teleopPeriodic() {
-    double speed = applyDeadband(controller.getLeftY());
+    double speed = applyDeadband(-controller.getLeftY());  // minus: pushing the stick forward reads negative
 
     if (isWallClose()) {
         stopMotors();
@@ -417,7 +446,7 @@ private double applyDeadband(double value) {
 }
 
 private boolean isWallClose() {
-    return rangefinder.getDistance() < 20.0;
+    return rangefinder.getDistanceMeters() < 0.20;  // 0.20 meters is 20 cm
 }
 
 private void driveForward(double speed) {
@@ -430,6 +459,10 @@ private void stopMotors() {
     rightMotor.set(0);
 }
 ```
+
+> **Why the minus sign?**
+>
+> On an Xbox controller, pushing the stick **forward** gives a **negative** number, a leftover from flight-simulator joysticks. The minus sign in `-controller.getLeftY()` flips it, so forward means forward. Chapter 8 explains controller directions in full.
 
 Read `teleopPeriodic` aloud. "Get the speed from the controller with a deadband. If the wall is close, stop and report. Otherwise if the speed is nonzero, drive forward and report. Otherwise stop and report idle."
 
@@ -458,13 +491,13 @@ That is the goal. Code that reads like a description of what the robot is doing,
 
 ### Practice
 
-In your XRP scratch project, write these three methods. Each one should be tested by calling it from the appropriate place in `Robot.java`.
+In your XRP scratch project (with the four parts from Section 6.8, Step 1, added), write these three methods. Each one should be tested by calling it from the appropriate place in `Robot.java`.
 
 1. **`isAButtonPressed()`** returns a `boolean`. Returns `true` when the A button on the controller is held, `false` otherwise. Test it by printing the result to SmartDashboard from `teleopPeriodic()`. Verify the value changes as you press and release the button.
 
 2. **`driveForward(double speed)`** returns nothing (`void`). Sets both drive motors to the given speed. Test it by calling `driveForward(0.3)` when the A button is pressed and `stopMotors()` otherwise. Use the `isAButtonPressed()` method from above when writing the condition.
 
-3. **`blinkLED(int times)`** returns nothing. Blinks the onboard LED the given number of times. For this exercise, write the *blocking* version using `Timer.delay()` and call it once from the `Robot()` constructor. Deploy and verify the LED blinks the expected number of times at startup.
+3. **`blinkLED(int times)`** returns nothing. Blinks the onboard LED the given number of times. For this exercise, write the *blocking* version using `Timer.delay()` and call it once from the `Robot()` constructor. Run it and verify the LED blinks the expected number of times at startup.
 
 After you have all three working, commit your work.
 
@@ -472,11 +505,12 @@ After you have all three working, commit your work.
 
 Bring the chapter together in your XRP Explorer project, starting from the "smarter teleop" in Section 6.8:
 
-1. Add an `applyDeadband(double value)` helper method and use it on the drive stick input, replacing any copy-pasted deadband logic.
-2. In `teleopPeriodic()`, read the rangefinder and drive forward only while the path is clear, stopping when you are within the threshold distance of a wall. Use an `if` and a boolean helper like `isWallClose()`.
-3. Report the current state (driving or stopped, and the measured distance) to SmartDashboard.
+1. Add the controller, rangefinder, and two motors, with their imports and the `rightMotor.setInverted(true)` line (Section 6.8, Step 1). Build: `BUILD SUCCESSFUL` before you go on.
+2. Add an `applyDeadband(double value)` helper method and use it on the drive stick input (with the minus sign), replacing any copy-pasted deadband logic.
+3. In `teleopPeriodic()`, read the rangefinder and drive forward only while the path is clear, stopping when you are within the threshold distance of a wall. Use an `if` and a boolean helper like `isWallClose()`.
+4. Report the current state (driving or stopped, and the measured distance) to SmartDashboard.
 
-Deploy, then drive the XRP toward a wall and confirm it stops on its own. This is the first time the Explorer reacts to its environment instead of just obeying the stick.
+Run it, then drive the XRP toward a wall and confirm it stops on its own. This is the first time the Explorer reacts to its environment instead of just obeying the stick.
 
 ### Reflect
 

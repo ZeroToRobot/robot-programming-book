@@ -212,7 +212,7 @@ public class Robot extends TimedRobot {
 }
 ```
 
-If you deploy this and watch SmartDashboard, the `Time` value will tick upward smoothly. If you watch the **RioLog** (you opened it in Chapter 4) or the Driver Station log, you'll see "Robot started!" appear exactly once, when the program first runs.
+If you run this and watch SmartDashboard, the `Time` value will tick upward smoothly. If you watch VS Code's terminal (where your prints appeared in Chapter 4), you'll see "Robot started!" appear exactly once, when the program first runs.
 
 `Timer.getFPGATimestamp()` returns the number of seconds since the robot was powered on. We'll use that timer constantly throughout the rest of the book.
 
@@ -286,27 +286,27 @@ public class Robot extends TimedRobot {
 
 This is your **mode skeleton**. It does almost nothing on purpose. The only thing it does is announce its current mode to SmartDashboard so you can watch the lifecycle play out in real time.
 
-### Step 3: Build and Deploy
+### Step 3: Build and Run
 
-Build the project (`WPILib: Build Robot Code`), confirm `BUILD SUCCESSFUL`, then deploy (`WPILib: Deploy Robot Code`). If you get stuck, Chapter 2 has the full deploy walkthrough.
+Build the project (`WPILib: Build Robot Code`), confirm `BUILD SUCCESSFUL`, then run it (`WPILib: Simulate Robot Code`, or **F5**). If you get stuck, Chapter 2 has the full walkthrough.
 
 ### Step 4: Watch the Mode Change
 
-Open SmartDashboard (`WPILib: Start Tool` > `SmartDashboard`) and the Driver Station. You should see a `Mode` widget appear with the value `Disabled`.
+Open SmartDashboard (`WPILib: Start Tool` > `SmartDashboard`). You should see a `Mode` widget appear with the value `Disabled`.
 
-Now, in the Driver Station:
+Now, in the Simulation GUI's **Robot State** panel (Chapter 2), which does the Driver Station's job for the XRP:
 
-1. Click the **Autonomous** radio button, then click **Enable**. The Mode widget should change to `Autonomous`.
-2. Click **Disable**, then switch to **Teleoperated**, then click **Enable**. The Mode widget should change to `Teleop`.
-3. Click **Disable**. The Mode widget should change back to `Disabled`.
+1. Click **Autonomous**. The Mode widget should change to `Autonomous`.
+2. Click **Disabled**, then click **Teleoperated**. The Mode widget should change to `Teleop`.
+3. Click **Disabled**. The Mode widget should change back to `Disabled`.
 
 You're watching `disabledInit()`, `autonomousInit()`, and `teleopInit()` fire in real time. Each transition triggers exactly one `Init` call, and the `Periodic` methods are running quietly between them at 50 Hz.
 
 If the Mode widget doesn't update when you change modes, double-check that:
 
 - Your laptop is still connected to the XRP's Wi-Fi
-- The Driver Station shows green for Communications, Robot Code, and Joysticks
-- The deploy actually succeeded (re-deploy if you're not sure)
+- The program is still running: the Simulation GUI window is open, and VS Code's terminal shows no crash
+- You restarted the program after your last change (stop it, then run `WPILib: Simulate Robot Code` again if you're not sure)
 
 > **You just verified the lifecycle**
 >
@@ -363,11 +363,11 @@ This exercise feels slow. It is. The students who do it once seriously almost ne
 
 Continue building the XRP Explorer skeleton from Section 5.6.
 
-1. Verify that the `Mode` widget on SmartDashboard correctly reflects each mode change in the Driver Station
+1. Verify that the `Mode` widget on SmartDashboard correctly reflects each mode change you make in the Simulation GUI's Robot State panel
 2. Add a second SmartDashboard string called `LastInitTime` that records `Timer.getFPGATimestamp()` inside each `Init` method (you'll need to import `Timer`). Watch how the value updates every time you change modes
 3. Add a `disabledPeriodic()` print of the current uptime, just to confirm it really does keep ticking while the robot is disabled
 
-After all three changes, build, deploy, and verify on the dashboard. You should be able to switch modes and see both the mode name and the last-init timestamp update in real time.
+After all three changes, build, run, and verify on the dashboard. You should be able to switch modes and see both the mode name and the last-init timestamp update in real time.
 
 ### Practice
 

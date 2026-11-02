@@ -455,12 +455,12 @@ public void autonomousPeriodic() {
 }
 ```
 
-3. Put the XRP on the floor with room ahead of it. Build, deploy, then in the Driver Station select **Autonomous** and click **Enable**.
+3. Put the XRP on the floor with room ahead of it. Build and run it, then click **Autonomous** in the Simulation GUI's Robot State panel.
 
 Watch what happens and diagnose it:
 
 - **Drives straight forward, then stops:** wiring is correct. Done.
-- **Spins in place:** one side is driving backward. Change the inversion in `Drivetrain`'s constructor (invert the left motor instead of the right, or remove the inversion), redeploy, and test again.
+- **Spins in place:** one side is driving backward. Change the inversion in `Drivetrain`'s constructor (invert the left motor instead of the right, or remove the inversion), then run it and test again.
 - **Drives backward:** both sides are reversed from what you expect. Invert both, or swap which direction you call "forward."
 - **Barely moves:** the XRP is fighting friction. Raise `0.6` toward `0.9` and test again.
 

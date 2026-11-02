@@ -4,7 +4,7 @@ Before you write a single line of robot code, your computer and your XRP need to
 
 This chapter will walk you through all of it, step by step. Some of it is mechanical (install this, click that). Some of it requires a little patience (firmware flashing can be finicky). None of it requires any programming knowledge.
 
-By the end of this chapter, you will have deployed your first robot program, an empty one, but a real one, to your XRP and confirmed that the connection works. That moment, when you see the status LED on the XRP go green for the first time, is more satisfying than it sounds.
+By the end of this chapter, you will have run your first robot program, an empty one, but a real one, on your XRP and confirmed that the connection works. That moment, when you see the status LED on the XRP go green for the first time, is more satisfying than it sounds.
 
 ---
 
@@ -20,13 +20,13 @@ WPILib comes bundled with its own version of the Java Development Kit (JDK). Thi
 
 ### VS Code (the WPILib edition)
 
-VS Code is the code editor you'll use to write, build, and deploy your robot programs. The WPILib installer sets up a special version of VS Code pre-configured with the WPILib extension, which adds robot-specific build tools, a project generator, and a direct "Deploy to Robot" button.
+VS Code is the code editor you'll use to write, build, and run your robot programs. The WPILib installer sets up a special version of VS Code pre-configured with the WPILib extension, which adds robot-specific build tools, a project generator, and a direct "Deploy to Robot" button.
 
 If you already have VS Code installed, that's fine. The WPILib version installs alongside it and doesn't interfere.
 
 ### The WPILib Extension
 
-The WPILib extension is a plugin inside VS Code that handles everything robot-specific: creating new projects from templates, building Java code into a deployable binary, connecting to the robot over Wi-Fi, and opening tools like SmartDashboard and Shuffleboard. You'll use it constantly.
+The WPILib extension is a plugin inside VS Code that handles everything robot-specific: creating new projects from templates, building Java code into a program, running it and connecting it to the robot over Wi-Fi, and opening tools like SmartDashboard and Shuffleboard. You'll use it constantly.
 
 ### XRP Firmware
 
@@ -217,7 +217,7 @@ You can skip this section on a first read. The defaults above will get you throu
 
 ### Why Customize
 
-When you're sitting next to a friend whose XRP is also broadcasting `XRP-AAAA-BBBB`-something, it's surprisingly easy to deploy code to the wrong robot. Giving your XRP a distinctive SSID, like `XRP-Alice` or `XRP-Team3415`, removes that confusion entirely.
+When you're sitting next to a friend whose XRP is also broadcasting `XRP-AAAA-BBBB`-something, it's surprisingly easy to join the wrong robot's Wi-Fi and drive your friend's XRP. Giving your XRP a distinctive SSID, like `XRP-Alice` or `XRP-Team3415`, removes that confusion entirely.
 
 ### How to Customize
 
@@ -239,7 +239,7 @@ Reconnect your laptop using the new SSID and password. Visit `http://192.168.42.
 
 ## 2.7 Creating Your First Robot Project
 
-Now let's create a robot project in VS Code, build it, and deploy it to the XRP. The project won't do anything interesting yet: it's an empty template. But successfully deploying it proves that your entire toolchain works end to end.
+Now let's create a robot project in VS Code, build it, and run it on the XRP. The project won't do anything interesting yet: it's an empty template. But running it successfully proves that your entire toolchain works end to end.
 
 ### Step 1: Create a New Project
 
@@ -348,37 +348,37 @@ A successful build ends with:
 BUILD SUCCESSFUL in Xs
 ```
 
-> **Build errors vs. deploy errors**
+> **Build errors vs. connection errors**
 >
-> A build error means your Java code has a problem: the compiler couldn't translate it into runnable code. A deploy error means the code built fine but couldn't be sent to the robot, usually a network issue. These are completely separate problems with completely separate solutions.
+> A build error means your Java code has a problem: the compiler couldn't translate it into runnable code. A connection error means the code built fine but your program can't reach the robot, usually a Wi-Fi issue. These are completely separate problems with completely separate solutions.
 >
-> For now, focus on getting a clean `BUILD SUCCESSFUL` before worrying about deployment.
+> For now, focus on getting a clean `BUILD SUCCESSFUL` before worrying about the connection.
 
-### Step 4: Deploy to the XRP
+### Step 4: Run It on the XRP
 
-Make sure your laptop is connected to the XRP's Wi-Fi. Then:
+Here is something that surprises almost everyone: your program does not go onto the XRP. It runs on your **laptop**, and talks to the XRP over Wi-Fi fifty times a second. The firmware you flashed in Section 2.4 does whatever your program says: spin this motor, read that sensor. WPILib runs XRP programs with its **simulation** tools, the same machinery that can run a robot program with no robot at all, plus an extension that connects it to a real XRP.
 
-1. Press `Ctrl+Shift+P` and type `WPILib: Deploy Robot Code`
+Make sure the XRP is powered on and your laptop is connected to the XRP's Wi-Fi. Then:
+
+1. Press `Ctrl+Shift+P` and type `WPILib: Simulate Robot Code` (or press **F5**)
 2. Press Enter
+3. If VS Code asks which simulation extensions to use, leave **Sim GUI** and **XRP Client** checked, and click **OK**
 
-The terminal will show the build output followed by deployment progress. A successful deployment ends with something like:
+Gradle builds your code, and then the **Simulation GUI** window opens. That window is your program, running. Tilt or turn the XRP: if the gyro and accelerometer values in the window change, your laptop is talking to the robot.
 
-```
-Deploying program to XRP
-SUCCESS
-```
+The Simulation GUI is also how you **enable** the XRP. Its **Robot State** panel has buttons for **Disabled**, **Autonomous**, **Teleoperated**, and **Test**. Click a mode to enable the robot in it, and click **Disabled** to stop it. The robot starts out disabled, so nothing moves until you choose a mode.
 
-The XRP will reboot automatically after deployment. Wait for the status LED to settle (a few seconds) before doing anything else.
-
-> **The XRP reboots on every deploy**
+> **Your laptop is the robot's brain, for now**
 >
-> Every time you deploy new code, the XRP restarts to run the new program. This is normal. Don't power-cycle the XRP manually during a deployment: wait for the reboot to complete on its own.
+> Because the program runs on your laptop, stopping it stops the robot. Close the Simulation GUI window, or click the red **Stop** square in VS Code's debug toolbar. To try new code, stop the program, then run `WPILib: Simulate Robot Code` again. If the robot doesn't respond, check the two links between them: the XRP is on, and your laptop is on the XRP's Wi-Fi (not your school's). If you changed your XRP's IP address, update the `HALSIMXRP_HOST` line in `build.gradle` to match.
+>
+> In Chapter 26 your program moves onto a real robot computer, the roboRIO. That's when you'll **deploy** it for the first time: copy it onto the robot so it runs there.
 
 ---
 
 ## 2.8 Verifying Everything Works
 
-Deploying an empty program isn't very exciting. Let's add one line of code to confirm that the program is actually running and that your laptop can communicate with it.
+Running an empty program isn't very exciting. Let's add one line of code to confirm that the program is actually running and that your laptop can communicate with it.
 
 ### Add a Dashboard Print
 
@@ -397,7 +397,7 @@ You'll also need to add an import at the top of the file (VS Code will often sug
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 ```
 
-Build and deploy again.
+Stop the running program, then build and run it again (`WPILib: Simulate Robot Code`).
 
 ### Open SmartDashboard
 
@@ -418,31 +418,26 @@ If you see that widget, congratulations: your toolchain works end to end. Your l
 
 ### Connect the Xbox Controller
 
-Plug in your Xbox controller (via USB cable or wireless adapter). Open the **Driver Station** tool:
-
-1. Press `Ctrl+Shift+P` and type `WPILib: Start Tool`
-2. Choose `Driver Station`
-
-In the Driver Station, go to the **USB Devices** tab. Your Xbox controller should appear in the device list. If it does, WPILib can read its inputs.
+Plug in your Xbox controller (via USB cable or wireless adapter). With your program running, look in the Simulation GUI for the **System Joysticks** window. Your Xbox controller should appear in that list. If it does, WPILib can see it. Drag it into slot **0** of the **Joysticks** window next to it, and turn on **Map gamepad** in the Joysticks menu so the sticks behave the way they would on a competition robot.
 
 You won't use the controller yet: that's Chapter 8. But confirming it shows up now avoids surprises later.
 
 ---
 
-## 2.9 The Deploy Workflow You'll Use Every Time
+## 2.9 The Workflow You'll Use Every Time
 
 Every chapter from here on follows the same cycle. It's worth understanding it clearly now so it becomes automatic:
 
 1. **Write code** in VS Code
 2. **Build** (`WPILib: Build Robot Code`): catches syntax errors immediately
 3. **Connect** to the XRP's Wi-Fi if you're not already
-4. **Deploy** (`WPILib: Deploy Robot Code`): sends the program to the XRP
-5. **Test**: enable the robot in Driver Station, observe behavior, check SmartDashboard
+4. **Run** (`WPILib: Simulate Robot Code`, or **F5**): starts the program on your laptop, connected to the XRP
+5. **Test**: enable the robot in the Simulation GUI's Robot State panel, observe behavior, check SmartDashboard
 6. **Git commit**: save your progress with a meaningful message
 
-> **Build before you deploy**
+> **Build before you run**
 >
-> Deployment will fail if the build has errors. Some students try to deploy directly and get confused by errors that are actually compiler errors, not network errors. Get in the habit of running "Build" first, confirming `BUILD SUCCESSFUL`, then running "Deploy".
+> A program with build errors won't start. Some students run it directly and get confused by errors that are actually compiler errors, not connection errors. Get in the habit of running "Build" first, confirming `BUILD SUCCESSFUL`, then running "Simulate Robot Code".
 
 The whole cycle takes about 20 to 30 seconds once you're practiced. At competitions, where you might be making quick fixes between matches, that speed matters.
 
@@ -452,16 +447,16 @@ The whole cycle takes about 20 to 30 seconds once you're practiced. At competiti
 
 Let's connect what you just did to Chapter 1's big picture.
 
-When you clicked "Deploy Robot Code", here's what actually happened:
+When you ran "Simulate Robot Code", here's what actually happened:
 
 1. **Gradle compiled** your Java code into a `.jar` file (a packaged Java program)
-2. **WPILib's deployment tool** connected to the XRP over Wi-Fi (using the IP address 192.168.42.1)
-3. The `.jar` file was **transferred to the XRP** and stored in its memory
-4. **The XRP rebooted** and started running your program
+2. **Your laptop started the program**, along with the Simulation GUI and the XRP extension
+3. **The XRP extension connected to the XRP** over Wi-Fi (using the IP address 192.168.42.1)
+4. From then on, your program and the XRP's firmware **trade messages** many times a second: sensor readings come in, motor commands go out
 
-From that point on, every 20 milliseconds, the XRP runs through your robot program exactly once: calling `robotPeriodic()`, reading any inputs, and writing any outputs. The loop from Chapter 1.1 is running right now, even if your program doesn't do anything interesting yet.
+Every 20 milliseconds, your program runs through its loop exactly once: calling `robotPeriodic()`, reading any inputs, and writing any outputs. The loop from Chapter 1.1 is running right now, on your laptop, even if your program doesn't do anything interesting yet.
 
-On a competition robot, the process is almost identical. The `.jar` is deployed to a roboRIO instead of an XRP, the connection goes through the robot radio instead of a direct access point, and the roboRIO runs the same 50 Hz loop. The hardware is different. The toolchain is the same.
+On a competition robot, the code is the same, but it runs in a different place. The `.jar` is **deployed**, copied onto the roboRIO, the computer inside the robot, and runs there; the Driver Station laptop only sends commands to it. The roboRIO runs the same 50 Hz loop. The robot is different. Your code, and the way you write it, are the same. Chapter 26 makes that move.
 
 > **You've already done the hard part**
 >
@@ -475,12 +470,12 @@ On a competition robot, the process is almost identical. The `.jar` is deployed 
 
 > **What you learned in Chapter 2**
 >
-> - The WPILib installer sets up VS Code, the WPILib extension, and a bundled JDK: everything you need to write and deploy robot code
+> - The WPILib installer sets up VS Code, the WPILib extension, and a bundled JDK: everything you need to write and run robot code
 > - XRP firmware is flashed once by entering bootloader mode (hold BOOTSEL, press the reset button) and dragging a `.uf2` file onto the RPI-RP2 drive
 > - The XRP broadcasts its own Wi-Fi network with default SSID `XRP-AAAA-BBBB` and password `xrp-wpilib`; you can customize either from the Web UI at `http://192.168.42.1:5000`
-> - A WPILib project is created from a template (TimedRobot with the XRP option checked) and deployed with `WPILib: Deploy Robot Code`
-> - The deploy workflow (write, build, connect, deploy, test, commit) is the cycle you'll use for every chapter in this book
-> - The XRP's deploy process is nearly identical to a competition roboRIO; the architecture is the same, just smaller
+> - A WPILib project is created from a template (TimedRobot with the XRP option checked) and run with `WPILib: Simulate Robot Code`. XRP programs run on your **laptop** and talk to the XRP over Wi-Fi; nothing is copied onto the robot
+> - The workflow (write, build, connect, run, test, commit) is the cycle you'll use for every chapter in this book, and the Simulation GUI's Robot State panel enables and disables the XRP
+> - A competition robot runs the same code, but it is **deployed** onto the robot's roboRIO and runs there (Chapter 26)
 
 ---
 
@@ -488,9 +483,9 @@ On a competition robot, the process is almost identical. The `.jar` is deployed 
 
 ### Practice
 
-Deploy the empty template to your XRP and confirm the status LED behavior. Then add the `SmartDashboard.putString("Status", "Robot is running!")` line from Section 2.8, rebuild, redeploy, and verify the widget appears in SmartDashboard.
+Run the empty template on your XRP and confirm that the gyro values in the Simulation GUI change when you turn the robot. Then add the `SmartDashboard.putString("Status", "Robot is running!")` line from Section 2.8, stop the program, run it again, and verify the widget appears in SmartDashboard.
 
-Next, try changing the string to something else and redeploying. Observe how long the full write, build, deploy cycle takes. This is your baseline: you'll get faster at it, but it's useful to know the floor.
+Next, try changing the string to something else and running it again. Observe how long the full write, build, run cycle takes. This is your baseline: you'll get faster at it, but it's useful to know the floor.
 
 ### Build (XRP Explorer)
 
@@ -498,15 +493,15 @@ This is the first checkpoint for the running project you'll grow all the way thr
 
 1. Confirm your project is named `XRPExplorer`, created from the **XRP - TimedRobot** template with **Desktop Support** enabled (Section 2.7).
 2. Run `WPILib: Build Robot Code` and confirm `BUILD SUCCESSFUL`.
-3. Run `WPILib: Deploy Robot Code` and confirm the Driver Station shows green for Communications and Robot Code.
+3. Run `WPILib: Simulate Robot Code` with the XRP on. Confirm the Simulation GUI opens, the gyro values follow the robot when you turn it, and the Robot State panel can switch the XRP between **Disabled** and **Teleoperated**.
 
-Leave the project deployed and working. Every chapter from here adds to this same project, so a clean, deployable starting point is worth getting right once.
+Leave the project building and running cleanly. Every chapter from here adds to this same project, so a clean, working starting point is worth getting right once.
 
 ### Reflect
 
 In your own words, explain the difference between:
 
-1. A **build error** and a **deploy error**
+1. A **build error** and a **connection error**
 2. **Firmware** and your **robot program**
 3. The **XRP's Wi-Fi network** and your home or school Wi-Fi
 
@@ -522,7 +517,7 @@ In VS Code's integrated terminal (`` Ctrl+` ``):
 cd path/to/XRPExplorer
 git init
 git add .
-git commit -m "Ch2: project created, firmware flashed, first deploy working"
+git commit -m "Ch2: project created, firmware flashed, first run working"
 ```
 
 You'll learn Git in detail in Chapter 3, including how to push this project to GitHub. For now, you just need to know that this saves a snapshot of your project that you can return to.

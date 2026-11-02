@@ -105,7 +105,7 @@ The XRP is a small educational robot designed by WPI specifically for learning F
 
 Here's why the XRP matters: it uses the same WPILib APIs as a full competition robot. The code you write for the XRP is not "beginner code" that you'll throw away later. It's the same architecture, the same classes, and the same patterns used by championship-winning FRC teams. The only difference is the scale.
 
-In Phase 1 of this book (Chapters 1-25), the XRP is your primary hardware. You can deploy to it from your own laptop, in your own home, without needing access to a shop or a team robot.
+In Phase 1 of this book (Chapters 1-25), the XRP is your primary hardware. You can run code on it from your own laptop, in your own home, without needing access to a shop or a team robot.
 
 > **Draw this from memory**
 > 
@@ -206,7 +206,7 @@ The XRP (Experiential Robotics Platform) was designed by WPI specifically to tea
 | Ultrasonic rangefinder | Measures distance to objects in front of the robot |
 | Reflectance sensor | Detects the difference between light and dark surfaces (line following) |
 | Onboard green LED | Useful for status indication and debugging |
-| Wi-Fi | Connects to your laptop for deployment and Driver Station |
+| Wi-Fi | Connects to your laptop, which runs your program and talks to the XRP |
 
 The XRP runs WPILib's WebSockets-based hardware abstraction layer, which means your Java code looks almost identical to competition robot code. The class names are slightly different (`XRPMotor` instead of `SparkMax`), but the patterns (subsystems, commands, PID controllers, odometry) are exactly the same.
 
@@ -215,7 +215,7 @@ The XRP runs WPILib's WebSockets-based hardware abstraction layer, which means y
 This book follows a deliberate hardware progression:
 
 **Phase 1: XRP (Chapters 1-25)**
-Personal hardware. Deploy from your desk. Crash it without worrying about a $10,000 mechanism. This is where you learn everything: Java, robot structure, sensors, control theory, command-based architecture, simulation, and testing.
+Personal hardware. Run your code from your desk. Crash it without worrying about a $10,000 mechanism. This is where you learn everything: Java, robot structure, sensors, control theory, command-based architecture, simulation, and testing.
 
 **Phase 2: Mini Swerve Bot (Chapters 26-33)**
 A shared team robot with real competition hardware: roboRIO, Kraken X60 motors with Talon FX motor controllers, CANcoder absolute encoders, a Pigeon 2 gyro, and a camera. This is where you graduate to the full FRC hardware stack, learn swerve drive kinematics, and add vision-based pose estimation.
@@ -227,7 +227,7 @@ Your actual competition robot. The skills from Phases 1 and 2 transfer directly.
 > 
 > Some students are surprised to find themselves spending 25 chapters on a small robot, the size of a paperback book. Here's the reasoning: 
 > 
-> The XRP lets you make mistakes cheaply and often. You'll crash it into walls. You'll deploy broken code and watch it spin in circles. You'll tune PID gains until something clicks. All of that learning happens before you're anywhere near a $20,000 competition robot. By the time you get to Phase 2, you'll have real confidence, because you'll have actually debugged real problems.
+> The XRP lets you make mistakes cheaply and often. You'll crash it into walls. You'll run broken code and watch it spin in circles. You'll tune PID gains until something clicks. All of that learning happens before you're anywhere near a $20,000 competition robot. By the time you get to Phase 2, you'll have real confidence, because you'll have actually debugged real problems.
 
 ---
 
@@ -239,7 +239,7 @@ This book is built around **three projects**, and you build them piece by piece 
 
 Two things matter about that structure:
 
-1. **Every exercise is complete on its own.** When you finish a chapter's exercise, the project still compiles, still deploys, and still does something you can see on the robot. You are never left with half-broken code sitting around between chapters.
+1. **Every exercise is complete on its own.** When you finish a chapter's exercise, the project still compiles, still runs, and still does something you can see on the robot. You are never left with half-broken code sitting around between chapters.
 2. **The exercises compound.** Chapter 6's exercise builds on Chapter 5's work. Chapter 7 builds on Chapter 6. By the end of each section, what started as a program that just drives forward and stops has grown into something genuinely impressive, one chapter-sized step at a time.
 
 Think of it as building a house one room at a time, where every room is fully livable before you start on the next one. You always have a working robot. It just does more things each week.
@@ -358,4 +358,4 @@ There are no wrong answers here. You're practicing the skill of looking at a rob
 
 ---
 
-*Next up, Chapter 2: Setting Up Your Environment. You'll install WPILib and VS Code, flash your XRP firmware, and deploy your first (empty) robot program.*
+*Next up, Chapter 2: Setting Up Your Environment. You'll install WPILib and VS Code, flash your XRP firmware, and run your first (empty) robot program on the XRP.*

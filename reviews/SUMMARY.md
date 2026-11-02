@@ -1,0 +1,69 @@
+# Review Summary: Phases A and B
+
+**Status (2026-11-01):** Phase A (`00-book-wide.md`) and the lightweight Phase B (`chNN-sme.md`, run as described in `PHASE-B-LIGHT.md`) are complete for the 28 written chapters. Each Phase B file combines its own new findings with the issues carried over from the build verification, which lives in `robot-programming-book-exercises/chNN-*/VERIFY.md`. Chapters 29 to 39 are stubs and were not reviewed.
+
+**Totals:** 7 blockers, 44 majors and 281 minors. Every chapter with code builds (27 of 27).
+
+## Per chapter
+
+| Ch | Blocker | Major | Minor | Build | Phase C priority |
+|---|---|---|---|---|---|
+| 1 | 0 | 1 | 5 | none | The §1.6 code preview teaches patterns the book later calls bugs |
+| 2 | 2 | 1 | 6 | pass | Both blockers fixed (B3; the Driver Station isn't in Start Tool). M1: the Git exercise runs before Git is installed |
+| 3 | 0 | 5 | 8 | pass | No recovery path for a rejected push (`pull.rebase`); the constructor snippet empties the auto chooser; `git add Robot.java` fails from the project root |
+| 4 | 1 | 2 | 8 | pass | Blocker fixed (B3). M1: "use a variable from anywhere" contradicts scope |
+| 5 | 1 | 2 | 11 | pass | Blocker fixed (B3). M1: "WPILib catches exceptions and stops the motors" is false; "replace its contents" drops the Ch 4 Build |
+| 6 | 2 | 5 | 11 | pass | Both blockers fixed (undefined parts and units; B3). M1: every loop the chapter teaches is the blocking kind it forbids |
+| 7 | 0 | 3 | 6 | pass | **Merge conflict with the new Ch 6 parts** ("XRPMotor 0 already allocated"); no "how to stop the robot" before it first moves; "positive turns right" is wrong |
+| 8 | 0 | 1 | 11 | pass | The deadband "creep" lesson doesn't show, because `arcadeDrive` squares the input and applies its own 0.02 deadband |
+| 9 | 0 | 0 | 8 | pass | Wrong chapter numbers in forward references |
+| 10 | 1 | 1 | 8 | pass | Blocker fixed (the planted bug). Event logging floods when the wall stop chatters |
+| 11 | 0 | 1 | 10 | pass | The pair lab has no solo path, but Ch 12 builds on its result |
+| 12 | 0 | 2 | 6 | pass | Ch 12 and Ch 13 disagree on the XRP's top speed **[needs a measurement on a real XRP]**; table-top testing of bugs that never stop |
+| 13 | 0 | 0 | 8 | pass | A private `speedToPower` is called from `Robot` |
+| 14 | 0 | 0 | 10 | pass | D4a: the map moves to AdvantageScope; a `resetPose` callout for CAN hardware |
+| 15 | 0 | 0 | 13 | pass | `HAND_KI` is undefined; the distance controller's integrator cap protects nothing |
+| 16 | 0 | 0 | 11 | pass | SysId needs room to the side; [verify] the panel labels in SysId 2026.2.1 |
+| 17 | 0 | 1 | 10 | pass | The simulated robot keeps driving after Disable (one-line fix) |
+| 18 | 0 | 2 | 11 | pass | The motivating bug doesn't happen with the printed code; wait and print commands survive a disable |
+| 19 | 0 | 0 | 14 | pass | Length and load (M4); bench commands have no timeout |
+| 20 | 0 | 1 | 11 | pass | Practice 3 and 5 crash at startup with an NPE (the constructor order) |
+| 21 | 0 | 1 | 13 | pass | Practice 5's setups don't produce the cases it asks about |
+| 22 | 0 | 2 | 11 | pass | The course test can't tell whether leg 3 ran; the "shorten the line" red test stays green |
+| 23 | 0 | 2 | 10 | pass | The D4/D4a rewrite (a one-pass list is in `ch23-sme.md`); the null-check failure text is wrong |
+| 24 | 0 | 0 | 14 | pass | Timeline timing claims; a `ROBOT_MODE` guard test |
+| 25 | 0 | 3 | 16 | pass | The leg 4 "safety distance" can't protect the robot (0.60 m limit vs 0.30 m gap); "two meetings" has no slack; the blind spot from Ch 22 |
+| 26 | 0 | 3 | 11 | pass | The safety rules lack glasses, hands-off-while-disabled and battery shorts; `main` and `String[] args` are unexplained |
+| 27 | 0 | 1 | 10 | pass | `applyConfig` never retries (AdvantageKit's template uses `tryUntilOk`) |
+| 28 | 0 | 4 | 10 | pass | Onboard Talon FX loops promised to no chapter; no map to `TunerConstants`; `fromRotations(3.25).getDegrees()` is 1170 |
+
+## Blockers: all fixed (uncommitted, awaiting Devang's review)
+
+The 7 blockers were counted against the committed text. All are fixed in the working copy:
+- **B3 in Ch 2, 4, 5 and 6:** "deploy" is now Simulate Robot Code, plus the Simulation GUI and the terminal. The same pass also cleaned up Ch 1, 3, 7, 8, 10 and 22.
+- **Ch 2:** the Driver Station is no longer opened through Start Tool.
+- **Ch 6:** the parts are declared, the meters are fixed, and current controller APIs are used.
+- **Ch 10:** a planted bug that shows on the XRP, with Ch 11 updated to match.
+
+## Phase C order (majors)
+
+1. **Cross-chapter, do first:**
+   - **Ch 7:** remove the Ch 6 parts when building `Drivetrain`. This is now required.
+   - **M2 / D4 / D4a:** the Elastic and AdvantageScope rewrite across Ch 2 to 25, using the Phase A change table plus `ch23-sme.md`.
+   - **M4:** checkpoints and meeting splits.
+2. **Safety:** Ch 7 (how to stop before it moves), Ch 12 (floor only, hand on Disable), Ch 26 (the complete safety rules), and Ch 25 (a real safety stop).
+3. **Exercises that can't work as written:** Ch 18 (the motivating bug), Ch 20 (Practice 3 and 5), Ch 21 (Practice 5), Ch 22 and 25 (the course test blind spot), and Ch 11 (a solo path).
+4. **Wrong claims:** Ch 5 (exceptions), Ch 4 (scope), Ch 8 (deadband and squaring), Ch 18 (disable semantics), Ch 28 (`getDegrees`).
+5. **Best practice:** Ch 27 (config retry) and Ch 28 (onboard loops, `TunerConstants` map), plus Ch 1, Ch 3 and Ch 6's loop lesson.
+6. **Needs hardware before fixing:** the Ch 12 and 13 top speed.
+
+## For Devang (by hand, outside Phase C)
+
+Update CLAUDE.md:
+- the stale "Current status" line;
+- the Ch 17 "latest URL" note, which should be v26.0.2;
+- the Ch 23 quotes: "2026.2.2 Javadoc", and the null-check failure text;
+- the Ch 21 "enum classes" error wording, which should be "enum types";
+- the Ch 25 "over 100 ms" claim;
+- the Ch 26 "SparkMAX" mention;
+- the Ch 12 "timed segment" note.

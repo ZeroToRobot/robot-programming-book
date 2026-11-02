@@ -24,7 +24,7 @@ What went wrong is not that someone made a mistake. People always make mistakes.
 
 ### Testing by hand is real, and slow
 
-You have been testing by hand since Chapter 2, and it has served you well. Build, deploy, drive, watch, decide. Chapter 21's Section 21.9 was a long, careful hand test: nine numbered checks, a sharp corner, a sheet of white paper. That kind of testing is never going away, because some things can only be checked on a real floor.
+You have been testing by hand since Chapter 2, and it has served you well. Build, run, drive, watch, decide. Chapter 21's Section 21.9 was a long, careful hand test: nine numbered checks, a sharp corner, a sheet of white paper. That kind of testing is never going away, because some things can only be checked on a real floor.
 
 But count what a hand test costs:
 

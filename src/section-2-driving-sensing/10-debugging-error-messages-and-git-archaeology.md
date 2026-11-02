@@ -80,7 +80,7 @@ Every bug you will ever meet falls into one of three families. Knowing which fam
 | **Runtime error** | While the program runs | The program crashes and prints a stack trace | Calling a method on an object that was never created |
 | **Logic error** | While the program runs | Nothing crashes; the robot just does the wrong thing | Integer division making `METERS_PER_COUNT` come out as `0` |
 
-Chapter 2 already introduced the first split: a build error is a problem with your Java, a deploy or connection error is a problem with getting the program to the robot. This table splits "problems with your Java" into three.
+Chapter 2 already introduced the first split: a build error is a problem with your Java, a connection error is a problem with getting the program to talk to the robot. This table splits "problems with your Java" into three.
 
 Notice the pattern as you go down the table. Compile errors are loud and early: the compiler refuses to continue and points at the exact line. Runtime errors are loud but late: the program starts, then crashes, and leaves you a clue. Logic errors are silent. Nothing tells you anything is wrong. The robot just quietly drives 0 meters, or turns left when it should turn right.
 
@@ -230,7 +230,7 @@ That is the whole skill. Type of problem, plain-English message, the first line 
 
 ### Where does the output appear?
 
-In Chapter 4 you met RioLog, the VS Code window that shows what a robot program prints. RioLog connects to a **roboRIO**, the computer on a full FRC robot. Your XRP program works differently. As the Chapter 2 "Why firmware?" callout described, your Java code actually runs on your **laptop** and talks to the XRP over Wi-Fi. So when you run the Explorer, its prints, warnings, and stack traces appear in the **terminal panel** at the bottom of VS Code, the same place the build output appears.
+In Chapter 4 you saw your prints in VS Code's terminal, and heard about RioLog, the window that shows what a robot program prints on a full FRC robot. RioLog connects to a **roboRIO**, the computer on that robot. Your XRP program works differently. As the Chapter 2 "Why firmware?" callout described, your Java code actually runs on your **laptop** and talks to the XRP over Wi-Fi. So when you run the Explorer, its prints, warnings, and stack traces appear in the **terminal panel** at the bottom of VS Code, the same place the build output appears.
 
 When you move to the Mini Swerve in Chapter 26, the program will run on a real roboRIO, and the same text will show up in RioLog and in the Driver Station's console. The format of the errors is identical everywhere, so the reading skills you learn here carry straight over.
 
@@ -811,7 +811,7 @@ Git picks the middle commit and checks it out:
 
 ```
 Bisecting: 3 revisions left to test after this (roughly 2 steps)
-[12b9007...] Swap encoder channel order for consistency
+[12b9007...] Flip left distance sign for consistency
 ```
 
 Now **test it**. Build, run, press Y, push the robot forward 10 cm, and look at the distance widgets. Then tell Git what you saw, with exactly one of these:
@@ -829,7 +829,7 @@ commit 12b9007...
 Author: Sam Student <sam@example.com>
 Date:   ...
 
-    Swap encoder channel order for consistency
+    Flip left distance sign for consistency
 ```
 
 That is the exact commit where the bug was born. Before you do anything else, end the session:
@@ -916,7 +916,7 @@ Give the Explorer a flight recorder, then use Git to hunt down a planted bug.
 |---|---|---|
 | 1 | Add a comment above the constants in `Drivetrain.java` explaining where 585 comes from | `Explain counts per wheel rev` |
 | 2 | Change the `Mode` string in `teleopInit()` from `"Teleop"` to `"Teleoperated"` | `Use full mode name on dashboard` |
-| 3 | In `Drivetrain.java`, change `new Encoder(4, 5)` to `new Encoder(5, 4)` | `Tidy up encoder setup` |
+| 3 | In `Drivetrain.java`, change `getLeftDistanceMeters()` to `return -leftEncoder.getDistance();` (add a minus sign) | `Tidy up encoder setup` |
 | 4 | Add the comment `// Gyro: counterclockwise is positive` above the gyro getters in `Drivetrain.java` | `Comment gyro section` |
 | 5 | Change `SLOW_MODE_SCALE` from `0.5` to `0.4` | `Make slow mode a bit slower` |
 | 6 | Add `DataLogManager.log("Autonomous done")` when the auto timer passes 1 second | `Log end of auto` |
@@ -927,7 +927,7 @@ Give the Explorer a flight recorder, then use Git to hunt down a planted bug.
 4. Find the hash of your Part A commit with `git log --oneline`. That is your known-good commit.
 5. Run `git bisect start`, `git bisect bad`, and `git bisect good <your Part A hash>`. At each step, build, run, do your exact test, and answer `good` or `bad`.
 6. When Git names the first bad commit, write down its hash and message, then run `git bisect reset`.
-7. Run `git show` on the bad commit. Explain in one sentence why swapping the channel order breaks the left distance. (Hint: what did the Chapter 9 Build exercise say about encoders that count backward?)
+7. Run `git show` on the bad commit. Explain in one sentence why one minus sign makes `Avg Distance (m)` stay near zero. (Hint: what do you get when you average 0.10 and -0.10? And what did the Chapter 9 Build exercise say about encoders that count backward?)
 8. Fix it with `git revert --no-edit <hash>`, run your test again to confirm, and look at the new commit in `git log --oneline`.
 9. Go back to `main` with `git checkout main`. This branch was practice, so do not merge it. Delete it with `git branch -D bug-hunt` (a capital `D`, because Git warns you before deleting a branch that was never merged).
 
@@ -937,7 +937,7 @@ When you can find the bad commit in three tests and explain why it was bad, you 
 
 Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 
-1. The planted bug's commit message was `Tidy up encoder setup`. What would have made that message more helpful to the person hunting the bug? Rewrite it. Then explain why a message that honestly described the change ("Swap left encoder channels to 5, 4") might have led to the bug being caught in review.
+1. The planted bug's commit message was `Tidy up encoder setup`. What would have made that message more helpful to the person hunting the bug? Rewrite it. Then explain why a message that honestly described the change ("Negate the left distance") might have led to the bug being caught in review.
 2. Your teammate deleted `final` to make a compile error go away, and the program started crashing instead. Explain why a compile error is better than a runtime crash, and why a runtime crash is better than a silent logic error.
 3. When the robot misbehaves, why should you gather evidence (with probes, logs, or a smoke test) before changing any code? Describe what can go wrong if you change code based on a guess.
 

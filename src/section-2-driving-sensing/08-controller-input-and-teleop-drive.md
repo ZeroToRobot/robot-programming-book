@@ -74,7 +74,7 @@ Either way, the rule is the same: the number in `new XboxController(0)` must mat
 
 > **A common beginner mistake**
 >
-> The code builds, deploys, and enables, but the robot ignores the sticks completely. Nine times out of ten, the controller is in the wrong slot, or not in any slot at all. Before you debug your code, check the slot. It is a ten-second check that saves an hour.
+> The code builds, runs, and enables, but the robot ignores the sticks completely. Nine times out of ten, the controller is in the wrong slot, or not in any slot at all. Before you debug your code, check the slot. It is a ten-second check that saves an hour.
 
 ---
 
@@ -103,7 +103,7 @@ public void robotPeriodic() {
 
 Why `robotPeriodic()` and not `teleopPeriodic()`? Because `robotPeriodic()` runs in every mode, including Disabled. You can watch the numbers while the robot is safely disabled, with no motors involved. Reading inputs while disabled is a good habit any time you are about to wire a new input to something that moves.
 
-Build, deploy, and open SmartDashboard. Leave the robot **disabled**. Now play with the sticks and watch the two widgets.
+Build, run, and open SmartDashboard. Leave the robot **disabled**. Now play with the sticks and watch the two widgets.
 
 Here is what you should see:
 
@@ -330,7 +330,7 @@ Walk through what changed since Chapter 7:
 
 `Drivetrain.java` does not change at all. That is encapsulation paying off: the drivetrain already knew how to `arcadeDrive`, and it does not care whether the numbers come from a timer, a controller, or (in Chapter 12) an autonomous routine.
 
-Build, deploy, put the XRP on the floor with some room around it, select **Teleoperated**, and **Enable**. Push the left stick forward gently. You are driving.
+Build and run it, put the XRP on the floor with some room around it, and click **Teleoperated** in the Simulation GUI. Push the left stick forward gently. You are driving.
 
 > **What `arcadeDrive` does with your two numbers**
 >
@@ -381,7 +381,7 @@ if (controller.getAButtonPressed()) {
 }
 ```
 
-`getAButtonPressed()` answers a different question: "did A **go from up to down** since the last time I asked?" It is `true` for exactly one loop per press, no matter how long you hold the button. Swap it in, redeploy, and every tap now counts as one.
+`getAButtonPressed()` answers a different question: "did A **go from up to down** since the last time I asked?" It is `true` for exactly one loop per press, no matter how long you hold the button. Swap it in, run it again, and every tap now counts as one.
 
 | Method | Question it answers | `true` for |
 |---|---|---|
@@ -509,7 +509,7 @@ SmartDashboard.putNumber("Left Y Filtered",
 
 With the robot disabled, let go of the stick ten times and write down the largest resting value of `Left Y`. Then push the stick very slowly forward and note the raw value where `Left Y Filtered` first leaves zero. Does it match your deadband?
 
-Next, set `STICK_DEADBAND` to `0.0`, deploy, enable Teleop, and let go of the controller. Watch and listen. Try it on a hard floor, then on carpet. On which surface does the XRP creep? On which does it only hum? Write two sentences explaining the difference, then put the deadband back.
+Next, set `STICK_DEADBAND` to `0.0`, run it, enable Teleop, and let go of the controller. Watch and listen. Try it on a hard floor, then on carpet. On which surface does the XRP creep? On which does it only hum? Write two sentences explaining the difference, then put the deadband back.
 
 **2. Write the smooth deadband yourself.** Without looking at WPILib's source, write a method `smoothDeadband(double value, double deadband)` that returns `0.0` inside the deadband and rescales the rest so that the output is `0.0` at the edge of the deadband and `1.0` at a full stick of `1.0`. Remember negative values. Check your method against the table in Section 8.4, then compare your code with WPILib's `MathUtil` source (linked in Additional Resources).
 
@@ -531,7 +531,7 @@ Give the Explorer full driver control and drive it around a course.
 1. Update `Robot.java` to the full listing in Section 8.6. Build and confirm `BUILD SUCCESSFUL`.
 2. Add slow mode from Section 8.8: the two scale constants, the ternary in `teleopPeriodic()`, and the `Slow Mode` dashboard widget.
 3. With painter's tape, lay out a simple course on the floor: a straight lane about one meter long, a 90 degree turn, and a "garage" box at the end just a little bigger than the XRP.
-4. Deploy, select **Teleoperated**, **Enable**, and drive the course. Use slow mode to park in the garage without touching the tape.
+4. Run it, click **Teleoperated**, and drive the course. Use slow mode to park in the garage without touching the tape.
 
 Diagnose anything strange:
 

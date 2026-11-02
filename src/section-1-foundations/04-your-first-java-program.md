@@ -233,7 +233,7 @@ When `+` is used between a string and a number, Java automatically converts the 
 
 When you run code on your laptop (in a normal Java program), `System.out.println` prints to your terminal or VS Code's output panel.
 
-When you run code on the XRP, it prints to the **RioLog** (a window inside VS Code that shows messages from the robot). You can open RioLog with `Ctrl+Shift+P` → `WPILib: Start RioLog`. We'll look at it in action shortly.
+When you run code on the XRP, prints appear in VS Code's **terminal** panel, because the program runs on your laptop (Chapter 2). On a competition robot they go to a window called **RioLog** instead. We'll look at the output in action shortly.
 
 `System.out.println` is fine for occasional messages, but for live values you want to watch change over time, there's a better tool: SmartDashboard. We'll use that later in this chapter.
 
@@ -241,7 +241,7 @@ When you run code on the XRP, it prints to the **RioLog** (a window inside VS Co
 
 ## 4.5 Writing and Running Code on Your Laptop First
 
-Before we touch the XRP, let's write some Java that runs on your laptop. This is the fastest way to see how variables and printing work without the overhead of a deploy cycle.
+Before we touch the XRP, let's write some Java that runs on your laptop. This is the fastest way to see how variables and printing work without starting the whole robot program.
 
 We'll do this inside your XRP Explorer project, but in a way that runs on your laptop, not on the robot. The Desktop Support checkbox you ticked when creating the project in Chapter 2 is what makes this possible.
 
@@ -284,15 +284,15 @@ If you see a red error message instead, read it carefully. The most common error
 
 Fix any errors and build again until you get a clean build.
 
-### Step 4: Deploy to the XRP
+### Step 4: Run It on the XRP
 
-Connect to the XRP's Wi-Fi (you remember the drill from Chapter 2). Then `WPILib: Deploy Robot Code`. Wait for `SUCCESS`.
+Connect to the XRP's Wi-Fi (you remember the drill from Chapter 2). Then `WPILib: Simulate Robot Code` (or **F5**). Wait for the Simulation GUI window to open.
 
-### Step 5: Open RioLog and See the Output
+### Step 5: Find the Output
 
-`Ctrl+Shift+P` → `WPILib: Start RioLog`. A window opens at the bottom of VS Code.
+Your program runs on your laptop (Chapter 2), so its prints appear right in VS Code, in the **terminal** panel at the bottom of the window (open it with `` Ctrl+` `` if it's hidden). On a real roboRIO you'd use a tool called **RioLog** instead; you'll meet it in Chapter 26.
 
-The XRP just rebooted with your new code, and the `Robot()` constructor ran exactly once at startup. You should see your print messages in RioLog:
+The program just started with your new code, and the `Robot()` constructor ran exactly once at startup. You should see your print messages in the terminal, mixed in with some WPILib startup lines:
 
 ```
 ---- Robot starting up ----
@@ -302,11 +302,11 @@ Battery: 12.3V
 Ready? true
 ```
 
-If you see this, your code ran on the robot. The variables you declared in Java actually existed in the XRP's memory long enough to be printed.
+If you see this, your robot program ran. The variables you declared in Java actually existed in memory long enough to be printed.
 
 > **Why these messages only show up once**
 >
-> The `Robot()` constructor runs exactly once when the program starts. The XRP rebooted on deploy, so the program just started, so the constructor just ran. If you want to see something print repeatedly, you'd put it in `robotPeriodic()`, which runs every 20 ms. Don't do that with print statements: you'd get 50 messages per second and saturate the log. We'll get to a much better approach in Section 4.7.
+> The `Robot()` constructor runs exactly once when the program starts. You just started the program, so the constructor just ran. If you want to see something print repeatedly, you'd put it in `robotPeriodic()`, which runs every 20 ms. Don't do that with print statements: you'd get 50 messages per second and saturate the log. We'll get to a much better approach in Section 4.7.
 
 ---
 
@@ -355,7 +355,7 @@ onBoardIO.setLed(true);
 
 `setLed` is a method on the `onBoardIO` object. You're passing it a boolean: `true` means on, `false` means off.
 
-Build and deploy. Watch the XRP. The LED should turn on and stay on.
+Build and run it (`WPILib: Simulate Robot Code`). Watch the XRP. The LED should turn on and stay on.
 
 You just controlled physical hardware from a Java program. That's the loop from Chapter 1, even if a very small version of it.
 
@@ -372,19 +372,19 @@ public Robot() {
 }
 ```
 
-Now the LED state is held in a variable. Deploy and watch. The LED should still be on, but now its state is determined by `ledShouldBeOn`.
+Now the LED state is held in a variable. Stop the program, run it again, and watch. The LED should still be on, but now its state is determined by `ledShouldBeOn`.
 
-Change the variable to `false`, redeploy, and watch the LED stay off. This is a tiny example, but it captures the whole idea: your code reads or computes a value, stores it in a variable, and the variable drives behavior in the world.
+Change the variable to `false`, run it again, and watch the LED stay off. This is a tiny example, but it captures the whole idea: your code reads or computes a value, stores it in a variable, and the variable drives behavior in the world.
 
 > **One step closer to a real program**
 >
-> Right now, the LED state is hardcoded. You change it by editing your code and redeploying. In Chapter 6 you'll learn how to compute the value at runtime: turn the LED on if a button is pressed, or if a sensor sees something, or if the robot is in autonomous mode. The variable stays the same. What changes is where its value comes from.
+> Right now, the LED state is hardcoded. You change it by editing your code and running it again. In Chapter 6 you'll learn how to compute the value at runtime: turn the LED on if a button is pressed, or if a sensor sees something, or if the robot is in autonomous mode. The variable stays the same. What changes is where its value comes from.
 
 ---
 
 ## 4.7 SmartDashboard: Watching Variables Live
 
-Here's a problem with print statements: every time you want to know what a variable is doing right now, you have to print it, redeploy, run the robot, and read the log. That's slow, and the log fills up fast if you print every loop.
+Here's a problem with print statements: every time you want to know what a variable is doing right now, you have to print it, restart the program, run the robot, and read the log. That's slow, and the log fills up fast if you print every loop.
 
 SmartDashboard solves this. You send a value from your robot code, and SmartDashboard displays it as a live widget on your laptop screen. The value updates every time you send it, with no log spam.
 
@@ -437,7 +437,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 Don't worry about the `?` on the `mode` line: it's a shorthand for an if/else called the ternary operator, which we'll cover in Chapter 8. For now, just know it sets `mode` to `"Enabled"` if the robot is enabled, `"Disabled"` otherwise.
 
-Build, deploy, and open SmartDashboard (`WPILib: Start Tool` → `SmartDashboard`). You should see three widgets: `Match Time` ticking up, `LED On` showing the current LED state, and `Mode` changing whenever you enable or disable the robot in the Driver Station.
+Build, run, and open SmartDashboard (`WPILib: Start Tool` → `SmartDashboard`). You should see three widgets: `Match Time` ticking up, `LED On` showing the current LED state, and `Mode` changing whenever you enable or disable the robot in the Driver Station.
 
 That's a live view of what's happening on your robot, updating 50 times per second, with no print spam.
 
@@ -495,7 +495,7 @@ Every chapter from here on builds on this. Joystick values come in as doubles. E
 >
 > - A **variable** is a named container that holds a value; you declare its type, give it a name, and assign a value with `=`
 > - The four main data types are **`int`** (whole numbers), **`double`** (decimal numbers), **`boolean`** (true/false), and **`String`** (text)
-> - **`System.out.println`** prints values once to RioLog; great for startup messages and errors
+> - **`System.out.println`** prints values once to the terminal (RioLog on a roboRIO); great for startup messages and errors
 > - **`SmartDashboard.putNumber`/`putBoolean`/`putString`** stream live values to your laptop dashboard; great for watching values change in real time
 > - The XRP's onboard LED can be controlled with `onBoardIO.setLed(boolean)`; this is your first real input-to-output loop
 > - Java's **type system** catches an entire class of bugs at build time instead of letting them blow up during a match
@@ -555,7 +555,7 @@ git push
 > - **Java naming conventions**: [google.github.io/styleguide/javaguide.html#s5-naming](https://google.github.io/styleguide/javaguide.html#s5-naming) Google's Java style guide; the conventions used by most professional Java codebases
 > - **WPILib SmartDashboard guide**: [docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/index.html) every widget type and how to use it
 > - **WPILib XRP API reference**: [github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/xrp/package-summary.html](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/xrp/package-summary.html) Javadoc for `XRPOnBoardIO`, `XRPMotor`, and the rest of the XRP-specific classes
-> - **WPILib RioLog documentation**: [docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html) how to view, filter, and save robot console output
+> - **WPILib console output documentation** (RioLog and the terminal): [docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html) how to view, filter, and save robot console output
 
 ---
 

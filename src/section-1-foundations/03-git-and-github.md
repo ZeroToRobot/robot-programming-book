@@ -466,8 +466,8 @@ Putting Chapters 2 and 3 together, here's the cycle you'll repeat for the rest o
 1. **Edit** code in VS Code
 2. **Build** (`WPILib: Build Robot Code`)
 3. **Connect** to the XRP's Wi-Fi
-4. **Deploy** (`WPILib: Deploy Robot Code`)
-5. **Test** the robot, watch SmartDashboard
+4. **Run** (`WPILib: Simulate Robot Code`, or **F5**)
+5. **Test** the robot (enable it in the Simulation GUI), watch SmartDashboard
 6. **Stage and commit**: `git add .` then `git commit -m "Ch_: <change>"`
 7. **Push**: `git push`
 
@@ -536,7 +536,7 @@ The XRP Explorer project for Devang Doshi's *Robot Programming Book*.
 
 1. Connect to the XRP Wi-Fi network
 2. Open this folder in WPILib VS Code
-3. Run `WPILib: Deploy Robot Code`
+3. Run `WPILib: Simulate Robot Code`, then enable the robot in the Simulation GUI
 
 See [robotprogrammingbook.com](https://robotprogrammingbook.com) for the full book.
 ```
