@@ -72,16 +72,8 @@ Done and committed, in this order:
 Still open:
 
 - **Needs hardware:** the Ch 12 and 13 XRP top speed (Ch 12 VERIFY 1). Measure one real XRP at full power, then make Ch 12's sample log and 3.0 s `STEP_TIMEOUT_SECONDS` agree with Ch 13's `MAX_WHEEL_SPEED_METERS_PER_SECOND`, and add a Diagnose line for leg 1 timing out.
-- **Not started:** the MINOR findings in each `chNN-sme.md`, and items marked [verify] or [verify on hardware].
-- **CLAUDE.md:** Ch 33's plan should say it moves steering (`PositionVoltage`, `RemoteCANcoder`) and driving (`VelocityVoltage`) onto the Talon FX.
+- **MINOR findings:** triaged in `MINOR-triage.md` (2026-11-02: 246 to fix, 27 already done, 8 to check online, 5 need hardware, 3 skipped), plus two MAJORs Phase C missed (Ch 2 Git exercise, Ch 24 failure text). Fixes not started.
 
-## For Devang (by hand, outside Phase C)
+## CLAUDE.md
 
-Update CLAUDE.md:
-- the stale "Current status" line;
-- the Ch 17 "latest URL" note, which should be v26.0.2;
-- the Ch 23 quotes: "2026.2.2 Javadoc", and the null-check failure text;
-- the Ch 21 "enum classes" error wording, which should be "enum types";
-- the Ch 25 "over 100 ms" claim;
-- the Ch 26 "SparkMAX" mention;
-- the Ch 12 "timed segment" note.
+Updated 2026-11-02 (local only, the file is gitignored): the "Current status" line; Ch 12 (built twice, clock then sensors); Ch 22 "enum types may not be instantiated"; Ch 24 "2026 Javadoc" and the real null-check failure text; Ch 26 record-logging cost; Ch 27 "No CAN/Talon FX"; Ch 28 and 29 configuration retries and `applyWithRetries`; Ch 33 moves steering (`PositionVoltage`, `RemoteCANcoder`) and driving (`VelocityVoltage`) onto the Talon FX. The Ch 17 "latest URL" note was already gone.
