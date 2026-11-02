@@ -47,17 +47,17 @@ Before you can program a robot, you need to know what you're programming. Here's
 
 ### The roboRIO
 
-The roboRIO is the robot's brain. It's a small computer made by National Instruments that runs your Java program. It has USB ports, Ethernet, and a CAN interface, and it connects to almost everything else on the robot. Every FRC robot is required to use one.
+The roboRIO is the robot's brain. It's a small computer made by National Instruments that runs your Java program. It has USB ports, Ethernet, and a CAN interface, and it connects to almost everything else on the robot. Every FRC robot in the 2026 season uses one, and so does every robot in this book.
 
 When you hear "deploy your code," it means you're copying your compiled Java program from your laptop to the roboRIO over Wi-Fi.
 
 ### The SystemCore
 
-Starting in the 2026-27 season, FRC is rolling out a new robot controller called the **SystemCore**, manufactured by Limelight Vision. It is the official successor to the roboRIO. The hardware is more capable: a Raspberry Pi Compute Module 5 brain, an onboard IMU and display, and more reconfigurable I/O than the roboRIO. From your program's perspective, though, the WPILib APIs are largely the same. Subsystems, commands, the 50 Hz loop, and everything else you learn in this book carry over.
+FIRST has announced a new robot controller called the **SystemCore**, manufactured by Limelight Vision, as the official successor to the roboRIO. The hardware is more capable: a Raspberry Pi Compute Module 5 brain, an onboard IMU and display, and more reconfigurable I/O than the roboRIO. From your program's perspective, though, the WPILib APIs are largely the same. Subsystems, commands, the 50 Hz loop, and everything else you learn in this book carry over.
 
-> **A note on SystemCore**
+> **Which season this book is written for**
 >
-> SystemCore is brand new at the time of writing. We will revise the relevant chapters in 2027 once teams (and this book's author) have a full season of real experience with it. For now, the book is written against the roboRIO, and most of what you learn transfers directly to SystemCore.
+> This book is written for the **2026 season**: **WPILib 2026.2.1** and the **roboRIO**, for the XRP and the Mini Swerve alike. Chapter 2 lists the exact versions of every tool and library the book uses. If an installer or a tool offers you a newer year, say no: the code in this book is written for 2026. Most of what you learn will carry over to SystemCore when your team gets there.
 
 ### The Robot Radio
 
@@ -73,7 +73,7 @@ You'll interact with the Driver Station constantly during testing. Learning to r
 
 Motors need a lot of electrical current, more than a microcontroller can provide directly. Motor controllers sit between the battery and the motors. They receive a command from your program (a number, typically -1 to 1) and translate it into the right amount of power.
 
-The most common motor controllers in FRC are the **REV Spark MAX** (used with NEO motors), the **CTR Electronics Talon FX** (used with Falcon motors), and older devices like the Victor SP. Each has its own Java class in WPILib, but they all work the same way from your program's perspective.
+The most common motor controllers in FRC are the **REV Spark MAX** (used with NEO motors), the **CTR Electronics Talon FX** (built into Kraken and Falcon motors), and older devices like the Victor SP. Each has its own Java class in WPILib, but they all work the same way from your program's perspective.
 
 ### Actuators
 
@@ -218,7 +218,7 @@ This book follows a deliberate hardware progression:
 Personal hardware. Deploy from your desk. Crash it without worrying about a $10,000 mechanism. This is where you learn everything: Java, robot structure, sensors, control theory, command-based architecture, simulation, and testing.
 
 **Phase 2: Mini Swerve Bot (Chapters 26-33)**
-A shared team robot with real competition hardware: roboRIO, Spark MAX motor controllers, navX gyro, and a camera. This is where you graduate to the full FRC hardware stack, learn swerve drive kinematics, and add vision-based pose estimation.
+A shared team robot with real competition hardware: roboRIO, Kraken X60 motors with Talon FX motor controllers, CANcoder absolute encoders, a Pigeon 2 gyro, and a camera. This is where you graduate to the full FRC hardware stack, learn swerve drive kinematics, and add vision-based pose estimation.
 
 **Phase 3: Competition Robot (Chapters 34-39)**
 Your actual competition robot. The skills from Phases 1 and 2 transfer directly. Phase 3 adds mechanisms, full autonomous routines, pneumatics, and competition-day process.

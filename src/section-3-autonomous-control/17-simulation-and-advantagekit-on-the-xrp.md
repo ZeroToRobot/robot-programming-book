@@ -277,8 +277,10 @@ AdvantageKit is a **vendor library** (a vendordep): code from outside WPILib tha
 3. Paste this URL and press Enter:
 
 ```
-https://github.com/Mechanical-Advantage/AdvantageKit/releases/latest/download/AdvantageKit.json
+https://github.com/Mechanical-Advantage/AdvantageKit/releases/download/v26.0.2/AdvantageKit.json
 ```
+
+That link names a version on purpose. **AdvantageKit 26.0.2** is the newest version that runs on WPILib 2026 and the roboRIO, the versions this whole book uses (Chapter 2). A "latest" link would one day hand you a version built for a different robot controller, and your project would stop building.
 
 A new file appears in your project: `vendordeps/AdvantageKit.json`. It tells Gradle which version of AdvantageKit to download. The next build needs an internet connection, once, to download it.
 
@@ -1313,7 +1315,7 @@ You will meet this chapter's two ideas, simulation and the IO layer, on every ro
 - **Chapter 19, subsystems.** `Drivetrain` becomes a WPILib `SubsystemBase`, and WPILib calls its `periodic()` method for you every loop. You already named it.
 - **Chapter 22, unit tests.** Automated tests need a robot that does exactly the same thing every time. You just built one. A test can create `new Drivetrain(new DrivetrainIOSim())`, drive it, and check where it ended up, on every push to GitHub, with no robot anywhere.
 - **Chapter 24, AdvantageScope and replay.** The inputs AdvantageKit is recording right now are what make replay possible. You will play a real run back through your code and watch it make the same decisions.
-- **Chapter 26, the roboRIO.** The Mini Swerve has completely different hardware: brushless motors on CAN, a navX gyro, real battery volts. Its drivetrain gets new IO classes for the new hardware. The logic above the seam (kinematics, feedforward, odometry, PID) is the part you carry over, and the part you already know works, because you tested it in simulation.
+- **Chapter 26, the roboRIO.** The Mini Swerve has completely different hardware: Kraken brushless motors on CAN, a Pigeon 2 gyro, real battery volts. Its drivetrain gets new IO classes for the new hardware. The logic above the seam (kinematics, feedforward, odometry, PID) is the part you carry over, and the part you already know works, because you tested it in simulation.
 - **Chapter 32, SysId on the Mini Swerve.** A swerve module's motors get the same treatment: measure the model, then simulate it.
 - **Chapter 34, mechanisms.** WPILib has simulation classes for most FRC mechanisms, built the same way as `DifferentialDrivetrainSim`: `FlywheelSim` for shooter wheels, `ElevatorSim`, `SingleJointedArmSim`, and more. Each mechanism gets an IO interface, a real IO class, and a sim IO class.
 - **Chapter 37, AdvantageKit on the competition robot.** Every subsystem gets an IO layer, and every match is logged for replay.

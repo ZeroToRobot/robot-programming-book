@@ -1310,7 +1310,7 @@ Your Explorer is about to be `1.0.0`: the first version you are willing to stand
 
 > **You have been reading version numbers all along**
 >
-> WPILib `2026.2.2` is year 2026, release 2, patch 2. AdvantageKit `v26.0.2` is a 2026 release, with two patches. When a vendor library's MINOR number goes up, you expect new features; when its MAJOR number goes up, you read the release notes before you update, because something will break. Now you know why the numbers have three parts.
+> WPILib `2026.2.1` is year 2026, release 2, patch 1. AdvantageKit `v26.0.2` is a 2026 release, with two patches. When a vendor library's MINOR number goes up, you expect new features; when its MAJOR number goes up, you read the release notes before you update, because something will break. Now you know why the numbers have three parts.
 
 ### Step 4: Tag it
 
@@ -1429,7 +1429,7 @@ Every one of those carries forward. That is the point of learning them on a robo
 
 ### From the Explorer to the Mini Swerve
 
-Chapter 26 starts Section VI and a new robot: the **Mini Swerve**, a team robot with a real roboRIO, SPARK MAX motor controllers on a CAN bus, a navX gyro, and a camera. It is shared, so you will work on it in a small team, with the habits from this chapter: design docs, reviews, and releases.
+Chapter 26 starts Section VI and a new robot: the **Mini Swerve**, a team robot with a real roboRIO, Kraken X60 motors with Talon FX motor controllers on a CAN bus, CANcoder absolute encoders, a Pigeon 2 gyro, and a camera. It is shared, so you will work on it in a small team, with the habits from this chapter: design docs, reviews, and releases.
 
 Here is how your Explorer maps onto it. Read the right column as a preview, not a promise of exact names:
 
@@ -1439,7 +1439,7 @@ Here is how your Explorer maps onto it. Read the right column as a preview, not 
 | `XRPMotor` and "pretend volts" (Chapter 16) | Motor controllers on CAN, and real volts from a real battery (Chapters 26 and 27) |
 | `DrivetrainIOXRP`, `DrivetrainIOSim` | New IO implementations for each swerve module, real and simulated: the **same pattern** (Chapters 26 to 29) |
 | `DifferentialDriveKinematics` | `SwerveDriveKinematics`: the same idea, in two directions (Chapter 28) |
-| `DifferentialDriveOdometry` and the XRP gyro | A pose estimator, the navX, and later the camera (Chapters 29, 30, and 33) |
+| `DifferentialDriveOdometry` and the XRP gyro | A pose estimator, the Pigeon 2, and later the camera (Chapters 29, 30, and 33) |
 | A course built from commands | Paths drawn in PathPlanner (Chapter 31) |
 | SysId on pretend volts | SysId on brushless motors (Chapter 32) |
 | Parking with the rangefinder | Lining up on an AprilTag with the camera (Chapter 33) |

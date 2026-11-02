@@ -1180,7 +1180,7 @@ You will write PID code, or tune someone else's, on every robot for the rest of 
 - **Chapter 16, feedforward.** SysId measures what it takes to move your XRP, including the friction term **kS**. Then the output becomes **feedforward plus PID**: feedforward predicts most of the power, and PID only corrects what is left. The steady-state gaps that needed `kI` in this chapter mostly disappear.
 - **Chapter 19, commands.** These two controllers move into commands called `DriveDistance` and `TurnToAngle`, which own their own controllers and use `atSetpoint()` to decide when they are finished. The ideas do not change; only where the code lives.
 - **Chapter 23, live tuning.** More ways to tune from the dashboard, and to keep the tuned numbers.
-- **Chapter 27, motor controllers.** A SparkMAX can run its own PID loop on its own processor, much faster than 50 times a second, right next to the motor. You give it gains and a setpoint over the CAN bus.
+- **Chapter 27, motor controllers.** A Talon FX can run its own PID loop on its own processor, much faster than 50 times a second, right next to the motor. You give it gains and a setpoint over the CAN bus.
 - **Chapter 28, swerve.** Every swerve module steers its wheel to an angle with a PID controller with continuous input, exactly like your heading controller.
 - **Chapter 31, path following.** PathPlanner's controller takes **two** sets of PID gains: one that pushes the robot back onto the path's position, and one that holds the path's heading. That is your leg 1 drive, plus the cascade from Practice 5, in every direction at once.
 - **Chapter 33, vision.** Auto-align turns the robot until a camera says the target is centered: a heading controller whose measurement comes from a camera instead of a gyro.

@@ -2,7 +2,7 @@
 
 The Explorer is finished. It is tagged `v1.0.0`, its release page has a green check and a video, and it is still sitting on your desk, ready for the next idea you want to try. Over twenty-five chapters it taught you how a robot program is shaped, how to make a robot move accurately, how to test code without a robot, and how to work on code with other people.
 
-This chapter starts Section VI and a new robot: the **Mini Swerve**. It is a real FRC control system on a small chassis: a **roboRIO** for a brain, **SPARK MAX** motor controllers on a **CAN bus**, brushless motors, a **navX** gyro, a camera, a radio, and a 12-volt battery that can push a lot of current. By the end of Section VI it will drive in any direction while spinning, follow paths drawn on a field, and find its place on the field by looking at AprilTags.
+This chapter starts Section VI and a new robot: the **Mini Swerve**. It is a real FRC control system on a small chassis: a **roboRIO** for a brain, **Kraken X60** brushless motors with built-in **Talon FX** motor controllers on a **CAN bus**, **CANcoder** absolute encoders, a **Pigeon 2** gyro, a camera, a radio, and a 12-volt battery that can push a lot of current. By the end of Section VI it will drive in any direction while spinning, follow paths drawn on a field, and find its place on the field by looking at AprilTags.
 
 Not today, though. Today the Mini Swerve does not move at all, and that is on purpose. Before you spin a single motor, you will move your **program** onto the robot, and that is a bigger change than it sounds. On the Explorer, your code ran on your laptop. On the Mini Swerve, it runs on the robot, and almost everything you know about building, deploying, printing, logging, and crashing changes a little because of it.
 
@@ -68,9 +68,9 @@ Here is what every Mini Swerve has, and the chapter where your code first talks 
 | **Power distribution** (PDH or PDP) | Splits battery power into a channel per device, each with its own breaker or fuse, and can measure each channel's current | Chapter 27 |
 | **Radio** | The robot's Wi-Fi, linking the roboRIO to the Driver Station laptop | This chapter (as a network) |
 | **Four swerve modules** | Each has a **drive** motor that spins the wheel and a **steer** motor that points it, so each wheel can roll in any direction | Chapter 27 (spin), Chapter 28 (math) |
-| **SPARK MAX** motor controllers | One per motor, eight in all, chained together on the **CAN bus** | Chapter 27 |
-| **Absolute encoders** | One per module, telling the code which way each wheel points, even right after power-on | Chapter 28 |
-| **navX** | A gyro and accelerometer board, usually plugged into the roboRIO's MXP port, for the robot's heading | Chapter 29 |
+| **Kraken X60** motors | Brushless motors, each with a **Talon FX** motor controller built in. One per drive and steer job, eight in all, chained together on the **CAN bus** | Chapter 27 |
+| **CANcoder** absolute encoders | One per module, on the CAN bus, telling the code which way each wheel points, even right after power-on | Chapter 27 (ID), Chapter 28 (calibration) |
+| **Pigeon 2** | A gyro and accelerometer on the CAN bus, for the robot's heading | Chapter 27 (ID), Chapter 29 (heading) |
 | **Camera** | Sees AprilTags on the field | Chapter 33 |
 
 > **Swerve in one paragraph**
@@ -79,7 +79,7 @@ Here is what every Mini Swerve has, and the chapter where your code first talks 
 
 ### The robot fact sheet
 
-Teams lose hours to facts nobody wrote down: which CAN ID is the front-left steer motor, which gear ratio the modules use, which way the navX is mounted. You will write them down now, in a Markdown file that lives in your repository next to the code, so it travels with the code and changes through pull requests like the code does.
+Teams lose hours to facts nobody wrote down: which CAN ID is the front-left steer motor, which gear ratio the modules use, which way the Pigeon 2 is mounted. You will write them down now, in a Markdown file that lives in your repository next to the code, so it travels with the code and changes through pull requests like the code does.
 
 Make a table like this one in a notebook today (you will turn it into `docs/robot.md` in Section 26.5), and fill in every row you can by **looking at the robot** and asking a mentor. Leave a row as "unknown" rather than guess. An honest "unknown" gets found out; a wrong guess hides for weeks.
 
@@ -101,7 +101,7 @@ Written from the real robot. Change it through a pull request, like code.
 | Wheel diameter | | Measured with calipers |
 | Drive and steer motors | | Labels |
 | Absolute encoders | | Labels |
-| Gyro | navX | Label, and which port it uses |
+| Gyro | Pigeon 2 | Label, and its CAN ID (Chapter 27) |
 | Camera | | Label |
 | CAN IDs | (Chapter 27) | |
 ```
@@ -196,7 +196,7 @@ Your Explorer repository stays yours, and stays tagged `v1.0.0`. Nothing in this
 
 > **Stay on WPILib 2026 for this robot**
 >
-> FRC is moving to a new robot controller, SystemCore, and WPILib 2027 is built for it, not for the roboRIO. The Mini Swerve has a roboRIO, so its project stays on **WPILib 2026** for as long as you use it, even after 2027 tools come out. The WPILib installer puts each year in its own folder, side by side, so you can have both. If VS Code ever offers to **import** or **upgrade** the Mini Swerve project to a newer year, say no. Chapter 1 promised that most of what you learn carries over to SystemCore; the code in this section is written for the roboRIO you have.
+> This book is written for the 2026 season (Chapter 1), and the Mini Swerve has a roboRIO, so its project uses **WPILib 2026.2.1**, the same as the Explorer (Chapter 2's version table). If VS Code ever offers to **import** or **upgrade** the Mini Swerve project to a newer year, say no.
 
 ### Step 1: Create the project
 
@@ -323,7 +323,7 @@ The last row is the one people get wrong. A kV measured on a 60 mm XRP wheel wit
 
 Work through these on the `roborio-setup` branch, building after each one.
 
-1. **AdvantageKit.** Install it as in Section 17.6: **WPILib: Manage Vendor Libraries** > **Install new libraries (online)**, and paste the same URL (`https://github.com/Mechanical-Advantage/AdvantageKit/releases/latest/download/AdvantageKit.json`). Newer versions of the dialog may also offer AdvantageKit by name in a list; either gives you `vendordeps/AdvantageKit.json`. Then open the Explorer's `build.gradle` beside the new one, and copy the two `akitJson`/`annotationProcessor` lines into the end of the `dependencies` block and the `replayWatch` task to the end of the file.
+1. **AdvantageKit.** Install it as in Section 17.6: **WPILib: Manage Vendor Libraries** > **Install new libraries (online)**, and paste the same pinned URL (`https://github.com/Mechanical-Advantage/AdvantageKit/releases/download/v26.0.2/AdvantageKit.json`). If the dialog offers AdvantageKit by name in a list instead, check that it says **26.0.2** before you install it. Either way you get `vendordeps/AdvantageKit.json`. Then open the Explorer's `build.gradle` beside the new one, and copy the two `akitJson`/`annotationProcessor` lines into the end of the `dependencies` block and the `replayWatch` task to the end of the file.
 2. **gversion.** Copy the `id "com.peterabeles.gversion" version "1.10"` line into the `plugins` block (leave the new project's GradleRIO line as it is), and the `gversion` block to the end of the file, from Section 25.9. Add the `BuildConstants.java` line to the end of `.gitignore`.
 3. **CI.** Copy the whole `.github` folder from the Explorer into the Mini Swerve project, so it has `.github/workflows/build.yml`. Nothing in it is specific to the XRP: it checks out the code, installs Java 17, and runs `./gradlew build`, which compiles and runs the tests. It never deploys, so it never needs a robot.
 
@@ -496,7 +496,7 @@ Now remember what a motor controller does with "power." `set(0.5)` means "switch
 | 11.0 V (sagging while driving) | 5.5 V |
 | 10.0 V (a tired battery, driving hard) | 5.0 V |
 
-The same line of code, three different speeds. An autonomous routine tuned on a fresh battery comes up short on a tired one, every time. The cure is to stop asking for power and ask for **volts**: "give this motor 6 volts," and let the motor controller work out the power from the battery voltage it measures, every few milliseconds. Your Explorer's code already asks for volts (`setVolts`, since Chapter 16); on the Explorer they were pretend, and on the Mini Swerve the motor controllers will make them real. Chapter 27 sets that up on the SPARK MAXes, and Chapter 32 measures kS, kV, and kA in real volts.
+The same line of code, three different speeds. An autonomous routine tuned on a fresh battery comes up short on a tired one, every time. The cure is to stop asking for power and ask for **volts**: "give this motor 6 volts," and let the motor controller work out the power from the battery voltage it measures, every few milliseconds. Your Explorer's code already asks for volts (`setVolts`, since Chapter 16); on the Explorer they were pretend, and on the Mini Swerve the motor controllers will make them real. Chapter 27 sets that up on the Talon FXs, and Chapter 32 measures kS, kV, and kA in real volts.
 
 > **Pretend volts, retired**
 >
@@ -1382,7 +1382,7 @@ Most of the right column is the hard part of robot programming, and you already 
 
 > **What comes next**
 >
-> The Mini Swerve has eight motors, and none of them has turned yet. Chapter 27 opens the **CAN bus**: the pair of yellow and green wires that links the roboRIO to every SPARK MAX, how each device gets an ID, and how to check that the right motor spins the right way, one at a time, wheels in the air. Your `RoboRio` subsystem will be watching the battery while they do. The first time a drive motor spins up, look at `RoboRio/BatteryVolts`: that dip is sag, measured for real, the thing pretend volts could never show you.
+> The Mini Swerve has eight motors, and none of them has turned yet. Chapter 27 opens the **CAN bus**: the pair of yellow and green wires that links the roboRIO to every Kraken, CANcoder, and the Pigeon 2, how each device gets an ID, and how to check that the right motor spins the right way, one at a time, wheels in the air. Your `RoboRio` subsystem will be watching the battery while they do. The first time a drive motor spins up, look at `RoboRio/BatteryVolts`: that dip is sag, measured for real, the thing pretend volts could never show you.
 
 ---
 
@@ -1533,7 +1533,7 @@ If there are only two of you, split the third one. Afterward, write two sentence
 
 - Read WPILib's **roboRIO Brownout** page (link below). It suggests making a **power budget** for a robot. Estimate one for the Mini Swerve: if each of four drive motors can pull 40 amps while accelerating hard, what does that add up to, and what would it do to the battery's voltage? What could code do about it? (Chapter 27 has an answer called a current limit.)
 - Open the **FRC Driver Station Log File Viewer** and find the log from your crash drill. Can you see the moment the robot code was lost, and how long it took to come back?
-- Read AdvantageKit's **template projects** page, and open the **Spark Swerve** template's `Robot.java` on GitHub. Compare it with yours, line by line. What is the same? What does it do that yours does not yet?
+- Read AdvantageKit's **template projects** page, and open the **TalonFX Swerve** template's `Robot.java` on GitHub. Compare it with yours, line by line. What is the same? What does it do that yours does not yet?
 - WPILib 2027 is built for **SystemCore**. Find WPILib's page about what changed from the roboRIO to SystemCore, and list two things in this chapter that would be different on a SystemCore robot.
 
 ---
@@ -1552,4 +1552,4 @@ If there are only two of you, split the third one. Afterward, write two sentence
 
 ---
 
-*Next up, Chapter 27: CAN Bus and Real Motor Controllers. The Mini Swerve's code is on the robot; now you wire it to the motors, give every SPARK MAX an ID, and spin each one, alone, wheels in the air, until you trust which way it turns.*
+*Next up, Chapter 27: CAN Bus and Real Motor Controllers. The Mini Swerve's code is on the robot; now you wire it to the motors, give every device on the CAN bus an ID, and spin each motor, alone, wheels in the air, until you trust which way it turns.*

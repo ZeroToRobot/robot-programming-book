@@ -46,7 +46,7 @@ Before you start, confirm you have the following:
 
 | Item | Notes |
 |------|-------|
-| A laptop or desktop computer | Windows 10/11, macOS 12+, or Ubuntu 22.04+ |
+| A laptop or desktop computer | 64-bit Windows 10/11, macOS 13.3+, or Ubuntu 22.04+ (what WPILib 2026.2.1 supports) |
 | An XRP robot | No tools or soldering required; if yours is new, you will need to assemble it from the box before starting |
 | A USB cable | For firmware flashing and Web UI configuration. Production (V1) XRPs use USB-C; older Beta XRPs use micro-USB. Either way, you need a data cable, not charge-only |
 | Four AA batteries | Rechargeable batteries work best; alkaline AAs are fine to start |
@@ -67,15 +67,29 @@ Before you start, confirm you have the following:
 
 ### Step 1: Download the Installer
 
-Go to **[github.com/wpilibsuite/allwpilib/releases](https://github.com/wpilibsuite/allwpilib/releases)** and find the latest release for the current FRC season. Download the installer for your operating system:
+This book uses **WPILib 2026.2.1**. Go to the **[WPILib 2026.2.1 release page](https://github.com/wpilibsuite/allwpilib/releases/tag/v2026.2.1)**, scroll down to **Assets**, and download the installer for your computer:
 
-- **Windows**: `WPILib_Windows-YEAR.X.X.iso`
-- **macOS**: `WPILib_macOS-YEAR.X.X.dmg`
-- **Linux**: `WPILib_Linux-YEAR.X.X.tar.gz`
+- **Windows**: `WPILib_Windows-2026.2.1.iso`
+- **macOS** (Apple silicon, M1 and newer): `WPILib_macOS-Arm64-2026.2.1.dmg`
+- **macOS** (Intel): `WPILib_macOS-Intel-2026.2.1.dmg`
+- **Linux**: `WPILib_Linux-2026.2.1.tar.gz`
 
 > **Which year?**
 >
-> Download the version that matches the current FRC season. If you're not sure, check [docs.wpilib.org](https://docs.wpilib.org): the homepage always shows the current recommended version. Using the wrong year can cause subtle compatibility problems.
+> Always **2026.2.1**, for every chapter of this book. The releases page may show newer versions, including ones for a later year. Do not install those for this book: the code in every chapter is written and tested for WPILib 2026.2.1, and a different year can stop it from building. The table below lists every version the book uses.
+
+> **Versions this book uses**
+>
+> | What | Version | Where you install it |
+> |---|---|---|
+> | FRC season | **2026** | |
+> | WPILib (and GradleRIO in `build.gradle`) | **2026.2.1** | This chapter |
+> | Java | **17**, bundled with WPILib | This chapter (automatic) |
+> | AdvantageKit | **26.0.2** | Chapter 17 (XRP) and Chapter 26 (Mini Swerve) |
+> | Phoenix 6 (CTRE) | **26.x**, the `frc2026` release | Chapter 27 |
+> | PathPlannerLib | **2026** release | Chapter 31 |
+>
+> Every robot in this book, the XRP and the Mini Swerve, uses this 2026 software (Chapter 1). If VS Code, the Driver Station, or a vendor library ever offers to upgrade a project to a newer year, say no.
 
 ### Step 2: Run the Installer
 
@@ -83,7 +97,7 @@ Go to **[github.com/wpilibsuite/allwpilib/releases](https://github.com/wpilibsui
 1. Mount the ISO file (right-click "Mount") or open it in File Explorer
 2. Run `WPILibInstaller.exe` inside the mounted drive
 3. When the installer asks what to install, choose **"Everything"**
-4. Accept the default installation path (`C:\Users\Public\wpilib\YEAR`)
+4. Accept the default installation path (`C:\Users\Public\wpilib\2026`)
 
 **On macOS:**
 1. Open the `.dmg` file
@@ -100,7 +114,7 @@ The installer will download additional components and set up VS Code. This usual
 
 ### Step 3: Launch VS Code
 
-After installation, look for **"WPILib VS Code YEAR"** in your Applications or Start Menu and open it, e.g. "WPILib VS Code 2026". You can confirm the WPILib extension is installed correctly by checking two things: a WPILib icon (a small red "W") appears in the top-right corner of the editor next to the tabs, and the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) shows WPILib-specific commands like **WPILib: Build Robot Code** and **WPILib: Deploy Robot Code** when you type "WPILib".
+After installation, look for **"WPILib VS Code 2026"** in your Applications or Start Menu and open it. You can confirm the WPILib extension is installed correctly by checking two things: a WPILib icon (a small red "W") appears in the top-right corner of the editor next to the tabs, and the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) shows WPILib-specific commands like **WPILib: Build Robot Code** and **WPILib: Deploy Robot Code** when you type "WPILib".
 
 > **First launch takes a moment**
 >
