@@ -126,7 +126,7 @@ Now take your hands off the controller completely and look again. Is `Left Y` ex
 
 A joystick is a mechanical part. Springs pull it back toward the center, but never perfectly. The sensor inside is not perfectly calibrated either. So when nobody is touching the stick, it rarely reports a clean zero. It reports a small, random-looking number near zero. This is called **stick drift**.
 
-Why does that matter? Feed `0.04` into `arcadeDrive` and you are asking the motors for four percent power. On a slick floor, the XRP might creep forward on its own. On carpet, it might not move at all, but the motors still hum and heat up, slowly draining your battery while the robot sits "still." On a competition robot, a creeping drivetrain during a precise lineup is the kind of bug that costs a match.
+Why does that matter? Send `0.04` straight to the motors and you are asking for four percent power. On a slick floor, the XRP might creep forward on its own. On carpet, it might not move at all, but the motors still hum and heat up, slowly draining your battery while the robot sits "still." On a competition robot, a creeping drivetrain during a precise lineup is the kind of bug that costs a match. (Today's `arcadeDrive` softens small numbers for you, as Section 8.6 explains, so the drift you feel this chapter is smaller. Any time code sends a stick value without softening it, the deadband is all that stands between drift and a creeping robot.)
 
 The fix is a **deadband**: a small zone around zero where any reading is treated as exactly zero. You wrote one yourself in Chapter 6:
 
@@ -337,11 +337,11 @@ Build and run it, put the XRP on the floor with some room around it, and click *
 > right = forward + rotation
 > ```
 >
-> Forward `0.5` with rotation `0.2` (a gentle left turn) gives left `0.3`, right `0.7`. The right side outruns the left, and the robot curves left. If a sum goes past `1.0`, WPILib scales both sides down together so the turn keeps its shape. Turning "how fast and how much turn" into "what each wheel does" is called **inverse kinematics**, and it is the whole subject of Chapter 13. In Chapter 29 you will do the same thing for swerve drive, where each of four wheels also gets its own steering angle.
+> Forward `0.5` with rotation `0.2` (a gentle left turn) gives left `0.3`, right `0.7`, before WPILib's adjustments. The right side outruns the left, and the robot curves left. The real numbers are smaller, because WPILib first squares both inputs (the next callout), then scales both sides together so the turn keeps its shape and neither side goes faster than your bigger input: left about `0.18`, right about `0.25`. Turning "how fast and how much turn" into "what each wheel does" is called **inverse kinematics**, and it is the whole subject of Chapter 13. In Chapter 29 you will do the same thing for swerve drive, where each of four wheels also gets its own steering angle.
 
 > **Why small stick movements feel gentle**
 >
-> The two-number version of `arcadeDrive` **squares** your inputs before using them (keeping the sign). Half stick, `0.5`, becomes `0.25` power. Full stick is still `1.0`. This gives the driver fine control at low speeds, where precision matters, without giving up top speed. Shaping the input curve like this is called **input shaping**, and drivers notice it immediately. If you ever want a linear response, `arcadeDrive(forward, rotation, false)` turns the squaring off.
+> The two-number version of `arcadeDrive` **squares** your inputs before using them (keeping the sign). Half stick, `0.5`, becomes `0.25` power. Full stick is still `1.0`. This gives the driver fine control at low speeds, where precision matters, without giving up top speed. A stick response shaped like this is called an **input curve** (WPILib's name for this one is `squareInputs`), and drivers notice it immediately. If you ever want a linear response, `arcadeDrive(forward, rotation, false)` turns the squaring off.
 
 ---
 
@@ -399,7 +399,7 @@ The idea of reacting to the moment something changes, rather than to its current
 
 The XRP is small and quick. Driving it through a tight gap at full stick sensitivity is hard. Real FRC drivers solve this with a **slow mode** (sometimes called precision mode): hold a button, and the robot's top speed drops so small corrections are easy.
 
-Let us add one: while the right bumper is held, the XRP drives at half speed. First, two more constants:
+Let us add one: while the right bumper is held, the XRP gets half the command, so it drives much slower. First, two more constants:
 
 ```java
 private static final double FULL_SPEED_SCALE = 1.0;
@@ -454,7 +454,7 @@ SmartDashboard.putBoolean("Slow Mode", speedScale == SLOW_MODE_SCALE);
 
 > **Scaling commands is not the same as limiting speed**
 >
-> Multiplying by `0.5` cuts the **command** in half, which is roughly half power. On a fresh battery that might be one speed; on a tired battery, noticeably slower. Remember the callout from Chapter 7: `-1.0` to `1.0` is a fraction of power, not a real-world speed. Once your drivetrain knows its true speed from encoders (Ch 9) and a measured motor model (Ch 16), you can ask for "0.3 meters per second" and get it, battery or not.
+> Multiplying by `0.5` cuts the **command** in half. Because `arcadeDrive` then squares it (Section 8.6), full stick in slow mode is `0.5 * 0.5`, about a **quarter** of full power. On a fresh battery that might be one speed; on a tired battery, noticeably slower. Remember the callout from Chapter 7: `-1.0` to `1.0` is a fraction of power, not a real-world speed. Once your drivetrain knows its true speed from encoders (Ch 9) and a measured motor model (Ch 16), you can ask for "0.3 meters per second" and get it, battery or not.
 
 ---
 
@@ -505,7 +505,7 @@ SmartDashboard.putNumber("Left Y Filtered",
 
 With the robot disabled, let go of the stick ten times and write down the largest resting value of `Left Y`. Then push the stick very slowly forward and note the raw value where `Left Y Filtered` first leaves zero. Does it match your deadband?
 
-Next, set `STICK_DEADBAND` to `0.0`, run it, enable Teleop, and let go of the controller. Watch and listen. Try it on a hard floor, then on carpet. On which surface does the XRP creep? On which does it only hum? Write two sentences explaining the difference, then put the deadband back.
+Next, set `STICK_DEADBAND` to `0.0`. On its own that will probably show you nothing, because `arcadeDrive` squares a resting drift of `0.06` down to well under one percent power. So for this experiment, also turn the squaring off: in `Drivetrain.arcadeDrive`, temporarily change `diffDrive.arcadeDrive(forward, rotation);` to `diffDrive.arcadeDrive(forward, rotation, false);`. Run it, enable Teleop, and let go of the controller. Watch and listen. Try it on a hard floor, then on carpet. On which surface does the XRP creep? On which does it only hum? Write two sentences explaining the difference, then put the deadband and the squaring back.
 
 **2. Write the smooth deadband yourself.** Without looking at WPILib's source, write a method `smoothDeadband(double value, double deadband)` that returns `0.0` inside the deadband and rescales the rest so that the output is `0.0` at the edge of the deadband and `1.0` at a full stick of `1.0`. Remember negative values. Check your method against the table in Section 8.4, then compare your code with WPILib's `MathUtil` source (linked in Additional Resources).
 

@@ -37,7 +37,9 @@ batteryPercent = 80;
 System.out.println(batteryPercent);  // now prints 80
 ```
 
-That's the whole idea. A variable is a labeled box. You can look inside, you can put something new in, and you can refer to it by name from anywhere in your code.
+That's the whole idea. A variable is a labeled box. You can look inside, and you can put something new in.
+
+One catch: a variable only exists inside the curly braces `{ }` where you declared it. A variable you declare inside the `Robot()` constructor is gone once the constructor finishes, so another method cannot see it. If you try, the build fails with `cannot find symbol`. Chapter 15 explains this fully.
 
 > **Why do we need variables at all?**
 >
@@ -344,6 +346,8 @@ public class Robot extends TimedRobot {
 ```
 
 Don't worry about `private final` or `new XRPOnBoardIO()` for now. You'll understand both completely by Chapter 7. For this chapter, just trust that this line gives you a variable called `onBoardIO` that you can use to control the LED.
+
+Notice where this line goes: inside the class, but **outside** every method. That is what lets the constructor and `robotPeriodic()` both use `onBoardIO`. A variable declared inside one method cannot be seen by another.
 
 ### Turning the LED On
 

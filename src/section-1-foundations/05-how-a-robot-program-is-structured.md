@@ -324,7 +324,7 @@ The answer is **safety and consistency**.
 
 In a normal program, if your code hangs or crashes, the worst case is a frozen window. In a robot program, if your code hangs while a motor is running, the motor keeps running. That's how hardware breaks, and how people get hurt.
 
-The TimedRobot template enforces a structure that WPILib can monitor. If your `teleopPeriodic()` takes too long to execute, WPILib will print warnings. If your code throws an exception, WPILib catches it and stops the motors. If the Driver Station disconnects, WPILib disables the robot automatically. None of that would be possible if your code were a free-form loop.
+The TimedRobot template enforces a structure that WPILib can monitor. If your `teleopPeriodic()` takes too long to execute, WPILib prints a warning. And if your code crashes with an error (Java calls it an **exception**), nothing catches it for you: the whole program stops, the motors stop with it, and the error appears in the terminal. You will learn to read those errors in Chapter 10. (On a full-size robot there is one more safety check, below your code: if the Driver Station stops talking to the robot, the robot disables itself within a fraction of a second.) None of these checks would be possible if your code were a free-form loop.
 
 The structure is also a contract between programmers. Every FRC robot program in the world has the same basic shape: a startup block, the periodic methods, the mode transitions. When you join a new team, or read another team's code on GitHub, or get help on Chief Delphi, you can skip the "where do I start reading?" step. You already know.
 
