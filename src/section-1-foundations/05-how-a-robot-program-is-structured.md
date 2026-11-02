@@ -1,6 +1,6 @@
 # Chapter 5: How a Robot Program Is Structured
 
-In Chapter 4, you wrote your first Java code. Variables, prints, a blinking LED, a few values pushed to the dashboard. That was Java. This chapter is about the shape of a robot program.
+In Chapter 4, you wrote your first Java code. Variables, prints, an LED you turned on, a few values pushed to the dashboard. That was Java. This chapter is about the shape of a robot program.
 
 A robot program isn't a single script that runs once and exits. It's a long-running loop with very specific rules: certain code must run when the robot first turns on, certain code must run only during autonomous, certain code must run on every single tick of the 50 Hz clock you met in Chapter 1. WPILib gives you a template that handles all of that scheduling for you, but only if you understand which method goes where.
 
@@ -33,15 +33,15 @@ That "figure out which mode the robot is in" step is what makes the structure of
 
 > **Why 50 Hz, exactly?**
 >
-> The roboRIO and the Driver Station communicate at 50 Hz, which is once every 20 milliseconds. That's fast enough that human drivers can't perceive any lag, and slow enough that the roboRIO has plenty of CPU time between iterations to do real work like running PID controllers, reading sensors, and logging data. The number is hardcoded into FRC's network protocol: every team's robot runs at the same rate, on the same schedule.
+> The Driver Station sends the robot a control packet every 20 milliseconds (50 times a second), and `TimedRobot` runs your loop on the same beat by default. That's fast enough that human drivers can't perceive any lag, and slow enough that the roboRIO has plenty of CPU time between iterations to do real work like running PID controllers, reading sensors, and logging data. Teams *can* change the loop rate, but almost nobody needs to, and this book never does. On the XRP there is no roboRIO: the loop runs on your laptop, at the same 20 ms.
 
 ---
 
 ## 5.2 The TimedRobot Template
 
-Open `Robot.java` in your XRPExplorer project from Chapter 2. If you didn't keep that project around, create a fresh one now: `WPILib: Create a new project`, **Template** > **Java** > **XRP - TimedRobot**, name it `XRPExplorer` again.
+Open `Robot.java` in your XRPExplorer project from Chapter 2. If it's not on this laptop, clone it from GitHub (`git clone <your repo URL>`), so you keep its Git history from Chapter 3.
 
-You should see something like this:
+Here is a trimmed version of what you'll see. The real template also has an auto chooser and a small `XRPDrivetrain`, which you replace in Section 5.6 and Chapter 7.
 
 ```java
 package frc.robot;
@@ -101,7 +101,7 @@ This line pulls in the **TimedRobot** class from WPILib so that we can use it in
 
 This is the most important line in the whole template, and it deserves its own paragraph.
 
-`public class Robot` declares a Java class named `Robot`. We talked briefly about classes in Chapter 4: they're the blueprints that Java uses to organize code. We'll go much deeper into classes in Chapter 7.
+`public class Robot` declares a Java class named `Robot`. Chapter 4 mentioned classes in passing: they're the blueprints that Java uses to organize code. We'll go much deeper into classes in Chapter 7.
 
 The interesting part is `extends TimedRobot`. In Java, when one class extends another, it inherits all of that class's behavior. WPILib's `TimedRobot` class already knows how to talk to the Driver Station, how to detect mode changes, how to schedule the 50 Hz loop, and a hundred other things. By writing `extends TimedRobot`, we're saying: "Our Robot class is a TimedRobot. Give us all of that built-in behavior for free."
 
@@ -109,7 +109,7 @@ This is why your robot program "just works" without you writing any networking c
 
 > **Inheritance, in one sentence**
 >
-> `extends TimedRobot` means: "everything TimedRobot can do, my class can do too, and I can add my own behavior on top." We'll come back to this idea formally in Chapter 7. For now, just trust that `extends TimedRobot` gives you all the FRC plumbing for free.
+> `extends TimedRobot` means: "everything TimedRobot can do, my class can do too, and I can add my own behavior on top." We'll come back to this idea formally in Chapter 20. For now, just trust that `extends TimedRobot` gives you all the FRC plumbing for free.
 
 ### `public Robot()`
 
@@ -153,7 +153,7 @@ The same idea, for teleop. `teleopInit()` runs once when teleop starts. `teleopP
 
 ## 5.4 The Full Mode Lifecycle
 
-The template you just read shows three of the robot's modes: disabled (kind of), autonomous, and teleop. There are actually five modes in FRC:
+The template you just read shows three of the robot's modes: disabled (kind of), autonomous, and teleop. There are actually four modes in FRC:
 
 | Mode | When It Runs | Periodic Method |
 | --- | --- | --- |
@@ -161,9 +161,10 @@ The template you just read shows three of the robot's modes: disabled (kind of),
 | **Autonomous** | First 15 to 20 seconds of a match (depends on the year's game) | `autonomousPeriodic()` |
 | **Teleop** | Driver-controlled period of a match | `teleopPeriodic()` |
 | **Test** | A custom mode for testing mechanisms | `testPeriodic()` |
-| **Simulation** | When running in the WPILib simulator | `simulationPeriodic()` |
 
-Each mode also has an `Init` method that fires once when the robot enters that mode. The default template only shows the most common ones, but you can add the others by overriding their methods.
+Simulation is not a fifth mode. There is one more method, `simulationPeriodic()`, that WPILib calls every loop **in addition** to the mode's methods whenever the program runs in simulation. On the XRP, that is always: your program runs through `WPILib: Simulate Robot Code`.
+
+Each mode also has an `Init` method that fires once when the robot enters that mode. The default template only shows the most common ones, but you can add the others by overriding their methods. There is also an `Exit` method for each mode (`autonomousExit()`, `teleopExit()`, and so on). WPILib calls it once when that mode ends. This book doesn't use them, but you'll see them in other teams' code.
 
 Here's the lifecycle of a typical match, in order:
 
@@ -226,7 +227,7 @@ The Explorer is a robot that, by Chapter 26, will navigate an autonomous obstacl
 
 ### Step 1: Confirm Your Project Exists
 
-If you still have your `XRPExplorer` project from Chapter 2, open it now. If not, create a fresh one (see Section 5.2 for a refresher).
+If you still have your `XRPExplorer` project from Chapter 2, open it now. If it's not on this laptop, clone it from GitHub (`git clone <your repo URL>`).
 
 ### Step 2: Set Up the Mode Skeleton
 
@@ -286,6 +287,8 @@ public class Robot extends TimedRobot {
 
 This is your **mode skeleton**. It does almost nothing on purpose. The only thing it does is announce its current mode to the dashboard so you can watch the lifecycle play out in real time.
 
+A method written `public void disabledPeriodic() {}` has an **empty body**: the method exists, and WPILib calls it, but there's nothing inside the braces yet. You'll fill several of these in over the next chapters.
+
 ### Step 3: Build and Run
 
 Build the project (`WPILib: Build Robot Code`), confirm `BUILD SUCCESSFUL`, then run it (`WPILib: Simulate Robot Code`, or **F5**). If you get stuck, Chapter 2 has the full walkthrough.
@@ -320,6 +323,8 @@ If the Mode widget doesn't update when you change modes, double-check that:
 
 Take a step back for a moment. Why does WPILib force you into this structure? Why not just give you a `main()` method like a normal Java program and let you write whatever loop you want?
 
+Actually, your project *does* have a `main()`. Open `Main.java`. Its one real line is `RobotBase.startRobot(Robot::new);`, which means "WPILib, here is my `Robot` class: create it and run it." (The `::` is explained in Chapter 7.) After that, WPILib is in charge. It calls your constructor once, then your Init and Periodic methods for as long as the program runs. The comment in that file says not to change it, and you won't.
+
 The answer is **safety and consistency**.
 
 In a normal program, if your code hangs or crashes, the worst case is a frozen window. In a robot program, if your code hangs while a motor is running, the motor keeps running. That's how hardware breaks, and how people get hurt.
@@ -341,7 +346,7 @@ The structure is also a contract between programmers. Every FRC robot program in
 > **What you learned in Chapter 5**
 >
 > * The TimedRobot template gives every FRC program the same structure: an `Init` method (runs once) and a `Periodic` method (runs every 20 ms) for each mode
-> * The five robot modes are Disabled, Autonomous, Teleop, Test, and Simulation. `robotPeriodic()` runs in all of them
+> * The four robot modes are Disabled, Autonomous, Teleop, and Test. `robotPeriodic()` runs in all of them, and `simulationPeriodic()` runs on top of them whenever the program is simulated (always, on the XRP)
 > * `extends TimedRobot` is how your `Robot` class inherits all of WPILib's lifecycle, networking, and safety machinery
 > * `@Override` annotations protect you from typos by forcing the compiler to check that you're really replacing a method that exists in TimedRobot
 > * The rule of thumb: **The constructor and Init methods are for one-time setup. Periodic methods are for code that runs every loop.**
@@ -355,7 +360,7 @@ The structure is also a contract between programmers. Every FRC robot program in
 
 Sit down with a teammate, partner, or someone who can listen patiently. Open `Robot.java` from your XRP Explorer project and read the entire file aloud, line by line, **explaining every line in plain English**. Not "this is a method." Plain English: "This line tells Java to import a class called TimedRobot from WPILib, so I can use it below."
 
-If you hit a line you can't explain, mark it. After you finish, look up the answer (this chapter, the WPILib docs, or Chief Delphi) and write the explanation as a code comment. The goal is to leave no unexplained line behind.
+If you hit a line you can't explain, mark it. After you finish, look up the answer (this chapter, the WPILib docs, or Chief Delphi) and write the explanation as a code comment. (A comment is a line starting with `//`. Java ignores it.) The goal is to leave no unexplained line behind.
 
 This exercise feels slow. It is. The students who do it once seriously almost never have to do it again, because they actually understand what they're looking at.
 
@@ -364,8 +369,8 @@ This exercise feels slow. It is. The students who do it once seriously almost ne
 Continue building the XRP Explorer skeleton from Section 5.6.
 
 1. Verify that the `Mode` widget in Elastic correctly reflects each mode change you make in the Simulation GUI's Robot State panel
-2. Add a second dashboard value called `LastInitTime` that records `Timer.getFPGATimestamp()` inside each `Init` method (you'll need to import `Timer`). Watch how the value updates every time you change modes
-3. Add a `disabledPeriodic()` print of the current uptime, just to confirm it really does keep ticking while the robot is disabled
+2. Add a second dashboard value called `LastInitTime` that records `Timer.getFPGATimestamp()` inside each `Init` method (you'll need to import `Timer`). It's a number, so use `putNumber`. Watch how the value updates every time you change modes
+3. In `disabledPeriodic()`, publish the current uptime with `SmartDashboard.putNumber("Uptime", Timer.getFPGATimestamp())`, just to confirm it really does keep ticking while the robot is disabled. Use the dashboard, not a print: a print every 20 ms floods the console
 
 After all three changes, build, run, and verify on the dashboard. You should be able to switch modes and see both the mode name and the last-init timestamp update in real time.
 
@@ -402,8 +407,7 @@ Confirm on GitHub that your commit appears. This is the first commit that contai
 
 > **Additional Resources**
 >
-> * **WPILib TimedRobot reference**: [docs.wpilib.org/en/stable/docs/software/convenience-features/timed-robot.html](https://docs.wpilib.org/en/stable/docs/software/convenience-features/timed-robot.html) the official explanation of the TimedRobot lifecycle, with timing diagrams
-> * **WPILib Robot Program structure**: [docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html) walks through every file in a generated WPILib project
+> * **WPILib Robot Program structure**: [docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/creating-robot-program.html) the official explanation of the TimedRobot lifecycle (Init, Periodic, and Exit methods, and the 20 ms default), plus a walkthrough of every file in a generated WPILib project
 > * **Java packages and imports**: [docs.oracle.com/javase/tutorial/java/package](https://docs.oracle.com/javase/tutorial/java/package/index.html) the official Java tutorial on packages, if you want a deeper dive into what `package frc.robot;` actually means
 > * **Java inheritance and `extends`**: [docs.oracle.com/javase/tutorial/java/IandI/subclasses.html](https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html) a clear walkthrough of inheritance, the concept behind `extends TimedRobot`
 > * **The Hollywood Principle**: [en.wikipedia.org/wiki/Hollywood_principle](https://en.wikipedia.org/wiki/Hollywood_principle) short explanation of "don't call us, we'll call you," the framework design pattern WPILib uses

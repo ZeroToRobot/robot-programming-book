@@ -127,7 +127,7 @@ If you don't already have one, go to [github.com](https://github.com) and sign u
 
 - Use a username you'd be comfortable showing on a résumé. `qwerty12345` is funny now, less so later.
 - Use the same email you configured Git with.
-- Enable two-factor authentication when prompted: GitHub will eventually require it, and it's a good security habit.
+- Turn on two-factor authentication. GitHub requires it for accounts that contribute code, so set it up when GitHub asks. An authenticator app on your phone is the best choice.
 
 After signing up, you'll need a way for Git on your laptop to prove to GitHub that it's really you when you push. Git does this over **HTTPS**, and you authenticate the first time you push. How that first push looks depends on your operating system:
 
@@ -142,15 +142,17 @@ You don't need to do any of this right now. Just know that when you reach Sectio
 
 > **Why HTTPS instead of SSH?**
 >
-> Git can authenticate to GitHub two ways: HTTPS (with a token or credential manager, as above) or SSH (with a key pair you generate yourself). HTTPS is easier to set up, works through most corporate firewalls, and is what GitHub recommends for new users. SSH is slightly more elegant but adds setup steps that aren't worth it at this stage.
->
-> You can switch later if you ever feel limited. Most professional developers use HTTPS for years before considering it.
+> Git can authenticate to GitHub two ways: HTTPS (with a token or credential manager, as above) or SSH (with a key pair you generate yourself). Both are fine. HTTPS needs less setup, so this book uses it. You can switch later.
 
 ---
 
 ## 3.5 Your First Three Commands
 
 Before doing anything to your real project, let's practice on a throwaway folder. This way, if something goes wrong, you haven't damaged your XRP Explorer code.
+
+> **On Windows, use Git Bash for this chapter**
+>
+> The Git installer adds a terminal called **Git Bash**. In VS Code's terminal panel, click the small arrow next to **+** and choose **Git Bash**. Every command in this chapter works there exactly as shown. The older **Windows PowerShell** trips over two of them: `echo "..." > notes.txt` saves the file in a format Git treats as binary, and `&&` between two commands is an error. (PowerShell 7 is fine too.)
 
 In the terminal:
 
@@ -280,7 +282,7 @@ Some files should never be committed: build outputs, editor settings, OS junk fi
 cat .gitignore
 ```
 
-You'll see entries like `build/`, `.vscode/settings.json`, and `.DS_Store`. Git will ignore anything matching these patterns.
+You'll see entries like `/build/`, `.gradle`, `bin/`, and `.DS_Store`. Git will ignore anything matching these patterns. Lines that start with `!` are exceptions that Git keeps, like `!.vscode/settings.json`: your project's VS Code settings are worth sharing.
 
 > **Why ignore `build/`?**
 >
@@ -312,13 +314,13 @@ public Robot() {
 }
 ```
 
-Save the file. In the terminal:
+`System.out.println(...)` prints a line of text to VS Code's terminal panel. You'll learn it properly in Chapter 4. Save the file and run the program (`WPILib: Simulate Robot Code`). Look in the terminal panel: you should see `XRP Explorer starting up.` in the output. Stop the program. Now check what Git sees:
 
 ```bash
 git status
 ```
 
-You'll see `Robot.java` listed under "Changes not staged for commit". Look at the actual change:
+You'll see `Robot.java` listed under "Changes not staged for commit". (If a Simulation GUI settings file like `simgui-ds.json` shows up too, leave it alone for now: the next command only stages `Robot.java`.) Look at the actual change:
 
 ```bash
 git diff
@@ -346,7 +348,7 @@ Local commits are good, but they only exist on your laptop. If your hard drive d
 You'll create an empty repository on GitHub's website, then connect your local repo to it.
 
 1. On [github.com](https://github.com), click the **+** icon in the top-right and choose **"New repository"**
-2. Name it `XRPExplorer`. Leave **"Add a README"**, the `.gitignore` dropdown, and the license unchecked: your local project already has these, and adding them on GitHub now would create a conflict you'd have to untangle on your first push.
+2. Name it `XRPExplorer`. Leave **"Add a README"**, the `.gitignore` dropdown, and the license unchecked. Your project already has a `.gitignore` and a license, and you'll write your own README at the end of this chapter. Adding any of them on GitHub now would give GitHub a commit your laptop doesn't have, and your first push would be rejected.
 3. Choose **Public** or **Private** (either is fine for this book), then click **Create repository**
 4. GitHub shows a setup page. Because your project already has commits, use the section titled **"…or push an existing repository from the command line"**. It lists three commands like these:
 
@@ -379,7 +381,7 @@ Once your remote is set up, the workflow extends to four steps:
 
 > **If `git push` says "rejected"**
 >
-> It means GitHub has commits your laptop does not, usually from your other computer. Run `git pull`, then `git push` again. If Git says there is a **conflict**, do not panic, and do not delete the folder: your work is safe in your commits. Chapter 11 shows you what a conflict looks like and how to fix one.
+> It means GitHub has commits your laptop does not, usually from your other computer. Run `git pull`, then `git push` again. If Git says there is a **conflict**, do not panic, and do not delete the folder: your work is safe in your commits. Section 3.8 lets you see a conflict in your practice folder, and Chapter 11 shows you how to fix one in real code.
 
 > **Push frequently**
 >
@@ -426,7 +428,49 @@ If the changes don't conflict with anything on `main`, the merge happens cleanly
 >
 > If you and a teammate both edited the same line in the same file, Git can't tell which version is correct. It marks the file as "conflicted" and asks you to resolve it manually.
 >
-> This is a normal part of working in a team and one of the most useful skills in this book. Chapter 11 has a dedicated lab where you and a partner deliberately create a merge conflict, then resolve it together. For Chapter 3, all you need to know is that conflicts exist and that they're solvable.
+> This is a normal part of working in a team and one of the most useful skills in this book. Chapter 11 has a dedicated lab where you and a partner deliberately create a merge conflict, then resolve it together. For Chapter 3, all you need to know is that conflicts exist and that they're solvable. The short practice below shows you one.
+
+### See a Conflict (2 Minutes)
+
+Go back to your throwaway practice folder from Section 3.5 and make a conflict on purpose. First, make a branch called `other` and change `notes.txt` there:
+
+```bash
+cd ~/git-practice
+git checkout -b other
+echo "Hello from the other branch." > notes.txt
+git add notes.txt
+git commit -m "Change notes on other"
+```
+
+Now go back to `main` and change the same line a different way:
+
+```bash
+git checkout main
+echo "Hello from main." > notes.txt
+git add notes.txt
+git commit -m "Change notes on main"
+```
+
+Both branches changed the same line. Try to merge them:
+
+```bash
+git merge other
+```
+
+Git stops and tells you:
+
+```
+CONFLICT (content): Merge conflict in notes.txt
+Automatic merge failed; fix conflicts and then commit the result.
+```
+
+Open `notes.txt` in VS Code. Git has put both versions in the file, with markers around them:
+
+```
+<<<<<<< HEAD
+Hello from main.
+=======
+Hello from the other branch.
 
 ### Deleting a Branch
 
@@ -520,7 +564,7 @@ The first few times, you'll have to think about each step. After a chapter or tw
 
 In your XRPExplorer repository, make three small commits in sequence, each with a meaningful message:
 
-1. Add a comment at the top of `Robot.java` describing what the file does (one sentence is fine)
+1. Add a comment at the top of `Robot.java` describing what the file does (one sentence is fine). A comment is a line that starts with `//`. Java skips it, so it's a note for people. For example: `// Robot.java: the XRP Explorer's main program.`
 2. Add a `System.out.println("Teleop started")` to `teleopInit()`
 3. Change the message in the `Robot()` constructor to include your name
 
@@ -548,7 +592,7 @@ Set up your XRP Explorer repository on GitHub if you haven't already. Then:
 The XRP Explorer project for Devang Doshi's *Robot Programming Book*.
 
 - **Author**: Your Name
-- **XRP Serial**: <your XRP's SSID, e.g. XRP-FA12>
+- **XRP Wi-Fi name**: <your XRP's network name, for example XRP-1A2B-3C4D>
 - **Course**: <your team or class name>
 
 ## How to Run
@@ -560,7 +604,13 @@ The XRP Explorer project for Devang Doshi's *Robot Programming Book*.
 See [robotprogrammingbook.com](https://robotprogrammingbook.com) for the full book.
 ```
 
-2. Commit it: `git add README.md && git commit -m "Ch3: add README"`
+2. Stage and commit it, as two commands:
+
+```bash
+git add README.md
+git commit -m "Ch3: add README"
+```
+
 3. Push: `git push`
 4. Open the GitHub page for your repo in a browser. The README should now render at the top of the page.
 
@@ -601,4 +651,4 @@ When you're done playing, you can either merge the branch (`git merge ch3-experi
 
 ---
 
-*Next up, Chapter 4: Your First Java Program. You'll learn variables, data types, and print statements by blinking the XRP's LED and watching values change live in Elastic.*
+*Next up, Chapter 4: Your First Java Program. You'll learn variables, data types, and print statements by turning on the XRP's LED and watching values change live in Elastic.*

@@ -97,17 +97,23 @@ When you build, a program called the **compiler** reads every line of your Java 
 Suppose you leave the semicolon off the first line of `teleopPeriodic()`. The build fails with output like this (trimmed a little):
 
 ```
-> Task :compileJava FAILED
-C:\Users\you\XRPExplorer\src\main\java\frc\robot\Robot.java:101: error: ';' expected
+> Task :compileJava
+C:\Users\you\XRPExplorer\src\main\java\frc\robot\Robot.java:109: error: ';' expected
         double forward = -MathUtil.applyDeadband(controller.getLeftY(), STICK_DEADBAND)
                                                                                        ^
 1 error
+
+> Task :compileJava FAILED
+Compilation Error!
+GradleRIO detected this build failed due to a Compile Error (compileJava).
+Check that all your files are saved, then scroll up in this log for more information.
 
 FAILURE: Build failed with an exception.
 
 * What went wrong:
 Execution failed for task ':compileJava'.
-> Compilation failed; see the compiler error output for details.
+> Compilation failed; see the compiler output below.
+  ...
 
 BUILD FAILED in 2s
 ```
@@ -115,12 +121,12 @@ BUILD FAILED in 2s
 Read it piece by piece:
 
 - **The file**: `Robot.java`. (The long path in front tells you exactly which `Robot.java`, which matters once you have several projects.)
-- **The line number**: `101`. In VS Code, press `Ctrl+G` and type the number to jump straight there.
+- **The line number**: `109`. (That is the line in the Chapter 9 listing. Your numbers may differ a little.) In VS Code, press `Ctrl+G` and type the number to jump straight there.
 - **The problem**: `';' expected`. The compiler expected a semicolon and did not find one.
 - **The caret**: the `^` on the line below points at the exact spot where the compiler noticed the problem.
 - **The count**: `1 error`.
 
-Everything from `FAILURE:` down is Gradle, the build tool, saying "the compile step failed." It is the same every time. The useful part is always **above** it.
+Everything after `1 error` is the build tools saying "the compile step failed": GradleRIO's `Compilation Error!` banner, then Gradle's `FAILURE:` summary, which repeats the same error where the `...` is. It is the same every time. When you see `BUILD FAILED` at the bottom, it is your cue to scroll **up** to the first `error:` line: that is the useful part.
 
 You do not even need to build to see most compile errors. VS Code underlines them in red as you type. Hover over the red squiggle to read the message, or open the **Problems** panel (`Ctrl+Shift+M`) to see every error in the project as a clickable list.
 
@@ -139,12 +145,13 @@ Here are the compile errors you will meet again and again in robot code, with th
 | `incompatible types: possible lossy conversion from double to int` | You tried to store a `double` in an `int`, which would throw away the fraction | Use a `double` variable, or cast on purpose with `(int)` |
 | `missing return statement` | A method promises to return a value, but some path through it does not | Make sure every `if`/`else` path ends with a `return` |
 | `variable sensors might not have been initialized` | A `final` field is never given a value in the constructor | Create the object in the constructor (or in the field initializer) |
-| `class, interface, enum, or record expected` | Usually an extra or missing `}` somewhere above | Check that every `{` has a matching `}` |
+| `class, interface, enum, or record expected` | Usually an **extra** `}` somewhere above | Check that every `{` has a matching `}` |
+| `reached end of file while parsing` | A **missing** `}`: Java hit the end of the file while a block was still open (often after a few `';' expected` errors) | Find the `{` with no partner and add its `}` |
 
 `cannot find symbol` deserves a closer look, because it comes with extra lines that tell you exactly which name Java could not find:
 
 ```
-Robot.java:94: error: cannot find symbol
+Robot.java:114: error: cannot find symbol
         boolean blocked = sensors.isObstacleWithn(WALL_STOP_DISTANCE_METERS);
                                  ^
   symbol:   method isObstacleWithn(double)
@@ -181,9 +188,9 @@ Each of those calls is waiting for the one after it to finish. Java keeps track 
 
 ```
 leftEncoder.getDistance()                 <- running right now (top of the stack)
-drivetrain.getLeftDistanceMeters()        <- waiting, at Drivetrain.java line 60
-updateDashboard()                         <- waiting, at Robot.java line 45
-robotPeriodic()                           <- waiting, at Robot.java line 32
+drivetrain.getLeftDistanceMeters()        <- waiting, at Drivetrain.java line 59
+updateDashboard()                         <- waiting, at Robot.java line 52
+robotPeriodic()                           <- waiting, at Robot.java line 40
 TimedRobot (WPILib's loop)                <- waiting
 ```
 
@@ -198,14 +205,16 @@ Here is a crash you might really cause. A teammate is cleaning up `Robot.java`, 
 ```
 ********** Robot program starting **********
 XRP Explorer started!
-Error at frc.robot.Robot.updateDashboard(Robot.java:54): Unhandled exception: java.lang.NullPointerException: Cannot invoke "frc.robot.Sensors.getDistanceAheadMeters()" because "this.sensors" is null
-	at frc.robot.Robot.updateDashboard(Robot.java:54)
-	at frc.robot.Robot.robotPeriodic(Robot.java:31)
+********** Robot program startup complete **********
+Error at frc.robot.Robot.updateDashboard(Robot.java:62): Unhandled exception: java.lang.NullPointerException: Cannot invoke "frc.robot.Sensors.getDistanceAheadMeters()" because "this.sensors" is null
+	at frc.robot.Robot.updateDashboard(Robot.java:62)
+	at frc.robot.Robot.robotPeriodic(Robot.java:39)
 	at edu.wpi.first.wpilibj.IterativeRobotBase.loopFunc(IterativeRobotBase.java:400)
 	at edu.wpi.first.wpilibj.TimedRobot.startCompetition(TimedRobot.java:152)
 	at edu.wpi.first.wpilibj.RobotBase.runRobot(RobotBase.java:436)
-	at edu.wpi.first.wpilibj.RobotBase.lambda$startRobot$0(RobotBase.java:507)
-	at java.base/java.lang.Thread.run(Thread.java:840)
+	at edu.wpi.first.wpilibj.RobotBase.startRobot(RobotBase.java:527)
+	at frc.robot.Main.main(Main.java:23)
+
 Warning at edu.wpi.first.wpilibj.RobotBase.runRobot(RobotBase.java:450): The robot program quit unexpectedly. This is usually due to a code error.
   The above stacktrace can help determine where the error occurred.
   See https://wpilib.org/stacktrace for more information.
@@ -219,8 +228,8 @@ It looks like a wall of text. Here is how to take it apart:
 1. **Find the `Error at` line.** The text "The robot program quit unexpectedly" is WPILib's signal that a stack trace was printed above it. Look up.
 2. **Read the exception type.** `java.lang.NullPointerException`. That is the name of what went wrong. (Section 10.5 explains this one.)
 3. **Read the message after it.** Modern Java explains a `NullPointerException` in plain English: `Cannot invoke "frc.robot.Sensors.getDistanceAheadMeters()" because "this.sensors" is null`. In other words: you tried to call a method on `sensors`, but `sensors` was empty.
-4. **Read the `at` lines from the top down until you find your own code.** Lines that start with `frc.robot` are yours. Lines that start with `edu.wpi.first` are WPILib's, and lines that start with `java.` are Java's own. The first `frc.robot` line is where the crash happened: `Robot.java`, line 54, inside `updateDashboard`.
-5. **Keep reading down to see how you got there.** `updateDashboard` was called by `robotPeriodic`, at line 31. `robotPeriodic` was called by WPILib's loop. Each line was called by the line **below** it.
+4. **Read the `at` lines from the top down until you find your own code.** Lines that start with `frc.robot` are yours. Lines that start with `edu.wpi.first` are WPILib's, and lines that start with `java.` are Java's own. The first `frc.robot` line is where the crash happened: `Robot.java`, line 62, inside `updateDashboard`.
+5. **Keep reading down to see how you got there.** `updateDashboard` was called by `robotPeriodic`, at line 39. `robotPeriodic` was called by WPILib's loop. Each line was called by the line **below** it.
 
 That is the whole skill. Type of problem, plain-English message, the first line that is yours, and the chain of calls that led there. In this case it takes you straight to the missing `sensors = new Sensors();`.
 
@@ -282,8 +291,10 @@ private final Sensors sensors;
 Java **requires** that the constructor give `sensors` a value. Forget to, and you get a compile error:
 
 ```
-Robot.java:23: error: variable sensors might not have been initialized
+Robot.java:29: error: variable sensors might not have been initialized
 ```
+
+Notice where it points: line 29 is the constructor's closing `}`, not the field. Java checks at the end of the constructor, and that is where it notices `sensors` still has no value.
 
 That compile error was not an obstacle. It was the compiler catching a crash before it could happen. Deleting `final` did not fix the bug; it turned a friendly compile error into a runtime crash. Remember the table in Section 10.2: you always want to move bugs **up**, toward the compiler, never down.
 
@@ -399,6 +410,7 @@ This is a habit real FRC programmers lean on constantly. On a competition robot,
 - **Make it smaller.** If the bug happens in a long sequence, find the shortest set of steps that still causes it. A bug you can trigger in five seconds is a bug you can fix.
 - **Explain it to a rubber duck.** Explain your code, line by line, out loud, to someone who knows nothing about it: a teammate, a pet, or literally a rubber duck on your desk. Partway through the explanation you will very often hear yourself say "...and then this line does... oh." Programmers have used this technique for decades.
 - **Use `println` for events, not loops.** A print in a periodic method fires 50 times a second and floods the terminal (Chapter 4). Print when something **happens**, like a mode change or a button press. For values that change every loop, use the dashboard. For a record you can look back at later, use the log you are about to build.
+- **Pause the program with a breakpoint.** **Simulate Robot Code** runs your program under VS Code's Java debugger, so you can click in the margin left of a line number to set a **breakpoint** (a red dot). When the program reaches that line, it freezes, and the **Run and Debug** panel shows the value of every variable right then. Press `F10` to run one line at a time and `F5` to continue. Two cautions for robot code. First, while the program is paused, nothing in it can react, and the motors may keep doing whatever they were last told, so lift the XRP's wheels off the table first. Second, when you continue, WPILib's **Motor Safety** may complain (`Output not updated often enough`) and stop the motors, because your code missed its 20 ms deadline. That message is expected after a pause.
 
 ---
 
@@ -455,6 +467,8 @@ wasBlocked = blocked;
 ```
 
 Read it aloud: "If we are blocked now but were not last loop, the wall stop just turned on: log it. If we are not blocked now but were last loop, it just turned off: log that. Then remember this loop's value for next time." This is the same "did it just change?" idea as `getYButtonPressed()` from Chapter 8, written by hand. You will use it again when you build state machines in Chapter 22.
+
+If you creep toward a wall very slowly, you may see several `ON`/`OFF` pairs in a row. That is not a bug in the logging. It is the rangefinder reading wobbling back and forth across 20 cm, the **chatter** from Chapter 9's "Noise and filtering" callout, and the log is showing it honestly. Chapters 21 and 22 show two ways to fix it (debounce and hysteresis).
 
 ### The updated `Robot.java`
 
@@ -874,7 +888,7 @@ Bisect finds the first bad **commit**. If that commit is one line, you have foun
 2. Change `sensors.isObstacleWithin(...)` to `sensors.isObstacleWithIn(...)` (capital `I`).
 3. Delete the line `import edu.wpi.first.math.MathUtil;`.
 4. Change `double forward = ...` to `int forward = ...`.
-5. Delete one `}` from the middle of `Robot.java`. How many errors do you get? Which one is the real one?
+5. Delete one `}` from the middle of `Robot.java`. How many errors do you get? Which one is the real one? (Careful: the first error points just **after** the missing brace. If it says `';' expected`, it is not telling you to add a `;`.)
 
 Write one line per change: the message you got, and what it would tell a teammate who did not know what you changed. (Use `git diff` at the end to make sure you undid everything. If you lost track, `git checkout -- .` throws away all uncommitted changes, so only use it when you mean it.)
 
@@ -959,7 +973,7 @@ Every commit you have pushed since Chapter 3 is a save point you can return to. 
 
 ### Collab
 
-**Bug swap.** Pair up. Each partner creates a `bug-hunt` branch of their own Explorer with six to eight small commits, exactly one of which plants a bug that does not cause a compile error. Give your planted commit a boring, innocent-sounding message. Push the branch to GitHub (`git push -u origin bug-hunt`).
+**Bug swap.** Pair up. Each partner creates a `bug-hunt` branch of their own Explorer with six to eight small commits, exactly one of which plants a bug that does not cause a compile error. Give your planted commit a boring, innocent-sounding message. Before you push, test your bad commit and the one before it on the robot. If you can't see the difference, pick another bug. Write your test in one sentence for your partner (for example, "push the robot 10 cm and read `Avg Distance (m)`"). Push the branch to GitHub (`git push -u origin bug-hunt`).
 
 Then swap: clone your partner's repository (if it is private, they can add you as a collaborator on GitHub under **Settings** > **Collaborators**), check out their `bug-hunt` branch, and find the bug with `git bisect`. You may not read their diffs until bisect names a commit. Afterward, compare: how many tests did each of you need, and would better commit messages have made it faster?
 

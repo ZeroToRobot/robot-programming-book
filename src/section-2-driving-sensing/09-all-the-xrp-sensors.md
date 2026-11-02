@@ -186,7 +186,7 @@ Now there are two ways to read each encoder:
 
 Encoders tell you how far each wheel rolled. They do not directly tell you which way the robot is pointing. For that, the XRP has an **IMU** (inertial measurement unit) on its circuit board: a tiny chip containing a **gyroscope** and an **accelerometer**.
 
-A **gyro** measures how fast the robot is rotating. Integrate that rate over time (add up all the tiny turns, fifty times a second) and you get the robot's **heading**: the direction it is facing, in degrees. WPILib gives you the XRP's gyro through the `XRPGyro` class:
+A **gyro** measures how fast the robot is rotating. Add up that rate over time (all the tiny turns, one after another) and you get the robot's **heading**: the direction it is facing, in degrees. (Mathematicians call this kind of adding up **integrating**.) The XRP does that adding for you in its firmware, and `getAngle()` hands you the total. WPILib gives you the XRP's gyro through the `XRPGyro` class:
 
 ```java
 import edu.wpi.first.wpilibj.xrp.XRPGyro;
@@ -296,7 +296,7 @@ When the robot drives straight, both wheels travel the same distance, and the av
 
 ### The complete `Drivetrain.java`
 
-Here is `Drivetrain` with the encoders and gyro added. Remove the temporary encoder fields you put in `Robot.java` in Section 9.2, then update `Drivetrain.java`. Type it, do not paste:
+Here is `Drivetrain` with the encoders and gyro added. Remove the temporary encoder fields you put in `Robot.java` in Section 9.2, **and the two `Left Count`/`Right Count` lines** that read them (otherwise the build fails with `cannot find symbol`), then update `Drivetrain.java`. Type it, do not paste:
 
 ```java
 package frc.robot;
@@ -437,10 +437,6 @@ double distanceAhead = rangefinder.getDistanceMeters();
 
 There is also `getDistanceInches()`, if you ever need it. This book uses meters.
 
-> **Correction to Chapter 6**
->
-> Chapter 6 used `rangefinder.getDistance()` and compared it to `20.0` centimeters. The real `XRPRangefinder` method is `getDistanceMeters()`, and it returns meters. So the Chapter 6 check "closer than 20 cm" is written `getDistanceMeters() < 0.20`. If you typed the Chapter 6 version into your project and it would not compile, this is why.
-
 ### What the rangefinder is bad at
 
 The XRP's rangefinder reports from about 2 centimeters out to **4 meters**. Anything farther than 4 meters reads as 4 meters. Within that range it is quite good, but it has some habits worth knowing:
@@ -456,6 +452,8 @@ Put `rangefinder.getDistanceMeters()` on the dashboard and test each of those yo
 > **Noise and filtering**
 >
 > Watch the distance widget while the robot sits still facing a wall. The number will flicker a little from loop to loop, even though nothing moved. That is **noise**, and every real sensor has some. For now, ignore small flickers by using thresholds with some margin (stop at 20 cm, not exactly at the wall). Later, you will meet tools that smooth noisy readings by averaging the last few values, and in Chapter 15 you will see why noisy measurements make some control loops twitchy.
+>
+> Noise also matters for the wall stop you are about to build. Creep toward a wall slowly and the reading can wobble back and forth across 20 cm, so `Blocked` flickers on and off. That is called **chatter**. Two fixes exist: a **debounce** (only believe a change that lasts a moment, Chapter 21) or two thresholds, one to turn on and a farther one to turn off, called **hysteresis** (Chapter 22).
 
 ---
 
@@ -704,6 +702,7 @@ Walk through what changed since Chapter 8:
 - **A `Sensors` field**, created once in the constructor next to the drivetrain.
 - **A new constant**, `WALL_STOP_DISTANCE_METERS`, with the unit in its name. This is the 20 cm from Chapter 6, now in meters.
 - **`updateDashboard()`**, a private helper method (Chapter 6) that groups twenty `put` calls in one place so `robotPeriodic()` stays readable. It runs in `robotPeriodic()`, so every reading updates in **every mode**, including Disabled. That is what lets you push the robot by hand and watch the numbers.
+- **The `Forward Cmd` and `Rotation Cmd` widgets are gone.** They did their job in Chapter 8. The sensor widgets in `updateDashboard()` replace them, so delete those two lines from `teleopPeriodic()`.
 - **The Y button resets the sensors**, using `getYButtonPressed()` from Chapter 8 so one press means one reset. Zeroing the encoders and gyro before a test is something you will do constantly.
 - **The wall stop in `teleopPeriodic()`.** If the driver asks to go forward **and** the rangefinder sees something within 20 cm, the forward command becomes `0.0`. The driver can still back up and turn, because the check only blocks positive `forward`. This is the Chapter 6 Build idea, now with real units, a named constant, and the ternary from Chapter 8.
 
@@ -711,11 +710,11 @@ Why read the Y button in `robotPeriodic()` instead of `teleopPeriodic()`? Becaus
 
 > **The robot just got a reflex**
 >
-> The wall stop is small, but it is a big idea: the robot is overriding the driver based on what it senses. Real FRC robots do this all the time: an arm refuses to move past its safe limit, an intake stops when a sensor sees a game piece is loaded, a drivetrain slows near the edge of a scoring zone. A human gives the intent, and the robot's sensors keep it safe. When you build autonomous routines in Chapter 12, you will hand the intent over to code too.
+> The wall stop is small, but it is a big idea: the robot is overriding the driver based on what it senses. Real FRC robots do this all the time: an arm refuses to move past its safe limit, an intake stops when a sensor sees a game piece is loaded, a drivetrain slows near the edge of a scoring zone. A human gives the intent, and the robot's sensors help carry it out. A reflex like this helps the driver, but it is not a safety system: you just saw ways the rangefinder misses a wall. The real safety system is a person ready to click Disable. When you build autonomous routines in Chapter 12, you will hand the intent over to code too.
 
 > **Print for setup, dashboard for runtime**
 >
-> Notice there is no `System.out.println` in `updateDashboard()`. Printing twenty values fifty times a second would bury RioLog in a thousand lines a second. Use prints for things that happen once (startup, mode changes) and the dashboard for values that change every loop. In Chapter 10 you will see how good dashboards and logs turn "it is broken somehow" into "it broke right here."
+> Notice there is no `System.out.println` in `updateDashboard()`. Printing twenty values fifty times a second would bury the VS Code terminal in a thousand lines a second. Use prints for things that happen once (startup, mode changes) and the dashboard for values that change every loop. In Chapter 10 you will see how good dashboards and logs turn "it is broken somehow" into "it broke right here."
 
 ### Arrange the dashboard
 
@@ -802,7 +801,7 @@ The fourth and the last two are the tricky ones. Explain in one sentence each wh
 
 Give the Explorer its full set of senses and a live sensor dashboard.
 
-1. Update `Drivetrain.java` to the listing in Section 9.5, and remove any temporary encoder fields from `Robot.java`. Build and confirm `BUILD SUCCESSFUL`.
+1. Update `Drivetrain.java` to the listing in Section 9.5, and remove the temporary encoder fields **and the two `Left Count`/`Right Count` lines** from `Robot.java`. Build and confirm `BUILD SUCCESSFUL`.
 2. Create `Sensors.java` from Section 9.8.
 3. Update `Robot.java` to the listing in Section 9.8. Build again.
 4. Power on the XRP flat and still, wait for the LED to stop flashing, then run the program. Open Elastic, arrange your sensor dashboard, and save it as `src/main/deploy/elastic-layout.json` (Section 9.8).

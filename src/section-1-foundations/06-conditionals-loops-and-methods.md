@@ -86,7 +86,7 @@ To write a useful condition, you need to be able to compare values. Java has six
 | Operator | Meaning | Example |
 | --- | --- | --- |
 | `==` | equal to | `mode == 1` |
-| `!=` | not equal to | `state != "DONE"` |
+| `!=` | not equal to | `count != 5` |
 | `<` | less than | `distance < 0.20` |
 | `>` | greater than | `voltage > 11.5` |
 | `<=` | less than or equal to | `ticks <= 1000` |
@@ -212,7 +212,7 @@ This will blink the LED five times, then stop. Read it line by line: start count
 >
 > Do not use blocking loops like `while` and `Timer.delay()` inside `teleopPeriodic()` or `autonomousPeriodic()`.
 >
-> Remember: those methods run 50 times per second. They are expected to finish quickly and return. If you put a `while` loop with `Timer.delay()` inside `teleopPeriodic()`, the entire robot freezes for the duration of the loop. Driver Station inputs are ignored. Other code does not run. The watchdog will start barking.
+> Remember: those methods run 50 times per second. They are expected to finish quickly and return. If you put a `while` loop with `Timer.delay()` inside `teleopPeriodic()`, the entire robot freezes for the duration of the loop. Driver Station inputs are ignored. Other code does not run. The console fills with warnings like `Loop time of 0.02s overrun`, followed by a list of how long each method took. When you see that message, look for a slow or waiting line in a Periodic method.
 >
 > `while` loops with delays belong in standalone test code, or in the `Robot()` constructor (which runs once at startup). When you want loop-like behavior in periodic code, you use a counter variable that is checked on each tick, and you let the 50 Hz loop do the repeating. You will write this pattern in the Build exercise at the end of this chapter. Commands (Chapter 19) are built on the same "check every loop, never wait" idea.
 
@@ -466,6 +466,8 @@ private void stopMotors() {
 
 Read `teleopPeriodic` aloud. "Get the speed from the controller with a deadband. If the wall is close, stop and report. Otherwise if the speed is nonzero, drive forward and report. Otherwise stop and report idle."
 
+`speed != 0.0` is safe here only because `applyDeadband` returns exactly `0.0` when the stick is near center. For values a sensor measures, like a distance, never test for an exact number: use `<` or `>` instead. Chapter 12 explains why.
+
 That is the goal. Code that reads like a description of what the robot is doing, with the messy details tucked away in well-named methods.
 
 > **The foundation of clean robot code**
@@ -537,7 +539,7 @@ Run it. While it is disabled, the LED should blink about once a second. Then sel
 
 ### Reflect
 
-Write 4 to 6 sentences answering each of these prompts. Save your answers in a file called `reflections.md` in your project. You will refer back to these later in the book.
+Write 4 to 6 sentences answering each of these prompts. Save your answers in a file called `reflections.md` in your XRP Explorer project. You will refer back to these later in the book.
 
 1. **Why is a method better than copy-pasting the same code in two places?** Give a concrete example, ideally one from your own code.
 
@@ -570,15 +572,24 @@ public void teleopPeriodic() {
 
 ### Git
 
-After completing the Practice exercises, commit your work:
+This chapter has two commits, in two projects.
+
+After completing the Practice exercises, commit them in your scratch project (if it has a Git repo):
 
 ```bash
 git add .
 git commit -m "Ch6: utility methods (isAButtonPressed, driveForward, blinkLED)"
+```
+
+After the Build, commit in your XRP Explorer project, with your `reflections.md` file included:
+
+```bash
+git add .
+git commit -m "Ch6: deadband helper and wall stop in teleop"
 git push
 ```
 
-If you also wrote your `reflections.md` file, include it in the commit. Reflections are part of your work, not separate from it.
+Reflections are part of your work, not separate from it, so they go in the same commit as the Build.
 
 > **Write commit messages your future self can read**
 >
@@ -588,7 +599,6 @@ If you also wrote your `reflections.md` file, include it in the commit. Reflecti
 
 > **Additional Resources**
 >
-> * **WPILib Java basics**: [docs.wpilib.org/en/stable/docs/software/basic-programming/java-units.html](https://docs.wpilib.org/en/stable/docs/software/basic-programming/java-units.html) the official WPILib guide to Java fundamentals as they apply to robot code.
 > * **Java control flow**: [dev.java/learn/language-basics/controlling-flow](https://dev.java/learn/language-basics/controlling-flow/) Oracle's official Java tutorial on `if`, `for`, `while`, and `switch`. Skip past anything that is not in this chapter for now.
 > * **Java methods**: [dev.java/learn/classes/methods](https://dev.java/learn/classes/methods/) deeper dive into method syntax, parameters, and return values. Useful when you want to understand the underlying mechanics.
 > * **WPILib applyDeadband utility**: [github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/MathUtil.html](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/MathUtil.html) WPILib has a built-in `MathUtil.applyDeadband()` method. Look at the source to see how it handles edge cases your version probably does not. We will use it in real code from Chapter 8 onward.

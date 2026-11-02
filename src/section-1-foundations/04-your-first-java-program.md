@@ -2,7 +2,7 @@
 
 You have a working development environment. You have a version-controlled project on GitHub. Now it's time to write some actual Java.
 
-This chapter introduces variables, the four data types you'll use most often, and how to print values from your program so you can see what's happening. You'll write code that lives entirely on your laptop at first, then move it to the XRP and watch a real LED blink based on a real variable. By the end, you'll be able to read live values from your robot in Elastic while it's running.
+This chapter introduces variables, the four data types you'll use most often, and how to print values from your program so you can see what's happening. You'll write code that lives entirely on your laptop at first, then move it to the XRP and turn on a real LED based on a real variable. By the end, you'll be able to read live values from your robot in Elastic while it's running.
 
 If you've never written code before, this is the chapter where it starts to feel like programming. Take your time, and don't be afraid to break things.
 
@@ -29,6 +29,8 @@ You can read it later:
 ```java
 System.out.println(batteryPercent);  // prints 85
 ```
+
+See the `// prints 85` part? Two slashes start a **comment**. Java ignores everything from `//` to the end of the line, so a comment is a note for the people reading the code. This book uses comments to tell you what a line does.
 
 You can change it:
 
@@ -163,6 +165,26 @@ You have a lot of freedom in naming variables, but there are some rules and some
 >
 > Spend the extra second to give variables real names. Your future self (and your teammates reviewing your pull requests) will thank you.
 
+### Doing Math
+
+Java does arithmetic with four basic operators:
+
+| Operator | Meaning | Example | Result |
+| --- | --- | --- | --- |
+| `+` | add | `7 + 2` | `9` |
+| `-` | subtract | `7 - 2` | `5` |
+| `*` | multiply | `7 * 2` | `14` |
+| `/` | divide | `7.0 / 2` | `3.5` |
+
+You can use variables anywhere you'd use a number:
+
+```java
+double motorSpeed = 0.75;
+double halfSpeed = motorSpeed / 2;  // 0.375
+```
+
+One surprise: when you divide one `int` by another `int`, Java throws away the fraction. `7 / 2` is `3`, not `3.5`. Chapter 9 shows you why that matters on a robot and how to avoid it.
+
 ### Changing a Variable's Value
 
 Once a variable is declared, you can change its value without re-declaring the type:
@@ -280,7 +302,7 @@ Press `Ctrl+Shift+P` → `WPILib: Build Robot Code`. You should see `BUILD SUCCE
 
 If you see a red error message instead, read it carefully. The most common errors at this stage are:
 
-- **Missing semicolon**: the compiler will point at the next line and complain
+- **Missing semicolon**: the error says `';' expected` and points at the end of the line that needs one
 - **Mismatched quotes**: every `"` needs a matching `"`
 - **Typo in a name**: Java is case-sensitive, `BatteryVoltage` and `batteryVoltage` are different variables
 
@@ -312,7 +334,7 @@ If you see this, your robot program ran. The variables you declared in Java actu
 
 ---
 
-## 4.6 Your First Real Output: Blinking the LED
+## 4.6 Your First Real Output: Turning On the LED
 
 Printing values to a console is fine, but this is a robotics book. Let's make something physical happen.
 
@@ -412,22 +434,22 @@ Notice that `putNumber` is used for both `int` and `double`. The dashboard treat
 
 Print statements went in the `Robot()` constructor because it only runs once. Dashboard values are the opposite: it's designed to be called every loop, so you put it in `robotPeriodic()`, which runs every 20 ms.
 
-Make sure `SmartDashboard` is imported (you added this in Chapter 2):
+Make sure `SmartDashboard` is imported (the template already imports it):
 
 ```java
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 ```
 
-Then, in `robotPeriodic()`:
+Then, in `robotPeriodic()`, add these lines. This replaces the `Status` line from Chapter 2.
 
 ```java
 @Override
 public void robotPeriodic() {
-    double matchTime = Timer.getFPGATimestamp();
+    double uptimeSeconds = Timer.getFPGATimestamp();
     boolean ledOn = onBoardIO.getLed();
     String mode = isEnabled() ? "Enabled" : "Disabled";
 
-    SmartDashboard.putNumber("Match Time", matchTime);
+    SmartDashboard.putNumber("Uptime", uptimeSeconds);
     SmartDashboard.putBoolean("LED On", ledOn);
     SmartDashboard.putString("Mode", mode);
 }
@@ -441,9 +463,9 @@ import edu.wpi.first.wpilibj.Timer;
 
 Don't worry about the `?` on the `mode` line: it's a shorthand for an if/else called the ternary operator, which we'll cover in Chapter 8. For now, just know it sets `mode` to `"Enabled"` if the robot is enabled, `"Disabled"` otherwise.
 
-Build, run, and open Elastic (Chapter 2). Click **Add Widget**, open the **SmartDashboard** folder, and drag in three widgets: `Match Time` ticking up, `LED On` showing the current LED state, and `Mode` changing whenever you enable or disable the robot in the Simulation GUI's Robot State panel. Choose **File** > **Save** so they are there next time.
+Build, run, and open Elastic (Chapter 2). Click **Add Widget**, open the **SmartDashboard** folder, and drag in three widgets: `Uptime` ticking up (the seconds since your program started), `LED On` showing the current LED state, and `Mode` changing whenever you enable or disable the robot in the Simulation GUI's Robot State panel. Choose **File** > **Save** so they are there next time.
 
-That's a live view of what's happening on your robot, updating 50 times per second, with no print spam.
+That's a live view of what's happening on your robot, with no print spam. Your code sends the values every loop, and the dashboard redraws several times a second. To see every single loop, you'll use logs in Chapter 17.
 
 > **Print for setup, dashboard for runtime**
 >
@@ -453,7 +475,7 @@ That's a live view of what's happening on your robot, updating 50 times per seco
 
 ## 4.8 Why Java Makes You Declare Types
 
-Let's circle back to a question that probably bothered you earlier: why does Java make you write `int` or `double` or `boolean`? Other languages (Python, JavaScript) don't require this. Why does Java?
+Let's circle back to a question that probably bothered you earlier: why does Java make you write `int` or `double` or `boolean`? Some languages, like Python, let you skip this: they check types only while the program runs. Why does Java make you do it?
 
 The short answer: it catches bugs before the robot moves.
 
@@ -466,13 +488,13 @@ teamNumber = "three thousand four hundred fifteen";  // ERROR
 
 Java will refuse to compile that code. The compiler sees that `teamNumber` was declared as an `int` and you're trying to put a `String` in it. You get an error at build time, before the program even runs.
 
-In a language without types, that same mistake might compile fine and only blow up at runtime, possibly in the middle of a match, possibly in a way that's hard to trace back to its cause. The robot runs into a wall, you check the logs, and you see something that doesn't immediately look like the bug.
+In a language that checks types only while the program runs (like Python), that same mistake might start fine and only blow up at runtime, possibly in the middle of a match, possibly in a way that's hard to trace back to its cause. The robot runs into a wall, you check the logs, and you see something that doesn't immediately look like the bug.
 
 Type checking is a safety net. It costs you a few extra characters when you declare variables. In return, an entire category of bugs is impossible.
 
 > **A real-world example**
 >
-> A common bug is mixing up units. You read a sensor that returns angles in radians and pass it to a function expecting degrees. Java's type system can't catch unit mismatches by default, but a more advanced technique called custom types can. You'll see a hint of this in WPILib's `Rotation2d` class in Chapter 14: it represents an angle without committing to a particular unit, and provides methods like `getDegrees()` and `getRadians()` so you have to ask for the unit explicitly.
+> A common bug is mixing up units. You read a sensor that returns angles in radians and pass it to a function expecting degrees. Java's type system can't catch unit mismatches by default, but a more advanced technique called custom types can. You'll see a hint of this in WPILib's `Rotation2d` class in Chapter 14: it represents an angle without committing to a particular unit, and provides methods like `getDegrees()` and `getRadians()` so you have to ask for the unit explicitly. Chapter 16 goes further with WPILib's **units library**, which makes the unit part of the type, so the compiler catches a meters-versus-inches mix-up for you.
 >
 > The general principle is the same: the more your types tell the compiler about what's allowed, the more bugs the compiler can catch for you.
 
@@ -526,7 +548,7 @@ Predict the output, then verify.
 Add the LED control and the SmartDashboard live values from Sections 4.6 and 4.7 to your XRP Explorer project. Specifically:
 
 1. Add a `boolean ledShouldBeOn` variable in the `Robot()` constructor and use it to set the LED
-2. In `robotPeriodic()`, send `Match Time`, `LED On`, and `Mode` to the dashboard with `SmartDashboard`
+2. In `robotPeriodic()`, send `Uptime`, `LED On`, and `Mode` to the dashboard with `SmartDashboard`
 3. Add all three widgets in Elastic, and confirm the values look reasonable
 
 This is the start of a habit you'll keep for the rest of the book: every chapter where the Explorer gains new behavior, that behavior gets a dashboard widget so you can see it working.

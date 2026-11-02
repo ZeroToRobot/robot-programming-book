@@ -214,7 +214,7 @@ Java has a naming convention for constants: **ALL_CAPS with underscores** betwee
 
 > **When should a number become a constant?**
 >
-> A good rule: if a number is something you might **tune** (a deadband, a speed limit, a distance to a wall) or something with a **meaning** (a controller port, a motor channel), give it a name. Numbers that are just math, like the `2` in "divide by 2 to find the middle," can stay as they are. By Chapter 21 your constants will move into their own `Constants.java` file, so the whole team has one place to look for every tunable value on the robot.
+> A good rule: if a number is something you might **tune** (a deadband, a speed limit, a distance to a wall) or something with a **meaning** (a controller port, a motor channel), give it a name. Numbers that are just math, like the `2` in "divide by 2 to find the middle," can stay as they are. By Chapter 21 the constants several classes share move into their own `Constants.java` file, and the ones that describe one part of the robot live with that part.
 
 ---
 
@@ -387,6 +387,8 @@ if (controller.getAButtonPressed()) {
 
 Every button has all three versions (`getBButtonPressed()`, `getRightBumperButtonPressed()`, and so on).
 
+Read "just" carefully. `getAButtonPressed()` really means "pressed since the last time this line asked." Two things follow from that. First, the press is used up by whoever asks first: if two lines both call `getAButtonPressed()` in the same loop, only the first one sees `true`. So ask once per loop and keep the answer in a variable. Second, a press that happened while the line wasn't running (say, while the robot was disabled) still counts the next time it asks.
+
 > **Held for "while," pressed for "once"**
 >
 > Use the held version when the robot should do something **while** the button is down: run an intake while A is held, drive slowly while the bumper is held. Use the pressed version when something should happen **once** per press: toggle a mode on and off, count a scored game piece, switch cameras. Mixing them up is one of the most common teleop bugs. A toggle written with `getAButton()` flips fifty times a second, so where it ends up depends on how long you held the button.
@@ -439,7 +441,7 @@ String mode = isEnabled() ? "Enabled" : "Disabled";
 
 "Is the robot enabled? If so, `"Enabled"`. Otherwise, `"Disabled"`." One line, one choice, one value.
 
-Put slow mode into `teleopPeriodic()` by multiplying both commands by the scale:
+Put slow mode into `teleopPeriodic()` by multiplying both commands by the scale. Replace the `drivetrain.arcadeDrive(forward, rotation);` line with:
 
 ```java
 double speedScale = controller.getRightBumperButton() ? SLOW_MODE_SCALE : FULL_SPEED_SCALE;
@@ -448,13 +450,15 @@ drivetrain.arcadeDrive(forward * speedScale, rotation * speedScale);
 SmartDashboard.putBoolean("Slow Mode", speedScale == SLOW_MODE_SCALE);
 ```
 
+The `Forward Cmd` and `Rotation Cmd` widgets still show `forward` and `rotation`, the values **before** scaling, so they don't drop when you hold the bumper.
+
 > **When not to use the ternary**
 >
 > The ternary is great for a **simple choice between two values**. It is a bad idea for anything more. If you catch yourself nesting one inside another (`a ? b : c ? d : e`), or wanting it to "do" something like drive a motor, switch back to a regular `if`/`else`. The goal is code that reads like a sentence. A ternary that needs to be read three times has failed at that goal.
 
 > **Scaling commands is not the same as limiting speed**
 >
-> Multiplying by `0.5` cuts the **command** in half. Because `arcadeDrive` then squares it (Section 8.6), full stick in slow mode is `0.5 * 0.5`, about a **quarter** of full power. On a fresh battery that might be one speed; on a tired battery, noticeably slower. Remember the callout from Chapter 7: `-1.0` to `1.0` is a fraction of power, not a real-world speed. Once your drivetrain knows its true speed from encoders (Ch 9) and a measured motor model (Ch 16), you can ask for "0.3 meters per second" and get it, battery or not.
+> Multiplying by `0.5` cuts the **command** in half. Because `arcadeDrive` then squares it (Section 8.6), full stick in slow mode is `0.5 * 0.5`, about a **quarter** of full power. On a fresh battery that might be one speed; on a tired battery, noticeably slower. Remember the callout from Chapter 7: `-1.0` to `1.0` is a fraction of power, not a real-world speed. Once your drivetrain knows its true speed from encoders (Ch 9) and a measured motor model (Ch 16), you can ask for "0.3 meters per second" and get close. The motor model (Ch 16) gets you most of the way, and encoder feedback (Ch 15) fixes the rest, even on a tired battery.
 
 ---
 
@@ -509,12 +513,18 @@ Next, set `STICK_DEADBAND` to `0.0`. On its own that will probably show you noth
 
 **2. Write the smooth deadband yourself.** Without looking at WPILib's source, write a method `smoothDeadband(double value, double deadband)` that returns `0.0` inside the deadband and rescales the rest so that the output is `0.0` at the edge of the deadband and `1.0` at a full stick of `1.0`. Remember negative values. Check your method against the table in Section 8.4, then compare your code with WPILib's `MathUtil` source (linked in Additional Resources).
 
+Stuck? Read one hint at a time, and try again after each.
+
+- Hint 1: Get positive values working first. Ignore negatives until the positive side matches the table.
+- Hint 2: `value - deadband` is `0.0` right at the edge of the deadband, and `1.0 - deadband` at full stick. What can you divide it by so full stick comes out as `1.0`?
+- Hint 3: For negatives, do the math on `Math.abs(value)`, then put the minus sign back if `value` was negative.
+
 **3. Predict the ternary.** For each line, write the value of `result` before running anything:
 
 ```java
 int a = 7;
 String result1 = a > 5 ? "big" : "small";
-double result2 = a % 2 == 0 ? 1.0 : -1.0;
+double result2 = a > 10 ? 1.0 : -1.0;
 boolean result3 = a < 0 ? true : false;
 ```
 

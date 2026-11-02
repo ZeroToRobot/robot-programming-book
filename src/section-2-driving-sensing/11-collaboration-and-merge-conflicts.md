@@ -6,7 +6,7 @@ Real robots are not built that way. A competition robot's code is written by a t
 
 That moment is called a **merge conflict**, and this chapter is about walking straight into one on purpose. You will learn the workflow real teams use to share one codebase without stepping on each other: **feature branches**, **pull requests**, and **code review**. Then you and a partner will each change the same lines of the Explorer's code, try to merge, get a conflict, and resolve it together. By the end, your Explorer will contain a feature your partner wrote, merged cleanly into your own.
 
-On the Java side, you will learn to write code for other people to read. You will meet **Javadoc comments**, the special comments that turn into the documentation you have been reading on the WPILib website, and **method overloading**, a way to give a method new abilities without breaking any teammate's code that already calls it.
+On the Java side, you will learn to write code for other people to read. You will meet **Javadoc comments**, the special comments that turn into WPILib's API reference pages, and **method overloading**, a way to give a method new abilities without breaking any teammate's code that already calls it.
 
 This chapter needs no robot. Everything happens in VS Code and on GitHub, so you can do it at home with a partner, even if your partner is across town. If you do have your XRP nearby, you will get to test the merged code at the end. One honest warning: the first conflict feels scary. The screen fills with strange arrows and equals signs, and it looks like Git broke your file. It did not. By the end of the chapter, a conflict will look like what it is: a short question from Git, with a clear answer.
 
@@ -198,6 +198,9 @@ You do not have to be an expert to review well. Beginners catch real bugs consta
 | Is every new object created once, in the constructor or a field? | `new Drivetrain()` inside a periodic method (Chapter 10) |
 | Would a teammate understand it in a month? | A method named `doThing()`, or a confusing block with no comment |
 | Does it build? | You can check: fetch the branch, check it out, and run `WPILib: Build Robot Code` |
+| Could this make the robot move unexpectedly? | A changed sign on a motor, a new speed limit of `1.5`, or a wall stop that no longer checks the rangefinder |
+
+That last row matters most. If a PR changes how the robot moves, its **How I tested it** section should say it was **driven**, not only built. If it does not, ask.
 
 ### How to comment kindly
 
@@ -230,7 +233,7 @@ A comment that starts with `/**` (two stars) instead of `/*` or `//` is a **Java
 Java treats doc comments specially in two ways:
 
 1. **VS Code shows them when you hover.** Hover your mouse over any call to `drivetrain.arcadeDrive(...)` in `Robot.java`. A popup shows the comment you wrote. Your teammate gets your instructions right where they are typing, without opening `Drivetrain.java`.
-2. **The `javadoc` tool turns them into web pages.** Every page of the WPILib documentation you have opened since Chapter 7, like the `XboxController` and `XRPGyro` pages, was generated from doc comments written above WPILib's own methods. When you hover over `controller.getLeftY()`, you are reading the comment a WPILib developer wrote.
+2. **The `javadoc` tool turns them into web pages.** WPILib has two kinds of documentation. The tutorials at docs.wpilib.org are written by hand. The **API reference** at [github.wpilib.org/allwpilib/docs/release/java](https://github.wpilib.org/allwpilib/docs/release/java/), with one page per class like `XboxController` and `XRPGyro`, is generated from doc comments written above WPILib's own methods. When you hover over `controller.getLeftY()`, you are reading the comment a WPILib developer wrote.
 
 ### Tags: `@param` and `@return`
 
@@ -340,7 +343,7 @@ public void arcadeDrive(double forward, double rotation, boolean squareInputs) {
 }
 ```
 
-Read the first method aloud: "To drive with two numbers, drive with those two numbers and squaring turned on." The two-number version does not repeat the work; it **calls** the three-number version with `true` for the third argument. Now there is exactly one place that talks to `diffDrive`. If that line ever needs to change, it changes once. This is the same "write it once" idea as the helper methods in Chapter 6.
+Read the first method aloud: "To drive with two numbers, drive with those two numbers and squaring turned on." The two-number version does not repeat the work; it **calls** the three-number version with `true` for the third argument. Now the three-number version is the only drive method that talks to `diffDrive`. If that line ever needs to change, it changes once. (`stop()` from Chapter 7 still calls `diffDrive` directly too. It could call `arcadeDrive(0.0, 0.0)` instead, and some teams would.) This is the same "write it once" idea as the helper methods in Chapter 6.
 
 Java does not let you write two methods with the same signature, even if they return different types, because then it could not tell which one you meant. Overloads must differ in the number or the types of their parameters.
 
@@ -394,11 +397,16 @@ When both branches have new commits, Git combines them and records a **merge com
 ```
 *   3f2bc6f Merge remote-tracking branch 'origin/main' into careful-reverse
 |\
-| * 82a09ec Scale down teleop turning for easier aiming
-* | 16f190f Limit reverse speed in teleop
+| *   f1136c7 Merge pull request #1 from owner/gentle-turns
+| |\
+| | * 82a09ec Scale down teleop turning for easier aiming
+| |/
+* / 16f190f Limit reverse speed in teleop
 |/
-* a30f655 Ch10: add data logging for events and dashboard values
+* a30f655 Ch11: Javadoc comments and linear arcadeDrive overload
 ```
+
+There are two merge commits here. The top one is Jordan's merge. The one below it, `Merge pull request #1`, was made by GitHub's **Merge pull request** button when Maya's PR merged: the button always records a merge commit of its own.
 
 ### `git pull` is two commands in one
 
@@ -453,7 +461,7 @@ Jordan, on the `careful-reverse` branch, adds a different constant in the same s
         drivetrain.arcadeDrive(limitedForward * speedScale, rotation * speedScale);
 ```
 
-`Math.max` is a `static` utility method, like `MathUtil.applyDeadband` from Chapter 8. It returns whichever of its two numbers is bigger. Driving backward at full stick makes `safeForward` equal to `-1.0`, and `Math.max(-1.0, -0.5)` is `-0.5`, so reverse is capped at half. Driving forward, `safeForward` is positive and always bigger than `-0.5`, so it passes through untouched.
+`Math.max` is a `static` utility method, like `MathUtil.applyDeadband` from Chapter 8. It returns whichever of its two numbers is bigger. Driving backward at full stick makes `safeForward` equal to `-1.0`, and `Math.max(-1.0, -0.5)` is `-0.5`, so reverse is capped at half stick. (`arcadeDrive` then squares it, so half stick becomes about quarter power.) Driving forward, `safeForward` is positive and always bigger than `-0.5`, so it passes through untouched.
 
 Maya's pull request is reviewed and merged first. Now Jordan's PR shows a gray box on GitHub: **This branch has conflicts that must be resolved.** Jordan resolves it on Jordan's own laptop.
 
@@ -584,7 +592,7 @@ For bigger conflicts, VS Code also has a **merge editor**. Click **Resolve in Me
 
 ### Step 5: Build, then finish the merge
 
-Never commit a resolution you have not built. Run **`WPILib: Build Robot Code`** and wait for `BUILD SUCCESSFUL`. If you have your XRP, run the program and drive: turns should be gentler, and backing up should be capped at half speed.
+Never commit a resolution you have not built. Run **`WPILib: Build Robot Code`** and wait for `BUILD SUCCESSFUL`. If you have your XRP, run the program and drive: turns should be gentler, and backing up should be capped at half stick, which squaring turns into about quarter power.
 
 Then tell Git the conflict is resolved, and finish the merge:
 
@@ -627,7 +635,7 @@ That puts every file back exactly as it was before you typed `git merge`, as if 
 
 Git's three-way merge works line by line. It knows nothing about Java. That means a merge can finish with no conflicts at all and still produce code that does not build, or worse, builds and does the wrong thing. This is called a **semantic conflict**: the two changes do not overlap in the text, but they clash in **meaning**.
 
-Here is one that happens on real teams. Maya decides `isObstacleWithin` is a confusing name. On a `rename-obstacle-check` branch, Maya renames it in `Sensors.java` to `isObstacleCloserThan`, and updates the one call to it in `teleopPeriodic()`. The branch builds. The PR merges.
+Here is one that happens on real teams. Maya decides `isObstacleWithin` is a confusing name. On a `rename-obstacle-check` branch, Maya renames it in `Sensors.java` to `isObstacleCloserThan`, and updates both calls to it in `Robot.java` (one in `updateDashboard()`, one in `teleopPeriodic()`). The branch builds. The PR merges.
 
 Meanwhile, Jordan is on an `auto-wall-stop` branch, making autonomous stop early if it sees a wall, and adds a new call, in `autonomousPeriodic()`:
 
@@ -658,7 +666,7 @@ Three habits protect you:
 
 1. **Build after every merge, before you push.** Even a merge with no conflicts. This catches every semantic conflict that breaks the build, like this one, in seconds.
 2. **Treat public methods as contracts** (Section 11.6). Renaming a method teammates call is a bigger change than it looks. Tell the team first, or add the new name and keep the old one working for a while, the way WPILib did with `getLeftBumper()`.
-3. **Test after a merge, not just before.** A semantic conflict that still builds, like two features both changing `SLOW_MODE_SCALE` for different reasons, only shows up when you drive. The smoke test from Chapter 10 is a perfect post-merge check.
+3. **Test after a merge, not just before.** A semantic conflict that still builds only shows up when you drive. Say one teammate lowers `SLOW_MODE_SCALE` to `0.3` so parking is easier, and another adds `TURN_SCALE` on a different line to soften turns. Git merges them cleanly, and it builds. But in slow mode, turns are now scaled twice and become too slow to aim. The smoke test from Chapter 10 is a perfect post-merge check.
 
 > **Robots that check every merge for you**
 >
@@ -681,7 +689,7 @@ You cannot avoid every conflict, and you should not try. But a few habits keep t
 
 Your XRP Explorer lives in your own GitHub account, because it is your personal project. A competition robot's code belongs to the **team**, so most FRC teams create a **GitHub organization**: a shared account, like a club, that owns the team's repositories. Mentors and student leads manage who belongs to it, and when a student graduates, the code stays with the team instead of leaving on that student's account. When you reach the Mini Swerve in Chapter 27, its code will live in your team's organization.
 
-Organizations also make it easier to enforce the rules in this chapter. A team can **protect** its `main` branch with a rule that requires a pull request, and an approving review, before anything merges. Then "nobody commits directly to `main`" stops being a promise and becomes something GitHub enforces. (On GitHub's free plans, protected branches work on public repositories; private repositories need a paid plan. Ask your mentor how your team is set up.)
+Organizations also make it easier to enforce the rules in this chapter. A team can **protect** its `main` branch with a rule that requires a pull request, and an approving review, before anything merges. Then "nobody commits directly to `main`" stops being a promise and becomes something GitHub enforces. (On GitHub's free plans, protected branches work on public repositories; private repositories need a paid plan. If you are a student, the free [GitHub Student Developer Pack](https://education.github.com/pack) includes GitHub Pro, which adds protected branches to the private repositories in your own account, like your Explorer. A team organization's private repositories need an organization plan instead. Ask your mentor how your team is set up.)
 
 > **Write the rules down**
 >
@@ -696,7 +704,7 @@ Organizations also make it easier to enforce the rules in this chapter. A team c
 > * On a team, **`main` always works**. Every change happens on its own short-lived **feature branch**, started from an up-to-date `main` with `git checkout main`, `git pull`, `git checkout -b <name>`. This is **GitHub flow**.
 > * A **pull request** asks to merge a branch into `main`. It shows the diff, collects review comments, and updates when you push. Merging happens on GitHub; run `git pull` to bring it to your laptop.
 > * **Code review** catches bugs before they reach the robot and spreads knowledge across the team. Check units, signs, copy-paste, magic numbers, and whether the code matches the description. Comment on the code, not the person.
-> * **Javadoc comments** (`/** ... */`, with `@param` and `@return`) document how to use a class or method. VS Code shows them on hover, and they are how the WPILib documentation is made. Always include units, ranges, and directions.
+> * **Javadoc comments** (`/** ... */`, with `@param` and `@return`) document how to use a class or method. VS Code shows them on hover, and they turn into WPILib's API reference pages. Always include units, ranges, and directions.
 > * A method's **signature** is its name plus its parameter types. Changing it breaks every caller. **Overloading** (same name, different parameters) adds an ability without breaking anyone, and **deprecating** renames a method politely.
 > * Git merges by comparing both branches to their **merge base**. A **merge conflict** happens when both sides changed the same lines differently. Read the markers (`<<<<<<<` yours, `=======`, `>>>>>>>` theirs), then **keep both**, **combine**, or **choose one** so both people's intent survives. Build, `git add`, `git commit`. `git merge --abort` always backs out safely.
 > * A merge with no conflicts can still break: a **semantic conflict**. Build and test after every merge. Continuous integration (Chapter 23) will automate the check.
@@ -743,7 +751,7 @@ Do it a second time, but this time use `git merge --abort` instead of resolving.
 
 1. Partner A adds a `SmartDashboard.putNumber` line in `updateDashboard()`. Partner B changes `STICK_DEADBAND` from `0.1` to `0.12`.
 2. Both partners change `STICK_DEADBAND`, one to `0.12` and one to `0.15`.
-3. Partner A deletes the `getAccelZ()` method from `Sensors.java` because "nobody uses it." Partner B adds a "Robot Tipped" dashboard widget that calls `sensors.getAccelZ()`.
+3. Partner A deletes the `getAccelZ()` method from `Sensors.java`, and its `Accel Z (g)` dashboard line, because "nobody really uses it." Partner B adds a "Robot Tipped" widget in `teleopPeriodic()` that calls `sensors.getAccelZ()`.
 4. Both partners add a new constant on the line right after `WALL_STOP_DISTANCE_METERS`.
 
 **3. Document the `Sensors` class.** Add a Javadoc comment, with `@return` (and `@param` where needed), to every public method in `Sensors.java`. Include units and ranges. Then hover over a `sensors.` call in `Robot.java` and check that your comment appears.
@@ -801,7 +809,7 @@ Make the changes exactly at those spots. If you put your constant somewhere else
 4. **Teammate**: resolve it on your laptop, following Section 11.8: `git checkout careful-reverse`, `git fetch origin`, `git merge origin/main`. Resolve both conflicts so **both** features survive. Search for leftover `<<<<<<<` markers. Build. Then `git add`, `git commit --no-edit`, and `git push`.
 5. **Owner**: look at the PR's **Files changed** tab and check the resolution. Is `TURN_SCALE` still there? Is `limitedForward` used? Would the robot do what both of you wanted? Approve it, then merge it and delete the branch.
 6. **Both**: `git checkout main` and `git pull`. Open `Robot.java` and confirm the end of `teleopPeriodic()` matches the combined version in Section 11.8.
-7. **Owner, optional, if you have your XRP**: run the program and drive. Full right stick should turn noticeably more gently than before. Full reverse should be capped at about half speed. Forward driving and the wall stop should be unchanged.
+7. **Owner, optional, if you have your XRP**: run the program and drive. Full right stick should turn noticeably more gently than before. Full reverse should be capped at half stick, which squaring turns into about quarter power. Forward driving and the wall stop should be unchanged.
 
 **Part E: swap.** Repeat Parts B through D in the **other** partner's repository, with the roles reversed. The new owner writes `gentle-turns`, the new teammate writes `careful-reverse` and resolves the conflict. When you finish, both of your Explorers contain both features, each of you has resolved a real conflict, and each repository has a merged pull request that shows a conflict being resolved. Send your mentor the links to both merged PRs.
 
@@ -875,7 +883,7 @@ git commit -m "Ch11: add team branching rules"
 git push -u origin team-rules
 ```
 
-Open a pull request for `team-rules` on GitHub. Notice that GitHub now shows a link to your contributing guidelines on the PR page. Ask your lab partner to review it (they are still a collaborator on your repository), then merge it, delete the branch, and finish with `git checkout main` and `git pull`.
+Open a pull request for `team-rules` on GitHub. Ask your lab partner to review it (they are still a collaborator on your repository), then merge it, delete the branch, and finish with `git checkout main` and `git pull`. Now that `CONTRIBUTING.md` is on `main`, GitHub knows about it: open your repository's page and look for the **Contributing** link in the sidebar, then open the **New issue** page and look for the link to your guidelines. (You can leave the page without creating the issue.)
 
 Run `git log --oneline --graph -10`. Somewhere in that picture is the place where your partner's work and yours joined together. Every team robot you ever program will have a history shaped like that.
 

@@ -37,6 +37,10 @@ HARDWARE: ch15-v4 (leg 1 ends a few mm short of `X: 0.50`), ch17-v5 (simulated s
 
 The two missed MAJORs (ch02-M1: Git moved from Ch 2 into Ch 3 Section 3.6, which now runs `git init` and a first commit, and the Ch 3 claim that WPILib installs Git is gone; ch23-v1) and every high-priority item above: Ch 18 Practice 1 (probed: a second `XRPRangefinder` throws `AllocationException: Code: -1029`; the real branch is now a predict-the-crash step with a warning callout in 18.3), the Ch 3 push-rejected pointer, Ch 6 (enable Teleop, Elastic, a "Test new stopping code slowly" callout, Chapter 19), the pointers in Ch 9, 14 (Practice 4 only; the ghost-pose look is still HARDWARE), 15 and 16, and the Ch 22 and 26 error texts. A scan of every pointer to Ch 17 or later in Ch 1 to 16 found no others.
 
+## Batch 2 (done 2026-11-02)
+
+Ch 1 to 11 and the book-wide rows, except bw-m3 (Ch 14, moved to batch 3). Checked online: bw-m4 (docs.wpilib.org keeps `/en/2025/` and `/en/2024/`), ch02-m2 (XRP firmware 2.1.0 is still the latest), ch10-m4 (Simulate Robot Code launches the Java debugger, `vscode-wpilib` `simulate.ts`), ch11-m4 (Student Developer Pack includes GitHub Pro, which has protected branches on private repos), ch11-v6 (GitHub shows the contributing link when someone opens a PR or an issue). Probed: the GradleRIO `Compilation Error!` banner prints right after `compileJava FAILED`, before `FAILURE:`. Also fixed along the way: the Ch 2 exercise sheet (Simulate Robot Code, no Driver Station or deploy), the Ch 3 exercise sheet (no Ch 2 commit, `pull.rebase false`, sign-in), Ch 4 `Uptime` replaces `Match Time` in the chapter and solution, and Ch 29 `TRACKWIDTH_METERS` (ch29 solution builds, tests pass).
+
 ## Plan
 
 Fix in five batches, one commit per batch in each repo, exercises and solutions updated with the chapter and rebuilt where code changes: (1) the missed MAJORs and high-priority items; (2) Ch 1 to 11; (3) Ch 12 to 18; (4) Ch 19 to 26; (5) Ch 27 to 29. VERIFY-WEB items are checked online inside their batch; HARDWARE items are left for Devang. Mark each row's status in this file as it lands.
@@ -48,31 +52,31 @@ Fix in five batches, one commit per batch in each repo, exercises and solutions 
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| bw-m1 | `TRACKWIDTH_METERS` vs `TRACK_WIDTH_METERS`; Spark MAX spellings | FIX | M | XRP Ch 13 to 18+ use `TRACKWIDTH_METERS`, only Ch 29 (swerve) uses `TRACK_WIDTH_METERS`: rename Ch 29's 7 uses (and "track width" prose) to `TRACKWIDTH_METERS`/"trackwidth" to match WPILib and the XRP chapters, plus the ch29 solution. Ch 1 prose "Spark MAX" (2x) becomes "SPARK MAX" | `section-6-mini-swerve/29-swerve-kinematics.md`, `ch29-*/solution`, `section-1-foundations/01-*.md` |
+| bw-m1 | `TRACKWIDTH_METERS` vs `TRACK_WIDTH_METERS`; Spark MAX spellings | DONE (batch 2) | M | XRP Ch 13 to 18+ use `TRACKWIDTH_METERS`, only Ch 29 (swerve) uses `TRACK_WIDTH_METERS`: rename Ch 29's 7 uses (and "track width" prose) to `TRACKWIDTH_METERS`/"trackwidth" to match WPILib and the XRP chapters, plus the ch29 solution. Ch 1 prose "Spark MAX" (2x) becomes "SPARK MAX" | `section-6-mini-swerve/29-swerve-kinematics.md`, `ch29-*/solution`, `section-1-foundations/01-*.md` |
 | bw-m2 | Ch 23 title names retired apps | DONE | | Now Ch 24 "Live Tuning and the Autonomous Chooser" in heading and `SUMMARY.md` | `src/SUMMARY.md`, `24-*.md` |
 | bw-m3 | No alliance-flip preview before swerve chapters | FIX | S | Ch 14 line 108 already mentions the blue-wall origin; add one sentence: red robots flip paths and poses, covered in Ch 30 and Ch 32 (old 29, 31) | `section-3-autonomous-control/14-*.md` |
-| bw-m4 | Docs links use `/en/stable/`, will move to 2027 | VERIFY-WEB | S | Check whether docs.wpilib.org keeps a per-year path (e.g. `/en/2025/`) once a season rolls over. If not, add one line under the Ch 2 versions table about using the docs version picker | `section-1-foundations/02-*.md` |
+| bw-m4 | Docs links use `/en/stable/`, will move to 2027 | DONE (batch 2) | S | Check whether docs.wpilib.org keeps a per-year path (e.g. `/en/2025/`) once a season rolls over. If not, add one line under the Ch 2 versions table about using the docs version picker | `section-1-foundations/02-*.md` |
 | bw-m5 | CLAUDE.md "Current status" stale | DONE | | CLAUDE.md line 212 now says Ch 1 to 29 written, 30 to 40 stubs | `CLAUDE.md` |
 
 ## Ch 1
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch01-m1 | XRP called "WebSockets-based" (that's the Romi) | FIX | S | Line 211: "On the XRP, your Java program runs on your laptop, and WPILib talks to the XRP over Wi-Fi. Your code looks almost identical..." | `01-what-is-frc-programming.md` |
-| ch01-m2 | `SparkMax` etc. called WPILib classes | FIX | S | Line 76: each maker ships its own library (REVLib, Phoenix 6); line 98: list `XboxController`, `Timer`, `DifferentialDrive`, then one sentence on vendor libraries (Ch 28) | `01-*.md` |
-| ch01-m3 | "Deploy to the XRP" wording | FIX | S | Lines 108, 209, 218, 242, 361 already say "run". Only line 52 left: drop "over Wi-Fi" from the roboRIO deploy sentence (USB/Ethernet usual) | `01-*.md` |
-| ch01-m4 | Competition day normalizes last-minute deploys | FIX | S | Line 179: replace "deploying a last-minute fix" with checking the code on the robot is the tested version, plus the small-fix-tested-in-pits rule (Ch 40 checklist, old 39) | `01-*.md` |
-| ch01-m5 | "Driver inputs are ignored" in auto | FIX | S | Line 120: "the game rules say drivers can't control the robot, so your program must act entirely on its own". Keeping "15 to 20 s, check the manual" avoids the 2026 [verify] | `01-*.md` |
+| ch01-m1 | XRP called "WebSockets-based" (that's the Romi) | DONE (batch 2) | S | Line 211: "On the XRP, your Java program runs on your laptop, and WPILib talks to the XRP over Wi-Fi. Your code looks almost identical..." | `01-what-is-frc-programming.md` |
+| ch01-m2 | `SparkMax` etc. called WPILib classes | DONE (batch 2) | S | Line 76: each maker ships its own library (REVLib, Phoenix 6); line 98: list `XboxController`, `Timer`, `DifferentialDrive`, then one sentence on vendor libraries (Ch 28) | `01-*.md` |
+| ch01-m3 | "Deploy to the XRP" wording | DONE (batch 2) | S | Lines 108, 209, 218, 242, 361 already say "run". Only line 52 left: drop "over Wi-Fi" from the roboRIO deploy sentence (USB/Ethernet usual) | `01-*.md` |
+| ch01-m4 | Competition day normalizes last-minute deploys | DONE (batch 2) | S | Line 179: replace "deploying a last-minute fix" with checking the code on the robot is the tested version, plus the small-fix-tested-in-pits rule (Ch 40 checklist, old 39) | `01-*.md` |
+| ch01-m5 | "Driver inputs are ignored" in auto | DONE (batch 2) | S | Line 120: "the game rules say drivers can't control the robot, so your program must act entirely on its own". Keeping "15 to 20 s, check the manual" avoids the 2026 [verify] | `01-*.md` |
 
 ## Ch 2
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch02-m1 | Shuffleboard callout / line 29 old apps | FIX | S | Callout already replaced (line 417). Line 29 still says "opening tools like SmartDashboard and Shuffleboard": change to "Elastic and AdvantageScope" | `02-setting-up-your-environment.md` |
-| ch02-m2 | Firmware download is "latest" | FIX | S | Line 131: link the v2.1.0 release tag; add an "XRP firmware 2.1.0" row to the versions table (line 83); line 533: "use the firmware version in the versions table". Quick check that v2.1.0 is still the 2026 firmware | `02-*.md` |
+| ch02-m1 | Shuffleboard callout / line 29 old apps | DONE (batch 2) | S | Callout already replaced (line 417). Line 29 still says "opening tools like SmartDashboard and Shuffleboard": change to "Elastic and AdvantageScope" | `02-setting-up-your-environment.md` |
+| ch02-m2 | Firmware download is "latest" | DONE (batch 2) | S | Line 131: link the v2.1.0 release tag; add an "XRP firmware 2.1.0" row to the versions table (line 83); line 533: "use the firmware version in the versions table". Quick check that v2.1.0 is still the 2026 firmware | `02-*.md` |
 | ch02-m3 | Enable before learning how to stop | DONE | | Line 369 says click Disabled to stop; the "laptop is the robot's brain" callout explains stopping; Ch 7 has the full "stop before you start" callout before first motion | `02-*.md`, `07-*.md` |
-| ch02-v1 | Step 2 omits template's `XRPDrivetrain.java` | FIX | S | Add bullet at line 272: "`XRPDrivetrain.java`: a small example drivetrain the template uses; you replace it in Chapter 7" | `02-*.md` |
-| ch02-v2 | Says to add `SmartDashboard` import; template has it | FIX | S | Line 394: "The template already imports `SmartDashboard`; check this line is at the top:" | `02-*.md` |
+| ch02-v1 | Step 2 omits template's `XRPDrivetrain.java` | DONE (batch 2) | S | Add bullet at line 272: "`XRPDrivetrain.java`: a small example drivetrain the template uses; you replace it in Chapter 7" | `02-*.md` |
+| ch02-v2 | Says to add `SmartDashboard` import; template has it | DONE (batch 2) | S | Line 394: "The template already imports `SmartDashboard`; check this line is at the top:" | `02-*.md` |
 | ch02-v3 | "Open SmartDashboard" should be Elastic | DONE | | §2.8 "Open Elastic" (lines 402 to 415) | `02-*.md` |
 
 Aside (not a MINOR, outside scope): Ch 2 MAJOR M1 looks unfixed. The Git exercise (lines 512 to 525) still runs `git init` and commits in Ch 2, before Ch 3 installs and configures Git.
@@ -81,60 +85,60 @@ Aside (not a MINOR, outside scope): Ch 2 MAJOR M1 looks unfixed. The Git exercis
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch03-m1 | Merge-conflict "preview" is only described | FIX | M | Now worse: the new push-rejected callout (line 378) says "Section 3.8 shows you what one looks like", but §3.8 only describes. Add the 2-minute `git-practice` conflict step (branch `other`, edit line 1 both sides, `git merge`, markers, resolve) or reword line 378 | `03-git-and-github.md` |
-| ch03-m2 | "GitHub will eventually require" 2FA | FIX | S | Line 130: "GitHub requires it for accounts that contribute code, so set it up when asked. An authenticator app is best." | `03-*.md` |
-| ch03-m3 | `println`/`//` used before Ch 4; output never checked | FIX | S | After the §3.6 snippet (line 309): one line on `println` and "run it, see `XRP Explorer starting up.` in the terminal, then commit". Practice 1 (line 519): give `//` comment syntax with an example | `03-*.md` |
-| ch03-m4 | README "XRP Serial" field mislabeled | FIX | S | Line 547: "**XRP Wi-Fi name**: <your XRP's network name, for example XRP-1A2B-3C4D>"; same in the solution README | `03-*.md`, `ch03-git-and-github/solution/README.md` |
-| ch03-m5 | HTTPS callout's unsupported claims | FIX | S | Lines 145 to 147: "Both are fine. HTTPS needs less setup, so this book uses it. You can switch later." Drop "GitHub recommends" and "most professional developers" | `03-*.md` |
-| ch03-v4 | `.gitignore` description wrong | FIX | S | Line 290: entries like `/build/`, `.gradle`, `bin/`, `.DS_Store`; lines starting `!` are kept, like `.vscode/settings.json` (confirmed in template lines 107 to 108, 140) | `03-*.md` |
-| ch03-v5 | Says project already has a README | FIX | S | Line 345: "your project already has a `.gitignore` and a license, and you'll write your own README at the end of this chapter" | `03-*.md` |
-| ch03-v6 | WPILib VS Code "usually installs" Git | FIX | S | Line 79: "Git may already be on your computer. Let's check." (WPILib installer does not install Git) | `03-*.md` |
-| ch03-v7 | PowerShell 5.1: `echo >` writes UTF-16, `&&` fails | FIX | S | Line 559: split into two commands; add a short note near line 155/174 to use Git Bash (or PowerShell 7) as the terminal on Windows for this chapter | `03-*.md`, `ch03-*/assignment.md` if it repeats the `&&` line |
+| ch03-m1 | Merge-conflict "preview" is only described | DONE (batch 2) | M | Now worse: the new push-rejected callout (line 378) says "Section 3.8 shows you what one looks like", but §3.8 only describes. Add the 2-minute `git-practice` conflict step (branch `other`, edit line 1 both sides, `git merge`, markers, resolve) or reword line 378 | `03-git-and-github.md` |
+| ch03-m2 | "GitHub will eventually require" 2FA | DONE (batch 2) | S | Line 130: "GitHub requires it for accounts that contribute code, so set it up when asked. An authenticator app is best." | `03-*.md` |
+| ch03-m3 | `println`/`//` used before Ch 4; output never checked | DONE (batch 2) | S | After the §3.6 snippet (line 309): one line on `println` and "run it, see `XRP Explorer starting up.` in the terminal, then commit". Practice 1 (line 519): give `//` comment syntax with an example | `03-*.md` |
+| ch03-m4 | README "XRP Serial" field mislabeled | DONE (batch 2) | S | Line 547: "**XRP Wi-Fi name**: <your XRP's network name, for example XRP-1A2B-3C4D>"; same in the solution README | `03-*.md`, `ch03-git-and-github/solution/README.md` |
+| ch03-m5 | HTTPS callout's unsupported claims | DONE (batch 2) | S | Lines 145 to 147: "Both are fine. HTTPS needs less setup, so this book uses it. You can switch later." Drop "GitHub recommends" and "most professional developers" | `03-*.md` |
+| ch03-v4 | `.gitignore` description wrong | DONE (batch 2) | S | Line 290: entries like `/build/`, `.gradle`, `bin/`, `.DS_Store`; lines starting `!` are kept, like `.vscode/settings.json` (confirmed in template lines 107 to 108, 140) | `03-*.md` |
+| ch03-v5 | Says project already has a README | DONE (batch 2) | S | Line 345: "your project already has a `.gitignore` and a license, and you'll write your own README at the end of this chapter" | `03-*.md` |
+| ch03-v6 | WPILib VS Code "usually installs" Git | DONE (batch 2) | S | Line 79: "Git may already be on your computer. Let's check." (WPILib installer does not install Git) | `03-*.md` |
+| ch03-v7 | PowerShell 5.1: `echo >` writes UTF-16, `&&` fails | DONE (batch 2) | S | Line 559: split into two commands; add a short note near line 155/174 to use Git Bash (or PowerShell 7) as the terminal on Windows for this chapter | `03-*.md`, `ch03-*/assignment.md` if it repeats the `&&` line |
 
 ## Ch 4
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch04-m1 | Comments and arithmetic never named | FIX | M | Add a "Comments" paragraph after the first §4.1 listing, and a 4-row `+ - * /` table before "Changing a Variable's Value" (~line 168), with the int-division teaser | `04-your-first-java-program.md` |
-| ch04-m2 | Contradictory semicolon-error claims | FIX | S | Line 283: "the error says `';' expected` and points at the end of the line that needs one" | `04-*.md` |
-| ch04-m3 | "Updating 50 times per second" on dashboard | FIX | S | Line 446: "Your code sends the values every loop, and the dashboard redraws several times a second. For every single loop, you'll use logs in Chapter 17." Wording is safe without settling the NT flush-rate [verify] | `04-*.md` |
-| ch04-m4 | Python/JS called untyped; no units-library pointer | FIX | S | Lines 456/469: "a language that checks types only while the program runs (like Python)"; add a sentence in the line 475 callout pointing to Ch 16's units library | `04-*.md` |
-| ch04-v3 | `robotPeriodic()` listing drops Ch 2 `Status` line | FIX | S | After line 420 listing intro: "This replaces the `Status` line from Chapter 2." | `04-*.md` |
-| ch04-v4 | `Match Time` key holds uptime, not match clock | FIX | M | Rename key/variable to `Uptime`/`uptimeSeconds` (lines 426 to 430, 444, 529) to match Ch 5's uptime; update assignment, answer key, solution `Robot.java` line 72, and Ch 5 line 295 "Mode widget you added" check | `04-*.md`, `ch04-*/assignment.md`, `answer-key.md`, `solution/.../Robot.java` |
-| ch04-v5 | "Blinking the LED" but nothing blinks | FIX | S | §4.6 heading (line 315): "Turning On the LED"; line 5: "turn on a real LED"; Ch 5 line 3 "a blinking LED" too | `04-*.md`, `05-*.md` |
-| ch04-v6 | "(you added this in Chapter 2)" import | FIX | S | Line 415: "(the template already imports it)" | `04-*.md` |
+| ch04-m1 | Comments and arithmetic never named | DONE (batch 2) | M | Add a "Comments" paragraph after the first §4.1 listing, and a 4-row `+ - * /` table before "Changing a Variable's Value" (~line 168), with the int-division teaser | `04-your-first-java-program.md` |
+| ch04-m2 | Contradictory semicolon-error claims | DONE (batch 2) | S | Line 283: "the error says `';' expected` and points at the end of the line that needs one" | `04-*.md` |
+| ch04-m3 | "Updating 50 times per second" on dashboard | DONE (batch 2) | S | Line 446: "Your code sends the values every loop, and the dashboard redraws several times a second. For every single loop, you'll use logs in Chapter 17." Wording is safe without settling the NT flush-rate [verify] | `04-*.md` |
+| ch04-m4 | Python/JS called untyped; no units-library pointer | DONE (batch 2) | S | Lines 456/469: "a language that checks types only while the program runs (like Python)"; add a sentence in the line 475 callout pointing to Ch 16's units library | `04-*.md` |
+| ch04-v3 | `robotPeriodic()` listing drops Ch 2 `Status` line | DONE (batch 2) | S | After line 420 listing intro: "This replaces the `Status` line from Chapter 2." | `04-*.md` |
+| ch04-v4 | `Match Time` key holds uptime, not match clock | DONE (batch 2) | M | Rename key/variable to `Uptime`/`uptimeSeconds` (lines 426 to 430, 444, 529) to match Ch 5's uptime; update assignment, answer key, solution `Robot.java` line 72, and Ch 5 line 295 "Mode widget you added" check | `04-*.md`, `ch04-*/assignment.md`, `answer-key.md`, `solution/.../Robot.java` |
+| ch04-v5 | "Blinking the LED" but nothing blinks | DONE (batch 2) | S | §4.6 heading (line 315): "Turning On the LED"; line 5: "turn on a real LED"; Ch 5 line 3 "a blinking LED" too | `04-*.md`, `05-*.md` |
+| ch04-v6 | "(you added this in Chapter 2)" import | DONE (batch 2) | S | Line 415: "(the template already imports it)" | `04-*.md` |
 
 ## Ch 5
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch05-m1 | "Hardcoded into FRC's network protocol" 50 Hz | FIX | S | Line 36: DS sends packets every 20 ms and `TimedRobot` runs on the same beat by default; teams can change it, this book never does; on the XRP the loop runs on the laptop | `05-how-a-robot-program-is-structured.md` |
-| ch05-m2 | "Why not a `main()`?" while `Main.java` exists | FIX | M | After line 321, add the `Main.java` / `RobotBase.startRobot(Robot::new)` paragraph from the review | `05-*.md` |
-| ch05-m3 | TimedRobot resource link 404 | FIX | S | Line 405: delete the `convenience-features/timed-robot.html` bullet and fold its description into the line 406 bullet (same target page) | `05-*.md` |
-| ch05-m4 | Empty `{}` bodies, Exit methods, comments unexplained | FIX | M | After the skeleton: one paragraph on empty bodies; one sentence in §5.4 on `autonomousExit()` etc.; Reflect (line 358): "(A comment is a line starting with `//`.)" | `05-*.md` |
-| ch05-v3 | `LastInitTime` called a string | FIX | S | Chapter line 367 now says "dashboard value"; add "(a number: `putNumber`)". Answer-key line 30 still says the book says "string": drop that note | `05-*.md`, `ch05-*/answer-key.md` |
-| ch05-v4 | `disabledPeriodic()` print contradicts Ch 4 | FIX | S | Line 368: publish uptime with `SmartDashboard.putNumber("Uptime", ...)` (assignment step 5 already does) | `05-*.md` |
-| ch05-v5 | §5.2 listing is trimmed, not the real template | FIX | S | Line 44: "Here is a trimmed version. The real template also has an auto chooser and a small `XRPDrivetrain`, which you replace in Section 5.6 and Chapter 7." | `05-*.md` |
-| ch05-v6 | "talked briefly about classes in Chapter 4" | FIX | S | Line 104: "Chapter 4 mentioned classes in passing" | `05-*.md` |
-| ch05-v7 | Simulation listed as a fifth mode | FIX | S | Lines 156, 164, 344: four modes; note that `simulationPeriodic()` runs in addition whenever the program runs in simulation (always, on the XRP) | `05-*.md` |
-| ch05-v8 | "formally in Chapter 7" for `extends` | FIX | S | Ch 7 does not teach inheritance; Ch 20 §20.4 "Inheritance, Part Two" does. Line 112: "in Chapter 20" | `05-*.md` |
-| ch05-v9 | "create a fresh one" loses Git history | FIX | S | Lines 42 and 229: "If it's not on this laptop, clone it from GitHub (`git clone <your repo URL>`)" | `05-*.md` |
+| ch05-m1 | "Hardcoded into FRC's network protocol" 50 Hz | DONE (batch 2) | S | Line 36: DS sends packets every 20 ms and `TimedRobot` runs on the same beat by default; teams can change it, this book never does; on the XRP the loop runs on the laptop | `05-how-a-robot-program-is-structured.md` |
+| ch05-m2 | "Why not a `main()`?" while `Main.java` exists | DONE (batch 2) | M | After line 321, add the `Main.java` / `RobotBase.startRobot(Robot::new)` paragraph from the review | `05-*.md` |
+| ch05-m3 | TimedRobot resource link 404 | DONE (batch 2) | S | Line 405: delete the `convenience-features/timed-robot.html` bullet and fold its description into the line 406 bullet (same target page) | `05-*.md` |
+| ch05-m4 | Empty `{}` bodies, Exit methods, comments unexplained | DONE (batch 2) | M | After the skeleton: one paragraph on empty bodies; one sentence in §5.4 on `autonomousExit()` etc.; Reflect (line 358): "(A comment is a line starting with `//`.)" | `05-*.md` |
+| ch05-v3 | `LastInitTime` called a string | DONE (batch 2) | S | Chapter line 367 now says "dashboard value"; add "(a number: `putNumber`)". Answer-key line 30 still says the book says "string": drop that note | `05-*.md`, `ch05-*/answer-key.md` |
+| ch05-v4 | `disabledPeriodic()` print contradicts Ch 4 | DONE (batch 2) | S | Line 368: publish uptime with `SmartDashboard.putNumber("Uptime", ...)` (assignment step 5 already does) | `05-*.md` |
+| ch05-v5 | §5.2 listing is trimmed, not the real template | DONE (batch 2) | S | Line 44: "Here is a trimmed version. The real template also has an auto chooser and a small `XRPDrivetrain`, which you replace in Section 5.6 and Chapter 7." | `05-*.md` |
+| ch05-v6 | "talked briefly about classes in Chapter 4" | DONE (batch 2) | S | Line 104: "Chapter 4 mentioned classes in passing" | `05-*.md` |
+| ch05-v7 | Simulation listed as a fifth mode | DONE (batch 2) | S | Lines 156, 164, 344: four modes; note that `simulationPeriodic()` runs in addition whenever the program runs in simulation (always, on the XRP) | `05-*.md` |
+| ch05-v8 | "formally in Chapter 7" for `extends` | DONE (batch 2) | S | Ch 7 does not teach inheritance; Ch 20 §20.4 "Inheritance, Part Two" does. Line 112: "in Chapter 20" | `05-*.md` |
+| ch05-v9 | "create a fresh one" loses Git history | DONE (batch 2) | S | Lines 42 and 229: "If it's not on this laptop, clone it from GitHub (`git clone <your repo URL>`)" | `05-*.md` |
 
 ## Ch 6
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch06-m1 | `speed != 0.0` on a double, before the rule | FIX | S | After the read-aloud paragraph (~line 466): safe only because `applyDeadband` returns exactly `0.0`; measured values use `<`/`>`, Chapter 12 explains | `06-conditionals-loops-and-methods.md` |
+| ch06-m1 | `speed != 0.0` on a double, before the rule | DONE (batch 2) | S | After the read-aloud paragraph (~line 466): safe only because `applyDeadband` returns exactly `0.0`; measured values use `<`/`>`, Chapter 12 explains | `06-conditionals-loops-and-methods.md` |
 | ch06-m2 | No reminder to enable Teleop | DONE (batch 1) | S | After line 72: "Then click **Teleoperated** in the Robot State panel; `teleopPeriodic()` only runs while Teleop is enabled." Same parenthetical in Practice 1. Also line 72 still says "watching SmartDashboard": make it Elastic | `06-*.md` |
 | ch06-m3 | Wall-stop test needs a safety habit | DONE (batch 1) | S | Ch 6 Build is the first time motors move (Ch 7's callout comes after). Before line 532 add: finger on **Disabled**, part stick first, rangefinder can miss angled or soft walls | `06-*.md` |
-| ch06-m4 | "Watchdog will start barking" | FIX | S | Line 215: name the console message `Loop time of 0.02s overrun` and the per-method timing list. Confirm exact text in 2026.2.1 `Watchdog` source while editing | `06-*.md` |
-| ch06-m5 | Command-based chapter number wrong | FIX | S | Line 473 now says "By Chapter 20"; "Why Command-Based?" is Ch 19 after renumbering: "In Chapter 19, when you meet..." | `06-*.md` |
+| ch06-m4 | "Watchdog will start barking" | DONE (batch 2) | S | Line 215: name the console message `Loop time of 0.02s overrun` and the per-method timing list. Confirm exact text in 2026.2.1 `Watchdog` source while editing | `06-*.md` |
+| ch06-m5 | Command-based chapter number wrong | DONE (batch 2) | S | Line 473 now says "By Chapter 20"; "Why Command-Based?" is Ch 19 after renumbering: "In Chapter 19, when you meet..." | `06-*.md` |
 | ch06-v5 | Can't back away once wall is close | SKIP | | The assignment's "Check yourself" (assignment.md line 67, answer key line 86) uses this as a deliberate predict-and-fix task | |
 | ch06-v7 | Promised non-blocking blink never appears | DONE | | Build step 5 heartbeat (lines 512 to 530), line 217 callout points to it, "fixed rate" claim gone | `06-*.md` |
-| ch06-v8 | Practice/Git/Reflect disagree on which project | FIX | S | Chapter Git section (lines 569 to 577) still commits only the Practice. Match assignment.md: Practice commit in scratch project, Build commit `Ch6: deadband helper and wall stop in teleop` in the Explorer with `reflections.md` | `06-*.md` |
-| ch06-v9 | `!=` table example compares strings | FIX | S | Line 89: `count != 5` (or `mode != 0`) | `06-*.md` |
+| ch06-v8 | Practice/Git/Reflect disagree on which project | DONE (batch 2) | S | Chapter Git section (lines 569 to 577) still commits only the Practice. Match assignment.md: Practice commit in scratch project, Build commit `Ch6: deadband helper and wall stop in teleop` in the Explorer with `reflections.md` | `06-*.md` |
+| ch06-v9 | `!=` table example compares strings | DONE (batch 2) | S | Line 89: `count != 5` (or `mode != 0`) | `06-*.md` |
 | ch06-v10 | `getRightTrigger()`, deprecated `getLeftBumper()` | DONE | | Lines 165, 170 use `getRightTriggerAxis()` and `getLeftBumperButton()` | `06-*.md` |
-| ch06-v12 | "Java basics" link points at units page | FIX | S | Line 587: drop the bullet (or point to a real WPILib Java basics page if one exists) | `06-*.md` |
+| ch06-v12 | "Java basics" link points at units page | DONE (batch 2) | S | Line 587: drop the bullet (or point to a real WPILib Java basics page if one exists) | `06-*.md` |
 
 Extra (D4 leftover, not in review): Ch 6 line 72 "watching SmartDashboard" names the app; Practice 1 and Build step 4 say "to SmartDashboard", which is fine as the class. Folded into ch06-m2.
 
@@ -158,58 +162,58 @@ DONE 12, FIX 47, VERIFY-WEB 1, HARDWARE 0, SKIP 1 (61 items).
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch08-m1 | `...Pressed()` traps (edge remembered while not called; first caller uses it up) | FIX | S | After the 8.7 table (line ~388) add: "really means pressed since the last time this line asked; ask once per loop and keep the answer in a variable; a press while the line wasn't running (e.g. disabled) still counts next time." | book 08 |
+| ch08-m1 | `...Pressed()` traps (edge remembered while not called; first caller uses it up) | DONE (batch 2) | S | After the 8.7 table (line ~388) add: "really means pressed since the last time this line asked; ask once per loop and keep the answer in a variable; a press while the line wasn't running (e.g. disabled) still counts next time." | book 08 |
 | ch08-m2 | Slow Mode widget uses `speedScale == SLOW_MODE_SCALE` | SKIP | L | Ch 12 line 336 now uses this exact line as its "exact copies are safe" example; changing it ripples through Ch 8 to 20 listings and ~12 solutions for little gain. | n/a |
-| ch08-m3 | "get it, battery or not" overpromises (XRP can't measure battery) | FIX | S | Line 457: "...and get close. The motor model (Ch 16) gets you most of the way, and encoder feedback (Ch 15) fixes the rest, even on a tired battery." Matches Ch 16 line 148. | book 08 |
+| ch08-m3 | "get it, battery or not" overpromises (XRP can't measure battery) | DONE (batch 2) | S | Line 457: "...and get close. The motor model (Ch 16) gets you most of the way, and encoder feedback (Ch 15) fixes the rest, even on a tired battery." Matches Ch 16 line 148. | book 08 |
 | ch08-m4 | "Input shaping" wrong term | DONE | S | Line 344 now says "input curve (WPILib's name ... `squareInputs`)". | book 08 |
-| ch08-m5 | `Constants.java` promise says "every tunable value", Ch 21 keeps gains in their classes | FIX | S | Line 217: "By Chapter 21 the constants several classes share move into `Constants.java`, and ones that describe one part of the robot live with that part." (Ch 21 line 221 rule.) | book 08 |
-| ch08-m6 | Practice 2 smooth deadband has no hint | FIX | S | Add hint ladder after line 510: positives first; `value - deadband` is 0 at the edge, `1 - deadband` at full stick, so divide by that; then handle negatives with `Math.abs` and restore the sign. | book 08 |
+| ch08-m5 | `Constants.java` promise says "every tunable value", Ch 21 keeps gains in their classes | DONE (batch 2) | S | Line 217: "By Chapter 21 the constants several classes share move into `Constants.java`, and ones that describe one part of the robot live with that part." (Ch 21 line 221 rule.) | book 08 |
+| ch08-m6 | Practice 2 smooth deadband has no hint | DONE (batch 2) | S | Add hint ladder after line 510: positives first; `value - deadband` is 0 at the edge, `1 - deadband` at full stick, so divide by that; then handle negatives with `Math.abs` and restore the sign. | book 08 |
 | ch08-v2 | `left = forward - rotation` example numbers ignore squaring/scaling | DONE | S | Line 340 now gives "left about 0.18, right about 0.25" and explains squaring then scaling; "sum goes past 1.0" gone. | book 08 |
 | ch08-v3 | "Correction to Chapter 7" callout | DONE | S | No "Correction" callout left in Ch 8. | book 08 |
-| ch08-v4 | Slow mode snippet doesn't say it replaces the `arcadeDrive` line; `Cmd` widgets show unscaled values | FIX | S | Line ~443: "Replace the `drivetrain.arcadeDrive(forward, rotation);` line with:" and add one sentence that `Forward Cmd`/`Rotation Cmd` still show the values before scaling. Assignment already says Replace. | book 08 |
+| ch08-v4 | Slow mode snippet doesn't say it replaces the `arcadeDrive` line; `Cmd` widgets show unscaled values | DONE (batch 2) | S | Line ~443: "Replace the `drivetrain.arcadeDrive(forward, rotation);` line with:" and add one sentence that `Forward Cmd`/`Rotation Cmd` still show the values before scaling. Assignment already says Replace. | book 08 |
 | ch08-v5 | "Half speed" is really quarter power | DONE | S | Line 457 callout says "about a quarter of full power". | book 08 |
-| ch08-v6 | Practice 3 uses `%` (taught in Ch 29) | FIX | S | Line 517: change to `double result2 = a > 10 ? 1.0 : -1.0;` (or drop the line). Update answer key if it has the `%` answer. | book 08, ex ch08 answer-key.md |
+| ch08-v6 | Practice 3 uses `%` (taught in Ch 29) | DONE (batch 2) | S | Line 517: change to `double result2 = a > 10 ? 1.0 : -1.0;` (or drop the line). Update answer key if it has the `%` answer. | book 08, ex ch08 answer-key.md |
 
 ## Ch 9
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
 | ch09-m1 | Forward pointers to wrong chapters | DONE (batch 1) | S | Line 51: gear ratios on the Mini Swerve arrive in Chapter 29 (29.3), not 28. Line 233: "in Chapter 31 you will build a pose estimator, and in Chapter 34 feed it camera measurements..." | book 09 |
-| ch09-m2 | "bury RioLog" wrong for XRP | FIX | S | Line 718: "would bury the VS Code terminal in a thousand lines a second." | book 09 |
-| ch09-m3 | "Integrate ... fifty times a second" implies your code integrates | FIX | S | Line 189: "Add up that rate over time ... The XRP does that adding for you in its firmware, and `getAngle()` hands you the total." | book 09 |
-| ch09-m4 | Wall stop chatters at threshold; add hysteresis sprinkle | FIX | S | End of "Noise and filtering" callout (line 458): `Blocked` may flicker near 20 cm (**chatter**); fixes are a debounce (Ch 21) or two thresholds, **hysteresis** (Ch 22). | book 09 |
-| ch09-m5 | Wall stop called "keep it safe" | FIX | S | Line 714 callout: add "A reflex like this helps the driver but is not a safety system; you just saw ways the rangefinder misses a wall. The real safety system is a person on Disable." | book 09 |
-| ch09-v1 | Build step 1 / 9.5 say remove temp fields but not the two `Count` lines | FIX | S | Lines 299 and 805: "remove the temporary encoder fields **and the two `Left Count`/`Right Count` lines** from `Robot.java`". | book 09, ex ch09 assignment.md (check) |
-| ch09-v2 | "Correction to Chapter 6" callout | FIX | S | Ch 6 already uses `getDistanceMeters() < 0.20` (lines 358, 373); delete the stale callout at lines 440 to 442. | book 09 |
-| ch09-v3 | Listing drops Ch 8's `Forward Cmd`/`Rotation Cmd` silently | FIX | S | Add a bullet to "what changed since Chapter 8" (line 702): the two `Cmd` widgets are gone; the sensor widgets replace them. | book 09 |
+| ch09-m2 | "bury RioLog" wrong for XRP | DONE (batch 2) | S | Line 718: "would bury the VS Code terminal in a thousand lines a second." | book 09 |
+| ch09-m3 | "Integrate ... fifty times a second" implies your code integrates | DONE (batch 2) | S | Line 189: "Add up that rate over time ... The XRP does that adding for you in its firmware, and `getAngle()` hands you the total." | book 09 |
+| ch09-m4 | Wall stop chatters at threshold; add hysteresis sprinkle | DONE (batch 2) | S | End of "Noise and filtering" callout (line 458): `Blocked` may flicker near 20 cm (**chatter**); fixes are a debounce (Ch 21) or two thresholds, **hysteresis** (Ch 22). | book 09 |
+| ch09-m5 | Wall stop called "keep it safe" | DONE (batch 2) | S | Line 714 callout: add "A reflex like this helps the driver but is not a safety system; you just saw ways the rangefinder misses a wall. The real safety system is a person on Disable." | book 09 |
+| ch09-v1 | Build step 1 / 9.5 say remove temp fields but not the two `Count` lines | DONE (batch 2) | S | Lines 299 and 805: "remove the temporary encoder fields **and the two `Left Count`/`Right Count` lines** from `Robot.java`". | book 09, ex ch09 assignment.md (check) |
+| ch09-v2 | "Correction to Chapter 6" callout | DONE (batch 2) | S | Ch 6 already uses `getDistanceMeters() < 0.20` (lines 358, 373); delete the stale callout at lines 440 to 442. | book 09 |
+| ch09-v3 | Listing drops Ch 8's `Forward Cmd`/`Rotation Cmd` silently | DONE (batch 2) | S | Add a bullet to "what changed since Chapter 8" (line 702): the two `Cmd` widgets are gone; the sensor widgets replace them. | book 09 |
 
 ## Ch 10
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
 | ch10-m1 | "In Chapter 4 you met RioLog" stale after B3 | DONE | S | Line 233 now says prints were seen in the terminal and RioLog is for the roboRIO; matches Ch 4 lines 238 and 295. | book 10 |
-| ch10-m2 | Log-on-change pattern floods when wall stop chatters | FIX | S | After "Read it aloud" (line 457): creeping slowly may log several ON/OFF pairs; that's the reading wobbling across 20 cm (**chatter**), Ch 21/22 show fixes. | book 10 |
-| ch10-m3 | Bug swap Collab: authors should verify their bug shows | FIX | S | Line 962: "Before you push, test your bad commit and the one before it on the robot. If you can't see the difference, pick another bug. Write your test in one sentence for your partner." | book 10 |
-| ch10-m4 | No mention of breakpoints [verify] | VERIFY-WEB | S | Check WPILib 2026 docs/VS Code extension: does Simulate Robot Code (or a Debug sim option) attach the Java debugger for XRP? If yes, add the breakpoint bullet in 10.6 with the Motor Safety caveat. | book 10 |
-| ch10-v2 | Example line numbers (101, 94, 54, 31, 23) match no listing | FIX | M | Use Ch 9 listing numbers (109, 114, 63, 40, 29) per VERIFY issue 2, incl. call-stack diagram (lines 184 to 186) and steps 4 to 5 (lines 222 to 223); note "might not have been initialized" points at the constructor's closing brace; or add "your line numbers will differ" to 10.3. | book 10 |
-| ch10-v3 | Stack trace has roboRIO bottom frames | FIX | M | Replace lines 207 to 208 with `RobotBase.startRobot(RobotBase.java:527)` and `frc.robot.Main.main(Main.java:23)` (sim trace in VERIFY.md); add blank line before `Warning at`; adjust line numbers to match v2. | book 10 |
-| ch10-v4 | Compile error output lacks GradleRIO 2026 banner, old Gradle line | FIX | S | Line 110: "> Compilation failed; see the compiler output below." and add the `Compilation Error!` banner lines; say the banner means scroll up. | book 10 |
-| ch10-v5 | Missing `}` gives `';' expected` / `reached end of file`, not `class, interface...` | FIX | S | Table line 142: `class, interface...` = extra `}`; add row `reached end of file while parsing` = missing `}`; Practice 1.5 (line 879): first error points just after the missing brace, don't add a `;`. | book 10, ex ch10 answer-key.md |
+| ch10-m2 | Log-on-change pattern floods when wall stop chatters | DONE (batch 2) | S | After "Read it aloud" (line 457): creeping slowly may log several ON/OFF pairs; that's the reading wobbling across 20 cm (**chatter**), Ch 21/22 show fixes. | book 10 |
+| ch10-m3 | Bug swap Collab: authors should verify their bug shows | DONE (batch 2) | S | Line 962: "Before you push, test your bad commit and the one before it on the robot. If you can't see the difference, pick another bug. Write your test in one sentence for your partner." | book 10 |
+| ch10-m4 | No mention of breakpoints [verify] | DONE (batch 2) | S | Check WPILib 2026 docs/VS Code extension: does Simulate Robot Code (or a Debug sim option) attach the Java debugger for XRP? If yes, add the breakpoint bullet in 10.6 with the Motor Safety caveat. | book 10 |
+| ch10-v2 | Example line numbers (101, 94, 54, 31, 23) match no listing | DONE (batch 2) | M | Use Ch 9 listing numbers (109, 114, 63, 40, 29) per VERIFY issue 2, incl. call-stack diagram (lines 184 to 186) and steps 4 to 5 (lines 222 to 223); note "might not have been initialized" points at the constructor's closing brace; or add "your line numbers will differ" to 10.3. | book 10 |
+| ch10-v3 | Stack trace has roboRIO bottom frames | DONE (batch 2) | M | Replace lines 207 to 208 with `RobotBase.startRobot(RobotBase.java:527)` and `frc.robot.Main.main(Main.java:23)` (sim trace in VERIFY.md); add blank line before `Warning at`; adjust line numbers to match v2. | book 10 |
+| ch10-v4 | Compile error output lacks GradleRIO 2026 banner, old Gradle line | DONE (batch 2) | S | Line 110: "> Compilation failed; see the compiler output below." and add the `Compilation Error!` banner lines; say the banner means scroll up. | book 10 |
+| ch10-v5 | Missing `}` gives `';' expected` / `reached end of file`, not `class, interface...` | DONE (batch 2) | S | Table line 142: `class, interface...` = extra `}`; add row `reached end of file while parsing` = missing `}`; Practice 1.5 (line 879): first error points just after the missing brace, don't add a `;`. | book 10, ex ch10 answer-key.md |
 
 ## Ch 11
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch11-m1 | `SLOW_MODE_SCALE` "semantic conflict" example is a text conflict | FIX | S | Line 661: one teammate lowers `SLOW_MODE_SCALE` to 0.3, another adds `TURN_SCALE` on another line; Git merges cleanly and slow-mode turns become too slow to aim. | book 11 |
-| ch11-m2 | Mixes docs.wpilib.org (hand-written) with Javadoc API reference | FIX | S | Line 233: the API reference at github.wpilib.org (XboxController, XRPGyro pages) is generated from doc comments; docs.wpilib.org tutorials are hand-written. Line 9 and line 699: "turn into WPILib's API reference pages". | book 11 |
-| ch11-m3 | Review checklist lacks robot-safety row | FIX | S | Add row to 11.4 table: "Could this make the robot move unexpectedly?" plus one line: movement changes say "driven, not only built" in How I tested it. | book 11 |
-| ch11-m4 | Student Pack gives GitHub Pro for protected branches [verify] | VERIFY-WEB | S | Confirm on education.github.com/pack and GitHub plans that Pro (via Student Pack) includes branch protection/rulesets on private repos; then add one sentence at line 684. | book 11 |
-| ch11-v1 | "exactly one place that talks to `diffDrive`" false (`stop()`) | FIX | S | Line 343: soften to "the only drive method that talks to `diffDrive`", or have Part A change `stop()` to `arcadeDrive(0.0, 0.0)` (then update solution). | book 11 (ex ch11 solution Drivetrain.java if code route) |
-| ch11-v2 | "Reverse capped at half" ignores squaring | FIX | S | Lines 456, 587, 800: "capped at half stick, which squaring turns into about quarter power". | book 11 |
-| ch11-v3 | `--graph` picture omits PR merge commit and Part A commit | FIX | S | Lines 394 to 401: paste the real graph from VERIFY.md issue 3 (with `Merge pull request #1` and `Ch11: Javadoc...`), or label "simplified". | book 11 |
-| ch11-v4 | Rename "updates the one call" but there are two | FIX | S | Line 630: "updates both calls to it in `Robot.java`". | book 11 |
-| ch11-v5 | Practice 2.3 `getAccelZ()` is used; natural spot conflicts | FIX | S | Line 746: "A deletes `getAccelZ()` and its dashboard line"; "B adds a Robot Tipped widget in `teleopPeriodic()`". Check answer key. | book 11, ex ch11 answer-key.md |
-| ch11-v6 | CONTRIBUTING link won't show on the `team-rules` PR [verify] | VERIFY-WEB | S | Check GitHub docs (setting guidelines for contributors): link appears only when file is on default branch. If so, line 878: "After it merges, open a new PR or New issue page and look for the link." | book 11 |
+| ch11-m1 | `SLOW_MODE_SCALE` "semantic conflict" example is a text conflict | DONE (batch 2) | S | Line 661: one teammate lowers `SLOW_MODE_SCALE` to 0.3, another adds `TURN_SCALE` on another line; Git merges cleanly and slow-mode turns become too slow to aim. | book 11 |
+| ch11-m2 | Mixes docs.wpilib.org (hand-written) with Javadoc API reference | DONE (batch 2) | S | Line 233: the API reference at github.wpilib.org (XboxController, XRPGyro pages) is generated from doc comments; docs.wpilib.org tutorials are hand-written. Line 9 and line 699: "turn into WPILib's API reference pages". | book 11 |
+| ch11-m3 | Review checklist lacks robot-safety row | DONE (batch 2) | S | Add row to 11.4 table: "Could this make the robot move unexpectedly?" plus one line: movement changes say "driven, not only built" in How I tested it. | book 11 |
+| ch11-m4 | Student Pack gives GitHub Pro for protected branches [verify] | DONE (batch 2) | S | Confirm on education.github.com/pack and GitHub plans that Pro (via Student Pack) includes branch protection/rulesets on private repos; then add one sentence at line 684. | book 11 |
+| ch11-v1 | "exactly one place that talks to `diffDrive`" false (`stop()`) | DONE (batch 2) | S | Line 343: soften to "the only drive method that talks to `diffDrive`", or have Part A change `stop()` to `arcadeDrive(0.0, 0.0)` (then update solution). | book 11 (ex ch11 solution Drivetrain.java if code route) |
+| ch11-v2 | "Reverse capped at half" ignores squaring | DONE (batch 2) | S | Lines 456, 587, 800: "capped at half stick, which squaring turns into about quarter power". | book 11 |
+| ch11-v3 | `--graph` picture omits PR merge commit and Part A commit | DONE (batch 2) | S | Lines 394 to 401: paste the real graph from VERIFY.md issue 3 (with `Merge pull request #1` and `Ch11: Javadoc...`), or label "simplified". | book 11 |
+| ch11-v4 | Rename "updates the one call" but there are two | DONE (batch 2) | S | Line 630: "updates both calls to it in `Robot.java`". | book 11 |
+| ch11-v5 | Practice 2.3 `getAccelZ()` is used; natural spot conflicts | DONE (batch 2) | S | Line 746: "A deletes `getAccelZ()` and its dashboard line"; "B adds a Robot Tipped widget in `teleopPeriodic()`". Check answer key. | book 11, ex ch11 answer-key.md |
+| ch11-v6 | CONTRIBUTING link won't show on the `team-rules` PR [verify] | DONE (batch 2) | S | Check GitHub docs (setting guidelines for contributors): link appears only when file is on default branch. If so, line 878: "After it merges, open a new PR or New issue page and look for the link." | book 11 |
 
 ## Ch 12
 

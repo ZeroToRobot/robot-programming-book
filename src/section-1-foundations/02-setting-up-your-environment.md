@@ -26,7 +26,7 @@ If you already have VS Code installed, that's fine. The WPILib version installs 
 
 ### The WPILib Extension
 
-The WPILib extension is a plugin inside VS Code that handles everything robot-specific: creating new projects from templates, building Java code into a program, running it and connecting it to the robot over Wi-Fi, and opening tools like SmartDashboard and Shuffleboard. You'll use it constantly.
+The WPILib extension is a plugin inside VS Code that handles everything robot-specific: creating new projects from templates, building Java code into a program, running it and connecting it to the robot over Wi-Fi, and opening tools like Elastic and AdvantageScope. You'll use it constantly.
 
 ### XRP Firmware
 
@@ -85,11 +85,14 @@ This book uses **WPILib 2026.2.1**. Go to the **[WPILib 2026.2.1 release page](h
 > | FRC season | **2026** | |
 > | WPILib (and GradleRIO in `build.gradle`) | **2026.2.1** | This chapter |
 > | Java | **17**, bundled with WPILib | This chapter (automatic) |
+> | XRP firmware | **2.1.0** | This chapter |
 > | AdvantageKit | **26.0.2** | Chapter 17 (XRP) and Chapter 27 (Mini Swerve) |
 > | Phoenix 6 (CTRE) | **26.x**, the `frc2026` release | Chapter 28 |
 > | PathPlannerLib | **2026** release | Chapter 32 |
 >
 > Every robot in this book, the XRP and the Mini Swerve, uses this 2026 software (Chapter 1). If VS Code, the Driver Station, or a vendor library ever offers to upgrade a project to a newer year, say no.
+>
+> The book's links to the WPILib docs use `docs.wpilib.org/en/stable/`, which always shows the newest year. If you're reading after WPILib has moved on to 2027, use the docs' version menu to pick **2026**, so the pages match the code in this book.
 
 ### Step 2: Run the Installer
 
@@ -128,9 +131,9 @@ Now we need to update the software running on the XRP itself. This process takes
 
 ### Step 1: Download the XRP Firmware
 
-Go to **[github.com/wpilibsuite/xrp-wpilib-firmware/releases](https://github.com/wpilibsuite/xrp-wpilib-firmware/releases)** and find the latest release at the top of the page. Click **Assets** to expand the file list and download the `.uf2` file.
+This book uses **XRP firmware 2.1.0** (it's in the versions table above). Go to the **[XRP firmware 2.1.0 release page](https://github.com/wpilibsuite/xrp-wpilib-firmware/releases/tag/v2.1.0)**. Click **Assets** to expand the file list and download the `.uf2` file.
 
-The filename includes the version and a short commit hash, for example `xrp-wpilib-firmware-2.1.0-aa439f0.uf2`. Don't worry about the exact name; just save it somewhere you can find again (your Downloads folder is fine).
+The filename includes the version and a short commit hash: `xrp-wpilib-firmware-2.1.0-aa439f0.uf2`. Save it somewhere you can find again (your Downloads folder is fine).
 
 > **Beta XRP vs. production (V1) XRP**
 >
@@ -270,6 +273,7 @@ Before building anything, take a moment to look at the files VS Code created. In
 
 - **`Main.java`**: the entry point; you'll never edit this
 - **`Robot.java`**: the main robot class; this is where most of your code will live for now
+- **`XRPDrivetrain.java`**: a small example drivetrain the template uses; you replace it in Chapter 7
 
 Open `Robot.java`. The file the generator creates is longer than what we show here (it includes a small autonomous mode chooser as an example), but the skeleton looks like this:
 
@@ -391,7 +395,7 @@ public void robotPeriodic() {
 }
 ```
 
-You'll also need to add an import at the top of the file (VS Code will often suggest this automatically: look for the lightbulb icon):
+The template already imports `SmartDashboard`; check this line is at the top of the file:
 
 ```java
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -519,7 +523,7 @@ Nothing to do yet. In Chapter 3 you'll install Git, turn this project into a rep
 >
 > - **WPILib installation guide**: [docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html) the official installation walkthrough with screenshots
 > - **XRP hardware documentation**: [docs.wpilib.org/en/stable/docs/xrp-robot](https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html) hardware specs, firmware update instructions, and troubleshooting
-> - **XRP firmware releases**: [github.com/wpilibsuite/xrp-wpilib-firmware/releases](https://github.com/wpilibsuite/xrp-wpilib-firmware/releases) always use the firmware version that matches your WPILib installation year
+> - **XRP firmware releases**: [github.com/wpilibsuite/xrp-wpilib-firmware/releases](https://github.com/wpilibsuite/xrp-wpilib-firmware/releases) use the firmware version in the versions table in Section 2.3
 > - **Elastic documentation**: [frc-elastic.gitbook.io/docs](https://frc-elastic.gitbook.io/docs) connecting, adding widgets, tabs, and saving layouts in the dashboard this book uses
 > - **WPILib troubleshooting**: [docs.wpilib.org/en/stable/docs/software/vscode-overview/troubleshooting-wpilib.html](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/troubleshooting-wpilib.html) if something broke during installation, start here
 

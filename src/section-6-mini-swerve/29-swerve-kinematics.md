@@ -80,7 +80,7 @@ Start with a picture of the Mini Swerve from above. The robot's **center** is th
          BL  o---------------------o  BR
 ```
 
-The Mini Swerve is square: its wheel centers are 15.5 inches apart front to back (the **wheelbase**) and 15.5 inches apart left to right (the **track width**). Half of 15.5 inches is 7.75 inches, or **0.197 meters**. So:
+The Mini Swerve is square: its wheel centers are 15.5 inches apart front to back (the **wheelbase**) and 15.5 inches apart left to right (the **trackwidth**). Half of 15.5 inches is 7.75 inches, or **0.197 meters**. So:
 
 | Module | x (forward) | y (left) |
 |---|---|---|
@@ -116,7 +116,7 @@ module angle  =  Math.atan2(leftward, forward)       // which way it must point
 
 > **Chapter 13, hiding inside**
 >
-> Look at the first rule for a wheel on a differential drive, sitting on the left side at y = half the track width, with `vy` stuck at zero: `forward = vx - ω × (trackwidth / 2)`. That is Chapter 13's left-wheel formula, exactly. A tank drive is a swerve drive whose wheels are not allowed to steer. The math did not change; the robot gained a direction.
+> Look at the first rule for a wheel on a differential drive, sitting on the left side at y = half the trackwidth, with `vy` stuck at zero: `forward = vx - ω × (trackwidth / 2)`. That is Chapter 13's left-wheel formula, exactly. A tank drive is a swerve drive whose wheels are not allowed to steer. The math did not change; the robot gained a direction.
 
 ### Four worked examples
 
@@ -572,7 +572,7 @@ public final class DriveConstants {
 
     // The frame, measured between wheel centers (fact sheet): front to back, and left to right.
     public static final double WHEELBASE_METERS = Units.inchesToMeters(15.5);
-    public static final double TRACK_WIDTH_METERS = Units.inchesToMeters(15.5);
+    public static final double TRACKWIDTH_METERS = Units.inchesToMeters(15.5);
 
     // The wheel, and the gears between each motor and what it turns (fact sheet, Section 29.3).
     public static final double WHEEL_DIAMETER_METERS = Units.inchesToMeters(2.0);
@@ -645,16 +645,16 @@ public final class DriveConstants {
     // Section 29.9 measures the real ones.
     public static final ModuleConstants FRONT_LEFT = new ModuleConstants(
         "FrontLeft", 1, 2, 1, false, false, false, 0.0,
-        new Translation2d(WHEELBASE_METERS / 2.0, TRACK_WIDTH_METERS / 2.0));
+        new Translation2d(WHEELBASE_METERS / 2.0, TRACKWIDTH_METERS / 2.0));
     public static final ModuleConstants FRONT_RIGHT = new ModuleConstants(
         "FrontRight", 3, 4, 2, false, false, false, 0.0,
-        new Translation2d(WHEELBASE_METERS / 2.0, -TRACK_WIDTH_METERS / 2.0));
+        new Translation2d(WHEELBASE_METERS / 2.0, -TRACKWIDTH_METERS / 2.0));
     public static final ModuleConstants BACK_LEFT = new ModuleConstants(
         "BackLeft", 7, 8, 4, false, false, false, 0.0,
-        new Translation2d(-WHEELBASE_METERS / 2.0, TRACK_WIDTH_METERS / 2.0));
+        new Translation2d(-WHEELBASE_METERS / 2.0, TRACKWIDTH_METERS / 2.0));
     public static final ModuleConstants BACK_RIGHT = new ModuleConstants(
         "BackRight", 5, 6, 3, false, false, false, 0.0,
-        new Translation2d(-WHEELBASE_METERS / 2.0, -TRACK_WIDTH_METERS / 2.0));
+        new Translation2d(-WHEELBASE_METERS / 2.0, -TRACKWIDTH_METERS / 2.0));
 
     /** A new kinematics object for the four modules, in the book's order. Each Drive needs its own (Section 29.6). */
     public static SwerveDriveKinematics createKinematics() {
@@ -1374,7 +1374,7 @@ Check each module by hand: turn it slowly counterclockwise, seen from above. Its
 ```java
 public static final ModuleConstants FRONT_LEFT = new ModuleConstants(
     "FrontLeft", 1, 2, 1, true, false, false, -0.137,
-    new Translation2d(WHEELBASE_METERS / 2.0, TRACK_WIDTH_METERS / 2.0));
+    new Translation2d(WHEELBASE_METERS / 2.0, TRACKWIDTH_METERS / 2.0));
 ```
 
 **Step 5: Check again.** Deploy. With the wheels still lined up, all four `EncoderAbsoluteRotations` should read **0.000**, give or take 0.005 (about 2 degrees). Turn each module a quarter turn counterclockwise by hand: it should read about **+0.25**. Open the Swerve tab with `MeasuredStates`: all four arrows point the way the wheels really point. If one is off by about 0.5, its wheel was lined up with its bevel gear on the wrong side: line it up again and redo that module.
@@ -1570,7 +1570,7 @@ class SwerveMathTest {
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(new ChassisSpeeds(0.0, 0.0, 1.0));
 
         // Section 29.2, Example 3: sideways to each corner, all at 1 rad/s times the corner's distance.
-        double cornerDistance = Math.hypot(DriveConstants.WHEELBASE_METERS / 2.0, DriveConstants.TRACK_WIDTH_METERS / 2.0);
+        double cornerDistance = Math.hypot(DriveConstants.WHEELBASE_METERS / 2.0, DriveConstants.TRACKWIDTH_METERS / 2.0);
         for (SwerveModuleState state : states) {
             assertEquals(cornerDistance, state.speedMetersPerSecond, 1e-9);
         }

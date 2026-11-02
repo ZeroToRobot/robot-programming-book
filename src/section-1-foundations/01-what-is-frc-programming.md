@@ -26,7 +26,7 @@ Here's the chain of events, from your thumb to the robot's wheels:
 
 5. **Your program reads the joystick value and tells the motors what to do.** A single line of your code says something like: "set the left motor to whatever the left joystick says." The roboRIO sends that command to the motor controller over a communications network called CAN bus.
 
-6. **The motor controller drives the motor.** The motor controller (a Spark MAX, for example) takes the command (a number between -1 and 1) and converts it into electrical power. More power means a faster motor.
+6. **The motor controller drives the motor.** The motor controller (a SPARK MAX, for example) takes the command (a number between -1 and 1) and converts it into electrical power. More power means a faster motor.
 
 7. **The motor turns the wheel.** The wheel grips the carpet. The robot moves forward.
 
@@ -49,7 +49,7 @@ Before you can program a robot, you need to know what you're programming. Here's
 
 The roboRIO is the robot's brain. It's a small computer made by National Instruments that runs your Java program. It has USB ports, Ethernet, and a CAN interface, and it connects to almost everything else on the robot. Every FRC robot in the 2026 season uses one, and so does every robot in this book.
 
-When you hear "deploy your code," it means you're copying your compiled Java program from your laptop to the roboRIO over Wi-Fi.
+When you hear "deploy your code," it means you're copying your compiled Java program from your laptop to the roboRIO.
 
 ### The SystemCore
 
@@ -73,7 +73,7 @@ You'll interact with the Driver Station constantly during testing. Learning to r
 
 Motors need a lot of electrical current, more than a microcontroller can provide directly. Motor controllers sit between the battery and the motors. They receive a command from your program (a number, typically -1 to 1) and translate it into the right amount of power.
 
-The most common motor controllers in FRC are the **REV Spark MAX** (used with NEO motors), the **CTR Electronics Talon FX** (built into Kraken and Falcon motors), and older devices like the Victor SP. Each has its own Java class in WPILib, but they all work the same way from your program's perspective.
+The most common motor controllers in FRC are the **REV SPARK MAX** (used with NEO motors), the **CTR Electronics Talon FX** (built into Kraken and Falcon motors), and older devices like the Victor SP. Each maker ships its own Java library for its controllers (REV's REVLib, CTR Electronics' Phoenix 6), but they all work the same way from your program's perspective.
 
 ### Actuators
 
@@ -95,7 +95,7 @@ The Power Distribution Hub (PDH) routes battery power to every component on the 
 
 ### WPILib
 
-WPILib is the programming toolkit that makes all of the above accessible from Java. Instead of writing low-level code to talk to hardware, you use WPILib classes like `XboxController`, `SparkMax`, and `DifferentialDrive`. WPILib is maintained by Worcester Polytechnic Institute (WPI) and is updated every year with the new FRC season.
+WPILib is the programming toolkit that makes all of the above accessible from Java. Instead of writing low-level code to talk to hardware, you use WPILib classes like `XboxController`, `Timer`, and `DifferentialDrive`. Motor controller makers add their own libraries on top, called **vendor libraries**, which you'll install in Chapter 28. WPILib is maintained by Worcester Polytechnic Institute (WPI) and is updated every year with the new FRC season.
 
 This entire book is about learning to use WPILib well.
 
@@ -117,7 +117,7 @@ In Phase 1 of this book (Chapters 1-26), the XRP is your primary hardware. You c
 
 Every FRC match has two distinct phases:
 
-**Autonomous (Auto):** the first 15 to 20 seconds of the match. The exact length depends on that year's game, so check the game manual each season. The Driver Station connection is still active, but driver inputs are ignored. The robot must act entirely on its own, using pre-written logic and sensor feedback to complete tasks on the field. Autonomous is often worth a significant point bonus and can set up the rest of the match.
+**Autonomous (Auto):** the first 15 to 20 seconds of the match. The exact length depends on that year's game, so check the game manual each season. The Driver Station connection is still active, but the game rules say drivers can't control the robot, so your program must act entirely on its own, using pre-written logic and sensor feedback to complete tasks on the field. Autonomous is often worth a significant point bonus and can set up the rest of the match.
 
 **Teleop:** the rest of the match, a little over two minutes. The drivers take over. Your program reads joystick inputs and translates them into robot movement and mechanism control.
 
@@ -176,7 +176,7 @@ A good programmer asks these questions proactively. A great programmer documents
 
 ### Competition Day
 
-Here's something no one tells new programmers: at competitions, you are often the last person to work on the robot before it goes on the field. The drive team is psyching up. The mechanical team has stepped back. The programmer is deploying a last-minute fix, checking the Driver Station logs, and trying to remember whether the autonomous chooser is set correctly.
+Here's something no one tells new programmers: at competitions, you are often the last person to work on the robot before it goes on the field. The drive team is psyching up. The mechanical team has stepped back. The programmer is checking the Driver Station, confirming the right autonomous routine is selected, and making sure the code on the robot is the version that was tested. If something must change, a good team has a rule for that too: a small fix, tested in the pits, and committed so everyone knows what's on the robot. Chapter 40 builds that checklist.
 
 This is not a comfortable feeling the first time. It gets better with practice, process, and good tooling, all of which this book will teach you.
 
@@ -208,7 +208,7 @@ The XRP (Experiential Robotics Platform) was designed by WPI specifically to tea
 | Onboard green LED | Useful for status indication and debugging |
 | Wi-Fi | Connects to your laptop, which runs your program and talks to the XRP |
 
-The XRP runs WPILib's WebSockets-based hardware abstraction layer, which means your Java code looks almost identical to competition robot code. The class names are slightly different (`XRPMotor` instead of `SparkMax`), but the patterns (subsystems, commands, PID controllers, odometry) are exactly the same.
+On the XRP, your Java program runs on your laptop, and WPILib talks to the XRP over Wi-Fi. Your code looks almost identical to competition robot code. The class names are slightly different (`XRPMotor` instead of `SparkMax`), but the patterns (subsystems, commands, PID controllers, odometry) are exactly the same.
 
 ### The Three-Phase Progression
 
