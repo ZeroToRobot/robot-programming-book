@@ -20,6 +20,16 @@ On the Java side, you will learn **arrays**, the way Java keeps a numbered row o
 
 You need the Mini Swerve on blocks, a charged battery, a USB stick, your laptop with WPILib 2026 and the FRC Game Tools, and **Phoenix Tuner X** (Section 28.4 installs it). Work in your Mini Swerve team. One person drives the laptop; everyone else watches the wheels.
 
+> **How to split this chapter**
+>
+> This chapter mixes work at the robot with work at a laptop. Here is one way to spread it over three meetings, so that a team sharing one robot always has something to do.
+>
+> | Meeting | Sections | Where | Ends with |
+> |---|---|---|---|
+> | 1 | 28.1 to 28.4 | At the robot: the CAN map, Phoenix Tuner X, IDs, firmware. A teammate can start Section 28.5 on a laptop | Every device answering in Tuner X with the right ID |
+> | 2 | 28.5 to 28.8, and 28.11 | Laptop, in the simulator | The `Drive` subsystem and its tests, committed |
+> | 3 | 28.9 and 28.10 | At the robot | Motor directions set from the motor check, and the wrong-ID drill |
+
 ---
 
 ## 28.1 Eight Motors and One Pair of Wires
@@ -1726,6 +1736,10 @@ Wire the code to every motor, prove each one, and fix their directions.
 11. Push, open the pull request, have a teammate check every ID and direction against the fact sheet, wait for green, and merge.
 
 If every device answers, the motor check moves the motor it names in the direction it should, the alerts are quiet, and GitHub shows eleven green tests, your Mini Swerve is ready for Chapter 29.
+
+> **Checkpoint**
+>
+> Stuck, or did the build stop working and you cannot find why? Ask your mentor for the **Chapter 28 checkpoint**: a known-good copy of the project at the end of this chapter. Do not copy it over your work. Compare it with yours, file by file (in VS Code, right-click a file and choose **Select for Compare**, then right-click yours and choose **Compare with Selected**), find the difference, and fix your own code. Then commit as usual.
 
 ### Reflect
 

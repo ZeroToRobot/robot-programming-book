@@ -17,7 +17,7 @@ By the end of the chapter, you and your partner will have:
 
 On the Java side, you will learn **records**: a one-line way to write a small class that only holds values, like a decision with two parts. You have been using records since Chapter 16 without knowing it.
 
-The plan fits in **two lab meetings**, with the video finished at home. It works best with a partner at about the same point in the book. You will need your XRP, your strip of tape from Chapter 22, and something flat and hard to be the wall: a cardboard box, or a stack of books.
+The plan takes **two to three lab meetings**, with the video finished at home. It works best with a partner at about the same point in the book. You will need your XRP, your strip of tape from Chapter 22, and something flat and hard to be the wall: a cardboard box, or a stack of books.
 
 ---
 
@@ -50,19 +50,22 @@ The teammate's own Explorer stays as it is at the end of Chapter 25. That is fin
 
 Both partners need the owner's repository at the end of Chapter 25: **30 tests**, all green, merged into `main`. If one of you is not quite there, use the owner's, since that is the code you will build on.
 
-### The two meetings
+### The meetings
 
-| When | What you do | Done when |
-|---|---|---|
-| **Meeting 1** | Write the design doc together (Section 26.3), open it as a PR, review, merge. Then write the tests and the code for leg 4, and the pretend wall (Sections 26.4 to 26.7). | The leg 4 pull request is open, with a green check |
-| **Meeting 2** | Merge leg 4 and tune it on the floor (Section 26.8). Prepare the release (Section 26.9), then run the course three times, check the logs, tag it, and publish it (Section 26.10). | `v1.0.0` is on GitHub |
-| **At home** | Edit and upload the demo video, and add its link to the release. | The release page has the video link |
+| When | What you do | About | Done when |
+|---|---|---|---|
+| **Meeting 1** | Write the design doc together (Section 26.3), open it as a PR, review, merge. Then write the tests and the code for leg 4, and the pretend wall (Sections 26.4 to 26.7). | Design doc 30 min, records 15, tests 30, `ParkAtWall` 30, pretend wall and course 30 | The leg 4 pull request is open, with a green check |
+| **Meeting 2** | Merge leg 4 and tune it on the floor (Section 26.8). Prepare the release (Section 26.9). | Tuning 40 min, release prep 50 | The release pull request is merged |
+| **Meeting 3** (if you need it) | Run the course three times, check the logs, tag it, and publish it (Section 26.10). | 60 min, more if a run fails and you start over | `v1.0.0` is on GitHub |
+| **At home** | Edit and upload the demo video, and add its link to the release. | | The release page has the video link |
+
+The minutes are rough, for a pair who have finished Chapter 25. Most pairs need all three meetings; a fast pair finishes Section 26.10 at the end of meeting 2.
 
 If meeting 1 runs over, the floor work in Section 26.8 can start with the pull request still open: tune on the leg 4 branch, and merge when the green check comes back.
 
 > **Ahead, or behind?**
 >
-> If you finish early, the Exercises have a menu of **extensions**: more legs and smarter parking, each one a small project with its own design doc and its own release, `v1.1.0`. If you are behind, do the capstone with the smallest scope that meets the eight checks, and save the extensions for the catch-up meetings at the end of the season. Shipping a small thing that works beats half-building a big thing, every time.
+> If you finish early, the Exercises have a menu of **extensions**: more legs and smarter parking, each one a small project with its own design doc and its own release, `v1.1.0`. If you are behind, these can wait until after `v1.0.0`, because no acceptance check depends on them: the Mermaid state diagram in the design doc (Section 26.3), watching leg 4 live in AdvantageScope and the teleop wall-stop check (Section 26.7, Step 6), and the README sections beyond **Running it** and **Authors** (Section 26.9). Never cut the tests, the design doc review, or the three clean runs: they are the capstone. Shipping a small thing that works beats half-building a big thing, every time.
 
 ---
 
@@ -1270,7 +1273,7 @@ Approve, merge, and delete the branch. Both partners: `git checkout main` and `g
 
 ## 26.10 Prove It, Then Tag It
 
-The code for v1.0.0 is on `main`. Before it gets a name, it has to pass acceptance criteria 5 and 6: three clean runs, with logs, and a replay that matches.
+If this is a new meeting (meeting 3), start here, with fresh batteries. The code for v1.0.0 is on `main`. Before it gets a name, it has to pass acceptance criteria 5 and 6: three clean runs, with logs, and a replay that matches.
 
 ### Step 1: Three clean runs in a row
 

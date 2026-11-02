@@ -10,6 +10,15 @@ On the Java side, you finally write your own **enum**, the type Chapter 12 promi
 
 You will need your XRP, the course from Chapter 12, and about a meter more of black electrical tape.
 
+> **How to split this chapter**
+>
+> Here is one way to spread this chapter over two meetings, each ending at one of the chapter's two commits.
+>
+> | Meeting | Sections | Ends with |
+> |---|---|---|
+> | 1 | 22.1 to 22.6 | `FollowLine` on the left bumper in teleop, committed |
+> | 2 | 22.7 to 22.10 | Leg 3 in the course and the simulated floor, committed |
+
 ---
 
 ## 22.1 A Line That Bends

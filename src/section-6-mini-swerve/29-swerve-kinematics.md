@@ -21,6 +21,16 @@ On the Java side, you will learn the **remainder operator** `%`, the tool for nu
 
 The robot does not drive on the floor in this chapter. That is Chapter 30, with a controller and the Pigeon 2. Everything here happens on blocks, wheels in the air, where a mistake costs nothing. You need the Mini Swerve on blocks, a charged battery, a USB stick, your laptop, a straightedge (a metal ruler or a length of aluminum tube), and a piece of tape. Work in your Mini Swerve team.
 
+> **How to split this chapter**
+>
+> This is the longest chapter in Section VI, and its robot half needs a meeting of its own. Here is one way to spread it over three.
+>
+> | Meeting | Sections | Where | Ends with |
+> |---|---|---|---|
+> | 1 | 29.1 to 29.4 | Anywhere: hand math and the `%` operator, no robot | Your worked examples in `reflections.md` |
+> | 2 | 29.5 to 29.8, and 29.10 | Laptop, in the simulator | The swerve modules and kinematics, and the tests, committed |
+> | 3 | 29.9 | At the robot, start to finish | The CANcoder offsets committed on their own, and the kinematics check passed. No other code changes in this meeting |
+
 ---
 
 ## 29.1 Four Wheels That Can Point Anywhere
@@ -1739,6 +1749,10 @@ Teach the code the gears, find straight ahead, and prove the swerve math on the 
 8. Push, open the pull request, have a teammate check every ratio and offset against the fact sheet, wait for green, and merge.
 
 If the wheels match your hand math on all three checks, the CANcoders read zero when straight, and GitHub shows eighteen green tests, the Mini Swerve is ready to come off its blocks in Chapter 30.
+
+> **Checkpoint**
+>
+> Stuck, or did the build stop working and you cannot find why? Ask your mentor for the **Chapter 29 checkpoint**: a known-good copy of the project at the end of this chapter. Do not copy it over your work. Compare it with yours, file by file (in VS Code, right-click a file and choose **Select for Compare**, then right-click yours and choose **Compare with Selected**), find the difference, and fix your own code. Then commit as usual.
 
 ### Reflect
 

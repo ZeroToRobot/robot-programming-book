@@ -8,6 +8,16 @@ On the Java side, you will learn how a testing framework called **JUnit** reads 
 
 This chapter is mostly about code. You will need your XRP only once, near the start, to check that a refactor did not change how the robot drives. Everything else runs on your laptop, and then on GitHub's.
 
+> **How to split this chapter**
+>
+> Here is one way to spread this chapter over three meetings. The chapter has four commits; every meeting ends on one.
+>
+> | Meeting | Sections | Ends with |
+> |---|---|---|
+> | 1 | 23.1 to 23.5 | `FollowLine`'s decisions as pure functions (first commit), and its tests green |
+> | 2 | 23.6 to 23.8 | The drivetrain and command tests (second commit) and the whole-course test (third commit) |
+> | 3 | 23.9 and 23.10 | GitHub Actions building every push (fourth commit). A short meeting: use the rest for the Practice |
+
 ---
 
 ## 23.1 The Bug That Comes Back

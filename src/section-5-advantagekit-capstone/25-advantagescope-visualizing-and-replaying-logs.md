@@ -20,6 +20,16 @@ On the Java side, you will learn **anonymous classes**: a class with no name, wr
 
 You will need your XRP for parts of this chapter, and a strip of tape for the line follower. Everything except Section 25.11's corner can also be done on the simulated robot.
 
+> **How to split this chapter**
+>
+> This is a long chapter with five commits. Here is one way to spread it over three meetings.
+>
+> | Meeting | Sections | Ends with |
+> |---|---|---|
+> | 1 | 25.1 to 25.5 | The tour, the new outputs, and one log file per run (the first two commits) |
+> | 2 | 25.6 to 25.9 | `RobotMode` with real, sim, and replay, and your first replay (the third commit) |
+> | 3 | 25.10 to 25.12 | `Sensors` behind its own seam, and a real corner replayed into a test (the last two commits) |
+
 ---
 
 ## 25.1 The Run You Cannot Repeat
@@ -1517,6 +1527,10 @@ Give the Explorer one complete log, a decision timeline, and replay.
 8. Debug the corner with replay, and add `LastSteeringError` and `aRealCornerStartsASearch` (Section 25.11). Run the tests: **30 tests**. Commit, push, open a pull request, wait for the green check, and merge.
 
 If the HTML report shows **30 tests, 0 failures**, your logs folder has one file per run, and a replay of a fresh run matches it loop for loop, you are ready for Chapter 26.
+
+> **Checkpoint**
+>
+> Stuck, or did the build stop working and you cannot find why? Ask your mentor for the **Chapter 25 checkpoint**: a known-good copy of the project at the end of this chapter. Do not copy it over your work. Compare it with yours, file by file (in VS Code, right-click a file and choose **Select for Compare**, then right-click yours and choose **Compare with Selected**), find the difference, and fix your own code. Then commit as usual.
 
 ### Reflect
 

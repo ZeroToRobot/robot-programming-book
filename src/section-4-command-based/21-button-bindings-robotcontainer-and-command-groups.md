@@ -10,6 +10,15 @@ There is less brand-new code in this chapter than in Chapter 20, and more moving
 
 You will need your XRP for both checks and for the Build exercise.
 
+> **How to split this chapter**
+>
+> Here is one way to spread this chapter over two meetings, each ending at one of the chapter's two commits.
+>
+> | Meeting | Sections | Ends with |
+> |---|---|---|
+> | 1 | 21.1 to 21.5 | `Constants.java` and the obstacle course as one command group, committed |
+> | 2 | 21.6 to 21.9 | `RobotContainer` and the button bindings, every mode checked, committed |
+
 ---
 
 ## 21.1 What Is Still Not a Command
@@ -1509,6 +1518,10 @@ Diagnose anything strange with the table at the end of Section 21.8. Two more, s
 - **`incompatible types: CommandXboxController cannot be converted to ...`** or **`cannot find symbol ... method getAButtonPressed()`**: something still uses the controller the old way. In `RobotContainer`, every button goes through a binding; `getLeftY()` and `getRightX()` are the only methods you call directly.
 
 When the Explorer runs every mode from bindings, groups, and default commands, on both robots, you are ready for Chapter 22.
+
+> **Checkpoint**
+>
+> Stuck, or did the build stop working and you cannot find why? Ask your mentor for the **Chapter 21 checkpoint**: a known-good copy of the project at the end of this chapter. Do not copy it over your work. Compare it with yours, file by file (in VS Code, right-click a file and choose **Select for Compare**, then right-click yours and choose **Compare with Selected**), find the difference, and fix your own code. Then commit as usual.
 
 ### Reflect
 

@@ -12,6 +12,16 @@ On the Java side, you will learn **static imports** and WPILib's **units library
 
 You will need your XRP, about a meter and a half of clear, flat floor, and fresh batteries. Put the fresh batteries in **before** you start. You will see why in Section 16.2.
 
+> **How to split this chapter**
+>
+> This is a long chapter. Here is one way to spread it over three meetings. Push your branch at the end of each one, even if the chapter is not finished, so nothing lives only on one laptop.
+>
+> | Meeting | Sections | Where | Ends with |
+> |---|---|---|---|
+> | 1 | 16.1 to 16.5 | Laptop | The Test mode recorder typed in, and the project building |
+> | 2 | 16.6 and 16.7 | Floor, with fresh batteries | Four test runs logged, and your six gains in `reflections.md` |
+> | 3 | 16.8 to 16.10 | Laptop, then floor | Feedforward in the drivetrain, PID retuned, the chapter's commit |
+
 ---
 
 ## 16.1 Feedback Reacts, Feedforward Predicts
@@ -1382,6 +1392,10 @@ Diagnose anything strange:
 - **Teleop feels exactly the same as before:** that is expected. Teleop still uses `arcadeDrive`, which sends power straight from the sticks. Feedforward only affects `drive()`.
 
 When the Explorer cruises within about 10% of the speed you ask for with no PID, and runs the course at least as accurately as in Chapter 15 but faster, your robot is characterized. In Chapter 18, you will use what it now knows about itself to build a robot that runs without the robot.
+
+> **Checkpoint**
+>
+> Stuck, or did the build stop working and you cannot find why? Ask your mentor for the **Chapter 16 checkpoint**: a known-good copy of the project at the end of this chapter. Do not copy it over your work. Compare it with yours, file by file (in VS Code, right-click a file and choose **Select for Compare**, then right-click yours and choose **Compare with Selected**), find the difference, and fix your own code. Then commit as usual.
 
 ### Reflect
 

@@ -19,6 +19,16 @@ On the Java side, you will learn two things the move makes urgent. First, **byte
 
 This chapter needs the Mini Swerve, a charged robot battery, a USB stick, and a laptop with WPILib 2026 and the FRC Game Tools (for the Driver Station). It works best in your Mini Swerve team, with one person at the keyboard and everyone watching the robot.
 
+> **How to split this chapter**
+>
+> This chapter mixes work at the robot with work at a laptop. Here is one way to spread it over three meetings, so that a team sharing one robot always has something to do.
+>
+> | Meeting | Sections | Where | Ends with |
+> |---|---|---|---|
+> | 1 | 27.1 to 27.5 | Robot (imaging, fact sheet) and laptop (the new project) | The roboRIO imaged, `docs/robot.md` filled in, and the first two commits |
+> | 2 | 27.6 to 27.8 | Robot for the first deploy, laptop for the `RoboRio` subsystem | Real battery volts on the dashboard, and the third commit |
+> | 3 | 27.9 to 27.12 | Laptop for the tests, robot for the crash drill and the logs | Six tests green in CI, a log opened from the USB stick, and the fourth commit |
+
 ---
 
 ## 27.1 Where Your Code Runs Now

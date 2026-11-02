@@ -10,6 +10,18 @@ This is a big refactor, and it is honest to say so. You will touch every file in
 
 You will need your XRP for both checks and for the Build exercise.
 
+> **How to split this chapter**
+>
+> This is one of the longest chapters in the book. Here is one way to spread it over three meetings, ending each one at a commit or a pushed branch.
+>
+> | Meeting | Sections | Ends with |
+> |---|---|---|
+> | 1 | 20.1 to 20.4 | Packages, `Drivetrain` as a subsystem, and the first commit |
+> | 2 | 20.5 to 20.7 | The four command classes typed in. The project may not build until Section 20.8 rewires `Robot.java`; push your branch anyway |
+> | 3 | 20.8 to 20.10 | `Robot.java` on commands, every mode checked, and the second commit |
+>
+> Section 20.8's `Robot.java` is long. If your build will not go green there, your mentor can give you the Chapter 20 checkpoint to compare against (see the end of the Build exercise).
+
 ---
 
 ## 20.1 From Plan to Code
@@ -937,7 +949,7 @@ You have a subsystem and four command classes. Now `Robot.java` has to use them,
 >
 > The scheduler does not know or care which mode the robot is in. If the drivetrain has a default command, and no command requires the drivetrain, the default runs: in teleop, but also in autonomous and in Test mode. Any old code that still calls `drivetrain.drive(...)` from `autonomousPeriodic()` or `testPeriodic()` would fight the default command for the motors every loop, and the default would win, because the scheduler runs after the mode methods. So the old autonomous and Test mode code must become commands at the same moment the default command arrives.
 
-So this section replaces `Robot.java` in one go. Here is the complete file. The changes since Chapter 19 are:
+So this section replaces `Robot.java` in one go. It is a long listing, so type it in pieces and build often. If the build will not go green and you cannot find why, your mentor can give you the Chapter 20 checkpoint to compare against, file by file (see the end of the Build exercise). Here is the complete file. The changes since Chapter 19 are:
 
 - new imports for the commands, the subsystems (from Section 20.2), the SysId routine, and three units; `PIDController`, `SysIdRoutineLog`, and `State` are no longer imported;
 - the teleop constants, PID constants, auto speed constants, and `LEG_1_HEADING_DEGREES` are gone (they moved into `DriveWithSticks` and `Drivetrain`, or are no longer needed);
@@ -1699,6 +1711,10 @@ Diagnose anything strange with the table at the end of Section 20.9. Two more, s
 - **`cannot find symbol ... class Drivetrain` in `Robot.java`:** the `import frc.robot.subsystems.Drivetrain;` line is missing.
 
 When the Explorer drives the course, the bench, and teleop entirely on commands, on both robots, you are ready for Chapter 21.
+
+> **Checkpoint**
+>
+> Stuck, or did the build stop working and you cannot find why? Ask your mentor for the **Chapter 20 checkpoint**: a known-good copy of the project at the end of this chapter. Do not copy it over your work. Compare it with yours, file by file (in VS Code, right-click a file and choose **Select for Compare**, then right-click yours and choose **Compare with Selected**), find the difference, and fix your own code. Then commit as usual.
 
 ### Reflect
 
