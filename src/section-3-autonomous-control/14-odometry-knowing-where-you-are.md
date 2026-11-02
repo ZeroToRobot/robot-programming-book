@@ -1058,7 +1058,7 @@ Every number odometry uses comes from a sensor, and every sensor is a little bit
 
 > **Small angle, big miss**
 >
-> Of all the errors, heading errors do the most damage, because they get **multiplied** by distance. If the robot thinks it is facing 0 degrees but is really facing 2 degrees, then after driving 0.5 m it is off to the side by `0.5 × sin(2°)`, about 1.7 cm. After driving 5 meters, it is off by about 17 cm. A distance error stays the same size; a heading error grows with every meter you drive. This is why FRC teams spend real money on good gyros, and why the navX on the Mini Swerve (Chapter 29) matters so much.
+> Of all the errors, heading errors do the most damage, because they get **multiplied** by distance. If the robot thinks it is facing 0 degrees but is really facing 2 degrees, then after driving 0.5 m it is off to the side by `0.5 × sin(2°)`, about 1.7 cm. After driving 5 meters, it is off by about 17 cm. A distance error stays the same size; a heading error grows with every meter you drive. This is why FRC teams spend real money on good gyros, and why the Pigeon 2 on the Mini Swerve (Chapter 29) matters so much.
 
 ### Can you reset your way out of it?
 
