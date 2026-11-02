@@ -1112,6 +1112,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.simulation.DIOSim;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj.simulation.SimHooks;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.CourseConstants;
 import org.junit.jupiter.api.AfterEach;
@@ -1152,6 +1153,7 @@ class ObstacleCourseTest {
         // Arrange: the whole robot, simulated, and a way to watch its LED.
         RobotContainer robotContainer = new RobotContainer(true);
         DIOSim led = new DIOSim(LED_CHANNEL);
+        SmartDashboard.putString("Line State", "never ran");   // FollowLine writes its state here
 
         // Act: run autonomous, loop by loop, until the LED goes out (the course is over).
         CommandScheduler.getInstance().schedule(robotContainer.getAutonomousCommand());
@@ -1169,6 +1171,8 @@ class ObstacleCourseTest {
         assertEquals(CourseConstants.END_POSE.getX(), pose.getX(), 0.05);
         assertEquals(CourseConstants.END_POSE.getY(), pose.getY(), 0.10);
         assertEquals(CourseConstants.TURN_HEADING_DEGREES, pose.getRotation().getDegrees(), 10.0);
+        assertEquals("END_OF_LINE", SmartDashboard.getString("Line State", "never ran"),
+                "leg 3 never followed the line");
     }
 }
 ```
@@ -1177,21 +1181,25 @@ Walk through it:
 
 - **`setUp()`** is the same as the command tests, plus one line: `DriverStationSim.setAutonomous(true)`. Without it, an enabled robot is in **teleop**, and the teleop bindings would come alive: the line light, for one, would turn the LED on and off as the robot crossed the tape.
 - **`tearDown()`** has one more line too: `getDefaultButtonLoop().clear()`. `RobotContainer` bound a dozen triggers to buttons and sensors (Chapter 21), and the scheduler keeps polling them every loop until it is told to forget them. Clearing the loop makes sure no later test is ever surprised by a leftover binding.
-- **Arrange** builds the whole robot, simulated, with `new RobotContainer(true)`. Then it makes a `DIOSim` to watch the LED. The XRP's LED is digital output 1 (hold Ctrl and click `XRPOnBoardIO` in `RobotContainer` to see it in WPILib's source), and `DIOSim` reads what the program last set on that output, exactly as the Simulation GUI's DIO panel does.
+- **Arrange** builds the whole robot, simulated, with `new RobotContainer(true)`. Then it makes a `DIOSim` to watch the LED. The XRP's LED is digital output 1 (hold Ctrl and click `XRPOnBoardIO` in `RobotContainer` to see it in WPILib's source), and `DIOSim` reads what the program last set on that output, exactly as the Simulation GUI's DIO panel does. The last line of Arrange writes `never ran` into the `Line State` dashboard value, so whatever is there at the end was written by this run.
 - **Act** schedules the autonomous command, as `autonomousInit()` does, and runs the loop until the **LED goes out**. Chapter 21 made the LED part of the course: `deadlineFor(lightTheLed())` keeps it on for exactly as long as the course runs, and turns it off the moment the last leg ends and `Hold Still` takes over. So "until the LED goes out" means "until the course is over." Each loop does what the real robot does every 20 ms: `CommandScheduler.getInstance().run()` (Robot's `robotPeriodic()`), then `simulationPeriodic()` (the pretend floor sets each reflectance sensor from the robot's pose), then 20 ms on the clock. `TIME_LIMIT_SECONDS` is 40, more than all the course's timeouts added up, so a stuck robot cannot run the test forever.
-- **Assert** checks that the LED went out (the course finished, with a message saying so if not), and then that the robot is where leg 3 should leave it: within 5 cm of the line sideways, within 10 cm of `END_POSE` along the line, and facing up leg 3 within 10 degrees.
+- **Assert** checks that the LED went out (the course finished, with a message saying so if not), and then that the robot is where leg 3 should leave it: within 5 cm of the line sideways, within 10 cm of `END_POSE` along the line, and facing up leg 3 within 10 degrees. The last assert reads `Line State` back: `FollowLine` publishes its state there every loop it runs (Chapter 22), so `END_OF_LINE` means leg 3 really followed the line to its end.
 
-Why these tolerances? The follower stops when its sensors, 5 cm ahead of the robot's center, run off the end of the tape, so the robot's center stops about 5 cm short of `END_POSE`. And the sideways check must allow for the pretend tape's 2 cm half-width. The tolerances say "the robot followed the line to its end," and nothing more precise than the course itself can promise.
+Why these tolerances? The follower stops when its sensors, 5 cm ahead of the robot's center, run off the end of the tape, so the robot's center stops about 5 cm short of `END_POSE`. And the sideways check must allow for the pretend tape's 2 cm half-width.
+
+Why is the pose not enough on its own? Because a robot that never sees the crossbar ends up in almost the same place. `DriveUntilLine` then drives its full `LEG_2_MAX_DISTANCE_METERS`, 1.0 m, which on this course is just where the line ends, and the `either` skips leg 3. That course finishes at about (0.51, 1.01), facing 89 degrees: inside every tolerance above. A test that only checks where the robot stopped cannot tell "followed the line" from "never saw it." So the test also checks something only leg 3 can produce. Whenever you write a test, ask: what is the **wrong** program that would also pass it?
 
 Run the tests. With the example gains, the simulated Explorer drives leg 1 in about 2.8 s, turns in about 1.1 s, reaches the crossbar at about 5.7 s, follows the line, and finishes at about 11.8 s, roughly 4 cm short of `END_POSE`. All of it takes well under a second of real time. Open the HTML report, click `ObstacleCourseTest`, and look at **Standard output**: the whole course's log is there, from `Drivetrain: SIMULATED` through `FollowLine finished in END_OF_LINE`, exactly as you would see it in the terminal on the robot.
 
-Now try the experiment that makes this test worth having. Open `Constants.java` and change `FOLLOW_LINE_LENGTH_METERS` from `0.60` to `0.30`, so the pretend tape is shorter than `END_POSE` expects. Run the tests:
+Now try the experiments that make this test worth having. First, in `RobotContainer.isOnPretendTape()`, change `alongLeg2 <= CourseConstants.FOLLOW_LINE_LENGTH_METERS` to `alongLeg2 <= 0.30`, so the pretend tape is shorter than `END_POSE` expects. (Changing `FOLLOW_LINE_LENGTH_METERS` itself would not do it: `END_POSE` is computed from it, so the target would move with the tape.) Run the tests:
 
 ```
 ObstacleCourseTest > courseEndsAtTheEndOfTheLine() FAILED
 ```
 
-and the report says the robot's y was about 0.66 m, not within 0.10 of 1.0. One number changed, and a test that knows nothing about tape lengths noticed the robot ended up somewhere else. Put it back.
+and the report says the robot's y was about 0.65 m, not within 0.10 of 1.0. One number changed, and a test that knows nothing about tape lengths noticed the robot ended up somewhere else. Put it back.
+
+Second, take the floor away: in the test's loop, comment out `robotContainer.simulationPeriodic();`, so the pretend sensors never see any tape. Run the tests. The pose asserts pass, for the reason above, and the last one catches it: `leg 3 never followed the line ==> expected: <END_OF_LINE> but was: <never ran>`. Put it back.
 
 > **Only one test may build the whole robot**
 >
@@ -1416,7 +1424,7 @@ Give the Explorer a test suite, and a robot at GitHub that runs it.
 5. Create `FakeDrivetrainIO` and `DrivetrainTest` (Section 23.6). Run the tests.
 6. Create `DriveCommandsTest` (Section 23.7). Run the tests. Commit.
 7. Give `RobotContainer` its second constructor, the `useSimulatedRobot` field, and `getPose()` (Section 23.8). Build, and check that the robot still starts both simulated and real.
-8. Create `ObstacleCourseTest`. Run all the tests, and read the course's log under **Standard output** in the report. Try the `FOLLOW_LINE_LENGTH_METERS` experiment, then put it back. Commit.
+8. Create `ObstacleCourseTest`. Run all the tests, and read the course's log under **Standard output** in the report. Try both experiments from Section 23.8 (the shorter pretend tape, and no floor at all), and put each one back. Commit.
 9. Create `.github/workflows/build.yml` (Section 23.9). Commit, push, and watch the run on the **Actions** tab until it shows a green check.
 10. Open a pull request into `main` and find the **Checks** box. Merge it once it is green.
 11. Do the "See it go red" check from Section 23.9, on a separate branch. Close that pull request without merging.
@@ -1436,7 +1444,7 @@ Diagnose anything strange:
 | A command test passes alone but fails when every test runs | An `@AfterEach` is missing `cancelAll()` or `unregisterAllSubsystems()`, so an earlier test's drivetrain or command is still around |
 | `Analog Input 0 previously allocated` | Two tests build a `RobotContainer` (or a `Sensors`). Only `ObstacleCourseTest` may (Section 23.8) |
 | `the course never finished` | The robot never reached leg 3, or the LED never went out: check that `setAutonomous(true)` is in `setUp()`, and read the course log in the report |
-| The course test fails on `getY()` by about 0.5 m | The robot stopped at the crossbar: the `either` took its "no line" branch. Check `simulationPeriodic()` and the `SIM_` tape constants |
+| `leg 3 never followed the line` | The `either` took its "no line" branch: the log says `No line here, so no leg 3`. Check that the loop calls `simulationPeriodic()`, and check the `SIM_` tape constants |
 | On GitHub: `Permission denied` on `./gradlew` | The `chmod +x gradlew` step is missing, or is after the build step |
 | On GitHub: `cannot find symbol` for a class that exists on your laptop | The file was never committed. Check `git status` for untracked files |
 | On GitHub: the workflow never runs | The file is not at exactly `.github/workflows/build.yml` (check the dot, and that `workflows` is plural), or it has a tab in it |

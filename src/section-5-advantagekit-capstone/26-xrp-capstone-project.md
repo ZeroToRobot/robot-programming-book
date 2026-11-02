@@ -1,6 +1,6 @@
 # Chapter 26: XRP Capstone Project
 
-Twenty-four chapters ago, the Explorer was an empty project that printed one line. Today it drives a whole obstacle course on its own: a measured leg, a turn to a heading, a drive to the tape, and a state machine that follows the line to its end. It is built from subsystems and commands, characterized with SysId, tuned live from a dashboard, guarded by thirty tests that run on every push, and it keeps a log of every run that you can replay on your laptop, loop by loop.
+Twenty-five chapters ago, the Explorer was an empty project that printed one line. Today it drives a whole obstacle course on its own: a measured leg, a turn to a heading, a drive to the tape, and a state machine that follows the line to its end. It is built from subsystems and commands, characterized with SysId, tuned live from a dashboard, guarded by thirty tests that run on every push, and it keeps a log of every run that you can replay on your laptop, loop by loop.
 
 That is a lot of robot. This chapter does not add a new kind of tool to it. Instead, you will use every tool you already have, on purpose, in the right order, the way a team does in build season. You and a partner will **design** one more leg of the course, **write the tests** for it before the code, **build** it, give the simulator a way to run it, **tune** it on the floor, **prove** it works with logs, and then **ship** the Explorer as a real, tagged release: version 1.0.0.
 
@@ -975,7 +975,7 @@ private Command buildObstacleCourse() {
 }
 ```
 
-Leg 4 runs whether leg 3 followed a line or not. If there was no line, the robot is at the crossbar, the wall is much farther away, and `ParkAtWall` either reaches it or stops at its safety distance. And like every other step, it has a timeout as a last safety net: 0.6 m at 0.2 m/s takes 3 seconds, well inside `STEP_TIMEOUT_SECONDS`.
+Leg 4 runs whether leg 3 followed a line or not. If there was no line, leg 2 drove its full 1.0 m, which on the book's course is about where the line ends, so `ParkAtWall` usually still finds the wall and parks. (That is exactly why the course test checks `Line State` too, below: parking alone does not prove the robot followed the line.) And like every other step, it has a timeout as a last safety net: 0.6 m at 0.2 m/s takes 3 seconds, well inside `STEP_TIMEOUT_SECONDS`.
 
 In `configureAutoChooser()`, add a routine for tuning leg 4 on its own, after **Follow Line Only**:
 
@@ -1014,6 +1014,7 @@ void courseParksAtTheWall() {
     // Arrange: the whole robot, simulated, and a way to watch its LED.
     RobotContainer robotContainer = new RobotContainer(RobotMode.SIM);
     DIOSim led = new DIOSim(LED_CHANNEL);
+    SmartDashboard.putString("Line State", "never ran");   // FollowLine writes its state here
 
     // Act: run autonomous, loop by loop, until the LED goes out (the course is over).
     CommandScheduler.getInstance().schedule(robotContainer.getAutonomousCommand());
@@ -1029,11 +1030,13 @@ void courseParksAtTheWall() {
     Pose2d pose = robotContainer.getPose();
     assertEquals(CourseConstants.END_POSE.getX(), pose.getX(), 0.05);
     assertEquals(CourseConstants.TURN_HEADING_DEGREES, pose.getRotation().getDegrees(), 10.0);
+    assertEquals("END_OF_LINE", SmartDashboard.getString("Line State", "never ran"),
+            "leg 3 never followed the line");
     assertEquals(CourseConstants.PARK_DISTANCE_METERS, robotContainer.getDistanceAheadMeters(), 0.03);
 }
 ```
 
-The name changed, because the promise changed: a test's name is the sentence it proves. The x and heading checks stay (the robot is still on the line, still facing up it). The y check is gone, replaced by a better one: instead of asking "is the robot at this spot on the floor?", the test asks the rangefinder "is the wall 10 cm away?", which is what parking **means**. It is the same measurement the real robot will use.
+The name changed, because the promise changed: a test's name is the sentence it proves. The x and heading checks stay (the robot is still on the line, still facing up it), and so does the `Line State` check from Section 23.8, which proves leg 3 followed the line. The y check is gone, replaced by a better one: instead of asking "is the robot at this spot on the floor?", the test asks the rangefinder "is the wall 10 cm away?", which is what parking **means**. It is the same measurement the real robot will use.
 
 Why 3 cm? `ParkAtWall` stops the first loop the gap is within 2 cm of the target, and it comes at the wall from the far side, so it parks near the **far** edge of that window, around 12 cm, not exactly 10. Then the simulated robot coasts a little after the motors stop. A 3 cm check says "parked," and nothing more precise than the command itself promises. (Reflect question 2 asks you to explain the 12 cm in your own words.)
 
