@@ -325,6 +325,7 @@ This time you are not adding to the file; you are replacing most of it. The moto
 
 - **Delete** the `leftMotor` and `rightMotor` fields, the `rightMotor.setInverted(true);` line, and the `driveForward` and `stopMotors` helpers. WPILib allows only **one** `XRPMotor` object per channel. If `Robot` still creates `new XRPMotor(0)` when `Drivetrain` creates its own, the program stops at startup with `XRPMotor 0 already allocated`.
 - **Delete** the wall stop from `teleopPeriodic()`, along with the `controller` and `rangefinder` fields, `applyDeadband`, `isWallClose`, and the `Distance` and `Status` widgets. The controller comes back in Chapter 8 and the wall stop in Chapter 9, both rebuilt on top of `Drivetrain` with better tools.
+- **Delete** the Chapter 6 heartbeat: the `onBoardIO` and `loopsSinceToggle` fields, their lines in `disabledPeriodic()`, and the `XRPOnBoardIO` import. The LED comes back in Chapter 19.
 - **Delete** the Chapter 5 `LastInitTime` and `Uptime` widgets and the `testInit`/`testPeriodic` methods. They proved how the modes take turns, and that job is done. Keeping the file short makes the new part easy to see.
 
 Here is the whole file after those changes, with the drivetrain wired in:

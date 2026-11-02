@@ -20,7 +20,7 @@ Imagine you are driving your XRP toward a wall. You want it to stop automaticall
 
 In English: "If the rangefinder reads less than 20 centimeters, stop the motors. Otherwise, keep driving."
 
-That word "if" is the whole game. Up until this chapter, every line of code you have written runs every single time the loop ticks. Variables get set. Values get printed. The LED blinks at a fixed rate. There is no choice involved.
+That word "if" is the whole game. Up until this chapter, every line of code you have written runs every single time the loop ticks. Variables get set. Values get printed. The LED turns on. There is no choice involved.
 
 A conditional is how you give your program a choice. It is the difference between a robot that always does the same thing and a robot that responds to its environment.
 
@@ -214,7 +214,7 @@ This will blink the LED five times, then stop. Read it line by line: start count
 >
 > Remember: those methods run 50 times per second. They are expected to finish quickly and return. If you put a `while` loop with `Timer.delay()` inside `teleopPeriodic()`, the entire robot freezes for the duration of the loop. Driver Station inputs are ignored. Other code does not run. The watchdog will start barking.
 >
-> `while` loops with delays belong in standalone test code, in the `Robot()` constructor (which runs once at startup), or in command-based code, which we get to in Chapter 20. Until then, when you want loop-like behavior in periodic code, you use a counter variable that is checked on each tick. We will see this pattern later in the book.
+> `while` loops with delays belong in standalone test code, or in the `Robot()` constructor (which runs once at startup). When you want loop-like behavior in periodic code, you use a counter variable that is checked on each tick, and you let the 50 Hz loop do the repeating. You will write this pattern in the Build exercise at the end of this chapter. Commands (Chapter 19) are built on the same "check every loop, never wait" idea.
 
 ### The `for` Loop
 
@@ -343,7 +343,7 @@ private void blinkLED(int times) {
 
 `void` literally means "nothing". This method takes a count, blinks the LED that many times, and returns nothing. You call it like `blinkLED(3);` and the method just runs.
 
-Note: this `blinkLED` example uses `Timer.delay`, so just like our earlier `while` example, you would only call it from the `Robot()` constructor or test code, not from `teleopPeriodic()`. We will write a non-blocking version of this in the exercises.
+Note: this `blinkLED` example uses `Timer.delay`, so just like our earlier `while` example, you would only call it from the `Robot()` constructor or test code, not from `teleopPeriodic()`. The Build exercise writes a blink that never waits, the kind that is safe in a periodic method.
 
 ### Methods That Return Booleans
 
@@ -509,8 +509,27 @@ Bring the chapter together in your XRP Explorer project, starting from the "smar
 2. Add an `applyDeadband(double value)` helper method and use it on the drive stick input (with the minus sign), replacing any copy-pasted deadband logic.
 3. In `teleopPeriodic()`, read the rangefinder and drive forward only while the path is clear, stopping when you are within the threshold distance of a wall. Use an `if` and a boolean helper like `isWallClose()`.
 4. Report the current state (driving or stopped, and the measured distance) to SmartDashboard.
+5. **A heartbeat light, with no waiting.** Make the LED blink while the robot is disabled, so you can tell at a glance that your code is running. (Competition robots do this too.) You cannot use `blinkLED` here, because `disabledPeriodic()` must finish within 20 ms. Instead, count loops. Add the import `import edu.wpi.first.wpilibj.xrp.XRPOnBoardIO;`, and two fields next to the others (outside every method, so they remember their values from one loop to the next):
 
-Run it, then drive the XRP toward a wall and confirm it stops on its own. This is the first time the Explorer reacts to its environment instead of just obeying the stick.
+   ```java
+       private final XRPOnBoardIO onBoardIO = new XRPOnBoardIO();   // the LED, as in Chapter 4
+       private int loopsSinceToggle = 0;                           // loops since the LED last flipped
+   ```
+
+   Then, at the end of `disabledPeriodic()`:
+
+   ```java
+       // 25 loops x 20 ms = 0.5 s between flips. No waiting: add one, check, and return right away.
+       loopsSinceToggle = loopsSinceToggle + 1;
+       if (loopsSinceToggle >= 25) {
+           onBoardIO.setLed(!onBoardIO.getLed());
+           loopsSinceToggle = 0;
+       }
+   ```
+
+   The 50 Hz loop **is** your loop. Each call does one small step and leaves. You will use this "check every loop, never wait" idea for the rest of the book.
+
+Run it. While it is disabled, the LED should blink about once a second. Then drive the XRP toward a wall and confirm it stops on its own. This is the first time the Explorer reacts to its environment instead of just obeying the stick.
 
 ### Reflect
 
@@ -542,6 +561,8 @@ public void teleopPeriodic() {
 ```
 
 3. **Where in Chapter 5's TimedRobot template would a `while` loop with `Timer.delay()` cause a bug?** Explain in terms of the 50 Hz loop. Where could the same loop run safely?
+
+4. **Why does `loopsSinceToggle` have to be declared outside `disabledPeriodic()`?** What would happen to the heartbeat if you declared it inside, and why? (Chapter 4's rule about where a variable lives is the key.)
 
 ### Git
 

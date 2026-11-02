@@ -260,40 +260,40 @@ The final phase brings everything together on your team's actual competition rob
 
 ### One Glimpse of Real Code
 
-Here's a five-line snippet of WPILib Java, the kind of code you'll be writing by Chapter 21. Don't worry about understanding it yet. Just notice that it's readable:
+Here's a short snippet of WPILib Java, the kind of code you'll be writing by Chapter 21. Don't worry about understanding it yet. Just notice that it's readable:
 
 ```java
-// When the driver holds A, drive forward at half speed
-new JoystickButton(controller, XboxController.Button.kA.value)
-    .whileTrue(new DriveForwardCommand(drivetrain, 0.5));
+// When the driver holds A, drive forward half a meter
+controller.a().whileTrue(new DriveDistance(drivetrain, 0.5));
 ```
 
 And here's a slightly larger piece, a complete command that drives the XRP forward for a set distance:
 
 ```java
-public class DriveForwardCommand extends Command {
+public class DriveDistance extends Command {
     private final Drivetrain drivetrain;
-    private final double targetDistance;
+    private final double distanceMeters;
+    private double startDistanceMeters = 0.0;
 
-    public DriveForwardCommand(Drivetrain drivetrain, double targetDistance) {
+    public DriveDistance(Drivetrain drivetrain, double distanceMeters) {
         this.drivetrain = drivetrain;
-        this.targetDistance = targetDistance;
+        this.distanceMeters = distanceMeters;
         addRequirements(drivetrain);
     }
 
     @Override
     public void initialize() {
-        drivetrain.resetEncoders();
+        startDistanceMeters = drivetrain.getAverageDistanceMeters();
     }
 
     @Override
     public void execute() {
-        drivetrain.drive(0.4, 0);
+        drivetrain.drive(0.20, 0.0);   // 0.20 meters per second, no turning
     }
 
     @Override
     public boolean isFinished() {
-        return drivetrain.getAverageDistanceMeter() >= targetDistance;
+        return drivetrain.getAverageDistanceMeters() - startDistanceMeters >= distanceMeters;
     }
 
     @Override
@@ -303,7 +303,7 @@ public class DriveForwardCommand extends Command {
 }
 ```
 
-You don't need to understand any of this right now. But notice: it reads almost like English. `initialize` runs once at the start. `execute` runs every loop. `isFinished` says when to stop. `end` cleans up.
+You don't need to understand any of this right now. But notice: it reads almost like English. `initialize` runs once at the start: it remembers where the robot started, so the command measures its own trip without erasing anything. `execute` runs every loop. `isFinished` says when to stop. `end` cleans up.
 
 By Chapter 20, you'll understand every line of this. By Chapter 26, you'll be writing code more sophisticated than this from memory.
 

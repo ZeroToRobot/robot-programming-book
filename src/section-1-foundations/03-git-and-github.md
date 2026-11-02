@@ -111,7 +111,13 @@ While you're at it, set the default branch name to `main` (this matches GitHub a
 git config --global init.defaultBranch main
 ```
 
-You only need to run these three commands once per computer.
+And one more, which tells `git pull` how to combine your work with new commits from GitHub. Chapter 11 explains it; for now, just set it:
+
+```bash
+git config --global pull.rebase false
+```
+
+You only need to run these four commands once per computer.
 
 ---
 
@@ -126,11 +132,13 @@ If you don't already have one, go to [github.com](https://github.com) and sign u
 After signing up, you'll need a way for Git on your laptop to prove to GitHub that it's really you when you push. Git does this over **HTTPS**, and you authenticate the first time you push. How that first push looks depends on your operating system:
 
 - **Windows**: the Git for Windows installer includes **Git Credential Manager**. The first time you run `git push`, a window opens asking you to sign in to GitHub. Click **Sign in with your browser**, approve it, and you're done. Git saves the credential and won't ask again.
-- **macOS and Linux**: the simplest reliable option is a **Personal Access Token**. On GitHub, go to **Settings**, then **Developer settings**, then **Personal access tokens**, then **Tokens (classic)**. Click **Generate new token**, give it the **repo** scope, and copy the token somewhere safe. The first time you push, Git asks for a username and password: enter your GitHub username, and paste the token as the password.
+- **macOS and Linux**: the easiest path is the same browser sign-in. Install **[Git Credential Manager](https://github.com/git-ecosystem/git-credential-manager)**, which works on all three systems; your first `git push` then opens the same "Sign in with your browser" window, and Git saves the credential. (The GitHub CLI's `gh auth login` is another way to do the same thing.)
 
-A Personal Access Token is like a password that only works for the permissions you grant it. GitHub requires one (or the browser sign-in above) instead of your account password.
+> **If you use a token instead**
+>
+> GitHub also accepts a **Personal Access Token** in place of a password: on GitHub, **Settings** > **Developer settings** > **Personal access tokens** > **Fine-grained tokens**. Limit it to your `XRPExplorer` repository, give it **Contents: Read and write**, and set an expiration date. When Git asks for a password, paste the token. Treat it like a password: never put it in a file in your project or paste it into a chat, because anyone who has it can push to your repository. (Without Git Credential Manager, Git on Linux does not remember it, and asks again on every push.)
 
-You don't need to do any of this right now. Just know that when you reach Section 3.7 and run your first `git push`, this is the prompt you'll see. Once you authenticate, Git remembers it.
+You don't need to do any of this right now. Just know that when you reach Section 3.7 and run your first `git push`, this is the prompt you'll see.
 
 > **Why HTTPS instead of SSH?**
 >
@@ -289,11 +297,14 @@ If you ever notice unwanted files showing up in `git status`, the fix is usually
 
 ### Make a Real Commit
 
-Open `Robot.java` and update the `Robot()` constructor (the block near the top that runs once when the program starts) to print a startup message:
+Open `Robot.java` and find the `Robot()` constructor (the block near the top that runs once when the program starts). Add one line, as the **first** line inside it, to print a startup message. Leave the template's three lines below it alone: they set up the autonomous chooser, and autonomous crashes without them.
 
 ```java
 public Robot() {
     System.out.println("XRP Explorer starting up.");
+    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
+    m_chooser.addOption("My Auto", kCustomAuto);
+    SmartDashboard.putData("Auto choices", m_chooser);
 }
 ```
 
@@ -314,7 +325,7 @@ This shows you, line by line, what's different between your working files and th
 Stage and commit:
 
 ```bash
-git add Robot.java
+git add src/main/java/frc/robot/Robot.java
 git commit -m "Ch3: add startup print to Robot constructor"
 ```
 
@@ -347,7 +358,7 @@ Copy them from your own setup page (GitHub fills in your real username) and run 
 - `git branch -M main` makes sure your branch is named `main`; you already did this in Section 3.6, so it changes nothing here
 - `git push -u origin main` uploads your commits and links `main` to `origin`, so that from now on you can push with just `git push`
 
-This first push is when the authentication from Section 3.4 kicks in. If Git prompts you to sign in, follow the browser flow (Windows) or paste your Personal Access Token as the password (macOS and Linux).
+This first push is when the authentication from Section 3.4 kicks in. If Git prompts you to sign in, follow the browser flow (or, if you made one, paste your fine-grained token as the password).
 
 Refresh the GitHub page: your code is there, with your commit history visible.
 
@@ -361,6 +372,10 @@ Once your remote is set up, the workflow extends to four steps:
 4. `git push`
 
 `git push` sends your local commits to GitHub. If you're working on more than one computer (a desktop at home and a laptop at school), you'd run `git pull` on the second computer to download the latest commits before starting work.
+
+> **If `git push` says "rejected"**
+>
+> It means GitHub has commits your laptop does not, usually from your other computer. Run `git pull`, then `git push` again. If Git says there is a **conflict**, do not panic, and do not delete the folder: your work is safe in your commits. Chapter 11 shows you how to fix a conflict, and Section 3.8 shows you what one looks like.
 
 > **Push frequently**
 >
@@ -556,7 +571,7 @@ git checkout -b ch3-experiment
 Make a small change to `Robot.java` (any change at all). Commit it on this branch:
 
 ```bash
-git add Robot.java
+git add src/main/java/frc/robot/Robot.java
 git commit -m "Ch3: branch experiment"
 ```
 
