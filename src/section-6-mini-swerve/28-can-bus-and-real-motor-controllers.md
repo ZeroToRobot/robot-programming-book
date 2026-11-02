@@ -474,6 +474,8 @@ Look again at that `apply` call. It sends a **whole** `TalonFXConfiguration`, an
 
 `apply` does not throw an exception if the motor does not answer. It returns a **`StatusCode`**, an enum that is `OK` if it worked and something else, like `RxTimeout` ("no answer in time"), if it did not. That is a different way to report trouble from Chapter 27's exceptions, and it fits this job: a motor that is missing at start-up is a problem a person must fix, not a bug that should crash the robot. So `ModuleIOTalonFX` checks the result and, if it is not `OK`, reports it to the Driver Station and carries on, the same choice AdvantageKit makes about a missing USB stick (Section 27.10). Section 28.10 makes sure nobody misses it.
 
+But a motor that misses its settings once is not necessarily lost. It might still have been starting up when your program did, or the bus might have been busy for a moment. So `ModuleIOTalonFX` asks up to five times, waiting a quarter of a second for each answer, which is what AdvantageKit's own TalonFX template does. Only a motor that never answers gets reported. Notice what a missed configuration would mean: the motor answers a moment later, so its "not answering" alert clears, but it runs on whatever settings were stored on it before (maybe coast, maybe the old inversion, maybe no current limit). That is why the retry matters more than the message.
+
 ### Reading a Kraken
 
 A Talon FX reports back constantly. Phoenix 6 calls each reading a **status signal**, and you ask for each one once, in the constructor:
@@ -689,6 +691,10 @@ public final class DriveConstants {
     public static final double DRIVE_STATOR_LIMIT_AMPS = 80.0;
     public static final double STEER_STATOR_LIMIT_AMPS = 40.0;
 
+    // Applying settings (Section 28.6): how many tries, and how long to wait for each answer.
+    public static final int CONFIG_ATTEMPTS = 5;
+    public static final double CONFIG_TIMEOUT_SECONDS = 0.25;
+
     // The motor check (Section 28.9): gentle volts, a short spin, a short rest between motors.
     public static final double MOTOR_CHECK_VOLTS = 1.5;
     public static final double MOTOR_CHECK_SECONDS = 1.5;
@@ -887,12 +893,18 @@ public class ModuleIOTalonFX implements ModuleIO {
         return inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
     }
 
-    /** Send a whole configuration to one motor, and say so if it does not answer. */
+    /** Send a whole configuration to one motor, try again if it does not answer, and say so if it never does. */
     private static void applyConfig(TalonFX motor, TalonFXConfiguration config, String description) {
-        StatusCode result = motor.getConfigurator().apply(config);
+        StatusCode result = motor.getConfigurator().apply(config, DriveConstants.CONFIG_TIMEOUT_SECONDS);
+        int attempts = 1;
+        while (!result.isOK() && attempts < DriveConstants.CONFIG_ATTEMPTS) {
+            result = motor.getConfigurator().apply(config, DriveConstants.CONFIG_TIMEOUT_SECONDS);
+            attempts++;
+        }
         if (!result.isOK()) {
             DriverStation.reportError(
-                description + " motor (CAN " + motor.getDeviceID() + ") did not take its settings: " + result,
+                description + " motor (CAN " + motor.getDeviceID() + ") did not take its settings after "
+                    + attempts + " tries: " + result,
                 false);
         }
     }
@@ -904,10 +916,10 @@ Walk through it, top to bottom:
 - **Three device objects**, made once in the constructor, each with its CAN ID from the record. This is the only file in the project that knows the word `TalonFX`.
 - **Two `VoltageOut` requests**, one per motor, made once and reused (Section 28.7).
 - **Eleven status signals**, fetched once in the constructor. The angle brackets are Chapter 24's generics: a `StatusSignal<Angle>` is a signal whose value is an angle.
-- **The configuration**, filled in field by field, then sent with `applyConfig`. `direction()` turns the record's `true`/`false` into Phoenix's two-value enum, with Chapter 8's ternary operator.
+- **The configuration**, filled in field by field, then sent with `applyConfig`, which tries up to `CONFIG_ATTEMPTS` times. `direction()` turns the record's `true`/`false` into Phoenix's two-value enum, with Chapter 8's ternary operator.
 - **`updateInputs`** refreshes each device's signals in one call, using varargs (Section 28.5), then turns each status into a debounced `Connected` flag and copies each value into the inputs.
 - **The two setters** are one line each.
-- **`applyConfig`** reports a failed configuration to the Driver Station with `DriverStation.reportError`, the same thing AdvantageKit does when it cannot open a log file (Section 27.10), and carries on. The `Connected` alert will keep reminding everyone, every loop.
+- **`applyConfig`** reports a failed configuration to the Driver Station with `DriverStation.reportError`, the same thing AdvantageKit does when it cannot open a log file (Section 27.10), and carries on. Its `while` loop is Chapter 6's: keep asking while the answer is not `OK` and there are tries left. If a motor is missing altogether, the `Connected` alert below keeps reminding everyone, every loop; if it answered late but never took its settings, that one line in RioLog is the only trace, so read RioLog after every deploy.
 
 > **Why the debouncer?**
 >
@@ -1385,7 +1397,7 @@ public static final ModuleConstants FRONT_LEFT = new ModuleConstants("FrontLeft"
 
 Robot on blocks. Deploy, and watch three places.
 
-1. **RioLog and the Driver Station's messages.** At start-up, your `applyConfig` reports that `FrontLeft steer motor (CAN 9) did not take its settings`, with a status code saying no answer came. Phoenix itself adds its own messages from `[phoenix]`, saying a CAN frame was "not received" or was "too stale," and naming a Talon FX with ID 9. (The robot also takes a moment longer to start: Phoenix waits a little for each answer that never comes.)
+1. **RioLog and the Driver Station's messages.** At start-up, your `applyConfig` reports that `FrontLeft steer motor (CAN 9) did not take its settings after 5 tries`, with a status code saying no answer came. Phoenix itself adds its own messages from `[phoenix]`, saying a CAN frame was "not received" or was "too stale," and naming a Talon FX with ID 9. (The robot also takes a moment longer to start: Phoenix waits a little for each answer that never comes.)
 2. **Elastic.** Half a second after the program starts, a red alert appears: **FrontLeft steer motor (CAN 9) is not answering.** It names the module, the motor, and the ID the code is looking for. It stays up for as long as the problem lasts.
 3. **AdvantageScope.** `Drive` > `FrontLeft` > `SteerConnected` is `false`, and that module's steer readings sit at zero.
 

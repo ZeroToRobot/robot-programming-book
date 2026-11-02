@@ -354,7 +354,7 @@ A swerve wheel looks the same pointing forward and pointing backward. Turn one 1
 
 > **Why not just measure it in Tuner X?**
 >
-> Phoenix Tuner X can zero a CANcoder for you, by working out an offset and saving it on the device. It works, and many teams use it. This book does not, for the same reason as Section 28.6: Tuner X would save the offset **on the device**, where nobody can see it in a pull request, and the next full configuration from your code would overwrite it anyway. The offset is a measured fact about your robot. It goes in `DriveConstants`, next to the CAN IDs, in a commit of its own.
+> Phoenix Tuner X can zero a CANcoder for you, by working out an offset and saving it on the device. It works, and many teams use it. This book does not, for the same reason as Section 28.6: Tuner X would save the offset **on the device**, where nobody can see it in a pull request, and the next full configuration from your code would overwrite it anyway. The offset is a measured fact about your robot. It goes in `DriveConstants`, next to the CAN IDs, in a commit of its own. (Tuner X's swerve project generator does it the other way: it measures the offsets, then writes them into a code file. That is this book's rule too.)
 
 You will measure the offsets in Section 29.9, once the code is ready to show you the readings. The procedure has the same shape as the motor check: line up, read, write down, put it in the code, check again.
 
@@ -423,9 +423,9 @@ The input is the CANcoder's angle in radians, the setpoint is the target in radi
 
 These are **untested starting points**, picked by trying them on the pretend module in the simulator, where they reach a quarter turn in about a tenth of a second with almost no overshoot. A real module has friction, which the simulator does not, so a real wheel may stop a degree or two short of its target, held back by **kS** (Chapter 16). Chapter 33 measures the steering's kS and retunes these gains on the real robot.
 
-> **Why steer on the roboRIO?**
+> **Why steer on the roboRIO, for now?**
 >
-> A Talon FX can run a PID loop itself, inside the motor controller, a thousand times a second, reading the CANcoder straight off the CAN bus. Competition teams usually do exactly that, and AdvantageKit's template does too. This book steers with WPILib's `PIDController` on the roboRIO first, because it is the controller you already know from Chapter 15, you can see every number in AdvantageScope, and it works the same on the real robot and the pretend one. Fifty times a second is plenty for a module on blocks. Moving the loop into the Talon FX is a good project once Chapter 33 has measured the real gains.
+> A Talon FX can run this loop itself, inside the motor controller, a thousand times a second, reading the CANcoder straight off the CAN bus. CTRE's generated swerve code and AdvantageKit's template both do exactly that, for steering (`PositionVoltage`, with the CANcoder as a remote sensor) and for the drive wheel too (`VelocityVoltage`). This book starts on the roboRIO because `PIDController` is the controller you already know from Chapter 15, every number shows up in AdvantageScope, and the pretend module runs the same code. Fifty times a second is plenty for a module on blocks. It is a starting point, not the finish: in Chapter 33, once SysId has measured the real gains, both loops move into the Talon FX, and `Module.runSetpoint` gets shorter. One thing to watch when you get there: a Talon FX's steering gain is in volts per **rotation**, not per radian, so the same module needs a kP about 6.3 (2 pi) times bigger.
 
 ### Driving the wheel
 
@@ -435,7 +435,7 @@ The drive motor gets the simplest possible treatment for now: the wheel speed fr
 double driveVolts = state.speedMetersPerSecond * DriveConstants.DRIVE_KV_VOLT_SECONDS_PER_METER;
 ```
 
-No PID, no kS. On blocks, with nothing to push against, it gets close. On the floor, with a robot's weight on the wheels, it will roll a little slower than asked. Chapter 30 drives on it anyway (a driver's thumb closes that loop), and Chapter 33 replaces it with measured feedforward.
+No PID, no kS. On blocks, with nothing to push against, it gets close. On the floor, with a robot's weight on the wheels, it will roll a little slower than asked. Chapter 30 drives on it anyway (a driver's thumb closes that loop), and Chapter 33 replaces it with a measured feedforward and moves the speed loop into the Talon FX.
 
 ### And when the robot is asked to stop?
 
@@ -604,6 +604,10 @@ public final class DriveConstants {
     public static final double DRIVE_STATOR_LIMIT_AMPS = 80.0;
     public static final double STEER_STATOR_LIMIT_AMPS = 40.0;
 
+    // Applying settings (Section 28.6): how many tries, and how long to wait for each answer.
+    public static final int CONFIG_ATTEMPTS = 5;
+    public static final double CONFIG_TIMEOUT_SECONDS = 0.25;
+
     // The motor check (Section 28.9).
     public static final double MOTOR_CHECK_VOLTS = 1.5;
     public static final double MOTOR_CHECK_SECONDS = 1.5;
@@ -673,6 +677,24 @@ Walk through what is new:
 >
 > The old swerve draft this book grew from, and plenty of team code online, writes `public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(...)`. It works on a robot with one drive. But a `SwerveDriveKinematics` remembers each module's last angle (Section 29.6), so it is a changeable object, and Chapter 24's rule says that is not a constant. Here is how that bites: in Section 29.10, two tests each build a `Drive`. If they shared one kinematics object, the second test would start with the first test's remembered wheel angles, and pass or fail depending on which test ran first. A factory gives every `Drive`, and every test, its own.
 
+> **The same facts, in someone else's file**
+>
+> Open almost any Kraken team's swerve code, or AdvantageKit's TalonFX template, and you will find a file called `TunerConstants`, written by Tuner X's swerve generator or by hand. It holds what your `DriveConstants` holds, with different names:
+>
+> | Your `DriveConstants` | In `TunerConstants` |
+> |---|---|
+> | `DRIVE_GEAR_RATIO`, `STEER_GEAR_RATIO` | `kDriveGearRatio`, `kSteerGearRatio` |
+> | `WHEEL_DIAMETER_METERS` | `kWheelRadius` (half of it!) |
+> | `FREE_SPEED_METERS_PER_SECOND` | `kSpeedAt12Volts` |
+> | `driveInverted` | `kInvertLeftSide`, `kInvertRightSide` (one per side, not per module) |
+> | `steerInverted`, `encoderInverted` | `kFrontLeftSteerMotorInverted`, `kFrontLeftEncoderInverted`, and so on |
+> | `encoderOffsetRotations` | `kFrontLeftEncoderOffset`, and so on |
+> | `location` | `kFrontLeftXPos`, `kFrontLeftYPos`, and so on |
+> | `DRIVE_STATOR_LIMIT_AMPS` | `kSlipCurrent` |
+> | `STEER_KP`, `STEER_KD` | `steerGains` (in volts per **rotation**) |
+>
+> One entry has no twin in your file: `kCoupleRatio`, how far the drive wheel turns when only the module steers, because of how the gears inside a swerve module are linked. Your code ignores it for now; on a module that steers a lot while it drives, it shows up as a small error in odometry.
+
 ### Step 2: The IO interface
 
 `ModuleIO.java`. Only the inputs change. The steer motor and the drive motor now report in the units of what they turn:
@@ -729,7 +751,7 @@ Three readings were renamed, and each name carries its new unit. `steerModuleRot
 
 ### Step 3: The real module
 
-`ModuleIOTalonFX.java`. Three changes from Chapter 28: each motor's configuration gets its `SensorToMechanismRatio`, the CANcoder gets a configuration of its own, and the drive readings are multiplied by the wheel's circumference. The small `applyConfig` helper becomes `report`, so it can check the CANcoder's settings too. Here is the whole file:
+`ModuleIOTalonFX.java`. Three changes from Chapter 28: each motor's configuration gets its `SensorToMechanismRatio`, the CANcoder gets a configuration of its own, and the drive readings are multiplied by the wheel's circumference. The small `applyConfig` helper becomes `applyWithRetries`, so it can retry the CANcoder's settings too. Here is the whole file:
 
 ```java
 package frc.robot.subsystems.drive;
@@ -754,6 +776,7 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.subsystems.drive.DriveConstants.ModuleConstants;
+import java.util.function.Supplier;
 
 /** A real swerve module: two Krakens (each with a Talon FX inside) and a CANcoder, on the CAN bus. */
 public class ModuleIOTalonFX implements ModuleIO {
@@ -797,7 +820,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         // Report wheel turns, not motor turns (Section 29.3).
         driveConfig.Feedback.SensorToMechanismRatio = DriveConstants.DRIVE_GEAR_RATIO;
-        report(driveMotor.getConfigurator().apply(driveConfig),
+        applyWithRetries(() -> driveMotor.getConfigurator().apply(driveConfig, DriveConstants.CONFIG_TIMEOUT_SECONDS),
             module.name() + " drive motor (CAN " + module.driveCanId() + ")");
 
         TalonFXConfiguration steerConfig = new TalonFXConfiguration();
@@ -807,7 +830,7 @@ public class ModuleIOTalonFX implements ModuleIO {
         steerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
         // Report module turns, not motor turns (Section 29.3).
         steerConfig.Feedback.SensorToMechanismRatio = DriveConstants.STEER_GEAR_RATIO;
-        report(steerMotor.getConfigurator().apply(steerConfig),
+        applyWithRetries(() -> steerMotor.getConfigurator().apply(steerConfig, DriveConstants.CONFIG_TIMEOUT_SECONDS),
             module.name() + " steer motor (CAN " + module.steerCanId() + ")");
 
         // Counterclockwise is positive, and straight ahead reads 0 (Section 29.5).
@@ -816,7 +839,7 @@ public class ModuleIOTalonFX implements ModuleIO {
             ? SensorDirectionValue.Clockwise_Positive
             : SensorDirectionValue.CounterClockwise_Positive;
         encoderConfig.MagnetSensor.MagnetOffset = module.encoderOffsetRotations();
-        report(encoder.getConfigurator().apply(encoderConfig),
+        applyWithRetries(() -> encoder.getConfigurator().apply(encoderConfig, DriveConstants.CONFIG_TIMEOUT_SECONDS),
             module.name() + " CANcoder (CAN " + module.encoderCanId() + ")");
 
         drivePosition = driveMotor.getPosition();
@@ -878,16 +901,26 @@ public class ModuleIOTalonFX implements ModuleIO {
         return inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
     }
 
-    /** If a device did not take its settings, say so on the Driver Station, and carry on (Section 28.6). */
-    private static void report(StatusCode result, String device) {
+    /**
+     * Apply settings to one device, try again if it does not answer, and say so on the
+     * Driver Station if it never does (Section 28.6).
+     */
+    private static void applyWithRetries(Supplier<StatusCode> apply, String device) {
+        StatusCode result = apply.get();
+        int attempts = 1;
+        while (!result.isOK() && attempts < DriveConstants.CONFIG_ATTEMPTS) {
+            result = apply.get();
+            attempts++;
+        }
         if (!result.isOK()) {
-            DriverStation.reportError(device + " did not take its settings: " + result, false);
+            DriverStation.reportError(
+                device + " did not take its settings after " + attempts + " tries: " + result, false);
         }
     }
 }
 ```
 
-The message is word for word what Chapter 28's `applyConfig` printed ("FrontLeft steer motor (CAN 9) did not take its settings: ..."), so the wrong-ID drill still reads the same. The only new idea is `SensorDirectionValue`, Phoenix's two-value enum for a CANcoder's direction, chosen with Chapter 8's ternary, the same way `direction()` chooses a motor's.
+`applyWithRetries` keeps Chapter 28's `while` loop, but a motor and a CANcoder have different configuration classes, so instead of a device it takes the **job** to retry, as a lambda: `() -> encoder.getConfigurator().apply(...)`. `Supplier<StatusCode>` is a functional interface (Chapter 19) whose one method, `get()`, runs that lambda and hands back its `StatusCode`, so each `apply.get()` is one more try. The message is the same as Chapter 28's ("FrontLeft steer motor (CAN 9) did not take its settings after 5 tries: ..."), so the wrong-ID drill still reads the same. The only new idea is `SensorDirectionValue`, Phoenix's two-value enum for a CANcoder's direction, chosen with Chapter 8's ternary, the same way `direction()` chooses a motor's.
 
 ### Step 4: The pretend module, with a pretend CANcoder
 
