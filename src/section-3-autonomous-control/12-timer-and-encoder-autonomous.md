@@ -794,7 +794,7 @@ Walk through what changed since Chapter 11:
 
 ### Run it
 
-Place the robot on the start line, pointing down leg 1. Run the program, open SmartDashboard, and put the `Auto Step` widget somewhere you can see it. Choose **Autonomous** and enable.
+Place the robot on the start line, pointing down leg 1. Run the program, open Elastic, and put the `Auto Step` widget somewhere you can see it. Choose **Autonomous** and enable.
 
 You should see the robot drive forward about half a meter, spin left a quarter turn, drive to the black line, and stop, with `Auto Step` counting `1`, `2`, `3`, `4` along the way. Disable it, then look at the terminal panel, where `DataLogManager.log` also prints. You should see the story of the run:
 
@@ -922,7 +922,7 @@ Give the Explorer its first real autonomous routine: obstacle course leg 1.
 
 1. Lay out the course from Section 12.1 on your floor: start line, corner mark at 0.5 m, black tape line about 0.4 m to the left of the corner.
 2. Update `Robot.java` to the listing in Section 12.7. Build and confirm `BUILD SUCCESSFUL`.
-3. Power on the XRP flat and still, wait for the gyro calibration to finish, and run the program. Arrange the three new autonomous widgets on your SmartDashboard and save the layout.
+3. Power on the XRP flat and still, wait for the gyro calibration to finish, and run the program. Add the three new autonomous widgets in Elastic and save the layout (**File** > **Save**).
 4. Place the robot on the start line and run autonomous. Watch `Auto Step` count from `1` to `4`.
 5. Read the terminal output and confirm each step started in order. Note how long each step took.
 6. Run it five times. Each time, measure how far from the center of the tape the robot's line sensors stopped. Record the results.

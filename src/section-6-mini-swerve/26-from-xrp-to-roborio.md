@@ -1349,7 +1349,7 @@ If you did the crash drill with a stick in, find that log too, and open its **Co
 
 Chapter 23 promised that the dashboard would come along with one change, and here it is. Open Elastic, click the gear, and set **IP Address Mode** to **Driver Station**: Elastic asks the Driver Station where the robot is, so it follows whatever connection the Driver Station is using. (On the Explorer, it was **localhost**, because the program ran on your laptop.) The bottom of the window turns green.
 
-The Mini Swerve has almost nothing to show yet, which makes it a good time to start its dashboard properly. Make a **Driver** tab with two widgets: the **Alerts** (find `SmartDashboard` > `Alerts` and show it as an Alerts widget), and the battery voltage. Then do Section 23.4's last steps: save, and export the layout to `src/main/deploy/elastic-layout.json`. Remember Section 26.5's `deploy` block: that file now gets copied to the robot on every deploy, and from there, Elastic's **Load Layout From Robot** can fetch it (Chapter 23's Practice showed how). Commit the layout on a branch, through a pull request.
+The Mini Swerve has almost nothing to show yet, which makes it a good time to start its dashboard properly. Make a **Driver** tab with two widgets: the **Alerts** (find `SmartDashboard` > `Alerts` and show it as an Alerts widget), and the battery voltage. Then do Section 23.4's last steps: save, and export the layout to `src/main/deploy/elastic-layout.json`. Remember Section 26.5's `deploy` block: that file now gets copied to the robot on every deploy, and from there, Elastic's **File** > **Download From Robot** can fetch it (Chapter 23's Practice showed how). Commit the layout on a branch, through a pull request.
 
 > **The Driver Station keeps its own log**
 >

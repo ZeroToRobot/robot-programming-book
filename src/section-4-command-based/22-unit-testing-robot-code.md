@@ -1546,4 +1546,4 @@ Afterward, each of you writes two sentences in `reflections.md`. First: in Chapt
 
 ---
 
-*Next up, Chapter 23: SmartDashboard, Shuffleboard, and Live Tuning. You will turn `FollowLine`'s gains and the PID values into dashboard controls, tune the course while it runs, and let your new tests stand guard while the numbers change.*
+*Next up, Chapter 23: Live Tuning and the Autonomous Chooser. You will turn `FollowLine`'s gains and the PID values into dashboard controls, tune the course while it runs, and let your new tests stand guard while the numbers change.*

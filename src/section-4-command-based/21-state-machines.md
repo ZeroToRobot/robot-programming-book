@@ -1031,7 +1031,7 @@ Build. Then, before you test anything, make sure the old behavior is safe: the c
 
 ## 21.9 Run It: Follow the Line
 
-Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`. Keep **NetworkTables** > **SmartDashboard** open with `Line State`, `Line Error`, `Left Reflectance`, `Right Reflectance`, and the Scheduler, and watch the terminal. Everything below says what the terminal should show; your numbers will differ.
+Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`. Keep Elastic open with `Line State`, `Line Error`, `Left Reflectance`, `Right Reflectance`, and the Scheduler (add the two new widgets and save the layout), and watch the terminal. Everything below says what the terminal should show; your numbers will differ.
 
 ### On the bench: teleop
 
@@ -1100,7 +1100,7 @@ FollowLine finished in END_OF_LINE after 0.583 m
 
 ### The simulated Explorer
 
-Switch the XRP off, set `USE_SIMULATED_ROBOT = true`, and run the course in autonomous. Watch the **Field** view: the robot icon drives leg 1, turns, and runs up leg 3 to the `END_POSE` marker. Then hold the left bumper in teleop with the simulated robot sitting on the pretend line, and drive it off the side with the sticks between tries.
+Switch the XRP off, set `USE_SIMULATED_ROBOT = true`, and run the course in autonomous. Watch AdvantageScope's 2D Field: the robot icon drives leg 1, turns, and runs up leg 3 to the `END_POSE` marker. Then hold the left bumper in teleop with the simulated robot sitting on the pretend line, and drive it off the side with the sticks between tries.
 
 The simulated sensors are perfectly sharp: each one reads pure black or pure white, so the error is always `-1`, `0`, or `+1`, and the steering looks jerkier than on the real robot. That is the pretend floor, not your code. Set `USE_SIMULATED_ROBOT = false` again before you commit.
 

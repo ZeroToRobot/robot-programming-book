@@ -1,4 +1,4 @@
-# Chapter 23: SmartDashboard, Shuffleboard, and Live Tuning
+# Chapter 23: Live Tuning and the Autonomous Chooser
 
 In Chapter 22 the Explorer got a safety net. Twenty-four tests walk `FollowLine` through every arrow of its state diagram, check the drivetrain's math, drive the commands on the simulated robot, and run the whole obstacle course in autonomous, every time you build. GitHub Actions runs them again on every push, and puts a green check or a red X on every pull request.
 
@@ -6,7 +6,7 @@ What has not changed since Chapter 2 is how you **tune**. You change `STEER_KP` 
 
 This chapter makes the dashboard talk **back**. By the end, the Explorer has a real dashboard with two tabs: a **Driver** tab with a dropdown that picks the autonomous routine, and a **Tuning** tab with every PID gain and all three of `FollowLine`'s promised tuning numbers, which you can change while the robot is running. You will tune the whole obstacle course that way, live, and then copy the winning numbers back into your code, where your tests stand guard over them.
 
-Along the way, you will find out something important about the tools in this chapter's title. WPILib changed its advice about dashboards for 2026, and the SmartDashboard and Shuffleboard **apps** are on their way out. Section 23.3 says exactly what changed, what it means for the code you have written since Chapter 4 (good news: very little), and which dashboard the book uses from here on.
+Along the way, you will find out what a dashboard really is underneath (NetworkTables), and why the book has used Elastic since Chapter 2 even though your code says `SmartDashboard`. Section 23.3 tells the full story: WPILib changed its advice about dashboards for 2026, and the old SmartDashboard and Shuffleboard **apps** are on their way out.
 
 On the Java side, you will learn **generics**: the angle brackets in `SendableChooser<Command>` that you have been seeing since Chapter 19 and quietly skipping past. And you will learn what it means for a `static final` field to point at an object that **changes**, which is exactly what a tunable number is.
 
@@ -26,7 +26,7 @@ There is a worse cost, too. Between two tries, a minute passes and the robot is 
 
 ### You had this once
 
-In Chapter 15 you tuned the heading PID controller **live**. `SmartDashboard.putData("Heading PID", headingController)` put the controller itself on the dashboard, and you changed its P, I, and D in the Simulation GUI while the robot turned. No rebuilding.
+In Chapter 15 you tuned the heading PID controller **live**. `SmartDashboard.putData("Heading PID", headingController)` put the controller itself on the dashboard, and you changed its P, I, and D in Elastic while the robot turned. No rebuilding.
 
 Chapter 19 took that away, and Section 19.5 explained why. Each command now owns its own PID controllers, created from `Drivetrain`'s factories, because a PID controller remembers (its error sum, its last error), and two jobs must never share one. Count how many heading controllers the Explorer has today:
 
@@ -58,7 +58,7 @@ Since Chapter 4, you have been calling `SmartDashboard.putNumber("Heading (deg)"
 
 Your robot program does not draw the dashboard. It does not even know a dashboard is open. Instead, it runs a small **server** called **NetworkTables**, which WPILib starts for you. A NetworkTables server keeps a list of named values, and any program that connects to it, called a **client**, can read those values, be told the moment one changes, and publish new values of its own.
 
-A dashboard is just a NetworkTables client that draws pictures of the values. The Simulation GUI's **NetworkTables** view is a client. The SmartDashboard app you have used since Chapter 4 is a client. AdvantageScope, which you connected in Chapter 17, is a client. They can all be connected at the same time, and they all see the same values, because they are all reading the same server.
+A dashboard is just a NetworkTables client that draws pictures of the values. Elastic, which you have used since Chapter 2, is a client. AdvantageScope, which you connected in Chapter 14, is a client. The Simulation GUI's **NetworkTables** view is a client too. They can all be connected at the same time, and they all see the same values, because they are all reading the same server.
 
 Where does the server run? Wherever the robot program runs. Chapter 2 explained that an XRP program runs on your **laptop**, and talks to the XRP over Wi-Fi. So for the Explorer, the NetworkTables server is on your laptop too, and every dashboard connects to it at `localhost`, the network name a computer uses for itself. That is true even when the real XRP is driving: the XRP only carries motor and sensor numbers back and forth, and never runs any of your code.
 
@@ -84,7 +84,7 @@ Run the Explorer now (real or simulated) and look in the Simulation GUI's **Netw
 
 Here is the part this chapter is about. A client does not only **read**. It can also publish a new value to a topic, and the server passes that new value to everyone else, **including your robot program**. Your code can then read it.
 
-That is exactly how Chapter 15's live PID widget worked. When you typed a new P into the Simulation GUI, the GUI published it to `/SmartDashboard/Heading PID/p`, the server passed it to your program, and the `PIDController` (which had told WPILib how to read and write its gains when you called `putData`) called its own `setP()`. Every dashboard control that changes the robot, from a chooser to a slider, works that way: a client publishes, and the robot program reads.
+That is exactly how Chapter 15's live PID widget worked. When you typed a new P into Elastic and clicked **Publish Values**, Elastic published it to `/SmartDashboard/Heading PID/p`, the server passed it to your program, and the `PIDController` (which had told WPILib how to read and write its gains when you called `putData`) called its own `setP()`. Every dashboard control that changes the robot, from a chooser to a slider, works that way: a client publishes, and the robot program reads.
 
 > **NetworkTables, in one sentence**
 >
@@ -92,21 +92,21 @@ That is exactly how Chapter 15's live PID widget worked. When you typed a new P 
 
 ---
 
-## 23.3 Which Dashboard? What Changed in 2026
+## 23.3 Why This Book Uses Elastic
 
-This chapter's title names two dashboards: **SmartDashboard** and **Shuffleboard**. When the book's outline was written, those were the two dashboards that came with WPILib for Java teams. Before writing this chapter, we checked what WPILib says about them for the 2026 season. Here is what we found.
+Since Chapter 2 you have used **Elastic** for your dashboard, while your code calls a class named `SmartDashboard`. Now that you know what a dashboard really is, here is the full story behind that choice.
 
 ### What WPILib's documentation says
 
-WPILib's dashboard overview page for 2026 says that SmartDashboard and Shuffleboard "do not have a person to maintain them so are not receiving bug fixes or improvements," and that "they are deprecated and will be removed for the 2027 season." Shuffleboard's own pages carry a warning: it "is deprecated and will be removed for 2027 due to its lack of a maintainer and resource utilization issues."
+WPILib's dashboard overview page for 2026 says that the SmartDashboard and Shuffleboard apps "do not have a person to maintain them so are not receiving bug fixes or improvements," and that "they are deprecated and will be removed for the 2027 season." Shuffleboard's own pages carry a warning: it "is deprecated and will be removed for 2027 due to its lack of a maintainer and resource utilization issues."
 
 The documentation for the 2027 season (still in development as this is written) lists them under **removed features**: "All Java GUI tools have been removed due to lack of maintenance." For SmartDashboard it adds that the app uses an old version of the NetworkTables protocol (NT3) which has itself been removed. And it says what to use instead: "Use Elastic as a driver dashboard and use AdvantageScope for debugging and data visualization."
 
-**Deprecated** means the same thing for a program as it did for a method in Chapter 11: it still works today, but it is on its way out, so do not start depending on it. Both apps still come with the 2026 WPILib installer, and both still work with your code this season.
+**Deprecated** means the same thing for a program as it did for a method in Chapter 11: it still works today, but it is on its way out, so do not start depending on it. Both apps still come with the 2026 WPILib installer. This book never opens them, so there is nothing for you to unlearn.
 
-### What it means for your code: almost nothing
+### What it means for your code: nothing
 
-Here is the good news. What is going away is the **app** called SmartDashboard, the window you open with **WPILib: Start Tool** > **SmartDashboard**. The **class** called `SmartDashboard`, the one in your code, is a different thing with the same name. It is a helper for writing into the `/SmartDashboard` table on the NetworkTables server, and it is **not** deprecated: WPILib 2026's Java documentation for `SmartDashboard` has no deprecation notice on the class or any of its methods. Elastic, AdvantageScope, the Simulation GUI, and Glass all read the `/SmartDashboard` table. So every `SmartDashboard.putNumber` you have written since Chapter 4 keeps working, with any dashboard you choose.
+What is going away is the **app** called SmartDashboard. The **class** called `SmartDashboard`, the one in your code, is a different thing with the same name. It is a helper for writing into the `/SmartDashboard` table on the NetworkTables server (Section 23.2), and it is **not** deprecated: WPILib 2026's Java documentation for `SmartDashboard` has no deprecation notice on the class or any of its methods. Elastic, AdvantageScope, the Simulation GUI, and Glass all read the `/SmartDashboard` table. So every `SmartDashboard.putNumber` you have written since Chapter 4 keeps working, with any dashboard you choose.
 
 Shuffleboard has a Java side too: a `Shuffleboard` class that lets code arrange widgets on Shuffleboard tabs. You will see it in older robot code on GitHub, looking like this:
 
@@ -118,80 +118,51 @@ GenericEntry steerKpEntry = tuningTab.add("Steer kP", 3.0)
     .getEntry();
 ```
 
-That class is not marked deprecated in WPILib 2026's Java documentation either. But the app that reads its layouts is going away, and Elastic has removed its own support for it (Elastic's documentation says support for the Shuffleboard API "has been removed in favor of downloading full layouts from the robot"). So the book will not write any new Shuffleboard code. If you meet it in another team's repository, you now know what it is: a way of saying from code which tab and which widget a value should get.
+That class is not marked deprecated in WPILib 2026's Java documentation either. But the app that reads its layouts is going away, and Elastic has removed its own support for it (Elastic's documentation says support for the Shuffleboard API "has been removed in favor of downloading full layouts from the robot"). So the book does not write any Shuffleboard code. If you meet it in another team's repository, you now know what it is: a way of saying from code which tab and which widget a value should get.
 
-### The dashboards you have, and what the book uses
+### The tools you have, and what the book uses
 
 All of these come with the WPILib 2026 installer, and open from **WPILib: Start Tool**:
 
-| Dashboard | What it is for | Status for 2026 | In this book |
+| Tool | What it is for | Status for 2026 | In this book |
 |---|---|---|---|
-| SmartDashboard (the app) | A simple driver dashboard | Deprecated; removed for 2027 | Chapters 4 to 22. Retired in this chapter |
+| SmartDashboard (the app) | A simple driver dashboard | Deprecated; removed for 2027 | Not used |
 | Shuffleboard | Driver and programmer dashboard with tabs | Deprecated; removed for 2027 | Not used |
-| Simulation GUI (and Glass) | A programmer's tool: NetworkTables view, plots, Field2d, the simulated joystick | Current | Still used: the controller setup (Chapter 8) and quick looks |
-| **Elastic** | A modern driver dashboard, made by FRC Team 353 | Current; WPILib's recommended driver dashboard | **From this chapter on**: the Driver and Tuning tabs |
-| **AdvantageScope** | Logs, graphs, 3D field views, and replay, made by FRC Team 6328 | Current; WPILib's recommended tool for debugging and data | Chapter 17, and all of Chapter 24 |
+| Simulation GUI (and Glass) | A programmer's tool: the robot's mode, the simulated joystick, a raw NetworkTables view | Current | The XRP's control window: Robot State, Joysticks, DIO |
+| **Elastic** | A modern driver dashboard, made by FRC Team 353 | Current; WPILib's recommended driver dashboard | Every dashboard value since Chapter 2, the Scheduler and Drivetrain widgets, and this chapter's Driver and Tuning tabs |
+| **AdvantageScope** | Logs, graphs, field views, and replay, made by FRC Team 6328 | Current; WPILib's recommended tool for debugging and data | The XRP's map (Chapter 14), PID graphs (Chapter 15), AdvantageKit (Chapter 17), and all of Chapter 24 |
 
 Elastic and AdvantageScope are both made by FRC teams, and both are open source. WPILib now ships them with every installation.
 
-> **Why this chapter still says "Shuffleboard"**
->
-> The book's outline was written before WPILib's 2026 announcement, and the chapter keeps its name so links and the table of contents stay stable. The ideas in it (a dashboard is a NetworkTables client, a chooser picks a routine, a tunable number is published once and read every loop) are the same in every dashboard, past and future. Only the app changes. When a tool you depend on is deprecated, the right move is the one you just watched: check the official documentation, find the recommended replacement, and move before the old tool disappears, not during build season.
-
 > **Check the docs, not your memory**
 >
-> Dashboards, vendor libraries, and even WPILib's own recommendations change from year to year. Everything in this section was checked against WPILib's 2026 documentation, which was current when this chapter was written. When you read it, check the **Dashboards** pages at docs.wpilib.org again (the link is in this chapter's resources). If the advice has changed, follow the documentation.
+> Dashboards, vendor libraries, and even WPILib's own recommendations change from year to year. When a tool you depend on is deprecated, the right move is to check the official documentation, find the recommended replacement, and move before the old tool disappears, not during build season. Everything in this section was checked against WPILib's 2026 documentation. When you read it, check the **Dashboards** pages at docs.wpilib.org again (the link is in this chapter's resources). If the advice has changed, follow the documentation.
 
 ---
 
-## 23.4 Your First Elastic Dashboard
+## 23.4 A Dashboard with Two Tabs
 
-Time to build a real dashboard. You will make it once, save it to a file in your project, and commit it, so that your whole team gets the same dashboard.
+You have been adding widgets to one Elastic grid since Chapter 2, and saving it in your project since Chapter 9. Now give it some structure: one tab for the drive team, and one for tuning.
 
-### Step 1: Open Elastic and connect
+### Step 1: Open your layout
 
-Run the Explorer, with the XRP switched on and `USE_SIMULATED_ROBOT = false`. Then, in VS Code, open the Command Palette (**Ctrl+Shift+P**), run **WPILib: Start Tool**, and choose **Elastic**.
+Run the Explorer, with the XRP switched on and `USE_SIMULATED_ROBOT = false`, and open Elastic (**WPILib: Start Tool** > **Elastic**). It should connect over **localhost** and show your saved layout. If the grid is empty, choose **File** > **Open Layout** and pick `src/main/deploy/elastic-layout.json`.
 
-Elastic opens with an empty grid, and a red **Network Tables: Disconnected** at the bottom of the window. It does not know where your robot is yet. Click the **gear** (settings) at the top of the window, and find the **IP Address Mode** dropdown. Elastic offers several:
-
-- **Driver Station** asks the Driver Station for the robot's address. It is the right choice for a roboRIO robot.
-- **Team Number** and **RoboRIO mDNS** build the address from your team number. They are for roboRIO robots too.
-- **localhost** connects to a NetworkTables server on this same computer.
-
-Choose **localhost**. Your XRP program, and so its NetworkTables server, runs on your laptop (Section 23.2), so `localhost` is right for the Explorer whether it is driving the real XRP or the simulated one. Close the settings. The bottom of the window turns green: **Network Tables: Connected**.
-
-### Step 2: Add widgets
-
-Click **Add Widget** at the top of the window. A dialog opens with the tables on the server: you will recognize **SmartDashboard** and **AdvantageKit**. Click **SmartDashboard** to open it, and you will see every value your code publishes.
-
-Drag these onto the grid, one at a time. Elastic draws a green outline where a widget can go, and a red one where it cannot:
-
-- `Mode`
-- `Line State`
-- `Heading (deg)`
-- `Wall Close` and `Blocked`
-- `Field`
-- `Scheduler`
-
-Elastic picks a widget for each value from its type. `Mode` and `Line State` become **Text Display** widgets; `Wall Close` and `Blocked` become **Boolean Box**es, which turn a color when `true`; `Field` becomes a **Field** that draws your `Field2d`, robot icon and course poses included (Chapter 14); and `Scheduler` becomes a list of every command that is running, with a button to cancel each. Drag a widget's edges to resize it, and drag the widget itself to move it.
-
-To change how a widget looks, right-click it and choose **Edit Properties**. Under **Container Settings** you can rename it and change its **widget type**. Try it on `Heading (deg)`: change it from a Text Display to a **Graph**, which draws the heading over time. Turn the XRP by hand, and watch the line move. To remove a widget, right-click it and choose **Remove**.
-
-### Step 3: Two tabs
+### Step 2: Two tabs
 
 Along the top of the grid is a row of **tabs**, like the tabs in a web browser. Right-click the first one and rename it **Driver**. Then click **+** to add a second tab, and name it **Tuning**. Leave it empty for now; Section 23.9 fills it.
 
+On the **Driver** tab, keep only what the drive team needs: `Mode`, `Line State`, `Heading (deg)`, `Wall Close`, `Blocked`, and `Scheduler`. Right-click everything else and choose **Remove**; the values are still published, and you can add them back on another tab any time. To change how a widget looks, right-click it, choose **Edit Properties**, and change its **Widget Type** under **Container Settings**. Make `Wall Close` and `Blocked` **Boolean Box**es if they are not already: they turn a color when `true`, which is easy to see from a step back.
+
 > **A driver dashboard is not a programmer dashboard**
 >
-> The drive team looks at the dashboard in quick glances, between watching the robot and the field. Every widget on the **Driver** tab should answer a question the drive team has during a match: which autonomous is selected, is the robot in the right mode, is it blocked, where does it think it is. Big, few, and readable from a step back. Everything a **programmer** wants (raw sensor readings, PID errors, graphs) goes on other tabs. A Driver tab with forty numbers on it is a Driver tab nobody reads.
+> The drive team looks at the dashboard in quick glances, between watching the robot and the field. Every widget on the **Driver** tab should answer a question the drive team has during a match: which autonomous is selected, is the robot in the right mode, is it blocked. Big, few, and readable from a step back. Everything a **programmer** wants (raw sensor readings, PID errors, graphs) goes on other tabs, or in AdvantageScope. A Driver tab with forty numbers on it is a Driver tab nobody reads.
 
-### Step 4: Save the layout in your project
+### Step 3: Save the layout in your project
 
-Elastic keeps your layout for next time when you choose **File** > **Save**. That is enough for your own laptop. But a dashboard is part of the robot program, just like a binding: if a teammate clones your repository, they should get the same dashboard. So save a copy into the project too.
+Choose **File** > **Save**. Your layout already lives at `src/main/deploy/elastic-layout.json` (Chapter 9), so this updates that file, ready to commit. If you ever lose track of which file Elastic is saving to, use **File** > **Save As** and pick that path again. Never edit the JSON by hand: Elastic writes it, and Elastic reads it back with **File** > **Open Layout**.
 
-Choose **File** > **Export Layout**, go to your Explorer project folder, then into `src`, then `main`, then `deploy` (create the `deploy` folder if it does not exist), and save the file as `elastic-layout.json`. You can open it in VS Code: it is a text file in **JSON**, a format for writing structured data, a little like the YAML of Chapter 22 but with braces and quotes. You will not edit it by hand. Elastic writes it, and Elastic reads it back with **File** > **Open Layout**.
-
-Why `src/main/deploy`? That folder is where a WPILib project keeps files that travel with the robot program. On a roboRIO, its contents are copied onto the robot every time you deploy, and Elastic can even download a layout straight from the robot (Practice 6 tries it). For now, it is just a sensible, standard place for the file to live.
+Why `src/main/deploy`? That folder is where a WPILib project keeps files that travel with the robot program. On a roboRIO, its contents are copied onto the robot every time you deploy, and Elastic can even download a layout straight from the robot with **File** > **Download From Robot** (Practice 6 tries it). That is how a team makes sure every Driver Station laptop shows the same dashboard.
 
 > **Lock it before a match**
 >
@@ -953,7 +924,7 @@ Then add the things you will want to **watch** while you tune, from the **SmartD
 - `Line Error`, as a **Graph**, and `Line State`, for tuning the follower.
 - `Auto Routine`, a second copy of the chooser, so you never have to switch tabs to pick "Leg 1 Only."
 
-Export the layout again, over the same `src/main/deploy/elastic-layout.json`.
+Save the layout again (**File** > **Save**), over the same `src/main/deploy/elastic-layout.json`.
 
 Try one change before you go on. Make sure `Heading kP` shows `0.3` (or your own value). Click in it, type `0.6`, and press Enter. Now look at the Simulation GUI's **NetworkTables** window: under **Tuning** > **Drivetrain**, `Heading kP` reads `0.6` there too. One server, many clients, all agreeing. Set it back.
 
@@ -1078,7 +1049,7 @@ WPILib also has a class called `Preferences`, which saves named values in a file
 
 ### What you built
 
-- **One dashboard, two jobs.** A **Driver** tab with the autonomous chooser, the mode, the field, and the robot's status, and a **Tuning** tab with nine live numbers and the graphs to judge them. Both are saved in your repository.
+- **One dashboard, two jobs.** A **Driver** tab with the autonomous chooser, the mode, and the robot's status, and a **Tuning** tab with nine live numbers and the graphs to judge them. Both are saved in your repository.
 - **An autonomous chooser** with four routines, logged by AdvantageKit, defaulting to the course, safe even before its first loop.
 - **Nine tunable numbers**, each a single object shared by every command that uses it, published once, read when it matters, logged every loop, and switched off with one constant.
 - **A tuning routine**: change one number, run, log it, keep it in the code, and let the tests check it.
@@ -1091,7 +1062,7 @@ WPILib also has a class called `Preferences`, which saves named values in a file
 >
 > * A dashboard is a **NetworkTables** client. The robot program runs the server (on your laptop for the XRP, on the roboRIO later), values live in **topics** with folder-like names such as `/SmartDashboard/Heading (deg)`, and any client can publish a new value that the robot reads back.
 > * For 2026, WPILib's documentation calls the **SmartDashboard and Shuffleboard apps** deprecated, to be removed for 2027, and recommends **Elastic** as the driver dashboard and **AdvantageScope** for debugging and data. The **`SmartDashboard` class** in your code is not deprecated; it writes into the `/SmartDashboard` table, which every dashboard reads.
-> * Your **Elastic** layout has a locked **Driver** tab and a **Tuning** tab, and it is exported to `src/main/deploy/elastic-layout.json` and committed, so the whole team gets the same dashboard.
+> * Your **Elastic** layout has a locked **Driver** tab and a **Tuning** tab, and it is saved to `src/main/deploy/elastic-layout.json` and committed, so the whole team gets the same dashboard.
 > * New Java: **generics**. A generic class like `SendableChooser<V>` has a **type parameter**; `SendableChooser<Command>` supplies a **type argument**, so the compiler checks what goes in and what comes out needs no cast. The **diamond** `<>` fills it in from the left; **wrapper classes** (`Double`) stand in for primitive types; **raw types** throw away the checking.
 > * AdvantageKit's **`LoggedDashboardChooser<Command>`** picks the autonomous routine and records the choice for replay. `getAutonomousCommand()` falls back to the course when the chooser has no answer yet, which keeps `ObstacleCourseTest` passing.
 > * New Java: a **`static final` reference to a changeable object**. `final` fixes which object a variable points at, not whether the object can change. One `static` `TunableNumber` per gain is shared by every command; it is named in `camelCase` because it is not a constant. `TunableNumber` wraps AdvantageKit's `LoggedNetworkNumber` to avoid the four traps of `SmartDashboard.getNumber` (overwriting, typo keys, invisible to the log, no off switch), with `TUNING_MODE` as the off switch.
@@ -1153,11 +1124,11 @@ import edu.wpi.first.wpilibj.Filesystem;
 ```
 
 ```java
-// Serve src/main/deploy, so Elastic can download the layout (Elastic: File > Load Layout From Robot).
+// Serve src/main/deploy, so Elastic can download the layout (Elastic: File > Download From Robot).
 WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 ```
 
-Run the Explorer. In Elastic, choose **File** > **Load Layout From Robot**. Does it find your `elastic-layout.json`? On a roboRIO, this is how a team makes sure every Driver Station laptop gets the same dashboard: the layout is deployed with the code. On the Explorer, the "robot" serving the file is your own laptop. Write down what happened, and why this would matter more on a team with three Driver Station laptops.
+Run the Explorer. In Elastic, choose **File** > **Download From Robot**. Does it find your `elastic-layout.json`? On a roboRIO, this is how a team makes sure every Driver Station laptop gets the same dashboard: the layout is deployed with the code. On the Explorer, the "robot" serving the file is your own laptop. Write down what happened, and why this would matter more on a team with three Driver Station laptops.
 
 **7. Tune in AdvantageScope.** Open AdvantageScope (**WPILib: Start Tool** > **AdvantageScope**) and connect with **File** > **Connect to Simulator** > **NetworkTables 4 (AdvantageKit)**. Find the **Tuning** table in the sidebar. Turn on **tuning mode** with the slider icon to the right of the search bar (it turns purple), and change `Heading kP` there. Make a **Line Graph** of the drivetrain's heading input, run the bench turn (Test mode, B then A), and compare the graph with Elastic's. Which tool would you rather tune in, and which would you rather drive with? (AdvantageScope's documentation on tuning mode: [docs.advantagescope.org/overview/live-sources/tuning-mode](https://docs.advantagescope.org/overview/live-sources/tuning-mode).)
 
@@ -1166,11 +1137,11 @@ Run the Explorer. In Elastic, choose **File** > **Load Layout From Robot**. Does
 Give the Explorer a real dashboard, an autonomous chooser, and live tuning, then tune the whole course.
 
 1. Make a branch (see the Git exercise).
-2. Open Elastic, connect with **localhost**, and build the **Driver** tab (Section 23.4). Add the empty **Tuning** tab. Export the layout to `src/main/deploy/elastic-layout.json`. Commit.
+2. Open Elastic and your saved layout, and build the **Driver** tab (Section 23.4). Add the empty **Tuning** tab. Save the layout to `src/main/deploy/elastic-layout.json`. Commit.
 3. Add the autonomous chooser to `RobotContainer` (Section 23.6, Steps 1 and 2). Build: 24 tests pass. Delete the `null` check, see `ObstacleCourseTest` fail, and put it back. Add `Auto Routine` to the Driver tab, and run **Leg 1 Only** and **Obstacle Course** in autonomous. Export the layout again. Commit.
 4. Add `TUNING_MODE` and `TunableNumber`, and wire in the six drivetrain gains, the `useLatest...Gains` lines in the three commands, and `FollowLine`'s three numbers (Section 23.9, Steps 1 to 6). Build. Drive the robot in teleop, run the bench in Test mode, and run the course: nothing should behave differently, because every tunable starts at its constant.
 5. Add the three new tests (Step 7). Run them: **27 tests**, all green.
-6. Build the **Tuning** tab (Step 8). Change `Heading kP` and check that the Simulation GUI's NetworkTables window agrees. Export the layout. Commit.
+6. Build the **Tuning** tab (Step 8). Change `Heading kP` and check that the Simulation GUI's NetworkTables window agrees. Save the layout. Commit.
 7. Tune: Sessions 1 to 4 of Section 23.10, on your real floor, with a tuning log in `reflections.md`.
 8. Copy the values you kept into your constants. Build (every test runs with your new numbers). Restart the Explorer and check that the Tuning tab starts at the new values. Run the whole course three times. Commit, push, open a pull request, wait for the green check, and merge.
 
@@ -1182,7 +1153,7 @@ If the HTML report shows **27 tests, 0 failures**, your Driver tab picks the aut
 
 Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 
-1. WPILib deprecated the SmartDashboard app, but you did not change a single `SmartDashboard.putNumber` in your code. Explain why, using the words **NetworkTables** and **client**.
+1. WPILib deprecated the SmartDashboard app, yet every value you have watched in Elastic since Chapter 2 was sent with `SmartDashboard.putNumber` and friends. Explain why that works, using the words **NetworkTables** and **client**.
 2. A `SendableChooser` from before generics held plain `Object`s, and `getSelected()` needed a cast. Describe a mistake that the old way would only catch while the robot was running, and say how `SendableChooser<Command>` catches it earlier.
 3. `headingKp` is declared `static final`, yet its value changes while the robot runs. Explain how both can be true, and why it is named `headingKp` and not `HEADING_KP_TUNABLE`.
 4. The drivetrain's PID gains take effect when a command starts, but `Steer kP` takes effect every loop. Give one reason for each choice. What could go wrong if you applied a new `Heading kI` in the middle of a turn?
@@ -1242,8 +1213,8 @@ As before, the **owner** is the person whose Explorer repository you use, and th
 
 **Part A: two dashboards, one file.** Work at the same time.
 
-1. **Owner:** create a branch `driver-tab-range`. Open the layout in Elastic (**File** > **Open Layout**), add `Distance Ahead (m)` to the Driver tab, and export over `src/main/deploy/elastic-layout.json`. Commit (`Add the rangefinder to the Driver tab`), push, open a pull request, and merge it once it is green.
-2. **Teammate:** create a branch `driver-tab-heading`. Open the same layout, add `Pose Heading (deg)` to the Driver tab, and export over the same file. Commit (`Add the heading to the Driver tab`) and push.
+1. **Owner:** create a branch `driver-tab-range`. Open the layout in Elastic (**File** > **Open Layout**), add `Distance Ahead (m)` to the Driver tab, and save over `src/main/deploy/elastic-layout.json`. Commit (`Add the rangefinder to the Driver tab`), push, open a pull request, and merge it once it is green.
+2. **Teammate:** create a branch `driver-tab-heading`. Open the same layout, add `Pose Heading (deg)` to the Driver tab, and save over the same file. Commit (`Add the heading to the Driver tab`) and push.
 3. **Teammate:** bring `main` into your branch, as in Section 11.8: `git fetch origin`, then `git merge origin/main`. Git almost certainly reports a **conflict** in `elastic-layout.json`. Open it in VS Code and look at the conflict markers.
 
 **Part B: do not hand-merge a generated file.** You could try to resolve those markers by hand, the Chapter 11 way. Look at them first: hundreds of lines of braces and numbers (widget positions, sizes, settings), and one misplaced comma makes the whole file unreadable to Elastic. A file that a **program** writes is not meant to be merged by a person. Instead:
@@ -1255,7 +1226,7 @@ As before, the **owner** is the person whose Explorer repository you use, and th
    ```
 
    During a merge, `--theirs` means "the version from the branch I am merging in," here `origin/main`.
-2. Open that layout in Elastic, add **your** widget (`Pose Heading (deg)`) again, and export over the file.
+2. Open that layout in Elastic, add **your** widget (`Pose Heading (deg)`) again, and save over the file.
 3. `git add src/main/deploy/elastic-layout.json`, then `git commit` to finish the merge, and push. The pull request goes green. **Owner:** review it in Elastic, not just on GitHub: check out the branch, open the layout, and look at it. Then merge.
 
 **Part C: whose floor?** Now the numbers.
@@ -1264,7 +1235,7 @@ As before, the **owner** is the person whose Explorer repository you use, and th
 2. **Owner:** before you merge, check out the branch and try the follower on **your** floor. Does it follow as well there? Add a review comment with what you saw.
 3. **Both:** decide together. One gain for both floors? A compromise value? Or a note in the tuning log that says which surface the number was tuned for? Merge your decision.
 
-Afterward, each of you adds a rule to the project's `CONTRIBUTING.md` (Chapter 11) about the layout file (for example: "Never hand-merge `elastic-layout.json`. Take one side, re-add your widgets in Elastic, and export.") and one about tuning (for example: "A pull request that changes a gain includes the tuning log rows that justify it."). In `reflections.md`, write two sentences: why is a merge conflict in a generated file different from one in code you wrote, and why does a tuned number need a note saying where it was tuned?
+Afterward, each of you adds a rule to the project's `CONTRIBUTING.md` (Chapter 11) about the layout file (for example: "Never hand-merge `elastic-layout.json`. Take one side, re-add your widgets in Elastic, and save.") and one about tuning (for example: "A pull request that changes a gain includes the tuning log rows that justify it."). In `reflections.md`, write two sentences: why is a merge conflict in a generated file different from one in code you wrote, and why does a tuned number need a note saying where it was tuned?
 
 ### Explore
 

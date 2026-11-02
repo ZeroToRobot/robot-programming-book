@@ -2,7 +2,7 @@
 
 You have a working development environment. You have a version-controlled project on GitHub. Now it's time to write some actual Java.
 
-This chapter introduces variables, the four data types you'll use most often, and how to print values from your program so you can see what's happening. You'll write code that lives entirely on your laptop at first, then move it to the XRP and watch a real LED blink based on a real variable. By the end, you'll be able to read live values from your robot in SmartDashboard while it's running.
+This chapter introduces variables, the four data types you'll use most often, and how to print values from your program so you can see what's happening. You'll write code that lives entirely on your laptop at first, then move it to the XRP and watch a real LED blink based on a real variable. By the end, you'll be able to read live values from your robot in Elastic while it's running.
 
 If you've never written code before, this is the chapter where it starts to feel like programming. Take your time, and don't be afraid to break things.
 
@@ -235,7 +235,7 @@ When you run code on your laptop (in a normal Java program), `System.out.println
 
 When you run code on the XRP, prints appear in VS Code's **terminal** panel, because the program runs on your laptop (Chapter 2). On a competition robot they go to a window called **RioLog** instead. We'll look at the output in action shortly.
 
-`System.out.println` is fine for occasional messages, but for live values you want to watch change over time, there's a better tool: SmartDashboard. We'll use that later in this chapter.
+`System.out.println` is fine for occasional messages, but for live values you want to watch change over time, there's a better tool: a dashboard. We'll use that later in this chapter.
 
 ---
 
@@ -382,11 +382,11 @@ Change the variable to `false`, run it again, and watch the LED stay off. This i
 
 ---
 
-## 4.7 SmartDashboard: Watching Variables Live
+## 4.7 Watching Variables Live
 
 Here's a problem with print statements: every time you want to know what a variable is doing right now, you have to print it, restart the program, run the robot, and read the log. That's slow, and the log fills up fast if you print every loop.
 
-SmartDashboard solves this. You send a value from your robot code, and SmartDashboard displays it as a live widget on your laptop screen. The value updates every time you send it, with no log spam.
+A dashboard solves this. You send a value from your robot code with the `SmartDashboard` class, and Elastic displays it as a live widget on your laptop screen. The value updates every time you send it, with no log spam.
 
 You already used `SmartDashboard.putString` once in Chapter 2. Let's use it for real now.
 
@@ -402,11 +402,11 @@ SmartDashboard.putString("Status", "Running");
 
 The first argument is the **key**: a label that becomes the widget name on the dashboard. The second is the **value** to display.
 
-Notice that `putNumber` is used for both `int` and `double`. SmartDashboard treats them the same way, so a single `putNumber` works for any numeric value.
+Notice that `putNumber` is used for both `int` and `double`. The dashboard treats them the same way, so a single `putNumber` works for any numeric value.
 
 ### A Live Loop Example
 
-Print statements went in the `Robot()` constructor because it only runs once. SmartDashboard is the opposite: it's designed to be called every loop, so you put it in `robotPeriodic()`, which runs every 20 ms.
+Print statements went in the `Robot()` constructor because it only runs once. Dashboard values are the opposite: it's designed to be called every loop, so you put it in `robotPeriodic()`, which runs every 20 ms.
 
 Make sure `SmartDashboard` is imported (you added this in Chapter 2):
 
@@ -437,13 +437,13 @@ import edu.wpi.first.wpilibj.Timer;
 
 Don't worry about the `?` on the `mode` line: it's a shorthand for an if/else called the ternary operator, which we'll cover in Chapter 8. For now, just know it sets `mode` to `"Enabled"` if the robot is enabled, `"Disabled"` otherwise.
 
-Build, run, and open SmartDashboard (`WPILib: Start Tool` → `SmartDashboard`). You should see three widgets: `Match Time` ticking up, `LED On` showing the current LED state, and `Mode` changing whenever you enable or disable the robot in the Driver Station.
+Build, run, and open Elastic (Chapter 2). Click **Add Widget**, open the **SmartDashboard** folder, and drag in three widgets: `Match Time` ticking up, `LED On` showing the current LED state, and `Mode` changing whenever you enable or disable the robot in the Simulation GUI's Robot State panel. Choose **File** > **Save** so they are there next time.
 
 That's a live view of what's happening on your robot, updating 50 times per second, with no print spam.
 
 > **Print for setup, dashboard for runtime**
 >
-> A useful rule of thumb: use `System.out.println` for things that happen once or rarely (startup, errors, mode transitions). Use SmartDashboard for things that change continuously (sensor readings, motor speeds, state). Both are useful. Mixing them up is a common reason debug output becomes unreadable.
+> A useful rule of thumb: use `System.out.println` for things that happen once or rarely (startup, errors, mode transitions). Use the dashboard for things that change continuously (sensor readings, motor speeds, state). Both are useful. Mixing them up is a common reason debug output becomes unreadable.
 
 ---
 
@@ -522,8 +522,8 @@ Predict the output, then verify.
 Add the LED control and the SmartDashboard live values from Sections 4.6 and 4.7 to your XRP Explorer project. Specifically:
 
 1. Add a `boolean ledShouldBeOn` variable in the `Robot()` constructor and use it to set the LED
-2. In `robotPeriodic()`, send `Match Time`, `LED On`, and `Mode` to SmartDashboard
-3. Confirm all three widgets appear in SmartDashboard and the values look reasonable
+2. In `robotPeriodic()`, send `Match Time`, `LED On`, and `Mode` to the dashboard with `SmartDashboard`
+3. Add all three widgets in Elastic, and confirm the values look reasonable
 
 This is the start of a habit you'll keep for the rest of the book: every chapter where the Explorer gains new behavior, that behavior gets a dashboard widget so you can see it working.
 
@@ -553,7 +553,7 @@ git push
 >
 > - **Java primitive types**: [docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html](https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html) the official tutorial on Java's basic types, with more detail than you need but a useful reference
 > - **Java naming conventions**: [google.github.io/styleguide/javaguide.html#s5-naming](https://google.github.io/styleguide/javaguide.html#s5-naming) Google's Java style guide; the conventions used by most professional Java codebases
-> - **WPILib SmartDashboard guide**: [docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/index.html) every widget type and how to use it
+> - **Elastic documentation**: [frc-elastic.gitbook.io/docs](https://frc-elastic.gitbook.io/docs) every widget type and how to use it
 > - **WPILib XRP API reference**: [github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/xrp/package-summary.html](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj/xrp/package-summary.html) Javadoc for `XRPOnBoardIO`, `XRPMotor`, and the rest of the XRP-specific classes
 > - **WPILib console output documentation** (RioLog and the terminal): [docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html) how to view, filter, and save robot console output
 

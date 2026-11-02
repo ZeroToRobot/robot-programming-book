@@ -103,7 +103,7 @@ public void robotPeriodic() {
 
 Why `robotPeriodic()` and not `teleopPeriodic()`? Because `robotPeriodic()` runs in every mode, including Disabled. You can watch the numbers while the robot is safely disabled, with no motors involved. Reading inputs while disabled is a good habit any time you are about to wire a new input to something that moves.
 
-Build, run, and open SmartDashboard. Leave the robot **disabled**. Now play with the sticks and watch the two widgets.
+Build, run, open Elastic, and add the two new widgets (**Add Widget**, **SmartDashboard**). Leave the robot **disabled**. Now play with the sticks and watch the two widgets.
 
 Here is what you should see:
 

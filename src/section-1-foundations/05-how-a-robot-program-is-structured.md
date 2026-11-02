@@ -1,6 +1,6 @@
 # Chapter 5: How a Robot Program Is Structured
 
-In Chapter 4, you wrote your first Java code. Variables, prints, a blinking LED, a few values pushed to SmartDashboard. That was Java. This chapter is about the shape of a robot program.
+In Chapter 4, you wrote your first Java code. Variables, prints, a blinking LED, a few values pushed to the dashboard. That was Java. This chapter is about the shape of a robot program.
 
 A robot program isn't a single script that runs once and exits. It's a long-running loop with very specific rules: certain code must run when the robot first turns on, certain code must run only during autonomous, certain code must run on every single tick of the 50 Hz clock you met in Chapter 1. WPILib gives you a template that handles all of that scheduling for you, but only if you understand which method goes where.
 
@@ -212,7 +212,7 @@ public class Robot extends TimedRobot {
 }
 ```
 
-If you run this and watch SmartDashboard, the `Time` value will tick upward smoothly. If you watch VS Code's terminal (where your prints appeared in Chapter 4), you'll see "Robot started!" appear exactly once, when the program first runs.
+If you run this and watch Elastic, the `Time` value will tick upward smoothly. If you watch VS Code's terminal (where your prints appeared in Chapter 4), you'll see "Robot started!" appear exactly once, when the program first runs.
 
 `Timer.getFPGATimestamp()` returns the number of seconds since the robot was powered on. We'll use that timer constantly throughout the rest of the book.
 
@@ -284,7 +284,7 @@ public class Robot extends TimedRobot {
 }
 ```
 
-This is your **mode skeleton**. It does almost nothing on purpose. The only thing it does is announce its current mode to SmartDashboard so you can watch the lifecycle play out in real time.
+This is your **mode skeleton**. It does almost nothing on purpose. The only thing it does is announce its current mode to the dashboard so you can watch the lifecycle play out in real time.
 
 ### Step 3: Build and Run
 
@@ -292,7 +292,7 @@ Build the project (`WPILib: Build Robot Code`), confirm `BUILD SUCCESSFUL`, then
 
 ### Step 4: Watch the Mode Change
 
-Open SmartDashboard (`WPILib: Start Tool` > `SmartDashboard`). You should see a `Mode` widget appear with the value `Disabled`.
+Open Elastic. The `Mode` widget you added in Chapter 4 should read `Disabled`. (If it is missing, add it: **Add Widget**, **SmartDashboard**, drag in `Mode`.)
 
 Now, in the Simulation GUI's **Robot State** panel (Chapter 2), which does the Driver Station's job for the XRP:
 
@@ -363,8 +363,8 @@ This exercise feels slow. It is. The students who do it once seriously almost ne
 
 Continue building the XRP Explorer skeleton from Section 5.6.
 
-1. Verify that the `Mode` widget on SmartDashboard correctly reflects each mode change you make in the Simulation GUI's Robot State panel
-2. Add a second SmartDashboard string called `LastInitTime` that records `Timer.getFPGATimestamp()` inside each `Init` method (you'll need to import `Timer`). Watch how the value updates every time you change modes
+1. Verify that the `Mode` widget in Elastic correctly reflects each mode change you make in the Simulation GUI's Robot State panel
+2. Add a second dashboard value called `LastInitTime` that records `Timer.getFPGATimestamp()` inside each `Init` method (you'll need to import `Timer`). Watch how the value updates every time you change modes
 3. Add a `disabledPeriodic()` print of the current uptime, just to confirm it really does keep ticking while the robot is disabled
 
 After all three changes, build, run, and verify on the dashboard. You should be able to switch modes and see both the mode name and the last-init timestamp update in real time.

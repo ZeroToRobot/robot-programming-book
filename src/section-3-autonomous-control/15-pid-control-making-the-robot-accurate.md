@@ -523,7 +523,7 @@ Last, `PIDController` knows how to describe itself to a dashboard, just like `Fi
 SmartDashboard.putData("Heading PID", headingController);
 ```
 
-Call it once, in the constructor. The controller's `kP`, `kI`, `kD`, I zone, and setpoint appear in the Simulation GUI, where you can **edit them while the robot runs**, and the change takes effect on the very next loop. Section 15.9 uses this to tune. It also publishes the controller's latest measurement and error, which you will plot.
+Call it once, in the constructor. The controller's `kP`, `kI`, `kD`, I zone, and setpoint appear on the dashboard, where you can **edit them while the robot runs**, and the change takes effect on the very next loop. Section 15.9 uses this to tune. It also publishes the controller's latest measurement and error, which you will plot.
 
 ### `PIDController` at a glance
 
@@ -1069,25 +1069,27 @@ To enter Test mode, choose **Test** where you normally choose Autonomous or Tele
 
 ### Seeing the gains: the PID widget
 
-Your two `putData` calls published the controllers. In the Simulation GUI, open the **NetworkTables** menu, then **SmartDashboard**, then click **Heading PID**. (This is the same menu you used for the Field in Chapter 14.) A small window opens with boxes labeled **P**, **I**, **D**, **Setpoint**, and **IZone**.
+Your two `putData` calls published the controllers. In Elastic, click **Add Widget**, open **SmartDashboard**, and drag the whole **Heading PID** folder onto the grid. Elastic recognizes it and makes one **PIDController** widget, with boxes labeled **P**, **I**, **D**, and **Setpoint**, and a **Publish Values** button with a check mark.
 
-Click in the **P** box and type a new number. The new gain takes effect on the very next loop, while the program keeps running. No rebuild, no restart. This is **live tuning**.
+Click in the **P** box, type a new number, and click **Publish Values**. The new gain takes effect on the very next loop, while the program keeps running. No rebuild, no restart. This is **live tuning**.
+
+The widget has no box for the I zone. To edit it, open the **Heading PID** folder in Add Widget and drag just its **izone** entry onto the grid. It lands as a **Text Display**: type a number into it and press **Enter**.
 
 Two cautions:
 
 - **The change is not saved in your code.** The moment you restart the program, the controller is created again from `HEADING_KP` and friends. When you find gains you like, **write them down**, and copy them into the constants before you stop. Every team has lost a good tune by forgetting this. Chapter 23 shows you more ways to make live tuning convenient.
 - **Ignore the Setpoint box.** Your code passes the setpoint to `calculate` every loop, so anything you type there is overwritten 20 milliseconds later. Use the buttons to change targets.
 
-Also, the new value takes effect **as you type**, so typing `0.35` briefly passes through `0.3`. That is harmless for small changes. For big ones, disable the robot first, type, then enable.
+Also, the robot does not see a gain until you click **Publish Values**, and then it sees all four boxes at once. For a big change, disable the robot first, type and publish, then enable.
 
 ### Seeing the response: a plot
 
-Numbers flickering in a box are hard to read. A graph of the **setpoint** and the **measurement** over time shows everything at once: how fast the robot responds, whether it overshoots, whether it stops short, and whether it wobbles. Chapter 10 promised you this graph. Here is how to make it in the Simulation GUI:
+Numbers flickering in a box are hard to read. A graph of the **setpoint** and the **measurement** over time shows everything at once: how fast the robot responds, whether it overshoots, whether it stops short, and whether it wobbles. Chapter 10 promised you this graph. Elastic's **Graph** widget draws only one value, so make it in **AdvantageScope**, which can put both lines on one graph:
 
-1. Open the **Plot** menu at the top and click **New Plot Window**. An empty window appears with an **Add plot** button. Click it.
-2. Open the **NetworkTables** menu and click **NetworkTables View** if that window is not already showing. It lists everything your robot publishes. Expand **SmartDashboard**, then **Heading PID**.
-3. Drag **setpoint** from that list into the plot. Then drag **measurement** into the same plot.
-4. Resize the plot window so it is wide enough to see a few seconds of history.
+1. Open AdvantageScope and connect it as in Chapter 14 (**File** > **Connect to Simulator** > **NetworkTables 4**).
+2. Use the **Line Graph** tab (add one with the **+** button if your tabs are all 2D Fields).
+3. In the sidebar, open **SmartDashboard**, then **Heading PID**. Drag **setpoint** onto the graph's left axis area. Then drag **measurement** onto the same axis.
+4. Make the window wide enough to see a few seconds of history. While connected, the graph scrolls along with the robot.
 
 Now press B, and watch. The setpoint line jumps from 0 to 90 in a single step. The measurement line follows it up and settles. The shape of that measurement curve is what you are tuning.
 
@@ -1125,7 +1127,7 @@ There are entire books about tuning, but this recipe works for most FRC mechanis
 6. **Check it at the edges.** Test a few turns with tired batteries, and a few on a different surface. A tune that only works on fresh batteries is not done.
 7. **Write it down.** Copy the final numbers into `HEADING_KP`, `HEADING_KI`, and `HEADING_KD`, with the date in a comment.
 
-Then tune the **distance** controller the same way, using X and A (out 30 cm and back). Watch it on a second plot: add **Distance PID**'s setpoint and measurement. Distance usually needs only P, because driving straight fights much less friction than turning in place.
+Then tune the **distance** controller the same way, using X and A (out 30 cm and back). Watch it on a second plot: add another Line Graph tab with **Distance PID**'s setpoint and measurement. Distance usually needs only P, because driving straight fights much less friction than turning in place.
 
 ### When the plot looks wrong
 
@@ -1200,7 +1202,7 @@ It is all the same three terms. The measurement changes, the output changes, the
 > * New Java: the **compound assignment operators** (`+=`, `-=`, `*=`, `/=`), and the `=+` typo that compiles but replaces instead of adding. **Scope** is where a name can be used (to the end of its braces); **lifetime** is how long a value exists. Values that must survive until the next loop belong in **fields**, not local variables, and need a deliberate reset.
 > * A PID controller is **an object with memory**, so you need **one controller per job**. WPILib's `PIDController` is created once as a field, `calculate(measurement, setpoint)` runs once per loop, `setTolerance` and `atSetpoint()` decide "close enough and settled," `reset()` clears the memory, `setIZone` limits windup, and `enableContinuousInput(-180, 180)` makes headings take the short way around. Clamp the output with `MathUtil.clamp`.
 > * The Explorer now drives leg 1 with a distance controller and a heading controller at the same time, turns with the heading controller, and holds its heading on leg 2. `Drivetrain` did not change, because the controllers decide **what** motion and `drive()` decides **how**.
-> * **Tuning** is done live: `SmartDashboard.putData` makes the gains editable in the Simulation GUI, a plot of setpoint and measurement shows the response, and Test mode is a tuning bench. Raise P until it rings, back off, then add I or D only if needed, one change at a time, and copy the final gains into your code.
+> * **Tuning** is done live: `SmartDashboard.putData` makes the gains editable in Elastic's **PIDController** widget, an AdvantageScope **Line Graph** of setpoint and measurement shows the response, and Test mode is a tuning bench. Raise P until it rings, back off, then add I or D only if needed, one change at a time, and copy the final gains into your code.
 
 ---
 
@@ -1258,9 +1260,9 @@ Test it: during leg 1, give the front of the robot a gentle sideways nudge with 
 Replace the open-loop drive and turn with PID, tune it, and measure the improvement.
 
 1. Remove the `HAND_KP` experiment from Section 15.2, if it is still there. Update `Robot.java` to the listing in Section 15.8. `Drivetrain.java` does not change. Build and confirm `BUILD SUCCESSFUL`.
-2. Run the program. In the Simulation GUI, open the **Heading PID** and **Distance PID** widgets (NetworkTables > SmartDashboard), and make a plot with Heading PID's **setpoint** and **measurement** (Section 15.9). Add `Distance Error (m)`, `Heading Error (deg)`, `Distance At Target`, and `Heading At Target` to your SmartDashboard layout and save it.
+2. Run the program. In Elastic, add the **Heading PID** and **Distance PID** widgets, and a Text Display for each one's **izone** (Section 15.9). Add `Distance Error (m)`, `Heading Error (deg)`, `Distance At Target`, and `Heading At Target` too, and save the layout. In AdvantageScope, make a Line Graph with Heading PID's **setpoint** and **measurement**.
 3. Enter **Test** mode. Tune the heading controller with B and A, following the recipe in Section 15.9. Record the gains you tried and what each plot looked like in a table in `reflections.md`.
-4. Make a second plot for Distance PID and tune the distance controller with X and A.
+4. Make a second Line Graph for Distance PID and tune the distance controller with X and A.
 5. Copy your final gains into the constants, with today's date in a comment. Rebuild, and confirm the tuning bench still behaves the same with the gains coming from the code.
 6. Run the autonomous course five times. For each run, record: the distance at the end of leg 1 (from the `Auto step 2` log line), the heading at the end of the turn (from the `Auto step 3` line), and the final pose **and** the tape measure's final position, as in Chapter 14. Put your Chapter 14 table next to the new one and compute the average error for each.
 7. Run the Chapter 12 safety-net test once more: hold the robot still during the turn. The turn step should time out after 7 seconds, and the routine should stop. PID did not remove the need for a safety net.
@@ -1274,7 +1276,7 @@ Diagnose anything strange:
 - **The I term seems to do nothing:** check that you edited the **I** box (not the IZone box), that the I zone is not `0`, and that the error is inside the I zone. An I zone smaller than the stall gap means the sum is cleared every loop.
 - **The robot overshoots wildly at the start of a step, then settles:** the previous step's error sum leaked in. Check that `startStep()` calls `reset()` on both controllers.
 - **Gains in the widget snap back to the old values after a restart:** that is expected. Live changes are not saved; copy them into the constants (step 5).
-- **No Heading PID item in the NetworkTables menu:** check the `putData` lines in the constructor, and that the program is running.
+- **No Heading PID folder in Elastic's Add Widget:** check the `putData` lines in the constructor, and that the program is running.
 - **Nothing happens in Test mode:** make sure the robot is **enabled** in Test, that the controller is in Joysticks slot 0 (Chapter 8), and that you pressed a button after enabling.
 
 When the Explorer finishes the turn within 2 degrees of 90 and leg 1 within a centimeter of the mark, five runs in a row, the robot is accurate. In Chapter 16, you will make it accurate **and** quick.
@@ -1323,7 +1325,7 @@ Work with a partner, with one robot on the tuning bench and a plot showing Headi
 | C | 0.3 | 3.0 | 90 | 0 |
 | D | Your tuned values | | | |
 
-One person (the tuner) shuffles the cards, picks one in secret, types its gains into the Heading PID widget, and presses B and A a few times. The other person (the detective) may only look at the **plot**, not the widget or the cards. The detective names the card and explains which part of the plot gave it away. Swap roles until each of you has diagnosed all four. Afterward, each of you writes one sentence in `reflections.md` about which card was hardest to tell apart from the others, and why. Put your tuned values back when you are done.
+One person (the tuner) shuffles the cards, picks one in secret, types its gains into the Heading PID widget (and its izone box), publishes them, and presses B and A a few times. The other person (the detective) may only look at the **plot**, not the widget or the cards. The detective names the card and explains which part of the plot gave it away. Swap roles until each of you has diagnosed all four. Afterward, each of you writes one sentence in `reflections.md` about which card was hardest to tell apart from the others, and why. Put your tuned values back when you are done.
 
 ### Explore
 

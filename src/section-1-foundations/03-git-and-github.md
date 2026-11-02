@@ -467,7 +467,7 @@ Putting Chapters 2 and 3 together, here's the cycle you'll repeat for the rest o
 2. **Build** (`WPILib: Build Robot Code`)
 3. **Connect** to the XRP's Wi-Fi
 4. **Run** (`WPILib: Simulate Robot Code`, or **F5**)
-5. **Test** the robot (enable it in the Simulation GUI), watch SmartDashboard
+5. **Test** the robot (enable it in the Simulation GUI), watch Elastic
 6. **Stage and commit**: `git add .` then `git commit -m "Ch_: <change>"`
 7. **Push**: `git push`
 
@@ -582,4 +582,4 @@ When you're done playing, you can either merge the branch (`git merge ch3-experi
 
 ---
 
-*Next up, Chapter 4: Your First Java Program. You'll learn variables, data types, and print statements by blinking the XRP's LED and watching values change live in SmartDashboard.*
+*Next up, Chapter 4: Your First Java Program. You'll learn variables, data types, and print statements by blinking the XRP's LED and watching values change live in Elastic.*

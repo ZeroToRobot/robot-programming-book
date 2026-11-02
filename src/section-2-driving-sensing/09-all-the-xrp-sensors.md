@@ -719,7 +719,9 @@ Why read the Y button in `robotPeriodic()` instead of `teleopPeriodic()`? Becaus
 
 ### Arrange the dashboard
 
-Run the program, open SmartDashboard, and arrange the widgets into groups: encoders in one column, gyro next to it, then the rangefinder, the line sensors, and the accelerometer. In SmartDashboard, turn on **View** > **Editable**, then right-click a number widget to change how it is displayed. A **line plot** is especially good for watching the rangefinder's noise and the gyro's drift over time. Save the layout (**File** > **Save**) so it comes back next session.
+Run the program, open Elastic, and add the new sensor widgets (**Add Widget**, **SmartDashboard**). Arrange them into groups: encoders in one column, gyro next to it, then the rangefinder, the line sensors, and the accelerometer. Drag a widget to move it and drag its edges to resize it. To change how a value is displayed, right-click the widget, choose **Edit Properties**, and change its **Widget Type**. A **Graph** is especially good for watching the rangefinder's noise and the gyro's drift over time.
+
+Now save the layout **in your project**, so it is committed with your code and a teammate who clones your repository gets the same dashboard. Choose **File** > **Save As**, go to your project folder, then `src`, `main`, `deploy`, and save it as `elastic-layout.json`. (Delete the template's `example.txt` from that folder while you are there.) From now on, **File** > **Save** updates that file. If Elastic ever opens empty, use **File** > **Open Layout** and pick it. The file is JSON, a text format Elastic writes and reads; you never edit it by hand. Chapter 23 explains why `deploy` is the right home for it.
 
 This is your **sensor dashboard**: one screen showing everything the Explorer can feel. Keep it open whenever the robot runs. When something goes wrong, the first question is always "what did the sensors say?", and now you can answer it at a glance.
 
@@ -803,7 +805,7 @@ Give the Explorer its full set of senses and a live sensor dashboard.
 1. Update `Drivetrain.java` to the listing in Section 9.5, and remove any temporary encoder fields from `Robot.java`. Build and confirm `BUILD SUCCESSFUL`.
 2. Create `Sensors.java` from Section 9.8.
 3. Update `Robot.java` to the listing in Section 9.8. Build again.
-4. Power on the XRP flat and still, wait for the LED to stop flashing, then run the program. Open SmartDashboard and arrange your sensor dashboard (Section 9.8).
+4. Power on the XRP flat and still, wait for the LED to stop flashing, then run the program. Open Elastic, arrange your sensor dashboard, and save it as `src/main/deploy/elastic-layout.json` (Section 9.8).
 5. Measure your line threshold on your actual floor and tape (Section 9.7), and update `LINE_THRESHOLD` in `Sensors.java`.
 6. Run through this sensor check, with the robot **disabled**, and fix anything that fails:
 

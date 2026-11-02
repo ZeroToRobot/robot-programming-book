@@ -56,7 +56,7 @@ If you worked on more than one computer, also run `git pull` so this computer ha
 
 ### Step 2: Build it and run it
 
-Power on the XRP flat and still, connect to its Wi-Fi, build, and run the program the same way you did in Chapter 9. Open SmartDashboard. Your saved layout from Chapter 9 should come back.
+Power on the XRP flat and still, connect to its Wi-Fi, build, and run the program the same way you did in Chapter 9. Open Elastic. Your saved layout from Chapter 9 should come back (if not, **File** > **Open Layout** and pick `src/main/deploy/elastic-layout.json`).
 
 ### Step 3: Run a smoke test
 
@@ -335,7 +335,7 @@ Since Chapter 1 you have known that every robot program is a loop: **read** the 
 - **Decide**: given those inputs, did your logic make the right choice? Is `blocked` true when it should be false?
 - **Write**: did the right numbers actually reach the motors? And did the motors do what they were told?
 
-Your SmartDashboard is the tool for this. Use it as a **probe**: like a multimeter touched to points on a circuit, a dashboard widget lets you see the value of a variable at one exact point in the code, live. Here is `teleopPeriodic()` from Chapter 9 with temporary probes at each stage boundary:
+Your dashboard is the tool for this. Use it as a **probe**: like a multimeter touched to points on a circuit, a dashboard widget lets you see the value of a variable at one exact point in the code, live. Here is `teleopPeriodic()` from Chapter 9 with temporary probes at each stage boundary:
 
 ```java
 @Override

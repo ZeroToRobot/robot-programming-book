@@ -149,7 +149,7 @@ The **discrete** area is for values that are not smooth numbers: true or false, 
 
 Add a tab with the **+** button at the top of the window, and choose **2D Field**. Drag `RealOutputs` > `Drivetrain` > `Pose` onto the **Poses** area at the bottom of the tab.
 
-In Chapter 17 the Explorer's course looked tiny on a full FRC field. You can do better. Open the field choices at the top of the tab, and look for **Evergreen**: a plain field with no game pieces on it. AdvantageScope has an FTC-sized Evergreen field too, 12 feet square, which suits the Explorer far better than a 54-foot FRC field. On the FTC field, the origin, (0, 0), is in the **center** of the field, so your start pose sits right in the middle. That is fine: the course still has the right shape, and you can zoom in with the mouse wheel.
+Pick the FTC-sized **Evergreen** field at the top of the tab, as in Chapter 14. The origin, (0, 0), is in the **center**, so your start pose sits right in the middle; zoom in with the mouse wheel.
 
 The robot drawn on the field is much bigger than an XRP: AdvantageScope draws FRC- and FTC-sized robots. Watch the **path** instead. Click on the timeline, at the start of autonomous, and drag slowly to the end. The robot traces leg 1, turns, and follows the line, exactly as `getPose()` reported it.
 

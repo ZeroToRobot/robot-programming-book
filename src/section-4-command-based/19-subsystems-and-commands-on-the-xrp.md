@@ -240,7 +240,7 @@ How does the scheduler know the drivetrain exists? You never told it. That is th
 SmartDashboard.putData("Drivetrain", drivetrain);
 ```
 
-A subsystem can be put on the dashboard, just like the scheduler. It publishes two facts that you will lean on all chapter: `.command`, the name of the command using the drivetrain right now (or `none`), and `.default`, the name of its default command (Section 19.7).
+A subsystem can be put on the dashboard, just like the scheduler. It publishes two facts that you will lean on all chapter: `.command`, the name of the command using the drivetrain right now (or `none`), and `.default`, the name of its default command (Section 19.7). Elastic's **Subsystem** widget shows them as **Current Command** and **Default Command**; the book calls them by their NetworkTables names, `.command` and `.default`.
 
 > **Did you forget to delete the call?**
 >
@@ -250,7 +250,7 @@ A subsystem can be put on the dashboard, just like the scheduler. It publishes t
 
 This is the first safe place to stand. Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`.
 
-1. In the Simulation GUI, open **NetworkTables** > **SmartDashboard** > **Drivetrain**. While disabled, `.command` says `none`, and `.default` says `none`.
+1. In Elastic, add the **Drivetrain** widget (**Add Widget**, **SmartDashboard**, drag the **Drivetrain** folder), and save the layout. While disabled, both `.command` and `.default` are empty: nothing is using the drivetrain, and it has no default command yet.
 2. Drive in teleop. The pose widgets and the field map move exactly as before, which proves the scheduler is calling `periodic()`: nothing else updates the pose any more.
 3. Run autonomous once, and run the cruise check in Test mode (hold the left bumper, watch `Measured Forward (m per s)` settle near 0.10).
 
@@ -1574,7 +1574,7 @@ The net is a little different from Chapter 16's. It used to stop each test 0.75 
 
 ## 19.9 Run It: Every Mode, on Commands
 
-This is the second safe place to stand, and the bigger test. Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`. Keep these open in the Simulation GUI: **NetworkTables** > **SmartDashboard** > **Scheduler** and **Drivetrain**, and the terminal.
+This is the second safe place to stand, and the bigger test. Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`. Keep Elastic open with the **Scheduler** and **Drivetrain** widgets, and the terminal.
 
 ### Teleop
 

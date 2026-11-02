@@ -399,22 +399,24 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 Stop the running program, then build and run it again (`WPILib: Simulate Robot Code`).
 
-### Open SmartDashboard
+### Open Elastic
 
-SmartDashboard is a dashboard tool that displays data sent from your robot program. To open it:
+A **dashboard** is a window that shows values sent from your robot program. The one this book uses is **Elastic**, which comes with WPILib. To open it:
 
 1. Press `Ctrl+Shift+P` and type `WPILib: Start Tool`
-2. Choose `SmartDashboard` from the list
+2. Choose `Elastic` from the list
 
-SmartDashboard will open. If your XRP is running and your laptop is on the XRP's Wi-Fi, you should see a widget appear labeled **"Status"** with the value **"Robot is running!"**.
+Elastic opens with an empty grid and a red **Network Tables: Disconnected** at the bottom of the window. It does not know where your robot program is yet. Click the **gear** (settings) at the top of the window, find **IP Address Mode**, and choose **localhost (127.0.0.1)**. "Localhost" means "this same computer," and that is right for the XRP: your robot program runs on your laptop. Close the settings, and the bottom of the window turns green: **Network Tables: Connected**.
+
+Elastic does not show anything until you ask it to. Click **Add Widget** at the top of the window, open the **SmartDashboard** folder, and drag **Status** onto the grid. You should see a widget labeled **"Status"** with the value **"Robot is running!"**.
 
 If you see that widget, congratulations: your toolchain works end to end. Your laptop can talk to your XRP.
 
-> **SmartDashboard vs. Shuffleboard**
+Every time a later chapter publishes a new value, you add it the same way: **Add Widget**, the **SmartDashboard** folder, drag it onto the grid. When you close Elastic, choose **File** > **Save** first, and your widgets will be there next time.
+
+> **Why the code says `SmartDashboard` but the app is Elastic**
 >
-> WPILib ships with two dashboard tools: SmartDashboard and Shuffleboard. SmartDashboard is simpler: widgets appear automatically, and you can't customize the layout much. Shuffleboard is more powerful: you can arrange widgets, create tabs, and add graphs.
->
-> You'll start with SmartDashboard because it requires less setup. Chapter 23 covers Shuffleboard in depth.
+> The class in your code is called `SmartDashboard` for historical reasons: it is named after an old dashboard app. The class just writes values into a table called `/SmartDashboard`, and every dashboard can read that table. The old SmartDashboard and Shuffleboard **apps** still come with WPILib 2026, but WPILib has deprecated them and removes them for 2027. Its documentation recommends **Elastic** for the dashboard and **AdvantageScope** (which you will meet later) for debugging, so those are the two this book uses. Chapter 23 explains how dashboards work underneath.
 
 ### Connect the Xbox Controller
 
@@ -432,7 +434,7 @@ Every chapter from here on follows the same cycle. It's worth understanding it c
 2. **Build** (`WPILib: Build Robot Code`): catches syntax errors immediately
 3. **Connect** to the XRP's Wi-Fi if you're not already
 4. **Run** (`WPILib: Simulate Robot Code`, or **F5**): starts the program on your laptop, connected to the XRP
-5. **Test**: enable the robot in the Simulation GUI's Robot State panel, observe behavior, check SmartDashboard
+5. **Test**: enable the robot in the Simulation GUI's Robot State panel, observe behavior, check Elastic
 6. **Git commit**: save your progress with a meaningful message
 
 > **Build before you run**
@@ -483,7 +485,7 @@ On a competition robot, the code is the same, but it runs in a different place. 
 
 ### Practice
 
-Run the empty template on your XRP and confirm that the gyro values in the Simulation GUI change when you turn the robot. Then add the `SmartDashboard.putString("Status", "Robot is running!")` line from Section 2.8, stop the program, run it again, and verify the widget appears in SmartDashboard.
+Run the empty template on your XRP and confirm that the gyro values in the Simulation GUI change when you turn the robot. Then add the `SmartDashboard.putString("Status", "Robot is running!")` line from Section 2.8, stop the program, run it again, and verify the widget appears in Elastic.
 
 Next, try changing the string to something else and running it again. Observe how long the full write, build, run cycle takes. This is your baseline: you'll get faster at it, but it's useful to know the floor.
 
@@ -529,7 +531,7 @@ You'll learn Git in detail in Chapter 3, including how to push this project to G
 > - **WPILib installation guide**: [docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/wpilib-setup.html) the official installation walkthrough with screenshots
 > - **XRP hardware documentation**: [docs.wpilib.org/en/stable/docs/xrp-robot](https://docs.wpilib.org/en/stable/docs/xrp-robot/index.html) hardware specs, firmware update instructions, and troubleshooting
 > - **XRP firmware releases**: [github.com/wpilibsuite/xrp-wpilib-firmware/releases](https://github.com/wpilibsuite/xrp-wpilib-firmware/releases) always use the firmware version that matches your WPILib installation year
-> - **SmartDashboard documentation**: [docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard](https://docs.wpilib.org/en/stable/docs/software/dashboards/smartdashboard/index.html) how to send and display values from your robot program
+> - **Elastic documentation**: [frc-elastic.gitbook.io/docs](https://frc-elastic.gitbook.io/docs) connecting, adding widgets, tabs, and saving layouts in the dashboard this book uses
 > - **WPILib troubleshooting**: [docs.wpilib.org/en/stable/docs/software/vscode-overview/troubleshooting-wpilib.html](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/troubleshooting-wpilib.html) if something broke during installation, start here
 
 ---

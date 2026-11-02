@@ -43,7 +43,7 @@
 - [20. Button Bindings, RobotContainer, and Command Groups](section-4-command-based/20-button-bindings-robotcontainer-and-command-groups.md)
 - [21. State Machines](section-4-command-based/21-state-machines.md)
 - [22. Unit Testing Robot Code](section-4-command-based/22-unit-testing-robot-code.md)
-- [23. SmartDashboard, Shuffleboard, and Live Tuning](section-4-command-based/23-smartdashboard-shuffleboard-and-live-tuning.md)
+- [23. Live Tuning and the Autonomous Chooser](section-4-command-based/23-smartdashboard-shuffleboard-and-live-tuning.md)
 
 ---
 

@@ -1236,14 +1236,14 @@ Build, then:
 1. **Switch your XRP off.** In simulation, there must be no real robot answering. If the XRP is on and connected, its real sensor readings and your simulated ones would fight over the same channels.
 2. Set `USE_SIMULATED_ROBOT = true`. Build.
 3. Run **WPILib: Simulate Robot Code**, the same as always. If VS Code asks which simulation extensions to use, the Simulation GUI must be checked. The XRP client can stay checked; with the XRP switched off, it simply has no robot to talk to.
-4. In the Simulation GUI, set up your controller in **Joysticks** slot 0 (Chapter 8), and open the field: **NetworkTables** > **SmartDashboard** > **Field** (Chapter 14).
+4. In the Simulation GUI, set up your controller in **Joysticks** slot 0 (Chapter 8), then open the map in AdvantageScope's 2D Field and your widgets in Elastic, the same as with the real robot (Chapter 14). The simulated program is a NetworkTables server on your laptop, so neither tool can tell the difference.
 
 Now look at the field. The robot is a dot at the start line. Choose **Teleoperated** in the Robot State panel, and drive. The dot moves. It turns when you turn, slows when you let go, and the `Pose X (m)` and `Measured Forward (m per s)` widgets change as if the robot were real. There is no robot. Every one of those numbers came from the model you measured in Chapter 16.
 
 Then try the routines you already have, in order:
 
 - **The cruise check.** Choose **Test**, hold the left bumper, and watch `Measured Forward (m per s)`. It should settle almost exactly on 0.10, because the simulated robot obeys precisely the model your feedforward was built from.
-- **The tuning bench.** Still in Test, press **B** (turn to 90), then **A** (home), then **X** (drive out 0.30 m). Open a plot (**Plot** > **New Plot Window**, Section 15.9) of the heading setpoint and measurement, and watch PID do its job on a robot made of math.
+- **The tuning bench.** Still in Test, press **B** (turn to 90), then **A** (home), then **X** (drive out 0.30 m). Open an AdvantageScope Line Graph (Section 15.9) of the heading setpoint and measurement, and watch PID do its job on a robot made of math.
 - **Autonomous.** Press **Y** to reset the pose, choose **Autonomous**, and watch the dot drive leg 1, turn left, and drive up to the tape. On the field, it should end on the `Course` ghost's last pose, or very close. The event log in VS Code's terminal panel should show each step starting and `Line found after ... m`.
 
 > **Did the dot not move?**
@@ -1259,9 +1259,9 @@ With the simulated Explorer running:
 1. In AdvantageScope's menu, choose **File** > **Connect to Simulator** > **NetworkTables 4 (AdvantageKit)**. The window title stops saying "Searching" when it connects.
 2. The left sidebar now lists everything AdvantageKit is publishing. Open **Drivetrain**: there are your eight inputs, one for every field in `DrivetrainIOInputs`, with the names `@AutoLog` gave them (`LeftDistanceMeters`, `HeadingDegrees`, and so on). Open **RealOutputs** > **Drivetrain**: there is `Pose`, the output you logged in `periodic()`.
 3. The main area starts on a **Line Graph** tab. Drag `LeftSpeedMetersPerSecond` and `RightSpeedMetersPerSecond` onto it. Drive in teleop and watch both lines move. Hold the left bumper in Test mode and watch them climb to 0.10 and stop, the curve from your table at the start of Section 17.8.
-4. Add a new tab with the **+** button at the top of the window, and choose **2D Field**. Drag `Pose` from **RealOutputs** > **Drivetrain** onto the **Poses** list at the bottom. A robot appears on a field. Run autonomous and watch it.
+4. Add a new tab with the **+** button at the top of the window, and choose **2D Field**. Pick the FTC **Evergreen** field, as in Chapter 14, and drag `Pose` from **RealOutputs** > **Drivetrain** onto the **Poses** list at the bottom. Run autonomous and watch it.
 
-The full-size FRC field makes the Explorer's course look tiny, and that is fine. Chapter 24 will show you how to zoom, replay, and line up the graphs with the field.
+This is the same map as Chapter 14's, drawn from a different source: there, `Field2d` published the pose to the dashboard; here, AdvantageKit records it as an output, so it also lands in the log file. Chapter 24 will show you how to replay a run and line up the graphs with the field.
 
 > **Simulated or real, the same recordings**
 >

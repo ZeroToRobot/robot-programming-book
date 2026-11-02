@@ -602,7 +602,7 @@ Build. If the compiler complains about `autoStep`, `stepTimer`, or `STEP_DONE`, 
 
 ### Check: the course, as one command
 
-This is the first safe place to stand. Switch on the XRP and run the program with `USE_SIMULATED_ROBOT = false`. Keep **NetworkTables** > **SmartDashboard** > **Scheduler** and **Drivetrain** open, and the terminal.
+This is the first safe place to stand. Switch on the XRP and run the program with `USE_SIMULATED_ROBOT = false`. Keep Elastic open with the **Scheduler** and **Drivetrain** widgets, and the terminal.
 
 1. Press Y, then enable **Autonomous**. The Scheduler list shows one entry: `Obstacle Course`. Not `DriveDistance`, not `Auto Light`: the scheduler only sees the outermost group (Section 20.4). Drivetrain's `.command` also says `Obstacle Course`. The robot drives the course just as it did in Chapter 19, and the LED is on.
 2. When the robot finds the tape, the LED goes **out**, but `Obstacle Course` stays in the list. The deadline group has ended, and `Hold Still` is now holding the drivetrain until autonomous ends. The terminal tells the story:
@@ -1368,7 +1368,7 @@ These two are **public**, because `Robot` calls them every loop. They live here 
 
 ## 20.8 Run It: The Whole Robot, Declared
 
-This is the second safe place to stand, and the full test. Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`. Keep **NetworkTables** > **SmartDashboard** > **Scheduler** and **Drivetrain** open, and the terminal.
+This is the second safe place to stand, and the full test. Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`. Keep Elastic open with the **Scheduler** and **Drivetrain** widgets, and the terminal.
 
 ### Disabled
 

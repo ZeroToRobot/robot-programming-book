@@ -690,18 +690,21 @@ field.setRobotPose(drivetrain.getPose());
 
 ### Where to see it
 
-The SmartDashboard app you have been using since Chapter 5 does not have a field map widget. But you already have a window open that does: the **Simulation GUI**, the window that appears whenever you run your XRP code (Chapter 8 used it for controller setup). It is built on the same tools as WPILib's **Glass** dashboard, and it can show any value your robot publishes, including a `Field2d`.
+Elastic has a field widget, but it only draws full-size FRC fields, more than 16 meters long, so your XRP's whole course would be a few pixels in one corner. For the Explorer's map, use **AdvantageScope**, the log viewer you peeked at in Chapter 10. It can draw a much smaller field, and it can watch your program live.
 
 1. Run your program as usual.
-2. In the Simulation GUI window, open the **NetworkTables** menu at the top, then **SmartDashboard**, then click **Field**. A new window opens with a field and a robot drawn on it.
-3. The map starts out drawn as a full-size FRC field, more than 16 meters long, so your XRP's whole course is a few pixels in one corner. Right-click the title bar of the Field window to open its settings. Set the field image to none (or leave it if you like the picture), set the field size to **2 meters by 2 meters**, and set the robot size to about **0.2 meters**. Now the map is a two-meter square of floor, and your robot is drawn at a realistic size.
-4. Drag and resize the window where you can see it. The Simulation GUI remembers its layout (in a file called `imgui.ini` in your project folder) for the next time you run.
+2. Open AdvantageScope (**WPILib: Start Tool** > **AdvantageScope**). In its menu, choose **File** > **Connect to Simulator** > **NetworkTables 4**. (Your XRP program runs on your laptop, which is why "simulator" is the right choice even with the real robot.) The left sidebar fills with everything your program publishes.
+3. Add a tab with the **+** button at the top of the window, and choose **2D Field**.
+4. Open the field choices at the top of the tab and pick the FTC-sized **Evergreen** field: a plain field 12 feet (about 3.7 meters) square, with no game pieces on it. That is a far better fit for the Explorer than a 54-foot FRC field.
+5. In the sidebar, open **SmartDashboard** > **Field**, and drag **Robot** onto the **Poses** area at the bottom of the tab. A robot appears on the field.
 
-The map draws the field origin at its **bottom-left corner**, with +x to the right and +y up. Your robot starts at `(0, 0)`, so it appears at that corner, pointing right. If you drive forward, it moves right. Turn left, and it rotates to point up. Same frame as Section 14.2, now on screen.
+On the FTC field, the origin, `(0, 0)`, is in the **center** of the field, so your robot starts in the middle, pointing along +x (to the right), with +y up the screen. If you drive forward, it moves right. Turn left, and it rotates counterclockwise to point up. Same frame as Section 14.2, now on screen. The robot is drawn at FTC size, more than twice as wide as an XRP; watch where it goes, not how big it is. Zoom in with the mouse wheel.
+
+AdvantageScope remembers its tabs for next time. Chapter 24 shows you how to save them in your project as well.
 
 > **One map, many viewers**
 >
-> `Field2d` does not care who draws it. The same object can be shown in the Simulation GUI, in Glass, in Shuffleboard, and in **AdvantageScope** (which you opened briefly in Chapter 10). Because your data log records everything published to the dashboard, AdvantageScope can even replay a run from the log file and show the robot driving across the map after the fact. Chapter 24 does exactly that. For now, the Simulation GUI is the quickest way to watch it live.
+> `Field2d` does not care who draws it. The same object can be shown in **AdvantageScope**, in **Elastic** (full-size FRC fields only, which suits the Mini Swerve in Chapter 26), and in the Simulation GUI's **NetworkTables** menu. Because your data log records everything published to the dashboard, AdvantageScope can even replay a run from the log file and show the robot driving across the map after the fact. Chapter 24 does exactly that.
 
 ### Drawing the plan, too
 
@@ -711,7 +714,7 @@ A field map gets really useful when you can see the robot **and** where it was s
 field.getObject("Course").setPoses(START_POSE, CORNER_POSE, LINE_POSE);
 ```
 
-`getObject("Course")` returns an object of type `FieldObject2d` that the field will draw (creating it the first time you ask), and `setPoses` takes as many poses as you want to give it. The field draws each one as a ghost robot outline. This is method chaining again: `getObject` returns an object, and `setPoses` is called on it, all in one line. Since the course never changes, this goes in the constructor, once.
+`getObject("Course")` returns an object of type `FieldObject2d` that the field will draw (creating it the first time you ask), and `setPoses` takes as many poses as you want to give it. To see them in AdvantageScope, drag **Course** from **SmartDashboard** > **Field** onto the **Poses** area too: each pose is drawn as a ghost robot. This is method chaining again: `getObject` returns an object, and `setPoses` is called on it, all in one line. Since the course never changes, this goes in the constructor, once.
 
 And look at those three constants. They are `static final Pose2d` constants, which is only safe because `Pose2d` is immutable (Section 14.5).
 
@@ -1000,7 +1003,7 @@ Walk through what changed since Chapter 13:
 
 ### Try it: push the robot by hand
 
-Build and run. Open the Field window and arrange the three `Pose` widgets on SmartDashboard. Leave the robot **disabled**. Press Y to reset the pose, then do these by hand, slowly, with the wheels on the table:
+Build and run. Open AdvantageScope's 2D Field, and add the three `Pose` widgets in Elastic. Leave the robot **disabled**. Press Y to reset the pose, then do these by hand, slowly, with the wheels on the table:
 
 1. **Push the robot straight forward about 20 cm.** `Pose X (m)` climbs to about `0.20`, and the robot icon slides right on the map.
 2. **Rotate it left a quarter turn in place.** `Pose Heading (deg)` goes to about `90`, and the icon turns to point up. `Pose X` and `Pose Y` barely change.
@@ -1098,7 +1101,7 @@ Look at how your code is set up for all of this. `Robot.java` asks the drivetrai
 > * `Translation2d`, `Rotation2d`, and `Pose2d` show **composition**: a pose **has a** translation and **has a** rotation, unlike inheritance, where `Robot` **is a** `TimedRobot`. You reach inside with **method chaining** (`pose.getRotation().getDegrees()`) and build angles with **static factory methods** (`Rotation2d.fromDegrees`).
 > * The geometry classes are **immutable**: `private final` fields and no setters, so every "change" returns a new object. Immutable objects are safe to share, and only immutable objects make truly constant `static final` object constants.
 > * `DifferentialDriveOdometry` needs the gyro heading and both encoder distances to start, `update` once per loop, and `getPoseMeters()` to read. **Resetting sensors without `resetPosition` makes the pose teleport**, so `Drivetrain.resetPose(Pose2d)` resets everything together and the raw resets are now `private`.
-> * `Field2d`, published once with `SmartDashboard.putData`, draws the robot and the planned course on a map in the Simulation GUI. Odometry **drifts**: wheel slip, wheel size, scrubbing, gyro drift, and the floor all add up, and heading errors grow with distance. Resetting at known places, and later AprilTags, keep the belief close to the truth.
+> * `Field2d`, published once with `SmartDashboard.putData`, draws the robot and the planned course on a map in AdvantageScope's **2D Field** (on the small FTC Evergreen field). Odometry **drifts**: wheel slip, wheel size, scrubbing, gyro drift, and the floor all add up, and heading errors grow with distance. Resetting at known places, and later AprilTags, keep the belief close to the truth.
 
 ---
 
@@ -1175,7 +1178,7 @@ Give the Explorer odometry and a live map.
 
 1. Update `Drivetrain.java` to the listing in Section 14.6. Build. Expect compile errors in `Robot.java` about `resetEncoders()` and `resetHeading()` having `private access`. Do not fix them by making the methods public again: read each error, find the line, and go on to step 2.
 2. Update `Robot.java` to the listing in Section 14.7. Measure the distance from your corner mark to the tape and put it in `LINE_DISTANCE_METERS`. Build and confirm `BUILD SUCCESSFUL`.
-3. Run the program. Open the Field window in the Simulation GUI (Section 14.7), set the field to 2 m by 2 m and the robot to about 0.2 m, and arrange it next to SmartDashboard. Put `Pose X (m)`, `Pose Y (m)`, and `Pose Heading (deg)` on SmartDashboard, near `Heading (deg)`, and save the layout.
+3. Run the program. Open AdvantageScope's 2D Field on the FTC Evergreen field with `Robot` and `Course` on it (Section 14.7), and put it next to Elastic. Add `Pose X (m)`, `Pose Y (m)`, and `Pose Heading (deg)` in Elastic, near `Heading (deg)`, and save the layout.
 4. Do the five-step hand test from Section 14.7. Every step should match.
 5. Run the autonomous course five times. For each run, record the final pose from the terminal log (the `Auto step 4` line) **and** measure the robot's real final position with a tape measure from the start line (x along leg 1, y to the left). Record both in a table.
 6. For each run, compute the difference between odometry's belief and the tape measure, in centimeters. What is the average? Compare odometry's final heading with the gyro's: are they the same number? (They should be, within a hair, because odometry gets its heading from the gyro.)
@@ -1188,8 +1191,8 @@ Diagnose anything strange:
 - **The icon drives the right way but the map rotates it oddly, or x and y seem swapped:** check that you used `Rotation2d.fromDegrees(...)`, not `new Rotation2d(...)`, which takes **radians**. A heading of `90` radians points somewhere strange.
 - **The pose jumps when you press Y or start autonomous:** something is resetting a sensor without `resetPose`. Search your code for `.reset()` outside `Drivetrain`.
 - **The pose slowly drifts while the robot sits still:** that is gyro drift (Chapter 9). Power-cycle the XRP flat and still, and wait for the calibration to finish.
-- **No Field window, or no Field item in the NetworkTables menu:** check that `SmartDashboard.putData("Field", field);` is in the constructor and that the program is running. The entry only appears once the robot code has published it.
-- **The robot icon is huge or invisible:** the field or robot size settings are off. Right-click the Field window's title bar and set them again (Section 14.7).
+- **No Field folder in AdvantageScope's sidebar:** check that `SmartDashboard.putData("Field", field);` is in the constructor, that the program is running, and that AdvantageScope is connected (**File** > **Connect to Simulator**). The entry only appears once the robot code has published it.
+- **The robot is a speck in a corner of a huge field:** you are on an FRC field. Pick the FTC **Evergreen** field at the top of the 2D Field tab (Section 14.7).
 - **Compile error `illegal forward reference`:** a course pose constant is above a constant it uses. Move the course group below the autonomous constants.
 
 When the map and the real robot agree to within a couple of centimeters at the end of the course, the Explorer knows where it is. In Chapter 15, it will start using that knowledge to steer.
@@ -1244,7 +1247,8 @@ The driver presses Y, then drives the path in teleop, pressing A at the start an
 >
 > * **Differential Drive Odometry**: [docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/differential-drive-odometry.html](https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/differential-drive-odometry.html) the official guide to `DifferentialDriveOdometry`, including the warning about resetting sensors and `resetPosition`
 > * **Translation, Rotation, and Pose**: [docs.wpilib.org/en/stable/docs/software/advanced-controls/geometry/pose.html](https://docs.wpilib.org/en/stable/docs/software/advanced-controls/geometry/pose.html) WPILib's introduction to `Translation2d`, `Rotation2d`, and `Pose2d`, with pictures of the field frame
-> * **The Field2d Widget**: [docs.wpilib.org/en/stable/docs/software/dashboards/glass/field2d-widget.html](https://docs.wpilib.org/en/stable/docs/software/dashboards/glass/field2d-widget.html) how to publish a `Field2d`, open it in Glass, and change the field image, sizes, and drawing style
+> * **AdvantageScope 2D Field**: [docs.advantagescope.org/tab-reference/2d-field](https://docs.advantagescope.org/tab-reference/2d-field) the tab you use for the Explorer's map: choosing a field, adding poses, and zooming
+> * **The Field2d Widget**: [docs.wpilib.org/en/stable/docs/software/dashboards/glass/field2d-widget.html](https://docs.wpilib.org/en/stable/docs/software/dashboards/glass/field2d-widget.html) how to publish a `Field2d`, and how WPILib's own tools draw it
 > * **`Pose2d` Javadoc**: [github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/math/geometry/Pose2d.html) every method on `Pose2d`, including `exp`, the arc math from Section 14.3
 > * **Immutable Objects (The Java Tutorials)**: [docs.oracle.com/javase/tutorial/essential/concurrency/immutable.html](https://docs.oracle.com/javase/tutorial/essential/concurrency/immutable.html) Java's own explanation of immutable objects and a recipe for writing them
 

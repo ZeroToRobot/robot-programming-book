@@ -603,7 +603,7 @@ autoLight.cancel();
 
 Build, switch on your XRP, and run the program with `USE_SIMULATED_ROBOT = false`.
 
-1. In the Simulation GUI, open **NetworkTables** > **SmartDashboard** > **Scheduler**. It lists the names of the commands that are running right now. Before autonomous, the list is empty.
+1. In Elastic, click **Add Widget**, open **SmartDashboard**, and drag **Scheduler** onto the grid. Elastic makes it a **Scheduler** widget: a list of the commands that are running right now, with a button to cancel each. Before autonomous, the list is empty. Save the layout.
 2. Press Y to reset the pose, and start **Autonomous**. The LED comes on, the Explorer drives the course exactly as it did in Chapter 17, and `Auto Light` appears in the Scheduler list.
 3. When the robot finds the tape and `autoStep` reaches `STEP_DONE`, the LED goes out and `Auto Light` disappears from the list. Its `until` condition came true, so the scheduler ended it.
 4. Run autonomous again, and this time **disable** the robot in the middle of leg 1. The LED goes out immediately. You never wrote a single line about the LED in `disabledInit()`. The scheduler saw that the robot was disabled, cancelled the command, and ran its end action.
@@ -746,7 +746,7 @@ Diagnose anything strange:
 - **The LED comes on but never goes off:** the scheduler is not running. See "Did the LED stay on after you disabled?" in Section 18.7.
 - **The LED never comes on:** check that `autonomousInit()` really schedules `autoLight`, and that nothing else (old Chapter 4 code in `robotPeriodic()`, for example) sets the LED back to `false` every loop.
 - **The LED goes off the moment autonomous starts:** `autoStep` is already `STEP_DONE` when the command is scheduled. Schedule it **after** `startStep(STEP_DRIVE_LEG_1)`, not before.
-- **The Scheduler widget is missing:** check the `SmartDashboard.putData("Scheduler", ...)` line, and look under **NetworkTables** > **SmartDashboard**.
+- **The Scheduler widget is missing:** check the `SmartDashboard.putData("Scheduler", ...)` line, and look in the **SmartDashboard** folder of Elastic's **Add Widget**.
 - **VS Code shows `schedule()` crossed out:** you wrote `autoLight.schedule()`. Use `CommandScheduler.getInstance().schedule(autoLight)` (the "`schedule()` the old way" callout).
 
 When the LED tracks the autonomous routine on both robots, and your plan table lists every action the Explorer can take, you are ready for Chapter 19.

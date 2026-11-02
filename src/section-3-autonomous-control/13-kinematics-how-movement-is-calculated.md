@@ -997,7 +997,7 @@ Give the Explorer a drivetrain that drives by chassis velocity, and run the obst
 
 1. Measure your robot's top speed (Section 13.8), three runs, using the slower side. Write the number and today's date down.
 2. Update `Drivetrain.java` to the listing in Section 13.8, with your measured top speed in `MAX_WHEEL_SPEED_METERS_PER_SECOND` and the date in its comment. Build and confirm `BUILD SUCCESSFUL`.
-3. Add the two `Measured` widgets to `updateDashboard()` in `Robot.java`, and the `ChassisSpeeds` import. Run in teleop and drive around. Put `Measured Turn (deg per s)` next to the gyro's `Turn Rate (deg per s)` on your dashboard and save the layout.
+3. Add the two `Measured` widgets to `updateDashboard()` in `Robot.java`, and the `ChassisSpeeds` import. Run in teleop and drive around. Put `Measured Turn (deg per s)` next to the gyro's `Turn Rate (deg per s)` in Elastic and save the layout.
 4. Update the autonomous constants and `autonomousPeriodic()` as in Section 13.9.
 5. Before running, fill in a prediction table like the one in Section 13.9 using **your** constants.
 6. Run the course five times. For each run, record each step's actual time from the terminal log, and the `Measured Forward (m per s)` value during leg 1.
