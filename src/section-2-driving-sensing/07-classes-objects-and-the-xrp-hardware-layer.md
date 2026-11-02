@@ -122,7 +122,7 @@ Two objects from one class, each with its **own** `points`. Adding to `red` neve
 >
 > When you write `new ScoreKeeper()`, Java sets aside fresh memory for that object's fields. Ten scorekeepers means ten separate `points` values. The class is written once; the state is stored per object. This is exactly why two `XRPMotor` objects can spin at different speeds at the same time.
 
-The dot you keep seeing, as in `red.addPoints(5)`, means "call the `addPoints` method on the `red` object." The object goes on the left of the dot; the thing you want it to do goes on the right. You have used this since Chapter 4, every time you wrote `SmartDashboard.putNumber(...)`. Now you know what the dot means.
+The dot you keep seeing, as in `red.addPoints(5)`, means "call the `addPoints` method on the `red` object." The object goes on the left of the dot; the thing you want it to do goes on the right. You have been using dots since Chapter 4, in lines like `SmartDashboard.putNumber(...)`. That one has a class, not an object, on the left, and Section 7.9 explains the difference. Now you know what the dot means.
 
 ---
 
@@ -247,7 +247,7 @@ WPILib hands you a helper built for two-sided drivetrains: the `DifferentialDriv
 diffDrive.arcadeDrive(forward, rotation);
 ```
 
-`forward` is how fast to drive straight (`-1.0` to `1.0`), and `rotation` is how hard to turn (`-1.0` to `1.0`, positive turns right). `DifferentialDrive` does the left-versus-right math for you. It is called "arcade" because it feels like an arcade racing game: one input for speed, one for steering.
+`forward` is how fast to drive straight (`-1.0` to `1.0`), and `rotation` is how hard to turn (`-1.0` to `1.0`, positive turns **left**, counterclockwise seen from above). Turning left for positive may feel backward; Chapter 8 shows where that rule comes from, when you connect a controller. `DifferentialDrive` does the left-versus-right math for you. It is called "arcade" because it feels like an arcade racing game: one input for speed, one for steering.
 
 Our plan: build a small `Drivetrain` class that owns the two `XRPMotor` objects and a `DifferentialDrive`, keeps them private, and exposes exactly two public actions, `arcadeDrive` and `stop`. That is the hardware layer for the Explorer's drive.
 
@@ -260,6 +260,10 @@ Our plan: build a small `Drivetrain` class that owns the two `XRPMotor` objects 
 ## 7.7 Building the `Drivetrain` Class
 
 Time to write it. In VS Code, create a new file next to `Robot.java`, in the same `frc.robot` folder, named `Drivetrain.java`. Type the following. As always, type it, do not paste; the point is to feel the structure.
+
+> **Delete the template's `XRPDrivetrain.java`**
+>
+> The XRP template came with its own drive class, `XRPDrivetrain.java`, sitting in the same folder. Open it and take a look first: it also creates `XRPMotor(0)` and `XRPMotor(1)` and inverts the right motor, much like the class you are about to write. Then delete it (right-click it in VS Code's Explorer and choose **Delete**). Your `Drivetrain` replaces it, and keeping two classes that both claim the same motors is an accident waiting to happen.
 
 ```java
 package frc.robot;
@@ -315,7 +319,15 @@ That is the entire hardware layer for the drive: three private fields, one const
 
 ## 7.8 Wiring the Drivetrain into `Robot.java`
 
-The `Drivetrain` class exists, but nothing creates one yet. Open `Robot.java` and connect it. Here is the file with the drivetrain wired in, starting from your Chapter 5 skeleton:
+The `Drivetrain` class exists, but nothing creates one yet. Open your Chapter 6 `Robot.java` and connect it.
+
+This time you are not adding to the file; you are replacing most of it. The motors now live inside `Drivetrain`, so the Chapter 6 code that drove them by hand has to go:
+
+- **Delete** the `leftMotor` and `rightMotor` fields, the `rightMotor.setInverted(true);` line, and the `driveForward` and `stopMotors` helpers. WPILib allows only **one** `XRPMotor` object per channel. If `Robot` still creates `new XRPMotor(0)` when `Drivetrain` creates its own, the program stops at startup with `XRPMotor 0 already allocated`.
+- **Delete** the wall stop from `teleopPeriodic()`, along with the `controller` and `rangefinder` fields, `applyDeadband`, `isWallClose`, and the `Distance` and `Status` widgets. The controller comes back in Chapter 8 and the wall stop in Chapter 9, both rebuilt on top of `Drivetrain` with better tools.
+- **Delete** the Chapter 5 `LastInitTime` and `Uptime` widgets and the `testInit`/`testPeriodic` methods. They proved how the modes take turns, and that job is done. Keeping the file short makes the new part easy to see.
+
+Here is the whole file after those changes, with the drivetrain wired in:
 
 ```java
 package frc.robot;
@@ -371,7 +383,7 @@ public class Robot extends TimedRobot {
 
 Two things to notice.
 
-First, `drivetrain` is created inside the `Robot()` constructor, not inside a periodic method. This is the Chapter 5 rule in action: objects that should exist for the whole match are created **once**, at startup. If you put `new Drivetrain()` inside `teleopPeriodic()`, you would build a brand new drivetrain fifty times a second, which is both wasteful and buggy. The field is also `final`, just like the motors inside `Drivetrain`: Java lets a constructor assign a `final` field exactly once, and refuses to compile any later attempt to replace it.
+First, `drivetrain` is created inside the `Robot()` constructor, not inside a periodic method. This is the Chapter 5 rule in action: objects that should exist for the whole match are created **once**, at startup. If you put `new Drivetrain()` inside `teleopPeriodic()`, you would try to build a brand new drivetrain fifty times a second. It would not even get to the second one: the second `new XRPMotor(0)` stops the program with `XRPMotor 0 already allocated`, the same error as leaving Chapter 6's motors in `Robot`. Hardware is created once. The field is also `final`, just like the motors inside `Drivetrain`: Java lets a constructor assign a `final` field exactly once, and refuses to compile any later attempt to replace it.
 
 Second, both `autonomousPeriodic()` and `teleopPeriodic()` call `drivetrain.stop()`. Right now the robot has no reason to move, so the safe default is to command a stop every loop. There is a real reason to call `stop()` every loop and not just once: `DifferentialDrive` has a built-in safety timer that expects to hear from you regularly. If nothing calls a drive method for a fraction of a second, it assumes your code has hung and cuts the motors, printing a warning. Calling `stop()` each loop keeps it satisfied and keeps the robot safely still.
 
@@ -455,14 +467,18 @@ public void autonomousPeriodic() {
 }
 ```
 
-3. Put the XRP on the floor with room ahead of it. Build and run it, then click **Autonomous** in the Simulation GUI's Robot State panel.
+> **Know how to stop before you start**
+>
+> This is the first time your code moves the robot. Before you click Enable, put your finger on the stop. In the Simulation GUI, that is the **Disabled** button in the Robot State panel: one click and the motors stop. Keep the XRP on the floor, never on a table where it can drive off the edge, and if all else fails, flip its power switch. Every time you enable a robot, from this XRP to a competition robot, you should already know how you will stop it. Chapter 26 adds the Driver Station's keyboard stops for the bigger robot.
+
+3. Put the XRP on the floor with room ahead of it. Build and run it. With your finger on **Disabled**, click **Autonomous** in the Simulation GUI's Robot State panel.
 
 Watch what happens and diagnose it:
 
 - **Drives straight forward, then stops:** wiring is correct. Done.
-- **Spins in place:** one side is driving backward. Change the inversion in `Drivetrain`'s constructor (invert the left motor instead of the right, or remove the inversion), then run it and test again.
-- **Drives backward:** both sides are reversed from what you expect. Invert both, or swap which direction you call "forward."
-- **Barely moves:** the XRP is fighting friction. Raise `0.6` toward `0.9` and test again.
+- **Spins in place:** one side is driving backward. With exactly one motor inverted the robot drives straight, so remove the `setInverted` line from `Drivetrain`'s constructor, then run it and test again. (Inverting the left motor *instead* of the right still leaves exactly one side flipped.)
+- **Drives backward:** both sides are reversed from what you expect. Flip both: invert the left motor and remove the right motor's inversion.
+- **Barely moves:** the XRP is fighting friction. `arcadeDrive` softens small commands (Chapter 8 explains how), so `0.6` is really only about a third of full power. Raise `0.6` toward `0.9` and test again.
 
 Once it drives straight forward for one second and stops, you have a working hardware layer with verified wiring. Leave the code in place; Chapter 8 replaces the timed nudge with real driver control.
 
@@ -476,6 +492,8 @@ Away from the robot, drill the concepts from Sections 7.2 through 7.4. In a scra
 - a public method `getVoltage()` that returns the current voltage.
 
 Then create **two** `Battery` objects with different starting voltages, drain them by different amounts, and print both voltages to prove each object keeps its own state. If both batteries end up reading the same value, you accidentally shared state somewhere; find out why.
+
+Now try `static` on purpose (Section 7.9). Add a field `private static int batteriesMade = 0;`, add one to it in the constructor (`batteriesMade = batteriesMade + 1;`), and add a method that returns it. Create both batteries, then print the count from each one: both print `2`. Remove the word `static` and run again: each battery prints `1`. Explain in a sentence why. (A `static` field has one copy for the whole class; an instance field has one copy per object.)
 
 ### Git
 

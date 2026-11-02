@@ -235,11 +235,7 @@ drivetrain.arcadeDrive(forward, rotation);
 Two minus signs, both from Section 8.3:
 
 - **Forward:** pushing the stick forward reads negative, but the robot treats positive as forward. Negate it.
-- **Rotation:** pushing the stick right reads positive, but in the robot's frame positive rotation is counterclockwise, which turns the robot **left**. Negate it, so pushing right turns right.
-
-> **Correction to Chapter 7**
->
-> Chapter 7 described `arcadeDrive`'s `rotation` as "positive turns right." Current WPILib uses the opposite: positive rotation is counterclockwise, which turns the robot **left**, matching the robot coordinate frame. That is why the rotation line above has a minus sign. If you ever find your robot steering backward, check this sign first.
+- **Rotation:** pushing the stick right reads positive, but in the robot's frame positive rotation is counterclockwise, which turns the robot **left**. Negate it, so pushing right turns right. This is the rule from Chapter 7 ("positive turns left"), and now you know why: it matches the robot coordinate frame. If you ever find your robot steering backward, check this sign first.
 
 Here is the complete `Robot.java`, starting from where Chapter 7 left it (including the timed autonomous from Chapter 7's Build exercise). Type it, do not paste:
 
@@ -531,7 +527,7 @@ Give the Explorer full driver control and drive it around a course.
 1. Update `Robot.java` to the full listing in Section 8.6. Build and confirm `BUILD SUCCESSFUL`.
 2. Add slow mode from Section 8.8: the two scale constants, the ternary in `teleopPeriodic()`, and the `Slow Mode` dashboard widget.
 3. With painter's tape, lay out a simple course on the floor: a straight lane about one meter long, a 90 degree turn, and a "garage" box at the end just a little bigger than the XRP.
-4. Run it, click **Teleoperated**, and drive the course. Use slow mode to park in the garage without touching the tape.
+4. Run it. Finger on **Disabled**, then click **Teleoperated** and drive the course. Use slow mode to park in the garage without touching the tape.
 
 Diagnose anything strange:
 
