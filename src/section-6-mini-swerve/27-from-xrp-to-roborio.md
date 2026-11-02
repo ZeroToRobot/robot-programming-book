@@ -128,14 +128,16 @@ The first column will grow as the robot does. The rows the book needs next are t
 
 The Explorer weighs about as much as a textbook, and its motors could not pinch a finger. The Mini Swerve is heavier, its motors are many times more powerful, and its battery can deliver hundreds of amps for a moment. Treat it the way your team treats every real robot, from the first day.
 
-These are the rules for every chapter in Section VI. Your team may have more; follow those too.
+These are the rules for every chapter in Section VI. Your team and your mentors may have more; theirs come first.
 
-1. **Wheels off the ground until the code is trusted.** Put the robot on blocks (a sturdy box or a robot cart) so its wheels spin in the air. Every first test of new code happens on blocks. Chapter 28 will tell you when it is time to put it on the floor.
+1. **Safety glasses on.** Everyone within reach of the robot wears safety glasses whenever the battery is plugged in. FIRST requires them in the pits and on the field at every event; wear them in your shop too, so it is a habit before you get there.
+2. **Wheels off the ground until the code is trusted.** Put the robot on blocks (a sturdy box or a robot cart) so its wheels spin in the air. Every first test of new code happens on blocks. Chapter 28 will tell you when it is time to put it on the floor.
 2. **Say it before you enable it.** Before you press Enable, say "Enabling!" loudly enough for everyone near the robot to hear, and wait for hands to come away from it. Your team may use another word; use the same one every time.
-3. **Know your stop keys.** In the Driver Station, **Enter** disables the robot, and the **space bar** is an emergency stop that works even when the Driver Station window is not in front. After an emergency stop, the roboRIO must be rebooted before it can be enabled again, which is exactly why it is safe: nothing can quietly start the robot back up. Keep a hand near the space bar whenever the robot is enabled.
-4. **One person drives the Driver Station.** On a shared robot, only one laptop is connected and enabling it at a time. Everyone else watches the robot, not the screen.
-5. **Batteries are heavy and full of acid.** Carry them by the handle or the body, never by the wires. A battery that is cracked, leaking, or swollen goes to a mentor, not into a robot. Plug in a charged battery, and put the used one on the charger.
-6. **Power off before you touch wiring.** Switch off the main breaker before you plug or unplug anything on the robot. Never power the robot off in the middle of a deploy (Section 27.7 says why).
+4. **Disabled before hands go in.** Before anyone touches the robot, the Driver Station operator disables it and says "Disabled!" Then, and only then, hands go in. A robot on blocks stays put, but its spinning wheels and steering gears still catch fingers, hair, and loose sleeves. Tie back long hair, and keep lanyards and loose clothing away from the robot.
+5. **Know your stop keys.** In the Driver Station, **Enter** disables the robot, and the **space bar** is an emergency stop that works even when the Driver Station window is not in front. After an emergency stop, the roboRIO must be rebooted before it can be enabled again, which is exactly why it is safe: nothing can quietly start the robot back up. Keep a hand near the space bar whenever the robot is enabled.
+6. **One person drives the Driver Station.** On a shared robot, only one laptop is connected and enabling it at a time. Everyone else watches the robot, not the screen.
+7. **Batteries are heavy and full of acid.** Carry them by the handle or the body, never by the wires. A battery that is cracked, leaking, or swollen goes to a mentor, not into a robot. Keep metal tools away from the terminals: a wrench across them is a short circuit with hundreds of amps behind it. Plug in a charged battery, and put the used one on the charger.
+8. **Power off before you touch wiring.** Switch off the main breaker before you plug or unplug anything on the robot. Never power the robot off in the middle of a deploy (Section 27.7 says why).
 
 > **The enable keys you should not learn**
 >
@@ -1534,7 +1536,7 @@ Before every commit, check `git status` for `BuildConstants.java` (it must not b
 A team repository works when everyone on the team has used it, not just the owner. Before Chapter 28, each teammate opens one pull request, and a **different** teammate reviews it:
 
 - **The fact sheet.** Turn the notebook table into `docs/robot.md`, with every row you know and "unknown" for the rest. The reviewer checks at least three rows against the real robot.
-- **The robot rules.** Copy the Explorer's `CONTRIBUTING.md` (Chapter 11) and add a section for the shared robot: how your team books robot time, your enable word, the safety rules from Section 27.3, "USB stick in, battery charged" before every session, and "never merge red." The reviewer checks it against what your mentors actually expect.
+- **The robot rules.** Copy the Explorer's `CONTRIBUTING.md` (Chapter 11) and add a section for the shared robot: how your team books robot time, your enable word, your mentors' shop rules, the safety rules from Section 27.3, "USB stick in, battery charged" before every session, and "never merge red." The reviewer checks it against what your mentors actually expect.
 - **The dashboard.** The Elastic layout from Section 27.11, exported to `src/main/deploy/elastic-layout.json`. The reviewer deploys it, opens Elastic on their own laptop, and loads the layout from the robot.
 
 If there are only two of you, split the third one. Afterward, write two sentences in `reflections.md`: which review found something the author missed, and what was it?
@@ -1553,6 +1555,7 @@ If there are only two of you, split the third one. Afterward, write two sentence
 > * **Imaging your roboRIO 1 (WPILib)**: [docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/imaging-your-roborio.html](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/imaging-your-roborio.html) the Imaging Tool, step by step, with troubleshooting
 > * **Imaging your roboRIO 2 (WPILib)**: [docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/roborio2-imaging.html](https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-3/roborio2-imaging.html) writing the microSD card, and setting the team number
 > * **FRC Driver Station (WPILib)**: [docs.wpilib.org/en/stable/docs/software/driverstation/driver-station.html](https://docs.wpilib.org/en/stable/docs/software/driverstation/driver-station.html) every tab, every indicator, and the keyboard shortcuts
+> * **Robot Battery Basics (WPILib)**: [docs.wpilib.org/en/stable/docs/hardware/hardware-basics/robot-battery.html](https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/robot-battery.html) how to carry, charge, check, and store an FRC battery safely
 > * **Viewing Console Output (WPILib)**: [docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html](https://docs.wpilib.org/en/stable/docs/software/vscode-overview/viewing-console-output.html) RioLog and the Driver Station's console
 > * **roboRIO Brownout and Understanding Current Draw (WPILib)**: [docs.wpilib.org/en/stable/docs/software/roborio-info/roborio-brownouts.html](https://docs.wpilib.org/en/stable/docs/software/roborio-info/roborio-brownouts.html) the brownout stages, and power budgets
 > * **Robot Battery Basics (WPILib)**: [docs.wpilib.org/en/stable/docs/hardware/hardware-basics/robot-battery.html](https://docs.wpilib.org/en/stable/docs/hardware/hardware-basics/robot-battery.html) what the voltages mean, and how to care for batteries
