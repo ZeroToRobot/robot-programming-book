@@ -62,6 +62,10 @@ Since Chapter 1, the goal of the XRP Explorer has been an autonomous obstacle co
 
 Use the same surface you measured your `LINE_THRESHOLD` on in Chapter 9. If you change surfaces, re-measure.
 
+> **Autonomous safety rules**
+>
+> From now on, your code moves the robot without you. Two rules, every time. First, run autonomous **on the floor**, with room ahead of the robot, never on a table or a desk. Second, keep a finger on **Disabled** in the Simulation GUI's Robot State panel for the whole run, as you learned in Chapter 7, and click it the moment anything looks wrong. (If the program itself is stuck, switch the XRP off.) Several bugs in this chapter, some of them on purpose, make the robot keep driving. The floor and your finger on Disabled turn that from a broken robot into a funny story.
+
 ---
 
 ## 12.2 The `Timer`: A Stopwatch, Not an Alarm Clock
@@ -183,7 +187,7 @@ Repeat until one run lands within a centimeter or two of 50 cm. Congratulations:
 
 ### Now run it five more times
 
-Do not change anything. Put the robot back on the start line and run it again. And again. Five runs, all with the same code. Record each one in a table like the one in Practice 1. Then try a different surface (carpet instead of a table, or the other way around) and do three more runs.
+Do not change anything. Put the robot back on the start line and run it again. And again. Five runs, all with the same code. Record each one in a table like the one in Practice 1. Then try a different surface (carpet instead of a hard floor, or the other way around) and do three more runs.
 
 Here is what usually happens. Your numbers will be different, and that is the point of measuring:
 
@@ -271,7 +275,7 @@ The code says "stop at 0.50 m," and it does: on the first loop where the distanc
 
 You can watch it happen. Your encoders kept counting during the coast, so the `Avg Distance (m)` widget shows where the robot actually stopped, not where the code said "stop." The gap between `0.50` and that final number is the stopping distance, measured.
 
-A faster robot has a longer stopping distance. Try `AUTO_DRIVE_SPEED = 0.8` and watch the overshoot grow. Try `0.3` and watch it shrink (though below some power, the robot will not move at all, because the motors cannot overcome friction).
+A faster robot has a longer stopping distance. Try `AUTO_DRIVE_SPEED = 0.8` (on the floor, with plenty of room past the mark) and watch the overshoot grow. Try `0.3` and watch it shrink (though below some power, the robot will not move at all, because the motors cannot overcome friction).
 
 > **Slowing down as you arrive: a preview of PID**
 >
@@ -298,7 +302,7 @@ if (drivetrain.getAverageDistanceMeters() == TEST_DISTANCE_METERS) {
 
 There are two reasons this fails, one about robots and one about Java.
 
-**The robot reason: sampling.** Your code only looks at the encoders once every 20 milliseconds. If the robot is moving half a meter per second, it travels a full centimeter between looks. One loop it reads `0.4952`, the next it reads `0.5047`. It never reads exactly `0.5000`, so the `==` is never true, and the robot drives off the edge of the table. This is like trying to stop a car at a line by glancing at it once a second: you will never catch the instant it is exactly on the line, but you will easily notice that you have **passed** it.
+**The robot reason: sampling.** Your code only looks at the encoders once every 20 milliseconds. If the robot is moving half a meter per second, it travels a full centimeter between looks. One loop it reads `0.4952`, the next it reads `0.5047`. It never reads exactly `0.5000`, so the `==` is never true, and the robot keeps driving until it hits something or you click **Disabled**. This is like trying to stop a car at a line by glancing at it once a second: you will never catch the instant it is exactly on the line, but you will easily notice that you have **passed** it.
 
 **The Java reason: `double`s are almost never exact.** Try this in a scratch file or in your `Robot()` constructor:
 
@@ -814,7 +818,7 @@ Mode: Disabled
 
 > **On a real field, autonomous ends on its own**
 >
-> At a competition, the field's control system switches every robot from autonomous to teleop when the autonomous period ends, whether your routine is finished or not. On your desk there is no field control system, so autonomous lasts until you disable it. That is one more reason every step needs a way to finish, and the routine needs a clear "done" step that stops the motors. A routine that relies on "the period will end eventually" will one day run straight off a table.
+> At a competition, the field's control system switches every robot from autonomous to teleop when the autonomous period ends, whether your routine is finished or not. At home there is no field control system, so autonomous lasts until you disable it. That is one more reason every step needs a way to finish, and the routine needs a clear "done" step that stops the motors. A routine that relies on "the period will end eventually" will one day drive straight into a wall.
 
 ---
 
@@ -878,7 +882,7 @@ Timers do not disappear from autonomous. They just change jobs. Good uses for a 
 
 | Run | Method | Surface | Target (cm) | Tape measure (cm) | Encoders (cm) | Error (cm) |
 |---|---|---|---|---|---|---|
-| 1 | Timer | Table | 50 | | | |
+| 1 | Timer | Hard floor | 50 | | | |
 | ... | | | | | | |
 
 Do at least five runs of each method on your usual surface and three of each on a second surface (or with your oldest batteries). Then write one paragraph comparing the two methods. Which one was more **accurate** (close to 50 cm on average)? Which was more **repeatable** (close to itself)? Did the tape measure and the encoders ever disagree, and if so, why? Save the table and the paragraph in `reflections.md`.
@@ -923,7 +927,7 @@ Give the Explorer its first real autonomous routine: obstacle course leg 1.
 1. Lay out the course from Section 12.1 on your floor: start line, corner mark at 0.5 m, black tape line about 0.4 m to the left of the corner.
 2. Update `Robot.java` to the listing in Section 12.7. Build and confirm `BUILD SUCCESSFUL`.
 3. Power on the XRP flat and still, wait for the gyro calibration to finish, and run the program. Add the three new autonomous widgets in Elastic and save the layout (**File** > **Save**).
-4. Place the robot on the start line and run autonomous. Watch `Auto Step` count from `1` to `4`.
+4. Place the robot on the start line, on the floor. With your finger on **Disabled** (Section 12.1's safety rules), run autonomous. Watch `Auto Step` count from `1` to `4`.
 5. Read the terminal output and confirm each step started in order. Note how long each step took.
 6. Run it five times. Each time, measure how far from the center of the tape the robot's line sensors stopped. Record the results.
 7. Set `STEP_TIMEOUT_SECONDS` to about one and a half times your slowest step's normal time.
