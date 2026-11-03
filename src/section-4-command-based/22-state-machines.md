@@ -388,7 +388,7 @@ error = left reflectance - right reflectance
 - Drifted right, the line slides under the left sensor: left reads darker, so the error is **positive**.
 - Drifted left, the error is **negative**.
 
-Then `turnRate = STEER_KP * error`. A positive turn rate is counterclockwise, which is a left turn (the Chapter 8 rule), so a positive error steers left, toward the line. That is a P controller (Chapter 15) with the setpoint at zero, and the reflectance difference as the measurement. Small drift, gentle steering; big drift, hard steering. The XRP's own introductory robotics course teaches line following exactly this way (it is linked in this chapter's resources).
+Then `turnRate = STEER_KP * error`. A positive turn rate is counterclockwise, which is a left turn (the Chapter 8 rule), so a positive error steers left, toward the line. That is a P controller (Chapter 15) with the setpoint at zero, and the reflectance difference as the measurement. Small drift, gentle steering; big drift, hard steering. The XRP's own introductory robotics course teaches line following exactly this way, in Python (it is linked in this chapter's resources; the idea is the same in any language).
 
 > **Bang-bang, P, and everything between**
 >
@@ -570,6 +570,7 @@ public class FollowLine extends Command {
     @Override
     public void end(boolean interrupted) {
         drivetrain.stop();
+        SmartDashboard.putString("Line State", state.name() + (interrupted ? " (interrupted)" : ""));
         DataLogManager.log("FollowLine " + (interrupted ? "interrupted" : "finished")
             + " in " + state + " after " + getTraveledMeters() + " m");
     }
@@ -703,7 +704,7 @@ Each row of the table is one case. Read the first aloud: "If we are following: i
 - **`stateForLostLine()`** is the heart of the chapter: the same input (no line) gives three different answers, depending on the **remembered** error. This is the exact situation from Section 22.1 that plain `if`s could not handle.
 - **`stateForSearch()`** compares the heading now with the heading when the search began. `Math.abs` makes it work for left and right searches alike. `getHeadingDegrees()` keeps counting past 360 instead of jumping back to 0 (Chapter 9), so the subtraction never jumps either.
 
-Notice what `decideNextState()` does **not** do: it does not drive, log, or change any field. It only answers a question. That makes it easy to reason about, and, in Chapter 23, easy to test.
+Notice what `decideNextState()` does **not** do: it does not drive, log, or change any field. It only answers a question. That makes it easy to reason about. It is not quite easy to **test** yet, because it still reads the sensors and the gyro itself; Chapter 23 hands it those readings as parameters, and then a test can ask it anything.
 
 ### `changeState()`: the one door between states
 
@@ -718,7 +719,7 @@ This is the steering from Section 22.5: read the error, **remember** it in `last
 
 ### `isFinished()` and `end()`
 
-`isFinished()` is one line: `return state.isDone();`. The command is finished exactly when the state machine is in a finished state, and the enum knows which those are. `end()` stops the motors however the command ends, and the log says both **how** it ended (finished or interrupted) and **where** (the state). Holding the left bumper and letting go halfway gives `FollowLine interrupted in FOLLOWING after 0.214 m`.
+`isFinished()` is one line: `return state.isDone();`. The command is finished exactly when the state machine is in a finished state, and the enum knows which those are. `end()` stops the motors however the command ends, and the log says both **how** it ended (finished or interrupted) and **where** (the state). Holding the left bumper and letting go halfway gives `FollowLine interrupted in FOLLOWING after 0.214 m`. `end()` also updates `Line State` one last time (`FOLLOWING (interrupted)` in that case), so the dashboard never shows a follower that is no longer running.
 
 ### `getState()`
 
@@ -730,7 +731,7 @@ The one public method besides the four command methods. It lets other code read,
 
 > **Chatter: when a machine flickers between states**
 >
-> Right at the edge of the tape, a reflectance reading can wobble around `LINE_THRESHOLD` for a few loops (Section 21.6 used `debounce` on the line light for exactly this reason). A state machine whose transitions depend on that reading can flicker between two states, every loop or two. Engineers call it **chatter**. The line follower is protected from the worst of it, because a search ends the moment the line is seen and following does not care how faintly it is seen. If your robot ever logs a long run of `FOLLOWING -> SEARCHING_LEFT -> FOLLOWING -> ...`, the cure is the same as in Chapter 21: make a transition require its condition for a short time (a debounce), or use two thresholds, a higher one to say "found" and a lower one to say "lost." The two-threshold trick is called **hysteresis**, and a thermostat uses it so the furnace does not click on and off every few seconds.
+> Right at the edge of the tape, a reflectance reading can wobble around `LINE_THRESHOLD` for a few loops (Section 21.6 used `debounce` on the line light for exactly this reason). A state machine whose transitions depend on that reading can flicker between two states, every loop or two. Engineers call it **chatter**. The line follower is protected from some of it, because a search ends the moment the line is seen and following does not care how faintly it is seen. But not from all of it: with one sensor wobbling on the tape's edge and the other on white, it will chatter. If your robot ever logs a long run of `FOLLOWING -> SEARCHING_LEFT -> FOLLOWING -> ...`, there are two cures. One is a debounce, as in Chapter 21: make a transition require its condition for a short time. Careful, though: if you debounce `isLineSeen()`, `followSpeeds()` keeps running during the debounce window and stores the both-white error, `0`, in `lastSteeringError`, so the memory the search needs is erased and every lost line looks like the end of the line. Keep `lastSteeringError` only on loops where the line is really seen. The other cure is usually better here: use two thresholds, a higher one to say "found" and a lower one to say "lost." The two-threshold trick is called **hysteresis**, and a thermostat uses it so the furnace does not click on and off every few seconds.
 
 ---
 
@@ -853,7 +854,7 @@ In `Constants.java`, add three constants to the end of `CourseConstants`, after 
             Rotation2d.fromDegrees(TURN_HEADING_DEGREES));
 ```
 
-Use **your** measured length. `FOLLOW_TIMEOUT_SECONDS` is a safety net, like every step's timeout: 0.6 m at 0.10 m/s takes about 6 seconds, plus time for a search or two. `END_POSE` is where the robot should finish if your line is straight. It is only for the field map (and the simulated floor in Step 4), so a bent line just means the robot finishes somewhere else, which is fine. The follower itself never looks at it: it stops when the **tape** ends, not when it reaches a number.
+Use **your** measured length. `FOLLOW_TIMEOUT_SECONDS` is a safety net, like every step's timeout: 0.6 m at 0.10 m/s takes about 6 seconds, plus time for a search or two. `END_POSE` marks the end of the tape, if your line is straight. The robot's center stops a few centimeters before it, because the sensors are at the robot's front and they are what sees the tape end. It is only for the field map (and the simulated floor in Step 4), so a bent line just means the robot finishes somewhere else, which is fine. The follower itself never looks at it: it stops when the **tape** ends, not when it reaches a number.
 
 The step constants (`FollowLine`'s speeds, gains, and search limit) stay inside `FollowLine`, because they describe how the follower behaves, not the course. That is Chapter 21's rule again.
 
@@ -1034,7 +1035,7 @@ Then `simulationPeriodic()` asks once for each sensor, with the side offset flip
 >
 > "Where on the field is a thing that is bolted to my robot?" is one of the most common questions in robot code. In Chapter 29, the Mini Swerve's four wheels are each at their own offset from the robot's center. In Chapter 34, the camera is mounted at an offset, and its view of an AprilTag has to be moved from the camera's frame, to the robot's, to the field's, before it can correct the robot's pose. Each of those steps is a `Transform2d` (or its 3D cousin), and each one is the same move you just made for a 1 cm sensor offset.
 
-Build. Then, before you test anything, make sure the old behavior is safe: the course's first four steps should not have changed at all. The next section checks everything.
+Build. Then, before you test anything, make sure the old behavior is safe. On the real robot, the course's first four steps should not have changed at all. On the simulated Explorer, leg 1 and the turn do not change, but leg 2 now stops a few centimeters sooner, because the pretend sensors now sit ahead of the robot's center (Step 5), the way the real ones do. The next section checks everything.
 
 ---
 
@@ -1046,7 +1047,7 @@ Build, switch on the XRP, and run the program with `USE_SIMULATED_ROBOT = false`
 
 Start with a plain straight strip of tape, away from the course, so nothing else can confuse you.
 
-1. **Before you enable,** put the robot on the tape, centered, and look at the two reflectance widgets. Both should read somewhere in the middle (around `0.4` to `0.7` on most floors), and `Line Error` near `0`. Slide the robot sideways by hand a few millimeters each way: one reading rises, the other falls, and the error swings positive when the tape is under the **left** sensor. If it swings the other way, your sensors are reversed in your head or in your code; fix that before going on.
+1. **Before you enable,** put the robot on the tape, centered, and look at the two reflectance widgets. Both should read above your `LINE_THRESHOLD` in `Sensors.java` (Section 9.7), and `Line Error` should be near `0`. If a centered sensor reads below the threshold, lower `LINE_THRESHOLD`, or the follower will start in `GAVE_UP` and stop at once. Slide the robot sideways by hand a few millimeters each way: one reading rises, the other falls, and the error swings positive when the tape is under the **left** sensor. If it swings the other way, your sensors are reversed in your head or in your code; fix that before going on.
 2. Enable **Teleoperated**, and **hold the left bumper**. `FollowLine` replaces `DriveWithSticks` in the Scheduler list, `Line State` says `FOLLOWING`, and the robot creeps along the tape. At the end of the tape, it stops by itself, and the terminal tells the story:
 
 ```
@@ -1109,7 +1110,7 @@ FollowLine finished in END_OF_LINE after 0.583 m
 
 ### The simulated Explorer
 
-Switch the XRP off, set `USE_SIMULATED_ROBOT = true`, and run the course in autonomous. Watch AdvantageScope's 2D Field: the robot icon drives leg 1, turns, and runs up leg 3 to the `END_POSE` marker. Then hold the left bumper in teleop with the simulated robot sitting on the pretend line, and drive it off the side with the sticks between tries.
+Switch the XRP off, set `USE_SIMULATED_ROBOT = true`, and run the course in autonomous. Watch AdvantageScope's 2D Field: the robot icon drives leg 1, turns, and runs up leg 3 toward the `END_POSE` marker, which marks the end of the tape. The icon (the robot's center) stops a few centimeters before it, because the pretend sensors sit ahead of the center, the way the real ones do. Then hold the left bumper in teleop with the simulated robot sitting on the pretend line, and drive it off the side with the sticks between tries.
 
 The simulated sensors are perfectly sharp: each one reads pure black or pure white, so the error is always `-1`, `0`, or `+1`, and the steering looks jerkier than on the real robot. That is the pretend floor, not your code. Set `USE_SIMULATED_ROBOT = false` again before you commit.
 
@@ -1119,13 +1120,14 @@ Diagnose anything strange:
 |---|---|
 | `the switch expression does not cover all possible input values` | A case is missing from `decideNextState()` or from the act switch in `execute()`. Every state needs a line in both |
 | `an enum switch case label must be the unqualified name of an enumeration constant` | A `case` says `State.FOLLOWING` or `FollowLine.State.FOLLOWING`; inside a `case`, write just `FOLLOWING` |
-| `';' expected` near the end of the enum's list | The semicolon after `GAVE_UP(true)` is missing |
+| `',', '}', or ';' expected` right after the last constant (and more errors at the constructor) | The semicolon after `GAVE_UP(true)` is missing |
 | `Line Error` is positive when the tape is under the **right** sensor | `getSteeringError()` subtracts the wrong way round, so the robot steers away from the line |
 | The robot spins forever and never gives up | The heading for the search is being set every loop instead of once: `searchStartHeadingDegrees` must be set only in `changeState()` |
 | The second follow in a session finishes instantly | `state` is only set in its field initializer, not in `initialize()` (the constructor trap from Section 20.6) |
 | `END_OF_LINE` on every bend | `SIDE_ERROR` is too high, or `STEER_KP` is too low, so the robot is never far enough off to one side |
 | Autonomous skips leg 3 even though the tape is there | The leg 3 strip does not start where the robot stops, so neither sensor is on tape when the `either` checks |
-| The left bumper does nothing in teleop | The binding is missing `.and(teleop)`, or uses `test` |
+| The left bumper does nothing in teleop | The binding uses `test` instead of `teleop`, or is missing |
+| In Test mode, the left bumper starts `FollowLine` and the bench cruise interrupts it at once | The `FollowLine` binding is missing `.and(teleop)`, so it works in every enabled mode |
 
 ---
 
@@ -1238,7 +1240,7 @@ Give the Explorer a line follower, in teleop and as leg 3 of the course.
 1. Make a branch (see the Git exercise).
 2. Lay out leg 3 on your floor (Section 22.5): a strip of black tape about 0.6 m long, starting where the robot stops on the crossbar. Measure it.
 3. Create `FollowLine.java` in the `commands` folder (Section 22.6). Build.
-4. Add the teleop binding and its controls table row (Section 22.8, Step 3). Build.
+4. Add the `FollowLine` import (Section 22.8, Step 2), then the teleop binding and its controls table row (Step 3). Build.
 5. On a separate straight strip of tape, run checks 1 to 4 in Section 22.9. Then checks 5 to 7, with a bend and a corner. Tune `STEER_KP`, `FOLLOW_METERS_PER_SECOND`, and `SIDE_ERROR` for your tape and floor, and record your final values and why in `reflections.md`. Commit.
 6. Add the leg 3 constants (Step 1), the new `buildObstacleCourse()` and the `isLineSeen()` helper (Step 2), the line light's new trigger line, and `END_POSE` on the field map (Step 4). Build.
 7. On the real XRP, run checks 8 and 9: the whole course, with and without the tape.
@@ -1402,7 +1404,7 @@ Afterward, each of you writes two sentences in `reflections.md`. First: if the t
 > * **Switch Expressions (Java 17 language guide)**: [docs.oracle.com/en/java/javase/17/language/switch-expressions.html](https://docs.oracle.com/en/java/javase/17/language/switch-expressions.html) arrow cases, `yield`, and why a switch expression on an enum must cover every constant
 > * **Command Compositions**: [docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html](https://docs.wpilib.org/en/stable/docs/software/commandbased/command-compositions.html) WPILib's guide to sequences and parallel groups, plus the selecting compositions (`either`, `select`) used for branches
 > * **Finite-state machine (Wikipedia)**: [en.wikipedia.org/wiki/Finite-state_machine](https://en.wikipedia.org/wiki/Finite-state_machine) states, transitions, and state diagrams, with the classic turnstile example
-> * **Following the Line: Proportional Control with Both Sensors**: [introtoroboticspbl.readthedocs.io/en/latest/course/line_following/proportional_control_with_two_sensors.html](https://introtoroboticspbl.readthedocs.io/en/latest/course/line_following/proportional_control_with_two_sensors.html) the XRP introductory course's lesson on steering with the difference between the two reflectance sensors
+> * **Following the Line: Proportional Control with Both Sensors**: [introtoroboticspbl.readthedocs.io/en/latest/course/line_following/proportional_control_with_two_sensors.html](https://introtoroboticspbl.readthedocs.io/en/latest/course/line_following/proportional_control_with_two_sensors.html) the XRP introductory course's lesson on steering with the difference between the two reflectance sensors (Python and Blockly; compare its `error` line with `getSteeringError()`)
 
 ---
 

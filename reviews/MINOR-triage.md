@@ -47,6 +47,12 @@ Ch 12 to 18 and bw-m3. ch14-m3 and bw-m3 went into CLAUDE.md as promises for the
 
 New, cross-chapter (for batch 4): the `Drivetrain.periodic()` Javadoc says it runs "before anything else asks the drivetrain a question", but the mode methods run before `robotPeriodic()`. The same Javadoc is copied into the Ch 17 listing and every later `Drivetrain.java`, so fix it everywhere at once.
 
+## Batch 4 (done 2026-11-02)
+
+Ch 19 to 26 (92 rows), plus the `Drivetrain.periodic()` Javadoc (Ch 17 listing, ch17 to ch19 solutions) and the "AdvantageKit first" wording (Ch 20 and 21). Checked against sources: Elastic 2026.1.1 menus from `Gold872/elastic-dashboard` `lib/pages/dashboard_page.dart` (File: Open Layout, Save, Save As, Download From Robot; no "Export Layout"); AdvantageScope Line Graph docs (click, not hover, to read values); WPILib 2026.2.1 source jars (`MathUtil` throws `AssertionError`); GitHub Docs (releases, noreply emails). Output text in Ch 21, 23, 24 and 25 copied from real runs. Ch 25 gains an optional Practice 9 (`ConstantsTest`); Build test counts unchanged (Ch 23 24, Ch 24 27, Ch 25 30, Ch 26 38).
+
+Carried forward into later chapters in a follow-up commit: `DriveWithSticks` `slowMode` (Ch 20), the Y binding guarded in autonomous (Ch 21), `FollowLine.end()` updating `Line State` (Ch 22), the `Tuning Mode` box (Ch 24), and the Ch 27 "export the layout" step.
+
 ## Plan
 
 Fix in five batches, one commit per batch in each repo, exercises and solutions updated with the chapter and rebuilt where code changes: (1) the missed MAJORs and high-priority items; (2) Ch 1 to 11; (3) Ch 12 to 18; (4) Ch 19 to 26; (5) Ch 27 to 29. VERIFY-WEB items are checked online inside their batch; HARDWARE items are left for Devang. Mark each row's status in this file as it lands.
@@ -328,70 +334,70 @@ DONE 12, FIX 47, VERIFY-WEB 1, HARDWARE 0, SKIP 1 (61 items).
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch18-m1 | LED called a subsystem; card says "requires LED" | FIX | S | Table line 136 and Collab card line 791: say LED is a subsystem only on bigger robots; Explorer can make one in Ch 20 Practice 5 (already exists); card "requires nothing" or "requires LED (if you build Ch 20's `Led`)" | src/section-4-command-based/19-why-command-based.md |
-| ch18-m2 | `TurnToHeading` preview hard-codes gains | FIX | S | Line 205: `Drivetrain.createHeadingController()` with comment "Chapter 20 writes this"; drop lines 211 to 212. Fixes v10 too | 19-why...md |
+| ch18-m1 | LED called a subsystem; card says "requires LED" | DONE (batch 4) | S | Table line 136 and Collab card line 791: say LED is a subsystem only on bigger robots; Explorer can make one in Ch 20 Practice 5 (already exists); card "requires nothing" or "requires LED (if you build Ch 20's `Led`)" | src/section-4-command-based/19-why-command-based.md |
+| ch18-m2 | `TurnToHeading` preview hard-codes gains | DONE (batch 4) | S | Line 205: `Drivetrain.createHeadingController()` with comment "Chapter 20 writes this"; drop lines 211 to 212. Fixes v10 too | 19-why...md |
 | ch18-v3 | DIO 1 starts on in sim, first "LED on" not visible | HARDWARE | S | Sim probe says DIO 1 starts true; confirm in the Sim GUI DIO window, then add a note at line 612 | 19-why...md |
-| ch18-v4 | `robotPeriodic()` listing rewords first comment silently | FIX | S | After the listing (line 575): "(The first comment is updated too, now that `periodic()` reads the IO layer.)" | 19-why...md |
-| ch18-v5 | `withName` "is the same command" | FIX | S | Line 483: "a new command that runs the original, with a name..." | 19-why...md |
-| ch18-v6 | All factories take subsystems: only `runOnce`, `run`, `startEnd` | FIX | S | Line 475: "The first three can also be given the subsystems..." | 19-why...md |
-| ch18-v7 | "That is eleven lines" | FIX | S | Line 333: "a dozen lines, plus a `package` line and an import" | 19-why...md |
-| ch18-v8 | Forward-reference callout: "same reason" as Ch 14 `odometry` | FIX | S | Line 553: "Chapter 14 met the same error with the course constants, and put `odometry` in the constructor for a related reason" | 19-why...md |
-| ch18-v9 | "Two PID controllers shared by three different jobs" | FIX | S | Line 5: "two different jobs" (align not built yet) | 19-why...md |
-| ch18-v10 | Preview drops I zone and clamp | FIX | S | Covered by ch18-m2 fix | 19-why...md |
-| ch18-v11 | Diagnose: "LED goes off at once" blames schedule order | FIX | S | Line 748: cause is a reversed `until` condition (`!=` for `==`); the order does not matter | 19-why...md |
+| ch18-v4 | `robotPeriodic()` listing rewords first comment silently | DONE (batch 4) | S | After the listing (line 575): "(The first comment is updated too, now that `periodic()` reads the IO layer.)" | 19-why...md |
+| ch18-v5 | `withName` "is the same command" | DONE (batch 4) | S | Line 483: "a new command that runs the original, with a name..." | 19-why...md |
+| ch18-v6 | All factories take subsystems: only `runOnce`, `run`, `startEnd` | DONE (batch 4) | S | Line 475: "The first three can also be given the subsystems..." | 19-why...md |
+| ch18-v7 | "That is eleven lines" | DONE (batch 4) | S | Line 333: "a dozen lines, plus a `package` line and an import" | 19-why...md |
+| ch18-v8 | Forward-reference callout: "same reason" as Ch 14 `odometry` | DONE (batch 4) | S | Line 553: "Chapter 14 met the same error with the course constants, and put `odometry` in the constructor for a related reason" | 19-why...md |
+| ch18-v9 | "Two PID controllers shared by three different jobs" | DONE (batch 4) | S | Line 5: "two different jobs" (align not built yet) | 19-why...md |
+| ch18-v10 | Preview drops I zone and clamp | DONE (batch 4) | S | Covered by ch18-m2 fix | 19-why...md |
+| ch18-v11 | Diagnose: "LED goes off at once" blames schedule order | DONE (batch 4) | S | Line 748: cause is a reversed `until` condition (`!=` for `==`); the order does not matter | 19-why...md |
 
 ## Ch 20 (review ch19-sme)
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch19-m1 | "which is not how commands behave" contradicts `ignoringDisable` | FIX | S | Line 65: "commands do not run while disabled unless you ask; Chapter 21 shows how" | src/section-4-command-based/20-subsystems-and-commands-on-the-xrp.md |
-| ch19-m2 | `speedScale == SLOW_MODE_SCALE` compares doubles | FIX | M | `DriveWithSticks` line 912: keep `boolean slowMode` and publish it; update solution file | 20-subsystems...md, exercises ch20 solution `DriveWithSticks.java` |
-| ch19-m3 | Practice 6 needs untaught decorators | FIX | S | Line 1691 hint: introduce `.beforeStarting(...)` and `.finallyDo(...)`; PID controller as captured local | 20-subsystems...md |
-| ch19-m4 | Stuck bench command locks out sticks, no way out | FIX | S | Callout line 1630: "press another bench button or disable; give bench commands `.withTimeout(5.0)`" | 20-subsystems...md |
-| ch19-m5 | Collab checklist lacks "second way to end" | FIX | S | Add checklist item after line 1767; `BackAwayFromWall` description "or 0.30 m of backing up, whichever first" (line 1763) | 20-subsystems...md |
-| ch19-v1 | `DriveUntilLine` holds the turn's end heading, contradicting "math did not change" | FIX | S | Line 1614: "almost the same; leg 2 now holds the heading the turn ended at" | 20-subsystems...md |
-| ch19-v2 | Double-call callout: no overshoot, AdvantageKit does not log twice | FIX | S | Line 257: drop "AdvantageKit records every input twice" and "overshoots every PID target" | 20-subsystems...md |
-| ch19-v3 | Diagnose "pressed twice" wrong for `getXButton()` | FIX | S | Line 1644: symptom is "restarts over and over while held" | 20-subsystems...md |
-| ch19-v4 | Diagnose "skips straight through" names never-finish causes | FIX | S | Line 1642: give finish-at-once causes (start read in constructor, tolerance too loose, setpoint never set) | 20-subsystems...md |
-| ch19-v5 | SysId fences: a test can drive almost 1.5 m | FIX | S | Line 1577: "leave 0.75 m on both sides of the Test-mode start, and start each test near the middle" | 20-subsystems...md |
-| ch19-v6 | Listing comments point to wrong 20.x sections | FIX | S | Recheck comments at lines 1064 to 1077, 1121 to 1146, 1258, 1369 against headings (default command is 20.7, rewiring is 20.8) | 20-subsystems...md, solution `Robot.java` |
+| ch19-m1 | "which is not how commands behave" contradicts `ignoringDisable` | DONE (batch 4) | S | Line 65: "commands do not run while disabled unless you ask; Chapter 21 shows how" | src/section-4-command-based/20-subsystems-and-commands-on-the-xrp.md |
+| ch19-m2 | `speedScale == SLOW_MODE_SCALE` compares doubles | DONE (batch 4) | M | `DriveWithSticks` line 912: keep `boolean slowMode` and publish it; update solution file | 20-subsystems...md, exercises ch20 solution `DriveWithSticks.java` |
+| ch19-m3 | Practice 6 needs untaught decorators | DONE (batch 4) | S | Line 1691 hint: introduce `.beforeStarting(...)` and `.finallyDo(...)`; PID controller as captured local | 20-subsystems...md |
+| ch19-m4 | Stuck bench command locks out sticks, no way out | DONE (batch 4) | S | Callout line 1630: "press another bench button or disable; give bench commands `.withTimeout(5.0)`" | 20-subsystems...md |
+| ch19-m5 | Collab checklist lacks "second way to end" | DONE (batch 4) | S | Add checklist item after line 1767; `BackAwayFromWall` description "or 0.30 m of backing up, whichever first" (line 1763) | 20-subsystems...md |
+| ch19-v1 | `DriveUntilLine` holds the turn's end heading, contradicting "math did not change" | DONE (batch 4) | S | Line 1614: "almost the same; leg 2 now holds the heading the turn ended at" | 20-subsystems...md |
+| ch19-v2 | Double-call callout: no overshoot, AdvantageKit does not log twice | DONE (batch 4) | S | Line 257: drop "AdvantageKit records every input twice" and "overshoots every PID target" | 20-subsystems...md |
+| ch19-v3 | Diagnose "pressed twice" wrong for `getXButton()` | DONE (batch 4) | S | Line 1644: symptom is "restarts over and over while held" | 20-subsystems...md |
+| ch19-v4 | Diagnose "skips straight through" names never-finish causes | DONE (batch 4) | S | Line 1642: give finish-at-once causes (start read in constructor, tolerance too loose, setpoint never set) | 20-subsystems...md |
+| ch19-v5 | SysId fences: a test can drive almost 1.5 m | DONE (batch 4) | S | Line 1577: "leave 0.75 m on both sides of the Test-mode start, and start each test near the middle" | 20-subsystems...md |
+| ch19-v6 | Listing comments point to wrong 20.x sections | DONE (batch 4) | S | Recheck comments at lines 1064 to 1077, 1121 to 1146, 1258, 1369 against headings (default command is 20.7, rewiring is 20.8) | 20-subsystems...md, solution `Robot.java` |
 | ch19-v7 | "nine fields to three" (Ch 19 had eight) | DONE | | Callout line 1583 now says "nine (counting the imagined `aligning`)" | |
 | ch19-v8 | File count ignores template `XRPDrivetrain.java` | DONE | | Ch 7 line 264 tells students to delete it, so seven is right | |
-| ch19-v9 | Practice 1: one fully qualified use does not build | FIX | S | Line 1681: "change every use of it" (or keep import and change one use) | 20-subsystems...md |
+| ch19-v9 | Practice 1: one fully qualified use does not build | DONE (batch 4) | S | Line 1681: "change every use of it" (or keep import and change one use) | 20-subsystems...md |
 
 ## Ch 21 (review ch20-sme)
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch20-m1 | `BackAwayFromWall` backs up blind with no limit | FIX | S | Collab binding line 1711: `.withTimeout(3.0)` with the "nothing watches behind" comment; same at the moved B binding (line 1728) | src/section-4-command-based/21-button-bindings-robotcontainer-and-command-groups.md |
-| ch20-m2 | Single-subsystem factories in `RobotContainer`, against WPILib guidance | FIX | M | Add the "Where should a factory live?" paragraph after the field/factory table (line 467) | 21-button-bindings...md |
-| ch20-m3 | Y resets pose mid-autonomous | FIX | S | Lines 806 to 809, 837, 1034: `controller.y().and(RobotModeTriggers.autonomous().negate())`; update controls table, Reflect 1, Diagnose | 21-button-bindings...md, solution `RobotContainer.java` |
+| ch20-m1 | `BackAwayFromWall` backs up blind with no limit | DONE (batch 4) | S | Collab binding line 1711: `.withTimeout(3.0)` with the "nothing watches behind" comment; same at the moved B binding (line 1728) | src/section-4-command-based/21-button-bindings-robotcontainer-and-command-groups.md |
+| ch20-m2 | Single-subsystem factories in `RobotContainer`, against WPILib guidance | DONE (batch 4) | M | Add the "Where should a factory live?" paragraph after the field/factory table (line 467) | 21-button-bindings...md |
+| ch20-m3 | Y resets pose mid-autonomous | DONE (batch 4) | S | Lines 806 to 809, 837, 1034: `controller.y().and(RobotModeTriggers.autonomous().negate())`; update controls table, Reflect 1, Diagnose | 21-button-bindings...md, solution `RobotContainer.java` |
 | ch20-v2 | Practice 5: binding `obstacleCourse` field gives NPE | DONE | | Practice 5 (line 1496) now says bind it in the constructor after `obstacleCourse = buildObstacleCourse();` | |
 | ch20-v3 | Sim USER button reads pressed | DONE | | Practice 5 now says do it on the real XRP and explains the sim behavior | |
-| ch20-v4 | `MathUtil`/`Commands` constructors shown empty; real ones throw | FIX | S | Line 102: show `throw new AssertionError("utility class")`; line 108: say `RobotModeTriggers` is the empty one | 21-button-bindings...md |
-| ch20-v5 | Diagnose: deadline group says "parallel group" | FIX | S | Row line 1413: list both texts ("parallel composition" or "parallel group") | 21-button-bindings...md |
-| ch20-v6 | "Originally composed at" starts with a WPILib line | FIX | S | Line 435: add `at edu.wpi.first.wpilibj2.command.Commands.sequence(...)` before the `frc.robot` line; say "the first `frc.robot` line" in 439 | 21-button-bindings...md |
-| ch20-v7 | Bindings in periodic: no loop overrun on a laptop | FIX | S | Line 829 and row 1418: drop the overrun claim; "on a roboRIO the pile would eventually slow the loop" | 21-button-bindings...md |
-| ch20-v8 | "nine fields of what am I doing" | FIX | S | Line 1370: "eight fields (nine with Section 19.1's `aligning`)" | 21-button-bindings...md |
-| ch20-v9 | `OperatorConstants` is roboRIO Command Robot template, not XRP Command | FIX | S | Line 201 (and 1745 is fine): "WPILib's roboRIO Command Robot template" | 21-button-bindings...md |
+| ch20-v4 | `MathUtil`/`Commands` constructors shown empty; real ones throw | DONE (batch 4) | S | Line 102: show `throw new AssertionError("utility class")`; line 108: say `RobotModeTriggers` is the empty one | 21-button-bindings...md |
+| ch20-v5 | Diagnose: deadline group says "parallel group" | DONE (batch 4) | S | Row line 1413: list both texts ("parallel composition" or "parallel group") | 21-button-bindings...md |
+| ch20-v6 | "Originally composed at" starts with a WPILib line | DONE (batch 4) | S | Line 435: add `at edu.wpi.first.wpilibj2.command.Commands.sequence(...)` before the `frc.robot` line; say "the first `frc.robot` line" in 439 | 21-button-bindings...md |
+| ch20-v7 | Bindings in periodic: no loop overrun on a laptop | DONE (batch 4) | S | Line 829 and row 1418: drop the overrun claim; "on a roboRIO the pile would eventually slow the loop" | 21-button-bindings...md |
+| ch20-v8 | "nine fields of what am I doing" | DONE (batch 4) | S | Line 1370: "eight fields (nine with Section 19.1's `aligning`)" | 21-button-bindings...md |
+| ch20-v9 | `OperatorConstants` is roboRIO Command Robot template, not XRP Command | DONE (batch 4) | S | Line 201 (and 1745 is fine): "WPILib's roboRIO Command Robot template" | 21-button-bindings...md |
 
 ## Ch 22 (review ch21-sme)
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch21-m1 | "easy to test" oversells `decideNextState()` | FIX | S | Line 706: "not quite easy to test yet: it reads sensors and gyro itself; Chapter 23 passes them in" | src/section-4-command-based/22-state-machines.md |
-| ch21-m2 | XRP course link is Python, not said | FIX | S | Line 391: "in Python"; resource line 1405: "(Python and Blockly; compare its `error` line with `getSteeringError()`)" | 22-state-machines.md |
-| ch21-m3 | `Line State` stale after command ends | FIX | M | `end()` (line 571): publish final state plus "(interrupted)"; one sentence in walk-through; update solution `FollowLine.java` | 22-state-machines.md, exercises ch22 solution |
+| ch21-m1 | "easy to test" oversells `decideNextState()` | DONE (batch 4) | S | Line 706: "not quite easy to test yet: it reads sensors and gyro itself; Chapter 23 passes them in" | src/section-4-command-based/22-state-machines.md |
+| ch21-m2 | XRP course link is Python, not said | DONE (batch 4) | S | Line 391: "in Python"; resource line 1405: "(Python and Blockly; compare its `error` line with `getSteeringError()`)" | 22-state-machines.md |
+| ch21-m3 | `Line State` stale after command ends | DONE (batch 4) | M | `end()` (line 571): publish final state plus "(interrupted)"; one sentence in walk-through; update solution `FollowLine.java` | 22-state-machines.md, exercises ch22 solution |
 | ch21-v1 | javac 17 says "enum types", not "enum classes" | DONE (batch 1) | S | Line 258: `enum types may not be instantiated` | 22-state-machines.md |
-| ch21-v2 | Missing semicolon message text | FIX | S | Row line 1122: "`',', '}', or ';' expected` (and more errors at the constructor)" | 22-state-machines.md |
-| ch21-v3 | Without `.and(teleop)` bumper works in every mode | FIX | S | Row line 1128: "does nothing: binding uses `test` or is missing"; separate row for missing `.and(teleop)` | 22-state-machines.md |
-| ch21-v4 | Sim leg 2 changes (sensors ahead of center) | FIX | S | Line 1037: "on the real robot the first four steps should not change; on the sim leg 2 stops a few cm sooner" | 22-state-machines.md |
-| ch21-v5 | `END_POSE` is tape end; center stops short | FIX | S | Line 856 and 1112: "marks the end of the tape; the robot's center stops a few cm before it" | 22-state-machines.md |
+| ch21-v2 | Missing semicolon message text | DONE (batch 4) | S | Row line 1122: "`',', '}', or ';' expected` (and more errors at the constructor)" | 22-state-machines.md |
+| ch21-v3 | Without `.and(teleop)` bumper works in every mode | DONE (batch 4) | S | Row line 1128: "does nothing: binding uses `test` or is missing"; separate row for missing `.and(teleop)` | 22-state-machines.md |
+| ch21-v4 | Sim leg 2 changes (sensors ahead of center) | DONE (batch 4) | S | Line 1037: "on the real robot the first four steps should not change; on the sim leg 2 stops a few cm sooner" | 22-state-machines.md |
+| ch21-v5 | `END_POSE` is tape end; center stops short | DONE (batch 4) | S | Line 856 and 1112: "marks the end of the tape; the robot's center stops a few cm before it" | 22-state-machines.md |
 | ch21-v6 | Line ending mid-correction reads as lost | HARDWARE | M | Seen on sim floor (8 of 29 shapes); confirm frequency on real tape before changing text or end test | 22-state-machines.md |
 | ch21-v8 | Practice 5(c) skipped follower reports last state | DONE | | Practice 5 (line 1226) now asks to restart and explains why the second run lies | |
-| ch21-v9 | Build step 4 builds before `FollowLine` import | FIX | S | Line 1241: "Add the `FollowLine` import (Step 2) and the teleop binding..." | 22-state-machines.md |
-| ch21-v10 | Chatter callout: edge case still chatters; naive debounce erases memory | FIX | M | Callout line 733: soften "protected" claim; warn that debouncing `isLineSeen()` loses `lastSteeringError`; prefer hysteresis | 22-state-machines.md |
-| ch21-v11 | "0.4 to 0.7" can sit below `LINE_THRESHOLD` (0.45) | FIX | S | Check 1 line 1049: "Both should read above your `LINE_THRESHOLD` (Section 9.7); if not, lower it". Wording safe without hardware | 22-state-machines.md |
+| ch21-v9 | Build step 4 builds before `FollowLine` import | DONE (batch 4) | S | Line 1241: "Add the `FollowLine` import (Step 2) and the teleop binding..." | 22-state-machines.md |
+| ch21-v10 | Chatter callout: edge case still chatters; naive debounce erases memory | DONE (batch 4) | M | Callout line 733: soften "protected" claim; warn that debouncing `isLineSeen()` loses `lastSteeringError`; prefer hysteresis | 22-state-machines.md |
+| ch21-v11 | "0.4 to 0.7" can sit below `LINE_THRESHOLD` (0.45) | DONE (batch 4) | S | Check 1 line 1049: "Both should read above your `LINE_THRESHOLD` (Section 9.7); if not, lower it". Wording safe without hardware | 22-state-machines.md |
 
 ## Counts
 
@@ -404,17 +410,17 @@ File: `section-4-command-based/23-unit-testing-robot-code.md`
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch22-m1 | setup-gradle saves its cache only from `main` | FIX | S | Line 1275: "saves downloaded files between runs, but only from runs on `main`; until your first PR is merged every run downloads everything" | Ch 23 §23.9 |
-| ch22-m2 | Forward promise names `SwerveModule` (class is `Module`) | FIX | S | Line 1346: "each swerve `Module` and the drive's kinematics get unit tests on fake IO layers as they are written (Chapters 28 and 29)" | Ch 23 §23.10 |
-| ch22-m3 | A YAML tab does not make the workflow "never run" | FIX | S | Line 1450: split row; add "red run that says **Invalid workflow file** / a tab or bad indent; the error names the line" | Ch 23 Diagnose |
-| ch22-v3 | "When tests pass, Gradle says nothing" is false | FIX | S | Line 170: Gradle lists every `PASSED` and the printouts; what matters is `BUILD SUCCESSFUL`; joystick warnings are harmless. Line 1017: printouts are under the test's `STANDARD_OUT` too | Ch 23 §23.2, §23.7 |
-| ch22-v4 | Allocation message is `Analog Input 2`, not `0` | FIX | S | `Analog Input 0` to `Analog Input 2` at lines 1206 and 1445 | Ch 23 §23.8, Diagnose |
-| ch22-v5 | Diagnose "`DriveDistance never finished`": wrong causes | FIX | S | Line 1443: row "`expected: <0.3> but was: <0.0>` / DS not enabled, disabled robot refuses to schedule"; drop the `stepTiming` cause | Ch 23 Diagnose |
-| ch22-v6 | No LED flicker without `setAutonomous(true)` | FIX | S | Line 1182: "every teleop binding is live while the course runs"; line 1446: drop the `setAutonomous` clause | Ch 23 §23.8, Diagnose |
-| ch22-v7 | Loop starts only because sim `DigitalOutput` starts true | FIX | S | Add one sentence after line 1185: "In simulation a digital output starts on, so the loop starts at once" | Ch 23 §23.8 |
-| ch22-v8 | `@Test` with parameters fails, not skipped | FIX | S | Line 1441: drop "or has parameters"; add row `ParameterResolutionException` / a `@Test` has parameters | Ch 23 Diagnose |
-| ch22-v9 | Practice 4 breaks 14 calls; only the "3" test goes red | FIX | S | Line 1381: add `NO_SEARCHES_YET = 0` as the last arg of every call in `FollowLineTest`; "the second one is red" | Ch 23 Practice 4; answer-key.md |
-| ch22-v10 | `git status` shows only `.github/` by then | FIX | S | Line 1504: "check that `.github/` is listed under Untracked files (tests were committed earlier; `git log --stat`)" | Ch 23 Git |
+| ch22-m1 | setup-gradle saves its cache only from `main` | DONE (batch 4) | S | Line 1275: "saves downloaded files between runs, but only from runs on `main`; until your first PR is merged every run downloads everything" | Ch 23 §23.9 |
+| ch22-m2 | Forward promise names `SwerveModule` (class is `Module`) | DONE (batch 4) | S | Line 1346: "each swerve `Module` and the drive's kinematics get unit tests on fake IO layers as they are written (Chapters 28 and 29)" | Ch 23 §23.10 |
+| ch22-m3 | A YAML tab does not make the workflow "never run" | DONE (batch 4) | S | Line 1450: split row; add "red run that says **Invalid workflow file** / a tab or bad indent; the error names the line" | Ch 23 Diagnose |
+| ch22-v3 | "When tests pass, Gradle says nothing" is false | DONE (batch 4) | S | Line 170: Gradle lists every `PASSED` and the printouts; what matters is `BUILD SUCCESSFUL`; joystick warnings are harmless. Line 1017: printouts are under the test's `STANDARD_OUT` too | Ch 23 §23.2, §23.7 |
+| ch22-v4 | Allocation message is `Analog Input 2`, not `0` | DONE (batch 4) | S | `Analog Input 0` to `Analog Input 2` at lines 1206 and 1445 | Ch 23 §23.8, Diagnose |
+| ch22-v5 | Diagnose "`DriveDistance never finished`": wrong causes | DONE (batch 4) | S | Line 1443: row "`expected: <0.3> but was: <0.0>` / DS not enabled, disabled robot refuses to schedule"; drop the `stepTiming` cause | Ch 23 Diagnose |
+| ch22-v6 | No LED flicker without `setAutonomous(true)` | DONE (batch 4) | S | Line 1182: "every teleop binding is live while the course runs"; line 1446: drop the `setAutonomous` clause | Ch 23 §23.8, Diagnose |
+| ch22-v7 | Loop starts only because sim `DigitalOutput` starts true | DONE (batch 4) | S | Add one sentence after line 1185: "In simulation a digital output starts on, so the loop starts at once" | Ch 23 §23.8 |
+| ch22-v8 | `@Test` with parameters fails, not skipped | DONE (batch 4) | S | Line 1441: drop "or has parameters"; add row `ParameterResolutionException` / a `@Test` has parameters | Ch 23 Diagnose |
+| ch22-v9 | Practice 4 breaks 14 calls; only the "3" test goes red | DONE (batch 4) | S | Line 1381: add `NO_SEARCHES_YET = 0` as the last arg of every call in `FollowLineTest`; "the second one is red" | Ch 23 Practice 4; answer-key.md |
+| ch22-v10 | `git status` shows only `.github/` by then | DONE (batch 4) | S | Line 1504: "check that `.github/` is listed under Untracked files (tests were committed earlier; `git log --stat`)" | Ch 23 Git |
 
 ## Ch 24 (review ch23-sme)
 
@@ -422,17 +428,17 @@ File: `section-4-command-based/24-smartdashboard-shuffleboard-and-live-tuning.md
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch23-v1 (MAJOR, coordinator item) | Null-check failure message wrong | FIX | S | Confirmed still wrong at line 418: use `the course never finished ==> expected: <false> but was: <true>`, after the full 40 s (LED starts on in sim) | Ch 24 §24.6; CLAUDE.md Ch 24 entry |
-| ch23-m1 | Step response read on single-topic Elastic Graph | FIX | M | Lines 922 to 953: keep Elastic Graphs as quick looks; add "to read overshoot, use an AdvantageScope Line Graph and hover the peak"; callout at 1046 already half there | Ch 24 §24.9 Step 8, §24.10 |
-| ch23-m2 | Overwrite trap "flickers"; it snaps back at once | FIX | S | Line 454: "the box shows `3.0` again at once" (matches Diagnose line 1018) | Ch 24 §24.7 |
-| ch23-m3 | Nothing on Driver tab shows tuning mode is on | FIX | M | Step 1 (line 604): add `SmartDashboard.putBoolean("Tuning Mode", Constants.TUNING_MODE)` as a Driver tab Boolean Box; mention at line 1038; update solution | Ch 24 §24.9, §24.11; ch24 solution |
-| ch23-m4 | "Start at new values" check can be fooled by Elastic resending | FIX | S | Line 1002 and Build step: "Close Elastic, run the Explorer, reopen Elastic, check". Harmless either way; optional hands-on check whether Elastic republishes | Ch 24 §24.10, Build |
-| ch23-v2 | `autoChooser.get()` on a `SendableChooser` | FIX | S | Lines 229, 237: use `autoChooser.getSelected()` (javac message stays the same) | Ch 24 §24.5 |
-| ch23-v3 | Simulate Robot Code does not run tests | FIX | S | Line 21: "Gradle compiles the code (the tests run when you build, not when you simulate)" | Ch 24 §24.1 |
-| ch23-v4 | "fourteen tests": eleven tests, fourteen calls | FIX | S | Line 782: "eleven tests call `decideNextState()` fourteen times" | Ch 24 §24.9 Step 6 |
-| ch23-v5 | Elastic menu names | FIX | S | Mostly done (lines 163, 165, 1127, 1131); line 426 still says **File > Export Layout**: change to **File > Save** | Ch 24 §24.6 callout |
-| ch23-v6 | Some values appear only after their command runs | FIX | S | Line 155 (and line 81): add "`Line State`, `Blocked` appear once their command has run: enable teleop, hold left bumper once"; same note for Step 8 (line 922) | Ch 24 §24.2, §24.4, §24.9 |
-| ch23-v7 | `git status` lists only step 8 changes | FIX | S | Line 1204: "you should see `Drivetrain.java`, `FollowLine.java`, `reflections.md`; the layout and `TunableNumber` went in earlier" | Ch 24 Git |
+| ch23-v1 (MAJOR, coordinator item) | Null-check failure message wrong | DONE (batch 4) | S | Confirmed still wrong at line 418: use `the course never finished ==> expected: <false> but was: <true>`, after the full 40 s (LED starts on in sim) | Ch 24 §24.6; CLAUDE.md Ch 24 entry |
+| ch23-m1 | Step response read on single-topic Elastic Graph | DONE (batch 4) | M | Lines 922 to 953: keep Elastic Graphs as quick looks; add "to read overshoot, use an AdvantageScope Line Graph and hover the peak"; callout at 1046 already half there | Ch 24 §24.9 Step 8, §24.10 |
+| ch23-m2 | Overwrite trap "flickers"; it snaps back at once | DONE (batch 4) | S | Line 454: "the box shows `3.0` again at once" (matches Diagnose line 1018) | Ch 24 §24.7 |
+| ch23-m3 | Nothing on Driver tab shows tuning mode is on | DONE (batch 4) | M | Step 1 (line 604): add `SmartDashboard.putBoolean("Tuning Mode", Constants.TUNING_MODE)` as a Driver tab Boolean Box; mention at line 1038; update solution | Ch 24 §24.9, §24.11; ch24 solution |
+| ch23-m4 | "Start at new values" check can be fooled by Elastic resending | DONE (batch 4) | S | Line 1002 and Build step: "Close Elastic, run the Explorer, reopen Elastic, check". Harmless either way; optional hands-on check whether Elastic republishes | Ch 24 §24.10, Build |
+| ch23-v2 | `autoChooser.get()` on a `SendableChooser` | DONE (batch 4) | S | Lines 229, 237: use `autoChooser.getSelected()` (javac message stays the same) | Ch 24 §24.5 |
+| ch23-v3 | Simulate Robot Code does not run tests | DONE (batch 4) | S | Line 21: "Gradle compiles the code (the tests run when you build, not when you simulate)" | Ch 24 §24.1 |
+| ch23-v4 | "fourteen tests": eleven tests, fourteen calls | DONE (batch 4) | S | Line 782: "eleven tests call `decideNextState()` fourteen times" | Ch 24 §24.9 Step 6 |
+| ch23-v5 | Elastic menu names | DONE (batch 4) | S | Mostly done (lines 163, 165, 1127, 1131); line 426 still says **File > Export Layout**: change to **File > Save** | Ch 24 §24.6 callout |
+| ch23-v6 | Some values appear only after their command runs | DONE (batch 4) | S | Line 155 (and line 81): add "`Line State`, `Blocked` appear once their command has run: enable teleop, hold left bumper once"; same note for Step 8 (line 922) | Ch 24 §24.2, §24.4, §24.9 |
+| ch23-v7 | `git status` lists only step 8 changes | DONE (batch 4) | S | Line 1204: "you should see `Drivetrain.java`, `FollowLine.java`, `reflections.md`; the layout and `TunableNumber` went in earlier" | Ch 24 Git |
 
 ## Ch 25 (review ch24-sme)
 
@@ -440,20 +446,20 @@ File: `section-5-advantagekit-capstone/25-advantagescope-visualizing-and-replayi
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch24-m1 | Corner test uses `false`, `0.0` not named inputs | FIX | S | Line 1414: `decideNextState(State.FOLLOWING, LINE_LOST, errorAtTheCorner, NOT_SEARCHING)` (both constants exist in `FollowLineTest`); update solution | Ch 25 §25.11 Step 5; ch25 solution FollowLineTest |
-| ch24-m2 | No CI guard for committing `ROBOT_MODE` != REAL | FIX | M | Add `ConstantsTest.committedCodeDrivesTheRealRobot` to the callout at line 839, or as a Practice to keep the 30-test count | Ch 25 §25.8; ch25 assignment/answer-key |
-| ch24-m3 | Planted `Side Error` must be cleared by hand | FIX | S | After line 1346 flow: "set Side Error back to `SIDE_ERROR` and close Elastic"; line 1422: "restart, reopen Elastic, check Side Error shows your code's value" | Ch 25 §25.11 |
-| ch24-v1 | `step()` starts each step one loop later | FIX | S | Line 317: "the step starts in the next loop: one extra 20 ms per step, too little to matter" | Ch 25 §25.4 |
-| ch24-v2 | `DriveWithSticks` turns on in the same loop | FIX | S | Line 363: "turns on in the next loop" to "turns on in the same loop" | Ch 25 §25.4 |
-| ch24-v3 | Instant commands only ever log `false` | FIX | S | After line 347: one sentence that `Reset Pose` only shows `false`; `Course/Step` shows instant steps | Ch 25 §25.4 |
-| ch24-v4 | `PIDController` reads no clock | FIX | S | Line 520: drop "the PID controllers' loop period" | Ch 25 §25.6 |
-| ch24-v5 | Replay takes a few seconds, not "a second or two" | FIX | S | Line 522 "in a few seconds"; also line 875 "a second or two later" to "a few seconds later" | Ch 25 §25.6, §25.9 |
-| ch24-v6 | Extensions error begins `Error at ...Logger.start`; Sim GUI may flash | FIX | S | Lines 866 to 870: "an error that says `All HAL simulation extensions...` (the Sim GUI window may flash open first)" | Ch 25 §25.9 Step 2 |
-| ch24-v7 | Replay leg 2 ends on timeout; `Leg 3` lasts two loops | FIX | S | Line 891: "ends on its timeout ... `Leg 3` starts, and ends almost at once" | Ch 25 §25.9 Step 3 |
-| ch24-v8 | Deleting `simulationPeriodic()` prints "Override me!" | FIX | S | Line 1233: add note that WPILib prints `Default simulationPeriodic() method... Override me!` once, and it is fine | Ch 25 §25.10 Step 5 |
-| ch24-v9 | `git status` before last commit lists only step 8 files | FIX | S | Line 1595: move the check to the step 7 commit; last commit shows `FollowLine.java`, `FollowLineTest.java`, `reflections.md` | Ch 25 Git, Build |
-| ch24-v10 | Practice 5 from a terminal hits the extensions error | FIX | S | Line 1508: "run it with `./gradlew simulateJava`; it needs the extensions off, see Practice 6, do the two together" | Ch 25 Practice 5 |
-| ch24-v11 | Reflect 5 order does not compile | FIX | S | Line 1543: add "(Try it: what does the compiler say? Then imagine `drivetrain` were not `final`.)"; update answer key | Ch 25 Reflect 5; ch25 answer-key.md |
+| ch24-m1 | Corner test uses `false`, `0.0` not named inputs | DONE (batch 4) | S | Line 1414: `decideNextState(State.FOLLOWING, LINE_LOST, errorAtTheCorner, NOT_SEARCHING)` (both constants exist in `FollowLineTest`); update solution | Ch 25 §25.11 Step 5; ch25 solution FollowLineTest |
+| ch24-m2 | No CI guard for committing `ROBOT_MODE` != REAL | DONE (batch 4) | M | Add `ConstantsTest.committedCodeDrivesTheRealRobot` to the callout at line 839, or as a Practice to keep the 30-test count | Ch 25 §25.8; ch25 assignment/answer-key |
+| ch24-m3 | Planted `Side Error` must be cleared by hand | DONE (batch 4) | S | After line 1346 flow: "set Side Error back to `SIDE_ERROR` and close Elastic"; line 1422: "restart, reopen Elastic, check Side Error shows your code's value" | Ch 25 §25.11 |
+| ch24-v1 | `step()` starts each step one loop later | DONE (batch 4) | S | Line 317: "the step starts in the next loop: one extra 20 ms per step, too little to matter" | Ch 25 §25.4 |
+| ch24-v2 | `DriveWithSticks` turns on in the same loop | DONE (batch 4) | S | Line 363: "turns on in the next loop" to "turns on in the same loop" | Ch 25 §25.4 |
+| ch24-v3 | Instant commands only ever log `false` | DONE (batch 4) | S | After line 347: one sentence that `Reset Pose` only shows `false`; `Course/Step` shows instant steps | Ch 25 §25.4 |
+| ch24-v4 | `PIDController` reads no clock | DONE (batch 4) | S | Line 520: drop "the PID controllers' loop period" | Ch 25 §25.6 |
+| ch24-v5 | Replay takes a few seconds, not "a second or two" | DONE (batch 4) | S | Line 522 "in a few seconds"; also line 875 "a second or two later" to "a few seconds later" | Ch 25 §25.6, §25.9 |
+| ch24-v6 | Extensions error begins `Error at ...Logger.start`; Sim GUI may flash | DONE (batch 4) | S | Lines 866 to 870: "an error that says `All HAL simulation extensions...` (the Sim GUI window may flash open first)" | Ch 25 §25.9 Step 2 |
+| ch24-v7 | Replay leg 2 ends on timeout; `Leg 3` lasts two loops | DONE (batch 4) | S | Line 891: "ends on its timeout ... `Leg 3` starts, and ends almost at once" | Ch 25 §25.9 Step 3 |
+| ch24-v8 | Deleting `simulationPeriodic()` prints "Override me!" | DONE (batch 4) | S | Line 1233: add note that WPILib prints `Default simulationPeriodic() method... Override me!` once, and it is fine | Ch 25 §25.10 Step 5 |
+| ch24-v9 | `git status` before last commit lists only step 8 files | DONE (batch 4) | S | Line 1595: move the check to the step 7 commit; last commit shows `FollowLine.java`, `FollowLineTest.java`, `reflections.md` | Ch 25 Git, Build |
+| ch24-v10 | Practice 5 from a terminal hits the extensions error | DONE (batch 4) | S | Line 1508: "run it with `./gradlew simulateJava`; it needs the extensions off, see Practice 6, do the two together" | Ch 25 Practice 5 |
+| ch24-v11 | Reflect 5 order does not compile | DONE (batch 4) | S | Line 1543: add "(Try it: what does the compiler say? Then imagine `drivetrain` were not `final`.)"; update answer key | Ch 25 Reflect 5; ch25 answer-key.md |
 
 ## Ch 26 (review ch25-sme)
 
@@ -461,22 +467,22 @@ File: `section-5-advantagekit-capstone/26-xrp-capstone-project.md`
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch25-m1 | `ParkAtWall` holds leg 3's crooked heading | FIX | M | Add `targetHeadingDegrees` param, pass `TURN_HEADING_DEGREES` from course and Park At Wall Only, drop line 706; update walkthrough and design doc risk 3. Or make it a design-review question in §26.3 | Ch 26 §26.3, §26.6, §26.7; ch26 solution |
-| ch25-m2 | "All tests first" called TDD | FIX | S | Line 439: strict TDD is one test at a time; writing all six first is "test-first"; Extension A tries the loop | Ch 26 §26.5; summary |
-| ch25-m3 | `Co-authored-by` uses old noreply format | FIX | S | Lines 805, 1062, 1124, 1258, 1588 to 1603: `12345678+alexchen@users.noreply.github.com`; line 808: "starts with a number and `+`, copy it from Settings > Emails" | Ch 26 §26.6 to §26.9, Git |
-| ch25-m4 | Release Swap assumes the other pair can see a private repo | FIX | S | Line 1626 step 1: "If your repository is private, add the other pair as collaborators with Read access first" | Ch 26 Collab |
-| ch25-m5 | Release form checkbox is "Set as a pre-release" | FIX | S | Line 1350: "Leave **Set as a pre-release** unchecked, check **Set as the latest release** is ticked" | Ch 26 §26.10 Step 5 |
-| ch25-v2 | Test reads 0.1197 before coasting; flip at or below 0.12 | FIX | S | Line 1041: "around 12 cm, and the robot coasts a few mm more after"; line 1049: "as the distance crosses 0.12" | Ch 26 §26.7 Steps 5, 6 |
-| ch25-v3 | Outside `ParkAtWall` the error is "has private access" | FIX | S | Line 385: "Try it inside `ParkAtWall` ..." plus the `private access` message for a test | Ch 26 §26.4 |
+| ch25-m1 | `ParkAtWall` holds leg 3's crooked heading | DONE (batch 4) | M | Add `targetHeadingDegrees` param, pass `TURN_HEADING_DEGREES` from course and Park At Wall Only, drop line 706; update walkthrough and design doc risk 3. Or make it a design-review question in §26.3 | Ch 26 §26.3, §26.6, §26.7; ch26 solution |
+| ch25-m2 | "All tests first" called TDD | DONE (batch 4) | S | Line 439: strict TDD is one test at a time; writing all six first is "test-first"; Extension A tries the loop | Ch 26 §26.5; summary |
+| ch25-m3 | `Co-authored-by` uses old noreply format | DONE (batch 4) | S | Lines 805, 1062, 1124, 1258, 1588 to 1603: `12345678+alexchen@users.noreply.github.com`; line 808: "starts with a number and `+`, copy it from Settings > Emails" | Ch 26 §26.6 to §26.9, Git |
+| ch25-m4 | Release Swap assumes the other pair can see a private repo | DONE (batch 4) | S | Line 1626 step 1: "If your repository is private, add the other pair as collaborators with Read access first" | Ch 26 Collab |
+| ch25-m5 | Release form checkbox is "Set as a pre-release" | DONE (batch 4) | S | Line 1350: "Leave **Set as a pre-release** unchecked, check **Set as the latest release** is ticked" | Ch 26 §26.10 Step 5 |
+| ch25-v2 | Test reads 0.1197 before coasting; flip at or below 0.12 | DONE (batch 4) | S | Line 1041: "around 12 cm, and the robot coasts a few mm more after"; line 1049: "as the distance crosses 0.12" | Ch 26 §26.7 Steps 5, 6 |
+| ch25-v3 | Outside `ParkAtWall` the error is "has private access" | DONE (batch 4) | S | Line 385: "Try it inside `ParkAtWall` ..." plus the `private access` message for a test | Ch 26 §26.4 |
 | ch25-v4 | "More than 100 ms, five whole loops" (coordinator item) | DONE (batch 1) | S | Confirmed at line 434: "can take more than 100 ms on a roboRIO; on your laptop it is closer to one loop" | Ch 26 §26.4 callout; CLAUDE.md Ch 26 Java entry |
-| ch25-v5 | gversion counts staged changes as clean | FIX | S | Line 1206: add "a change you have `git add`ed but not committed counts as clean too, so commit first, then build" | Ch 26 §26.9 Step 2 |
-| ch25-v6 | No `noWallStaysNoWall` test | FIX | M | Add test 7 (39 tests; red stage 37 tests, 5 failed) and fix counts at lines 13, 590, 799, 1043, 1270, 1370, 1544; or reword criterion 2 (line 33) and line 298 to "every rule" (S) | Ch 26 §26.1, §26.3, §26.5; ch26 solution |
-| ch25-v7 | `git diff main` also shows `reflections.md` | FIX | S | Line 1254: add "`reflections.md` (your tuning log)" | Ch 26 §26.9 Step 4 |
-| ch25-v8 | Design doc States lines run together when rendered | FIX | S | Lines 207 to 210: indent as a code block or make a list | Ch 26 §26.3 |
-| ch25-v9 | Wrong cross-refs and Ctrl+click path | FIX | S | Line 418 "Section 22.3" to "Section 22.6"; line 434 "Exercise 4" to "Practice 4"; line 1521 "Section 25.11's Practice 2" to "Chapter 25's Practice 2"; line 423 add "then Ctrl+click `ImmutableDistance`" | Ch 26 §26.4, Practice 4 |
-| ch25-v10 | `buildObstacleCourse()` Javadoc says nothing about parking | FIX | S | Line 953 listing: include the Javadoc with "..., and park at the wall" | Ch 26 §26.7 Step 4 |
-| ch25-v11 | `() -> pose` is ten characters | FIX | S | Line 940: "in one short line" | Ch 26 §26.7 Step 3 |
-| ch25-v12 | Templates use a switch statement, not expression | FIX | S | Line 1229: "the same strings as AdvantageKit's template projects, written as one switch expression" | Ch 26 §26.9 Step 2 |
+| ch25-v5 | gversion counts staged changes as clean | DONE (batch 4) | S | Line 1206: add "a change you have `git add`ed but not committed counts as clean too, so commit first, then build" | Ch 26 §26.9 Step 2 |
+| ch25-v6 | No `noWallStaysNoWall` test | DONE (batch 4) | M | Add test 7 (39 tests; red stage 37 tests, 5 failed) and fix counts at lines 13, 590, 799, 1043, 1270, 1370, 1544; or reword criterion 2 (line 33) and line 298 to "every rule" (S) | Ch 26 §26.1, §26.3, §26.5; ch26 solution |
+| ch25-v7 | `git diff main` also shows `reflections.md` | DONE (batch 4) | S | Line 1254: add "`reflections.md` (your tuning log)" | Ch 26 §26.9 Step 4 |
+| ch25-v8 | Design doc States lines run together when rendered | DONE (batch 4) | S | Lines 207 to 210: indent as a code block or make a list | Ch 26 §26.3 |
+| ch25-v9 | Wrong cross-refs and Ctrl+click path | DONE (batch 4) | S | Line 418 "Section 22.3" to "Section 22.6"; line 434 "Exercise 4" to "Practice 4"; line 1521 "Section 25.11's Practice 2" to "Chapter 25's Practice 2"; line 423 add "then Ctrl+click `ImmutableDistance`" | Ch 26 §26.4, Practice 4 |
+| ch25-v10 | `buildObstacleCourse()` Javadoc says nothing about parking | DONE (batch 4) | S | Line 953 listing: include the Javadoc with "..., and park at the wall" | Ch 26 §26.7 Step 4 |
+| ch25-v11 | `() -> pose` is ten characters | DONE (batch 4) | S | Line 940: "in one short line" | Ch 26 §26.7 Step 3 |
+| ch25-v12 | Templates use a switch statement, not expression | DONE (batch 4) | S | Line 1229: "the same strings as AdvantageKit's template projects, written as one switch expression" | Ch 26 §26.9 Step 2 |
 
 ## Ch 27 (review ch26-sme)
 

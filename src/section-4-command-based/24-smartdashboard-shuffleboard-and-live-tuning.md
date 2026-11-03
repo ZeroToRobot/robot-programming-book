@@ -18,7 +18,7 @@ You will need your XRP for most of this chapter, and a strip of tape for the lin
 
 Here is a tuning session from Chapter 22, timed.
 
-You are tuning `STEER_KP` on a gentle bend. The robot wiggles, so you lower the gain from `3.0` to `2.5`. You stop the program, edit the number, and run **WPILib: Simulate Robot Code**. Gradle compiles the code and runs the tests (Chapter 23 made every build do that). The program starts, the Simulation GUI opens, and the Explorer reconnects. You put the robot back at the start of the tape, enable teleop, hold the left bumper, and watch. Better, but now it drifts wide on the bend. Try `2.8`. Stop, edit, build, start, reconnect, place, enable, watch.
+You are tuning `STEER_KP` on a gentle bend. The robot wiggles, so you lower the gain from `3.0` to `2.5`. You stop the program, edit the number, and run **WPILib: Simulate Robot Code**. Gradle compiles the code (the tests run when you build, not when you simulate). The program starts, the Simulation GUI opens, and the Explorer reconnects. You put the robot back at the start of the tape, enable teleop, hold the left bumper, and watch. Better, but now it drifts wide on the bend. Try `2.8`. Stop, edit, build, start, reconnect, place, enable, watch.
 
 Each try takes about a minute, and you spend maybe five seconds of that minute actually watching the robot. Tuning one number well can take ten tries. The follower has three numbers, the drivetrain has six PID gains, and each one affects the others. That is an afternoon, spent mostly watching Gradle.
 
@@ -78,7 +78,7 @@ WPILib publishes the number to the topic `/SmartDashboard/Heading (deg)`. The `S
 
 Other code writes to other tables. AdvantageKit's `NT4Publisher`, which you added to `Robot()` in Chapter 17, publishes everything AdvantageKit logs into a table named `AdvantageKit`. That is what AdvantageScope reads when you choose **NetworkTables 4 (AdvantageKit)**.
 
-Run the Explorer now (real or simulated) and look in the Simulation GUI's **NetworkTables** window. You will see both tables. Open **SmartDashboard** and find `Heading (deg)` and `Line State`. Open **AdvantageKit** and find the drivetrain's inputs from Chapter 17. Two programs (your code and AdvantageKit) are writing into one server, and the Simulation GUI is reading both.
+Run the Explorer now (real or simulated) and look in the Simulation GUI's **NetworkTables** window. You will see both tables. Open **SmartDashboard** and find `Heading (deg)`. (`Line State` shows up there too, but only once `FollowLine` has run: enable teleop and hold the left bumper over the tape once.) Open **AdvantageKit** and find the drivetrain's inputs from Chapter 17. Two programs (your code and AdvantageKit) are writing into one server, and the Simulation GUI is reading both.
 
 ### Values can travel both ways
 
@@ -152,7 +152,7 @@ Run the Explorer, with the XRP switched on and `USE_SIMULATED_ROBOT = false`, an
 
 Along the top of the grid is a row of **tabs**, like the tabs in a web browser. Right-click the first one and rename it **Driver**. Then click **+** to add a second tab, and name it **Tuning**. Leave it empty for now; Section 24.9 fills it.
 
-On the **Driver** tab, keep only what the drive team needs: `Mode`, `Line State`, `Heading (deg)`, `Wall Close`, `Blocked`, and `Scheduler`. Right-click everything else and choose **Remove**; the values are still published, and you can add them back on another tab any time. To change how a widget looks, right-click it, choose **Edit Properties**, and change its **Widget Type** under **Container Settings**. Make `Wall Close` and `Blocked` **Boolean Box**es if they are not already: they turn a color when `true`, which is easy to see from a step back.
+On the **Driver** tab, keep only what the drive team needs: `Mode`, `Line State`, `Heading (deg)`, `Wall Close`, `Blocked`, and `Scheduler`. Right-click everything else and choose **Remove**; the values are still published, and you can add them back on another tab any time. Some values appear only once the command that publishes them has run: enable teleop for a moment, and hold the left bumper over the tape once, so `Blocked` and `Line State` show up. To change how a widget looks, right-click it, choose **Edit Properties**, and change its **Widget Type** under **Container Settings**. Make `Wall Close` and `Blocked` **Boolean Box**es if they are not already: they turn a color when `true`, which is easy to see from a step back.
 
 > **A driver dashboard is not a programmer dashboard**
 >
@@ -225,8 +225,8 @@ That is the promise generics make. You may only put `Command`s into this chooser
 Try to break the promise, and the build fails. Here are two mistakes, and what Java says about each:
 
 ```java
-autoChooser.addOption("Oops", 3.0);   // a number is not a Command
-String name = autoChooser.get();      // what comes out is a Command, not a String
+autoChooser.addOption("Oops", 3.0);          // a number is not a Command
+String name = autoChooser.getSelected();     // what comes out is a Command, not a String
 ```
 
 ```
@@ -234,8 +234,8 @@ error: incompatible types: double cannot be converted to Command
         autoChooser.addOption("Oops", 3.0);
                                       ^
 error: incompatible types: Command cannot be converted to String
-        String name = autoChooser.get();
-                                     ^
+        String name = autoChooser.getSelected();
+                                             ^
 ```
 
 Both mistakes are caught **at compile time**, at your desk, with the exact line marked. That is the whole point of generics.
@@ -423,7 +423,7 @@ Press Y to reset the pose, put the XRP at the start line, and enable **Autonomou
 
 > **Choose before you enable**
 >
-> `Robot.autonomousInit()` asks for the autonomous command once, at the moment autonomous starts. Changing the dropdown halfway through a routine does nothing until the next time autonomous is enabled. That is what a drive team wants: the choice is made in the queue, before the match, and nothing a nervous hand does on the laptop during autonomous can change it. Export your layout again (**File** > **Export Layout**, same file), so the chooser is part of the saved Driver tab.
+> `Robot.autonomousInit()` asks for the autonomous command once, at the moment autonomous starts. Changing the dropdown halfway through a routine does nothing until the next time autonomous is enabled. That is what a drive team wants: the choice is made in the queue, before the match, and nothing a nervous hand does on the laptop during autonomous can change it. Save your layout again (**File** > **Save**, same file), so the chooser is part of the saved Driver tab.
 
 > **The chooser is in the log**
 >
@@ -451,7 +451,7 @@ double steerKp = SmartDashboard.getNumber("Steer kP", STEER_KP);
 SmartDashboard.putNumber("Steer kP", STEER_KP);   // BUG: runs every loop
 ```
 
-Now you type `2.5` into the dashboard, and 20 milliseconds later your own code publishes `3.0` over it. The number on the screen flickers back, and whatever you type, the robot never sees it. This is the single most common live-tuning bug, and it is maddening, because the dashboard looks like it works. (Practice 2 lets you see it for yourself.)
+Now you type `2.5` into the dashboard and press Enter, and the box shows `3.0` again at once: your own code published over it in the very next loop. Whatever you type, the robot never sees it. This is the single most common live-tuning bug, and it is maddening, because the dashboard looks like it works. (Practice 2 lets you see it for yourself.)
 
 **Trap 2: the typo nobody notices.** The key is a `String`, typed twice: once to publish, once to read. Type `"Steer KP"` in one place and `"Steer kP"` in the other, and you get **two** topics. You tune one; the code reads the other, which never changes. Java cannot help, because to the compiler both are just text.
 
@@ -603,6 +603,15 @@ In `Constants.java`, add a second top-level constant, right after `USE_SIMULATED
 // Live tuning from the dashboard (Chapter 24): true while developing, false at competition.
 public static final boolean TUNING_MODE = true;
 ```
+
+A switch nobody can see is easy to forget, so put it on the dashboard. In `RobotContainer`'s constructor, right after `configureAutoChooser();`, add:
+
+```java
+// Show on the Driver tab whether live tuning is on (Section 24.11).
+SmartDashboard.putBoolean("Tuning Mode", Constants.TUNING_MODE);
+```
+
+Run the Explorer, add `Tuning Mode` from the **SmartDashboard** table to the **Driver** tab as a **Boolean Box**, and save the layout (**File** > **Save**). If that box is lit at a competition, someone forgot a step.
 
 ### Step 2: `TunableNumber`
 
@@ -779,7 +788,7 @@ The follower reads these two **every loop**. That is the right choice here, and 
 
 `SIDE_ERROR` is different. It is used inside `decideNextState()`, which Chapter 23 made a **pure function**: every fact comes in as a parameter, and it reads nothing else. A tunable side error is a new fact, so it must come in as a new parameter. If `decideNextState()` read `sideError.get()` itself, it would no longer be pure.
 
-But fourteen tests call `decideNextState()` with four arguments, and they should not all have to change. Chapter 11's **overloading** solves it, exactly the way Chapter 23 used two constructors for `RobotContainer`. Replace `decideNextState()` and `stateForLostLine()` with these three methods:
+But eleven tests call `decideNextState()` fourteen times, with four arguments, and they should not all have to change. Chapter 11's **overloading** solves it, exactly the way Chapter 23 used two constructors for `RobotContainer`. Replace `decideNextState()` and `stateForLostLine()` with these three methods:
 
 ```java
 /**
@@ -917,12 +926,14 @@ Run the Explorer, and in Elastic, switch to your empty **Tuning** tab. Open **Ad
 
 Drag all nine onto the Tuning tab. Group them by job: the three distance gains together, the three heading gains together, and the follower's three. Elastic shows each as a **Text Display**. To change one, click in it, type the new value, and press **Enter**. (If your version of Elastic shows a submit button instead, use that. Right-click, **Edit Properties**, can turn the button on or off.)
 
-Then add the things you will want to **watch** while you tune, from the **SmartDashboard** table:
+Then add the things you will want to **watch** while you tune, from the **SmartDashboard** table. (`Distance Error (m)` and `Line Error` appear only once their commands have run: in Test mode press **X** once, and in teleop hold the left bumper over the tape once.)
 
 - `Heading (deg)`, as a **Graph**, for tuning turns.
 - `Distance Error (m)`, as a **Graph**, for tuning `DriveDistance`.
 - `Line Error`, as a **Graph**, and `Line State`, for tuning the follower.
 - `Auto Routine`, a second copy of the chooser, so you never have to switch tabs to pick "Leg 1 Only."
+
+These Elastic graphs are quick looks: each shows one value over the last few seconds, with no target line and no way to read a past moment. To read a step response properly, open AdvantageScope too (**File** > **Connect to Simulator** > **NetworkTables 4 (AdvantageKit)**, as in Chapter 17) and graph `Drivetrain` > `HeadingDegrees` on a **Line Graph**. To read the overshoot, click the graph at the peak: the legend shows the value at that moment.
 
 Save the layout again (**File** > **Save**), over the same `src/main/deploy/elastic-layout.json`.
 
@@ -950,7 +961,7 @@ Live tuning makes it easy to change numbers fast. That is exactly its danger: ch
 ### Session 1: The turn
 
 1. Enable **Test** mode. On the Tuning tab, look at the `Heading (deg)` graph.
-2. Press **B**. The robot turns to heading 90 (Chapter 20's tuning bench). Watch the graph: how quickly does it rise, does it go past 90, and how long until it settles?
+2. Press **B**. The robot turns to heading 90 (Chapter 20's tuning bench). Watch the graph: how quickly does it rise, does it go past 90, and how long until it settles? (To read the overshoot, click the peak in AdvantageScope's Line Graph.)
 3. Press **A** to turn back to 0. That run is another step, in the other direction.
 4. Now change **one** gain. If the turn is slow and lazy, raise `Heading kP` a little (try 0.4 for 0.3). If it overshoots and swings back, lower it. Press B, then A. Compare the graph with the last run.
 5. Repeat until the turn is quick and settles with little or no overshoot. If it stops a degree or two short and stays there, that is steady-state error: Chapter 15's kI is the tool for that, and Chapter 16's feedforward may have made it less necessary (many readers found kI could be 0 after Chapter 16). If it overshoots no matter what kP is, try a small kD.
@@ -999,7 +1010,7 @@ When the course runs well, the numbers that make it work exist only on the dashb
 
 1. Copy each kept value into its **constant**: `DISTANCE_KP` and the rest in `Drivetrain`, `STEER_KP`, `FOLLOW_METERS_PER_SECOND`, and `SIDE_ERROR` in `FollowLine`.
 2. Build. The build runs every test **with your new numbers**: `FollowLineTest` builds its pretend errors from your new `SIDE_ERROR`, `DriveCommandsTest` drives the simulated robot with your new gains, and `ObstacleCourseTest` runs the whole course with them. If they all pass, your new tuning works on the model of your robot too.
-3. Run the Explorer again, and check the Tuning tab: every number should now start at your new value.
+3. Close Elastic, run the Explorer again, then reopen Elastic and check the Tuning tab: every number should now start at your new value. (Closing Elastic first makes sure it cannot hand the robot an old number you typed.)
 4. Commit and push (see the Git exercise). GitHub runs the tests again. The green check now means "these are the numbers we tuned, and they still pass everything."
 
 If a test goes **red** after you copy your numbers in, do not just change the test. Chapter 23 said a failing test is a question. Maybe your new heading gains overshoot on the simulated robot by more than the tolerance, because the model is lighter than your real Explorer (or heavier). That is worth knowing, and worth one sentence in your tuning log, before you decide what to change.
@@ -1035,7 +1046,7 @@ On the field, the dashboard has one main job: make sure the robot does what the 
 
 ### Turn tuning off
 
-Before an event, set `TUNING_MODE` to `false`, build, run the tests, and commit. With tuning off, no tunable number is published at all, so nothing typed into a dashboard, by anyone, can change a gain during a match, and the robot runs exactly the numbers that your tests checked and your commit recorded. Chapter 40's competition-day checklist includes this switch, along with tagging the release that goes on the robot.
+Before an event, set `TUNING_MODE` to `false`, build, run the tests, and commit. With tuning off, no tunable number is published at all, so nothing typed into a dashboard, by anyone, can change a gain during a match, and the robot runs exactly the numbers that your tests checked and your commit recorded. The `Tuning Mode` box on the Driver tab is no longer lit. Check it in the queue, next to the chooser. Chapter 40's competition-day checklist includes this switch, along with tagging the release that goes on the robot.
 
 ### On the Mini Swerve
 
@@ -1074,7 +1085,7 @@ WPILib also has a class called `Preferences`, which saves named values in a file
 
 ### Practice
 
-**1. Find it on the server.** Run the Explorer and open the Simulation GUI's **NetworkTables** window. Before you look, write down in `reflections.md` which table you expect each of these to be in: `Line State`, `Steer kP`, `Auto Routine`, and the drivetrain's left distance from Chapter 17. Then find each one, and write down its full topic name (for example, `/SmartDashboard/Line State`). Which one surprised you? Then open the **AdvantageKit** table and look for a folder named `NetworkInputs`. What is in it, and why is it there?
+**1. Find it on the server.** Run the Explorer, hold the left bumper over the tape once in teleop (so `Line State` exists), and open the Simulation GUI's **NetworkTables** window. Before you look, write down in `reflections.md` which table you expect each of these to be in: `Line State`, `Steer kP`, `Auto Routine`, and the drivetrain's left distance from Chapter 17. Then find each one, and write down its full topic name (for example, `/SmartDashboard/Line State`). Which one surprised you? Then open the **AdvantageKit** table and look for a folder named `NetworkInputs`. What is in it, and why is it there?
 
 **2. Spring the trap.** In a practice branch, add this line at the end of `updateDashboard()` in `RobotContainer`:
 
@@ -1138,12 +1149,12 @@ Give the Explorer a real dashboard, an autonomous chooser, and live tuning, then
 
 1. Make a branch (see the Git exercise).
 2. Open Elastic and your saved layout, and build the **Driver** tab (Section 24.4). Add the empty **Tuning** tab. Save the layout to `src/main/deploy/elastic-layout.json`. Commit.
-3. Add the autonomous chooser to `RobotContainer` (Section 24.6, Steps 1 and 2). Build: 24 tests pass. Delete the `null` check, see `ObstacleCourseTest` fail, and put it back. Add `Auto Routine` to the Driver tab, and run **Leg 1 Only** and **Obstacle Course** in autonomous. Export the layout again. Commit.
-4. Add `TUNING_MODE` and `TunableNumber`, and wire in the six drivetrain gains, the `useLatest...Gains` lines in the three commands, and `FollowLine`'s three numbers (Section 24.9, Steps 1 to 6). Build. Drive the robot in teleop, run the bench in Test mode, and run the course: nothing should behave differently, because every tunable starts at its constant.
+3. Add the autonomous chooser to `RobotContainer` (Section 24.6, Steps 1 and 2). Build: 24 tests pass. Delete the `null` check, see `ObstacleCourseTest` fail, and put it back. Add `Auto Routine` to the Driver tab, and run **Leg 1 Only** and **Obstacle Course** in autonomous. Save the layout again (**File** > **Save**). Commit.
+4. Add `TUNING_MODE` (and its `Tuning Mode` box on the Driver tab) and `TunableNumber`, and wire in the six drivetrain gains, the `useLatest...Gains` lines in the three commands, and `FollowLine`'s three numbers (Section 24.9, Steps 1 to 6). Build. Drive the robot in teleop, run the bench in Test mode, and run the course: nothing should behave differently, because every tunable starts at its constant.
 5. Add the three new tests (Step 7). Run them: **27 tests**, all green.
 6. Build the **Tuning** tab (Step 8). Change `Heading kP` and check that the Simulation GUI's NetworkTables window agrees. Save the layout. Commit.
 7. Tune: Sessions 1 to 4 of Section 24.10, on your real floor, with a tuning log in `reflections.md`.
-8. Copy the values you kept into your constants. Build (every test runs with your new numbers). Restart the Explorer and check that the Tuning tab starts at the new values. Run the whole course three times. Commit, push, open a pull request, wait for the green check, and merge.
+8. Copy the values you kept into your constants. Build (every test runs with your new numbers). Close Elastic, restart the Explorer, then reopen Elastic and check that the Tuning tab starts at the new values. Run the whole course three times. Commit, push, open a pull request, wait for the green check, and merge.
 
 Leave `TUNING_MODE` set to `true` for now. Chapter 26, the capstone, turns it off for the release.
 
@@ -1201,7 +1212,7 @@ git commit -m "Ch24: Gains from the live tuning session"
 git push -u origin live-tuning
 ```
 
-Check `git status` first: `src/main/deploy/elastic-layout.json`, `src/main/java/frc/robot/util/TunableNumber.java`, and `src/test/java/frc/robot/util/TunableNumberTest.java` should all be included. Open a pull request into `main`, wait for the green check, merge, delete the branch, and `git checkout main` and `git pull`.
+Check `git status` first: you should see `Drivetrain.java`, `FollowLine.java`, and `reflections.md`. The layout, `TunableNumber`, and its test went in with earlier commits (`git log --stat` shows them). Open a pull request into `main`, wait for the green check, merge, delete the branch, and `git checkout main` and `git pull`.
 
 Look at the history of one gain: `git log -p -- src/main/java/frc/robot/subsystems/Drivetrain.java` shows every change to the drivetrain, and your last commit shows each tuned number changing from its old value to its new one. Together with the tuning log, that is the full story of every number on your robot: what it was, what it is, and why.
 

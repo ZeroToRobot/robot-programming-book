@@ -2,7 +2,7 @@
 
 In Chapter 17 you split the drivetrain along a seam. The thinking stayed in `Drivetrain`, the hardware moved into `DrivetrainIOXRP` and `DrivetrainIOSim`, and the Explorer learned to drive a robot made of math. That was a big change to how one class is organized. This chapter is about how the **whole program** is organized.
 
-Open `Robot.java` and scroll. Slowly. It has an autonomous routine written as a `switch`, with five step constants and a helper that starts each step. It has a teleop drive with a wall stop, a slow mode, and a turn limit. It has a PID tuning bench in Test mode, and right next to it, a SysId test runner with two safety nets and a latch. It has two PID controllers shared by three different jobs. And it has a group of fields under the comment "Remembered from loop to loop" that has grown every chapter since Chapter 10.
+Open `Robot.java` and scroll. Slowly. It has an autonomous routine written as a `switch`, with five step constants and a helper that starts each step. It has a teleop drive with a wall stop, a slow mode, and a turn limit. It has a PID tuning bench in Test mode, and right next to it, a SysId test runner with two safety nets and a latch. It has two PID controllers shared by two different jobs. And it has a group of fields under the comment "Remembered from loop to loop" that has grown every chapter since Chapter 10.
 
 None of that is wrong. All of it works. But you have probably noticed that each new feature is harder to add than the last, and that every feature has to know about the others. This chapter starts with one small feature request and follows it until the problem is impossible to miss. Then it shows you how nearly every FRC team solves that problem: **command-based programming**, where the robot is described as **subsystems** (the parts) and **commands** (the actions), and a **scheduler** runs them for you.
 
@@ -133,10 +133,12 @@ Here is the Explorer, sorted:
 | Nouns (subsystems) | Verbs (commands) that use them |
 |---|---|
 | `Drivetrain` | Drive with the sticks, drive to a distance, turn to a heading, drive until the line, auto-align, SysId tests, feedforward cruise |
-| The onboard LED | Light while autonomous runs, blink a warning |
+| The onboard LED (maybe) | Light while autonomous runs, blink a warning |
 | `Sensors` | Nothing needs to "use" them; commands only read them |
 
 Notice that most of the verbs need the same noun. That is normal: on most robots, the drivetrain is the busiest subsystem by far. It is also exactly why the rule in the next section matters so much.
+
+Why "maybe" for the LED? On the Explorer, only one command ever uses the LED at a time, so nothing fights over it, and the book's code never makes it a subsystem: its LED commands require nothing. On a bigger robot with several LED patterns, teams usually do make the LEDs a subsystem, so the scheduler stops two patterns from fighting. Chapter 20's Practice 5 lets you try that on the Explorer.
 
 > **What about `Sensors`?**
 >
@@ -202,14 +204,12 @@ Here is a preview of what the turn looks like as a command class. **Do not type 
 ```java
 public class TurnToHeading extends Command {
     private final Drivetrain drivetrain;
-    private final PIDController headingController = new PIDController(0.3, 0.5, 0.0);
+    private final PIDController headingController = Drivetrain.createHeadingController();   // Chapter 20 writes this: your gains, tolerances, and I zone
     private final double targetHeadingDegrees;
 
     public TurnToHeading(Drivetrain drivetrain, double targetHeadingDegrees) {
         this.drivetrain = drivetrain;
         this.targetHeadingDegrees = targetHeadingDegrees;
-        headingController.enableContinuousInput(-180.0, 180.0);
-        headingController.setTolerance(2.0, 10.0);
         addRequirements(drivetrain);   // "I need the drivetrain while I run"
     }
 
@@ -222,6 +222,7 @@ public class TurnToHeading extends Command {
     public void execute() {
         double turnRate = headingController.calculate(
             drivetrain.getHeadingDegrees(), targetHeadingDegrees);
+        // Chapter 20's version also limits the turn rate, as calculateTurnRate() does.
         drivetrain.drive(0.0, turnRate);
     }
 
@@ -330,7 +331,7 @@ public class LedOn implements Runnable {
 }
 ```
 
-That is eleven lines, and a whole new file, to say `onBoardIO.setLed(true)`. Then another file just like it, `LedOff`, for the end. A real robot program would need hundreds of these tiny classes. Nobody would bear it.
+That is a dozen lines, plus a `package` line and an import, and a whole new file, to say `onBoardIO.setLed(true)`. Then another file just like it, `LedOff`, for the end. A real robot program would need hundreds of these tiny classes. Nobody would bear it.
 
 ### The short way: a lambda
 
@@ -472,7 +473,7 @@ You do not always have to write a command class like `TurnToHeading`. For small 
 | `Commands.waitUntil(condition)` | Does nothing, and finishes when `condition` (a `BooleanSupplier`) is true |
 | `Commands.print(message)` | Prints `message` once, and finishes |
 
-Each action is a `Runnable` and each condition is a `BooleanSupplier`, so each one is usually a lambda. (Each factory can also be given the subsystems the command requires, after the lambdas. The Explorer does not have any subsystems yet, so for now, leave them off.)
+Each action is a `Runnable` and each condition is a `BooleanSupplier`, so each one is usually a lambda. (The first three can also be given the subsystems the command requires, after the lambdas. The Explorer does not have any subsystems yet, so for now, leave them off.)
 
 Then, to change how a command **ends**, every command has **decorator** methods that wrap it in a new command:
 
@@ -480,7 +481,7 @@ Then, to change how a command **ends**, every command has **decorator** methods 
 |---|---|
 | `.until(condition)` | ends when `condition` becomes true (or when the original ends, if that comes first) |
 | `.withTimeout(seconds)` | ends after that many seconds, at most |
-| `.withName("Name")` | is the same command, with a name that shows up on the dashboard and in logs |
+| `.withName("Name")` | is a new command that runs the original, with a name that shows up on the dashboard and in logs |
 
 Decorators return a new command, so they chain, the way `pose.getRotation().getDegrees()` chained in Chapter 14. Here is the command you are about to add:
 
@@ -550,7 +551,7 @@ The command is created **once**, here, like every other object in `Robot`, and r
 
 > **Why not create it where the field is declared?**
 >
-> You might try `private final Command autoLight = Commands.startEnd(...)` up with the other fields. It fails with `error: illegal forward reference`, pointing at `autoStep`. Java creates fields in the order they are written, and `autoStep` is declared further down, in the "Remembered from loop to loop" group. Even though the lambda would not read `autoStep` until much later, Java refuses to let a field's starting value mention a field that is not created yet. The constructor runs after every field exists, so there it is fine. This is the same reason Chapter 14 created `odometry` in the constructor.
+> You might try `private final Command autoLight = Commands.startEnd(...)` up with the other fields. It fails with `error: illegal forward reference`, pointing at `autoStep`. Java creates fields in the order they are written, and `autoStep` is declared further down, in the "Remembered from loop to loop" group. Even though the lambda would not read `autoStep` until much later, Java refuses to let a field's starting value mention a field that is not created yet. The constructor runs after every field exists, so there it is fine. Chapter 14 met the same error with the course constants, and put `odometry` in the constructor for a related reason.
 
 ### Step 5: Start the scheduler
 
@@ -574,6 +575,8 @@ public void robotPeriodic() {
     updateDashboard();
 }
 ```
+
+(The first comment is updated too, now that `periodic()` reads the IO layer.)
 
 Without this line, nothing in the command library works at all. Commands could still be started, but nobody would ever run, check, or end them.
 
@@ -745,7 +748,7 @@ Diagnose anything strange:
 - **`error: illegal forward reference` on the `autoLight` line:** you created the command where the field is declared. Move it into the constructor (Step 4).
 - **The LED comes on but never goes off:** the scheduler is not running. See "Did the LED stay on after you disabled?" in Section 19.7.
 - **The LED never comes on:** check that `autonomousInit()` really schedules `autoLight`, and that nothing else (old Chapter 4 code in `robotPeriodic()`, for example) sets the LED back to `false` every loop.
-- **The LED goes off the moment autonomous starts:** `autoStep` is already `STEP_DONE` when the command is scheduled. Schedule it **after** `startStep(STEP_DRIVE_LEG_1)`, not before.
+- **The LED goes off the moment autonomous starts:** check the `until` condition. It should be `autoStep == STEP_DONE`, not `!=`. (The order of `schedule` and `startStep` does not matter: the scheduler first asks the condition in `run()`, after `autonomousInit()` has set the first step.)
 - **The Scheduler widget is missing:** check the `SmartDashboard.putData("Scheduler", ...)` line, and look in the **SmartDashboard** folder of Elastic's **Add Widget**.
 - **VS Code shows `schedule()` crossed out:** you wrote `autoLight.schedule()`. Use `CommandScheduler.getInstance().schedule(autoLight)` (the "`schedule()` the old way" callout).
 
@@ -789,7 +792,7 @@ Why commit something this small? Because it is a safe place to stand. The schedu
 This one needs no computer. Work in a group of three or four.
 
 1. Write each of these commands on an index card, with its **requirements** and its **finish condition**: "Drive with sticks (requires Drivetrain; never finishes)", "Auto-align (requires Drivetrain; finishes at heading 90)", "Drive 0.5 m (requires Drivetrain; finishes at 0.5 m)", "Auto Light (requires nothing; finishes when autonomous is done)", "Blink warning (requires LED; finishes after 2 s)".
-2. One person is the **scheduler**. One is the **Drivetrain**, and one is the **LED**: each can hold one card at a time. The last person is the **driver**, calling out events: "teleop starts," "A pressed," "heading reaches 90," "disabled," and so on.
+2. One person is the **scheduler**. One is the **Drivetrain**, and one is the **LED** (pretend it is a subsystem, as Chapter 20's Practice 5 makes it): each can hold one card at a time. The last person is the **driver**, calling out events: "teleop starts," "A pressed," "heading reaches 90," "disabled," and so on.
 3. Every clap is one loop. On each clap, the scheduler walks through the five steps of Section 19.5 out loud: subsystems check in, buttons, run each command and ask if it is finished, apply changes, start default commands. When a command ends, its holder says "end, interrupted" or "end, finished," and acts out the cleanup.
 4. Play three scenarios: a normal align in teleop; an align that gets disabled halfway; and the driver pressing A while "Drive 0.5 m" is running.
 

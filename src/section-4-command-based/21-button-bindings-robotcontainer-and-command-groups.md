@@ -99,14 +99,16 @@ You have called `MathUtil.applyDeadband(...)` and `MathUtil.clamp(...)` since Ch
 
 ```java
 public final class MathUtil {
-    private MathUtil() {}
+    private MathUtil() {
+        throw new AssertionError("utility class");
+    }
     // ...dozens of public static methods...
 }
 ```
 
-The constructor is `private`, so only code **inside** `MathUtil` could call it, and none does. That one line makes `new MathUtil()` a compile error everywhere else. It does not prevent anything you would want to do: every method is `static`, and you call them through the class.
+The constructor is `private`, so only code **inside** `MathUtil` could call it, and none does. (The `throw` inside it is extra protection; the Explore exercise asks you why.) That one line makes `new MathUtil()` a compile error everywhere else. It does not prevent anything you would want to do: every method is `static`, and you call them through the class.
 
-`Commands`, the class with all the factory methods from Chapter 19, is built exactly the same way, and so is `RobotModeTriggers`, which you will meet in Section 21.6. Compare it with Chapter 20's **abstract** classes, which you also cannot create with `new`, but for the opposite reason. An abstract class is an unfinished blueprint, made to be extended and then built. A class with a private constructor is not a blueprint at all. It is a labeled box of tools and numbers.
+`Commands`, the class with all the factory methods from Chapter 19, is built the same way, with a `throw` of its own. So is `RobotModeTriggers`, which you will meet in Section 21.6; its private constructor is the plain empty kind, `private RobotModeTriggers() {}`. Compare it with Chapter 20's **abstract** classes, which you also cannot create with `new`, but for the opposite reason. An abstract class is an unfinished blueprint, made to be extended and then built. A class with a private constructor is not a blueprint at all. It is a labeled box of tools and numbers.
 
 ### A `final` class: nobody can extend it
 
@@ -198,7 +200,7 @@ Walk through it:
 - **`public final class Constants`** with **`private Constants() {}`**: the holder-class pattern you just met. Each nested class repeats it, so nobody can create an `OperatorConstants` either.
 - **`public static final class OperatorConstants`**: a nested class, one per group. It is `static` because it does not belong to any `Constants` object (there are none), exactly like the nested inputs class in Chapter 17.
 - **`USE_SIMULATED_ROBOT` sits outside every group.** It is about the whole program, and both `Robot` and `RobotContainer` will read it.
-- **The group names follow WPILib's command-based template,** which starts every new command-based project with a `Constants` class holding an `OperatorConstants` group. Teams that read your code will recognize it.
+- **The group names follow WPILib's roboRIO Command Robot template,** which starts every new command-based roboRIO project with a `Constants` class holding an `OperatorConstants` group. (The XRP Command template has an empty `Constants` class.) Teams that read your code will recognize it.
 
 From outside, you name a constant by its class, then its group, then its name: `Constants.CourseConstants.START_POSE`. That is long, so import the group, the same way you import any class. Nested classes can be imported by their full name:
 
@@ -432,11 +434,12 @@ It compiles. The moment that last line runs, the robot program stops:
 ```
 java.lang.IllegalArgumentException: Commands that have been composed may not be added to another composition or scheduled individually!
 java.lang.Exception: Originally composed at:
+    at edu.wpi.first.wpilibj2.command.Commands.sequence(Commands.java:218)
     at frc.robot.Robot.<init>(Robot.java:131)
     ...
 ```
 
-Read it the Chapter 10 way. The exception's type and message say what went wrong, and the second part, "Originally composed at," points at the line where the command was put **into** a group. That is the first place to look.
+Read it the Chapter 10 way. The exception's type and message say what went wrong, and the second part, "Originally composed at," points at the line where the command was put **into** a group. Its first line is inside WPILib, so skip to the first `frc.robot` line under it. That is the first place to look.
 
 Why is WPILib so strict? Because a command is an object with **memory**. This `TurnToHeading` has a PID controller with an error sum, and `DriveDistance` remembers where it started. A group remembers which of its commands is running. Now imagine the course is in the middle of `turnLeft` when someone schedules `turnLeft` on its own, too. The same object would be started twice. Its `initialize()` would reset the controller under the course's feet, and its `execute()` would run twice per loop, once from the group and once from the scheduler. It is the two-references-to-one-object problem from Chapter 13, with a moving robot attached. So WPILib keeps a list of every command that has been put into a group, and refuses to let any of them be scheduled on their own or put into a second group. Chapter 19's Practice 5 hit the same wall.
 
@@ -463,6 +466,8 @@ That is why Chapter 19's preview was written with method calls: `driveDistance(0
 | Used as | `holdStill` | `holdStill()` |
 | Objects made | One, ever | One per call |
 | Safe in two groups? | No | Yes |
+
+Where should a factory method live? WPILib's guideline: if the command uses only one subsystem, make the factory a method **of that subsystem**, so `holdStill()` would really be `drivetrain.holdStill()`, written inside `Drivetrain`. If it uses several subsystems, or knows about the course, it belongs outside them, in `RobotContainer` or a class of its own. The Explorer keeps its small factories in `RobotContainer` for now, so this chapter changes as few files as possible. The Explore exercise at the end asks you to decide where each one should go.
 
 One more thing is allowed, and it surprises people: **binding** one command to two buttons. A binding (Section 21.6) does not put the command into a group. It only schedules it when the button is pressed, the way `testPeriodic()` did. One object can be scheduled from as many places as you like, as long as it is never part of a group. It still runs only once at a time: scheduling a command that is already running does nothing.
 
@@ -803,11 +808,13 @@ private Command resetPose() {
 }
 ```
 
-That is the `.ignoringDisable(true)` you typed in Section 21.5. The binding is then one line, with no mode, because it should work in every mode:
+That is the `.ignoringDisable(true)` you typed in Section 21.5. Now the mode. Y should work while disabled, in teleop, and in Test mode, but **not** in autonomous. `Reset Pose` requires nothing, so pressing Y in the middle of the course would not interrupt it. It would zero the pose underneath it, and `DriveDistance` and `TurnToHeading` would measure from the wrong starting point: a reset during leg 1 makes it drive too far, and a reset during the turn makes it turn too far. (The course resets the pose itself, as its first step.) So the binding uses `negate()` from the table above: "Y, when not in autonomous."
 
 ```java
-controller.y().onTrue(resetPose());
+controller.y().and(RobotModeTriggers.autonomous().negate()).onTrue(resetPose());
 ```
+
+`RobotModeTriggers.autonomous()` is true only while the robot is **enabled** in autonomous, so its negation is true while disabled, which is exactly when you need Y most. Zeroing buttons are for disabled and teleop (and the Test bench), never for the middle of autonomous: that is a real competition habit.
 
 Use `ignoringDisable(true)` only for commands that **never move anything**: resetting a pose, zeroing a sensor, changing an LED. "Disabled" is a safety promise to everyone standing near the robot. A command that drives a motor must never break it.
 
@@ -826,15 +833,16 @@ Every binding in this section is written **once**, when the robot starts, and ne
 > }
 > ```
 >
-> It compiles, and A even seems to work. But `teleopPeriodic()` runs every 20 milliseconds, and every run **adds another binding**, with a new `TurnToHeading`. After ten seconds of teleop there are five hundred of them. Press A, and all five hundred turns are scheduled in the same loop, each one interrupting the one before it. Leave the robot in teleop for a few minutes and there are thousands, every one checked every loop, until the loop starts running late and the console fills with loop-overrun warnings. Bindings belong in the constructor (and in Section 21.7, in a method the constructor calls), never in anything that runs every loop.
+> It compiles, and A even seems to work. But `teleopPeriodic()` runs every 20 milliseconds, and every run **adds another binding**, with a new `TurnToHeading`. After ten seconds of teleop there are five hundred of them. Press A, and all five hundred turns are scheduled in the same loop, each one interrupting the one before it. Leave the robot in teleop for a few minutes and there are thousands of rules and commands the program never needed, every one checked every loop. Your laptop is fast enough to hide the cost, but on a slower computer like a roboRIO the pile would eventually make the loop run late. Bindings belong in the constructor (and in Section 21.7, in a method the constructor calls), never in anything that runs every loop.
 
 ### The Explorer's bindings, all together
 
 Here is every binding the Explorer will have, as you will type them in Section 21.7. Each one replaces a piece of `testPeriodic()`, `robotPeriodic()`, or `testInit()`, or adds something new:
 
 ```java
-// Any mode: Y puts the robot back at the start pose.
-controller.y().onTrue(resetPose());
+// Any mode except autonomous: Y puts the robot back at the start pose.
+// (In autonomous, the course resets the pose itself, and a reset mid-course would confuse it.)
+controller.y().and(RobotModeTriggers.autonomous().negate()).onTrue(resetPose());
 
 // Teleop: hold A to turn and face up leg 2 (Section 19.1). Let go, and the sticks are back.
 controller.a().and(teleop).whileTrue(
@@ -1007,7 +1015,7 @@ public class RobotContainer {
      * Tie the controller's buttons (and one sensor) to commands. The driver's controls:
      *
      * <pre>
-     * Any mode   Y              reset the pose to the start line (works while disabled)
+     * Not auto   Y              reset the pose to the start line (works while disabled)
      * Teleop     sticks         drive (the default command)
      *            right bumper   slow mode (hold)
      *            A              turn to face up leg 2 (hold); let go to take the sticks back
@@ -1030,8 +1038,9 @@ public class RobotContainer {
             () -> -MathUtil.applyDeadband(controller.getRightX(), OperatorConstants.STICK_DEADBAND),
             controller.rightBumper()));
 
-        // Any mode: Y puts the robot back at the start pose.
-        controller.y().onTrue(resetPose());
+        // Any mode except autonomous: Y puts the robot back at the start pose.
+        // (In autonomous, the course resets the pose itself, and a reset mid-course would confuse it.)
+        controller.y().and(RobotModeTriggers.autonomous().negate()).onTrue(resetPose());
 
         // Teleop: hold A to turn and face up leg 2 (Section 19.1). Let go, and the sticks are back.
         controller.a().and(teleop).whileTrue(
@@ -1335,7 +1344,7 @@ The constructor creates the drivetrain first, then the field map and the SysId r
 
 `sensors`, `controller`, `onBoardIO`, and `field` are created in their field declarations, which Java runs before the constructor's body (Section 20.4), so they are always ready.
 
-And `RobotContainer` itself is created **after** AdvantageKit starts. `Robot`'s constructor starts the loggers, then calls `new RobotContainer()` as its very last line. That keeps Chapter 17's rule ("AdvantageKit first, before anything else is created") without `Robot` having to know what "anything else" is.
+And `RobotContainer` itself is created **after** AdvantageKit starts. `Robot`'s constructor starts the loggers, then calls `new RobotContainer()` as its very last line. That keeps Chapter 17's rule ("AdvantageKit first, before anything the constructor creates") without `Robot` having to know what those things are.
 
 ### `configureBindings()` and its controls table
 
@@ -1367,7 +1376,7 @@ These two are **public**, because `Robot` calls them every loop. They live here 
 
 > **What left `Robot.java`**
 >
-> At the start of Chapter 19, `Robot` held every part of the robot, every constant, every rule, and nine fields of "what am I doing right now." Count what is left in its "Remembered from loop to loop" group: one field, `autonomousCommand`, and it only remembers which command to cancel when teleop starts. Every other piece of memory now lives inside the command that needs it, or inside a trigger, or inside a group. That is Section 19.2's first growing pain, finished.
+> At the start of Chapter 19, `Robot` held every part of the robot, every constant, every rule, and eight fields of "what am I doing right now" (nine with Section 19.1's `aligning`). Count what is left in its "Remembered from loop to loop" group: one field, `autonomousCommand`, and it only remembers which command to cancel when teleop starts. Every other piece of memory now lives inside the command that needs it, or inside a trigger, or inside a group. That is Section 19.2's first growing pain, finished.
 
 > **Is `RobotContainer` a subsystem?**
 >
@@ -1410,12 +1419,12 @@ Diagnose anything strange:
 | What you see | Most likely cause |
 |---|---|
 | `Commands that have been composed may not be added to another composition or scheduled individually!` | One command object is in a group and also used somewhere else. Read the "Originally composed at" line, and build a fresh command with a factory method (Section 21.4) |
-| `Multiple commands in a parallel composition cannot require the same subsystems` at startup | Two commands in a `parallel`, `race`, or `deadline` group both require the drivetrain (Section 21.3) |
+| `Multiple commands in a parallel composition cannot require the same subsystems` at startup | Two commands in a `parallel`, `race`, or `deadline` group both require the drivetrain (Section 21.3). A deadline group (`deadline` or `deadlineFor`) words it slightly differently: `Multiple commands in a parallel group cannot require the same subsystems` |
 | Y does nothing while disabled, but works while enabled | `resetPose()` is missing `.ignoringDisable(true)` |
 | A bench button does something in teleop | Its binding is missing `.and(test)` |
 | A button does nothing in any mode | The binding was never declared: is `configureBindings()` called from the constructor? Or the binding has `.and(...)` with the wrong mode |
 | `NullPointerException` at startup, pointing into `configureBindings()` | Something the bindings use (`drivetrain`, `sysIdRoutine`) is created **after** `configureBindings()` is called |
-| A button seems to start its command several times, and things get slower the longer teleop runs | A binding is inside a periodic method instead of the constructor (Section 21.6) |
+| A button starts its command many times at once (the terminal shows a pile of starts and interrupts for one press), and the pile grows the longer teleop runs | A binding is inside a periodic method instead of the constructor (Section 21.6) |
 | The LED stays on after the course finds the line | `holdStill()` ended up **inside** the `Commands.sequence(...)`, so the deadline never ends |
 | The sticks do nothing in teleop after autonomous | `teleopInit()` is missing `autonomousCommand.cancel()`, so `Hold Still` still has the drivetrain |
 
@@ -1707,9 +1716,13 @@ As in Chapter 11, the **owner** is the person whose Explorer repository you are 
    and add this binding **right after** the teleop A binding:
 
    ```java
-   // Teleop: press X to back away from a wall.
-   controller.x().and(teleop).onTrue(new BackAwayFromWall(drivetrain, sensors));
+   // Teleop: press X to back away from a wall. The timeout is the safety net:
+   // nothing watches behind the robot.
+   controller.x().and(teleop).onTrue(
+       new BackAwayFromWall(drivetrain, sensors).withTimeout(3.0));
    ```
+
+   The command only stops when the rangefinder, which looks **forward**, says the way is clear. If it keeps reading something close (a hand that follows the robot, a glitch), the robot would keep backing up, and letting go of X does not stop an `onTrue` command. Every command that moves needs a second way to end, so the binding adds a timeout.
 
    Build, test it (drive up to a wall, press X, and the robot backs away slowly until the rangefinder reads more than 0.30 m), and commit: `Add BackAwayFromWall on X in teleop`.
 
@@ -1725,7 +1738,7 @@ As in Chapter 11, the **owner** is the person whose Explorer repository you are 
 **Part D: the conflict Git cannot see.** Read the controls table you just merged. X is listed twice, with two different jobs. The code has the same problem: two bindings on one button. Git merged the text without a complaint, the compiler accepted it, and the robot will run it. This is Chapter 11's **semantic conflict** (Section 11.9), in its command-based form.
 
 1. **Teammate:** before fixing it, predict: when you press X in teleop facing a wall, both bindings schedule their command in the same loop, and both commands require the drivetrain. Which one runs? Then run it, and watch the terminal and the Scheduler list. (Both bindings fire in the order they were declared. The second command interrupts the first, so the binding declared later wins, and the first command's log line appears for an instant before it is interrupted.)
-2. **Both:** decide together where `BackAwayFromWall` should go. B is free in teleop. Move its binding to `controller.b()`, fix its row in the table so that every button appears once, build, and test both buttons.
+2. **Both:** decide together where `BackAwayFromWall` should go. B is free in teleop. Move its binding to `controller.b()` (keep the `.withTimeout(3.0)`), fix its row in the table so that every button appears once, build, and test both buttons.
 3. **Teammate:** `git add`, `git commit --no-edit`, then make one more commit for the button change (`Move BackAwayFromWall to B: X was taken`), and push.
 4. **Owner:** review the PR's **Files changed**. Is every button in the table exactly once? Does each binding match its row? Approve, merge, and delete the branch.
 5. **Both:** `git checkout main`, `git pull`, build, and drive. X squares up, B backs away.

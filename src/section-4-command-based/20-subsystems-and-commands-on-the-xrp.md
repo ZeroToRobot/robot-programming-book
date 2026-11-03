@@ -62,7 +62,7 @@ A plan always leaves a few questions open. Here are the three this chapter settl
 
 **The LED stays as it is, for now.** `Auto Light` turns the LED on and off, so in a bigger program the LED would be a subsystem, to stop two commands from fighting over it. Today only one command touches it. Practice 5 makes the LED a subsystem, and asks what changes.
 
-**The Y button stays in `robotPeriodic()`.** Resetting the pose is instant and works even while disabled, which is not how commands behave. Chapter 21 is about tying buttons to commands, and it handles Y properly.
+**The Y button stays in `robotPeriodic()`.** Resetting the pose is instant and has to work while the robot is disabled, and commands do not run while disabled unless you ask. Chapter 21 is about tying buttons to commands, and it shows how to ask.
 
 > **One noun, many verbs**
 >
@@ -256,7 +256,7 @@ A subsystem can be put on the dashboard, just like the scheduler. It publishes t
 
 > **Did you forget to delete the call?**
 >
-> If `drivetrain.periodic();` is still in `robotPeriodic()`, nothing crashes. `periodic()` just runs **twice** every loop, once from your call and once from the scheduler. On the real XRP, you would barely notice: the encoders are read twice, and AdvantageKit records every input twice. On the **simulated** Explorer, it is dramatic. `DrivetrainIOSim` moves its pretend robot forward 20 milliseconds every time its inputs are read, so the simulated robot lives at **double speed**: it drives the course in half the time and overshoots every PID target. If your simulated robot ever seems to have had too much coffee, look for a second call to `periodic()`.
+> If `drivetrain.periodic();` is still in `robotPeriodic()`, nothing crashes. `periodic()` just runs **twice** every loop, once from your call and once from the scheduler. On the real XRP, nothing changes at all: the encoders are just read twice in a row. On the **simulated** Explorer, it is dramatic. `DrivetrainIOSim` moves its pretend robot forward 20 milliseconds every time its inputs are read, so the simulated robot lives at **double speed**: it drives the course in half the time on the clock, and every move looks twice as fast as it should. If your simulated robot ever seems to have had too much coffee, look for a second call to `periodic()`.
 
 ### Check: the robot drives exactly as before
 
@@ -891,7 +891,8 @@ public class DriveWithSticks extends Command {
         double rotation = rotationSupplier.getAsDouble();
 
         // Decide: slow mode, and never drive forward into a wall.
-        double speedScale = slowModeSupplier.getAsBoolean() ? SLOW_MODE_SCALE : FULL_SPEED_SCALE;
+        boolean slowMode = slowModeSupplier.getAsBoolean();
+        double speedScale = slowMode ? SLOW_MODE_SCALE : FULL_SPEED_SCALE;
         boolean blocked = forward > 0.0 && sensors.isObstacleWithin(WALL_STOP_DISTANCE_METERS);
         double safeForward = blocked ? 0.0 : forward;
 
@@ -909,7 +910,7 @@ public class DriveWithSticks extends Command {
         double limitedForward = Math.max(safeForward, -MAX_REVERSE_SPEED);
         drivetrain.arcadeDrive(limitedForward * speedScale, rotation * speedScale * TURN_SCALE);
 
-        SmartDashboard.putBoolean("Slow Mode", speedScale == SLOW_MODE_SCALE);
+        SmartDashboard.putBoolean("Slow Mode", slowMode);
         SmartDashboard.putBoolean("Blocked", blocked);
     }
 
@@ -1061,7 +1062,7 @@ public class Robot extends LoggedRobot {
     // Commands. Created in the constructor, once the drivetrain exists.
     private final Command autoLight;
 
-    // Autonomous: one command per step (Section 20.7).
+    // Autonomous: one command per step (Section 20.8).
     private final Command driveLeg1;
     private final Command turnLeft;
     private final Command driveToLine;
@@ -1087,7 +1088,7 @@ public class Robot extends LoggedRobot {
     private int lastDpad = -1;                            // -1: nothing pressed
 
     public Robot() {
-        // AdvantageKit first, before anything else is created (Section 17.3).
+        // AdvantageKit first, before anything the constructor creates (Section 17.3).
         Logger.recordMetadata("ProjectName", "XRP Explorer");
         Logger.recordMetadata("Robot", USE_SIMULATED_ROBOT ? "Simulated XRP" : "Real XRP");
         Logger.addDataReceiver(new WPILOGWriter());   // write a log file into logs/
@@ -1118,7 +1119,7 @@ public class Robot extends LoggedRobot {
         field.getObject("Course").setPoses(START_POSE, CORNER_POSE, LINE_POSE);
 
         // Driving with the sticks is the drivetrain's default command: it runs
-        // whenever no other command needs the drivetrain (Section 20.6).
+        // whenever no other command needs the drivetrain (Section 20.7).
         drivetrain.setDefaultCommand(new DriveWithSticks(
             drivetrain,
             sensors,
@@ -1126,7 +1127,7 @@ public class Robot extends LoggedRobot {
             () -> -MathUtil.applyDeadband(controller.getRightX(), STICK_DEADBAND),
             controller::getRightBumperButton));
 
-        // Autonomous: one command per step (Section 20.7).
+        // Autonomous: one command per step (Section 20.8).
         driveLeg1 = new DriveDistance(drivetrain, LEG_1_DISTANCE_METERS);
         turnLeft = new TurnToHeading(drivetrain, TURN_HEADING_DEGREES);
         driveToLine = new DriveUntilLine(drivetrain, sensors, LEG_2_MAX_DISTANCE_METERS);
@@ -1255,7 +1256,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledPeriodic() {}
 
-    // Autonomous: a step at a time, each step a command (Section 20.7).
+    // Autonomous: a step at a time, each step a command (Section 20.8).
 
     @Override
     public void autonomousInit() {
@@ -1574,7 +1575,7 @@ sysIdQuasistaticForward = sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForwa
     .withName("SysId Quasistatic Forward");
 ```
 
-The net is a little different from Chapter 16's. It used to stop each test 0.75 m from where **that test** started. Now it is a line on the floor 0.75 m in front of where Test mode started (`testInit()` resets the pose), and the reverse tests have a matching line 0.75 m behind. Leave that much room behind the robot.
+The net is a little different from Chapter 16's. It used to stop each test 0.75 m from where **that test** started. Now it is a line on the floor 0.75 m in front of where Test mode started (`testInit()` resets the pose), and the reverse tests have a matching line 0.75 m behind. A test that starts near one line can drive almost 1.5 m before it reaches the other, so leave 0.75 m of room on **both** sides of where Test mode started, and start each test near the middle. (If you carry the robot back to the middle, press Y: the pose reset moves both lines with it.)
 
 `updateSysIdTests()` watches the D-pad. When it **changes**, it cancels every SysId test and schedules the one for the new direction, if any. That is the Chapter 10 "did it just change?" pattern again, with `lastDpad` as its memory. And the latch, `sysIdWaitingForRelease`? Gone, and not replaced. A test only ever **starts** when the D-pad changes, so a test stopped by a safety net cannot restart until you let go and press again. The structure made the bug impossible.
 
@@ -1611,7 +1612,7 @@ Line found after 0.392 m
 Auto step 4 started at 6.2 s, Pose2d(...)
 ```
 
-(Your numbers will differ, and real ones will have more decimal places. What matters is the order, and that every command says "finished," not "interrupted.") The robot should drive the course just as well as it did in Chapter 19. The math did not change; only where it lives did.
+(Your numbers will differ, and real ones will have more decimal places. What matters is the order, and that every command says "finished," not "interrupted.") The robot should drive the course just as well as it did in Chapter 19. The math is almost the same; mostly, only where it lives changed. One small difference: leg 2 now holds the heading the turn ended at (within 2 degrees of 90), where Chapter 15's leg 2 held exactly 90, so your end pose can differ from Chapter 19's by a degree or so.
 
 4. Run it again, and **disable** halfway through leg 1. Everything stops at once: `DriveDistance interrupted after ...` in the terminal, the LED goes out, and the Scheduler list empties. Enable autonomous again: the routine starts over cleanly, because every command resets itself in `initialize()`.
 5. Run it again, and switch straight to **Teleoperated** partway through the turn. The turn is interrupted, and on the next loop, `DriveWithSticks` has the drivetrain.
@@ -1630,6 +1631,8 @@ Switch the XRP off, set `USE_SIMULATED_ROBOT = true`, and repeat checks 2, 3, 6,
 > **Command stuck in the list?**
 >
 > If a command stays in the Scheduler list long after the robot has stopped moving, its `isFinished()` is never returning `true`. Check that the command overrides `isFinished()` at all (the inherited one says "never"), that it has `@Override`, and that its tolerances are achievable on your robot: a heading tolerance of 2 degrees and a rate tolerance of 10 degrees per second must both be met at once. The `Heading Error (deg)` and `Heading At Target` widgets show which one is failing.
+>
+> A stuck bench command also keeps the drivetrain, so the sticks do nothing. To get them back right away, press another bench button (the new command interrupts the stuck one) or disable. To make the bench safe for good, give each bench command a second way to end, a timeout, when you create it: `benchTurnHome = new TurnToHeading(drivetrain, 0.0).withTimeout(5.0);`.
 
 Diagnose anything else strange:
 
@@ -1639,9 +1642,10 @@ Diagnose anything else strange:
 | The sticks do nothing in teleop, and the Scheduler list is empty | `setDefaultCommand` is missing, or the scheduler's `run()` is missing from `robotPeriodic()` |
 | The sticks do nothing in teleop, and `Hold Still` is listed | `teleopInit()` is missing `autoStepCommand.cancel()` |
 | X works the first time, then does nothing | A start distance is read in the constructor, not `initialize()` (Section 20.6) |
-| Autonomous skips straight through all its steps | A command's `isFinished()` is `true` before it starts moving: check the controller is `reset()` in `initialize()` and that `calculate` is called in `execute()` |
+| Autonomous skips straight through all its steps | A step's command ends at once: check its `isFinished()` (a missing `!`?), that its tolerance is not so loose the robot is "there" before it moves, and that `calculate` is given the target as well as the measurement (with only the measurement, the target stays 0) |
+| A step never ends until the 7 s timeout | `calculate` is not called in `execute()`, so `atSetpoint()` stays `false` |
 | The simulated robot runs at double speed | `drivetrain.periodic()` is still called in `robotPeriodic()` (Section 20.3) |
-| A bench button needs to be pressed twice | You used `getXButton()` instead of `getXButtonPressed()` |
+| A bench command starts over and over by itself while you hold the button | You used `getXButton()` instead of `getXButtonPressed()` |
 
 When every mode works on both robots, commit. Your Explorer is now a command-based robot: one subsystem, a default command, and commands for every action, with `Robot.java` deciding only **when** each one runs.
 
@@ -1678,7 +1682,7 @@ What you built in this chapter is the shape of every robot program for the rest 
 
 ### Practice
 
-**1. Package detective.** In a practice branch, list every `import` in `Robot.java` in `reflections.md`, grouped by package. Which packages are yours, which are WPILib's, and which are AdvantageKit's? Then delete the line `import frc.robot.commands.TurnToHeading;` and, instead, change one use of it to the fully qualified name: `new frc.robot.commands.TurnToHeading(drivetrain, 0.0)`. Does it build? Finally, remove `public` from `TurnToHeading`'s constructor, build, and copy the error message into `reflections.md` with one sentence explaining it in your own words. Delete the branch when you are done.
+**1. Package detective.** In a practice branch, list every `import` in `Robot.java` in `reflections.md`, grouped by package. Which packages are yours, which are WPILib's, and which are AdvantageKit's? Then delete the line `import frc.robot.commands.TurnToHeading;` and, instead, change every use of it (there are three) to the fully qualified name, such as `new frc.robot.commands.TurnToHeading(drivetrain, 0.0)`. Does it build? What happens if you change only one of them? Finally, remove `public` from `TurnToHeading`'s constructor, build, and copy the error message into `reflections.md` with one sentence explaining it in your own words. Delete the branch when you are done.
 
 **2. The constructor trap, on purpose.** In a practice branch, move the two lines that set `startDistanceMeters` and `holdHeadingDegrees` from `DriveDistance.initialize()` into its constructor. Before running, predict what the bench X button will do the first, second, and third time you press it, without moving the robot in between. Write your predictions down. Run it and compare. Then predict and test one more case: what does autonomous do on its **second** run, after you press Y to reset the pose? Put the lines back.
 
@@ -1688,7 +1692,7 @@ What you built in this chapter is the shape of every robot program for the rest 
 
 **5. Challenge: an LED subsystem.** Create `Led extends SubsystemBase` in `subsystems`, wrapping the `XRPOnBoardIO` with `setOn(boolean)`. Move the `onBoardIO` field out of `Robot` and into `Led`. Change `Auto Light` to `Commands.startEnd(() -> led.setOn(true), () -> led.setOn(false), led)`. Then add a bench command on the right stick button (`getRightStickButtonPressed()`) that blinks the LED: `Commands.run(...)` toggling every 0.2 s, `.withTimeout(2.0)`, requiring `led`. Run autonomous, switch to Test, and press it. Then start autonomous and, in a practice change, schedule the blink from `autonomousInit()` right after `Auto Light`. What happens to `Auto Light`, and why? Give `Led` a default command that turns the LED off. Does anything change?
 
-**6. Class or factory?** `holdStill` is one line: `Commands.run(drivetrain::stop, drivetrain)`. Write it instead as a class, `HoldStill extends Command`, with the four methods it needs (which ones are those?). Count the lines. Then go the other way: could `TurnToHeading` be written with `Commands.run(...)` and decorators? Try it, and write three sentences in `reflections.md` on when you would choose a class and when a factory. (Hint: where would the PID controller live, and how would `initialize()`'s reset happen?)
+**6. Class or factory?** `holdStill` is one line: `Commands.run(drivetrain::stop, drivetrain)`. Write it instead as a class, `HoldStill extends Command`, with the four methods it needs (which ones are those?). Count the lines. Then go the other way: could `TurnToHeading` be written with `Commands.run(...)` and decorators? Try it, and write three sentences in `reflections.md` on when you would choose a class and when a factory. (Hint: two decorators you have not met yet will help. `.beforeStarting(runnable)` runs something once, before the command starts, like your `initialize()`, and `.finallyDo(runnable)` runs something however the command ends, like your `end()`. The PID controller can be a local variable that the lambdas capture, as in Section 19.6.)
 
 ### Build (XRP Explorer)
 
@@ -1760,12 +1764,13 @@ Why two commits? Because the first one is a pure move plus a one-word change, an
 
 Chapter 21's pair lab has two people changing command classes at once. Practice reading each other's first.
 
-1. Pair up. Each of you writes one new command class from this list, on your own branch, without showing your partner: `DriveForTime` (Practice 4), `BackAwayFromWall` (drive backward slowly until the rangefinder reads more than 0.30 m), or `SquareUp` (turn to the nearest multiple of 90 degrees, using `Math.round(heading / 90.0) * 90.0`, read in `initialize()`).
+1. Pair up. Each of you writes one new command class from this list, on your own branch, without showing your partner: `DriveForTime` (Practice 4), `BackAwayFromWall` (drive backward slowly until the rangefinder reads more than 0.30 m, or until it has backed up 0.30 m, whichever comes first), or `SquareUp` (turn to the nearest multiple of 90 degrees, using `Math.round(heading / 90.0) * 90.0`, read in `initialize()`).
 2. Open a pull request and ask your partner to review it. The reviewer checks every item on this list, and leaves a comment on any line that fails one:
    - Does every method that should be overridden have `@Override`?
    - Does the constructor call `addRequirements` for every subsystem the command controls, and only those?
    - Is anything about **this run** read in the constructor instead of `initialize()`?
    - Does `isFinished()` exist, and can it actually become `true` on this robot?
+   - Does a command that moves have a safety limit (a `withTimeout`, or a maximum distance) in case its sensor never says "done"?
    - Does `end()` stop the motors, whether or not it was interrupted?
    - Is everything another package needs `public`, and everything else `private`?
 3. Fix what the review found, and merge.

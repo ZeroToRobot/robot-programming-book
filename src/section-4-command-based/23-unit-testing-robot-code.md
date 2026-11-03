@@ -164,10 +164,12 @@ Open the Command Palette (**Ctrl+Shift+P**) and run **WPILib: Test Robot Code**.
 ```
 > Task :test
 
+FollowLineTest > onlyTheEndingStatesAreDone() PASSED
+
 BUILD SUCCESSFUL in 9s
 ```
 
-That is all. **When tests pass, Gradle says nothing about them.** Silence is success. To see what actually ran, open the report Gradle writes every time: in the file explorer, open `build/reports/tests/test/index.html`, then right-click it and choose **Reveal in File Explorer** (or **Open with Live Server**, if you have that extension), and open it in your browser. It shows one test, in one class, with a green "100% successful." Click through to see the test's name and how long it took (a few milliseconds).
+Gradle lists every test it ran with `PASSED` (and, later, anything a test prints). The line that matters is **`BUILD SUCCESSFUL`**: it means every test passed. Once the course test arrives in Section 23.8, you will also see a dozen warnings like `Joystick Button 4 on port 0 not available, check if controller is plugged in`. They come from the course test's button bindings, with no controller plugged in, and they are harmless. To see what actually ran in more detail, open the report Gradle writes every time: in the file explorer, open `build/reports/tests/test/index.html`, then right-click it and choose **Reveal in File Explorer** (or **Open with Live Server**, if you have that extension), and open it in your browser. It shows one test, in one class, with a green "100% successful." Click through to see the test's name and how long it took (a few milliseconds).
 
 > **Building runs the tests too**
 >
@@ -1014,7 +1016,7 @@ Walk through it:
 - **`driveDistanceBacksUpForANegativeDistance`** checks the "negative drives backward" promise from `DriveDistance`'s Javadoc.
 - **`turnToHeadingFacesItsTarget`** turns to 90 degrees and checks the heading against `HEADING_TOLERANCE_DEGREES`.
 
-Run the tests. With the example gains, `DriveDistance` takes about 1.8 simulated seconds and `TurnToHeading` about 1.1, and the three tests together take a fraction of a second of real time. (To see the simulated seconds, add `System.out.println(seconds);` to a test, run it, and look under **Standard output** for that test in the HTML report. Gradle keeps test printouts out of the terminal.)
+Run the tests. With the example gains, `DriveDistance` takes about 1.8 simulated seconds and `TurnToHeading` about 1.1, and the three tests together take a fraction of a second of real time. (To see the simulated seconds, add `System.out.println(seconds);` to a test, run it, and look in the terminal under that test's `STANDARD_OUT` line, or under **Standard output** for that test in the HTML report.)
 
 > **What a simulation test can and cannot prove**
 >
@@ -1179,10 +1181,10 @@ class ObstacleCourseTest {
 
 Walk through it:
 
-- **`setUp()`** is the same as the command tests, plus one line: `DriverStationSim.setAutonomous(true)`. Without it, an enabled robot is in **teleop**, and the teleop bindings would come alive: the line light, for one, would turn the LED on and off as the robot crossed the tape.
+- **`setUp()`** is the same as the command tests, plus one line: `DriverStationSim.setAutonomous(true)`. Without it, an enabled robot is in **teleop**, and every teleop binding (the line light, the left bumper follow) is live while the course runs. The test would be checking a robot no driver would ever run.
 - **`tearDown()`** has one more line too: `getDefaultButtonLoop().clear()`. `RobotContainer` bound a dozen triggers to buttons and sensors (Chapter 21), and the scheduler keeps polling them every loop until it is told to forget them. Clearing the loop makes sure no later test is ever surprised by a leftover binding.
 - **Arrange** builds the whole robot, simulated, with `new RobotContainer(true)`. Then it makes a `DIOSim` to watch the LED. The XRP's LED is digital output 1 (hold Ctrl and click `XRPOnBoardIO` in `RobotContainer` to see it in WPILib's source), and `DIOSim` reads what the program last set on that output, exactly as the Simulation GUI's DIO panel does. The last line of Arrange writes `never ran` into the `Line State` dashboard value, so whatever is there at the end was written by this run.
-- **Act** schedules the autonomous command, as `autonomousInit()` does, and runs the loop until the **LED goes out**. Chapter 21 made the LED part of the course: `deadlineFor(lightTheLed())` keeps it on for exactly as long as the course runs, and turns it off the moment the last leg ends and `Hold Still` takes over. So "until the LED goes out" means "until the course is over." Each loop does what the real robot does every 20 ms: `CommandScheduler.getInstance().run()` (Robot's `robotPeriodic()`), then `simulationPeriodic()` (the pretend floor sets each reflectance sensor from the robot's pose), then 20 ms on the clock. `TIME_LIMIT_SECONDS` is 40, more than all the course's timeouts added up, so a stuck robot cannot run the test forever.
+- **Act** schedules the autonomous command, as `autonomousInit()` does, and runs the loop until the **LED goes out**. Chapter 21 made the LED part of the course: `deadlineFor(lightTheLed())` keeps it on for exactly as long as the course runs, and turns it off the moment the last leg ends and `Hold Still` takes over. So "until the LED goes out" means "until the course is over." The loop checks the LED before the first `run()`, before anything has turned it on. In simulation a digital output starts on, so the loop starts at once, and from the first loop the course holds the LED on. Each loop does what the real robot does every 20 ms: `CommandScheduler.getInstance().run()` (Robot's `robotPeriodic()`), then `simulationPeriodic()` (the pretend floor sets each reflectance sensor from the robot's pose), then 20 ms on the clock. `TIME_LIMIT_SECONDS` is 40, more than all the course's timeouts added up, so a stuck robot cannot run the test forever.
 - **Assert** checks that the LED went out (the course finished, with a message saying so if not), and then that the robot is where leg 3 should leave it: within 5 cm of the line sideways, within 10 cm of `END_POSE` along the line, and facing up leg 3 within 10 degrees. The last assert reads `Line State` back: `FollowLine` publishes its state there every loop it runs (Chapter 22), so `END_OF_LINE` means leg 3 really followed the line to its end.
 
 Why these tolerances? The follower stops when its sensors, 5 cm ahead of the robot's center, run off the end of the tape, so the robot's center stops about 5 cm short of `END_POSE`. And the sideways check must allow for the pretend tape's 2 cm half-width.
@@ -1203,7 +1205,7 @@ Second, take the floor away: in the test's loop, comment out `robotContainer.sim
 
 > **Only one test may build the whole robot**
 >
-> `ObstacleCourseTest` has exactly one test method, on purpose. `new RobotContainer(true)` creates a `Sensors`, and `Sensors` creates the XRP's reflectance sensors and rangefinder, on analog inputs 0, 1, and 2. Like `XRPMotor` in Section 23.6, each input can only be created once per program, and Gradle runs **all** your test classes in one program. A second `new RobotContainer(...)` anywhere in your tests would fail with an `AllocationException` whose message begins `Analog Input 0 previously allocated`. WPILib's answer is to `close()` hardware objects after each test, but the XRP's sensor classes do not have a `close()` method. So the rule for the Explorer is simple: **one test builds the whole robot; every other test uses fakes and the simulation.** Practice 6 gives `Sensors` an IO layer, which removes the limit.
+> `ObstacleCourseTest` has exactly one test method, on purpose. `new RobotContainer(true)` creates a `Sensors`, and `Sensors` creates the XRP's reflectance sensors and rangefinder, on analog inputs 0, 1, and 2. Like `XRPMotor` in Section 23.6, each input can only be created once per program, and Gradle runs **all** your test classes in one program. A second `new RobotContainer(...)` anywhere in your tests would fail with an `AllocationException` whose message says `Analog Input 2 previously allocated`. WPILib's answer is to `close()` hardware objects after each test, but the XRP's sensor classes do not have a `close()` method. So the rule for the Explorer is simple: **one test builds the whole robot; every other test uses fakes and the simulation.** Practice 6 gives `Sensors` an IO layer, which removes the limit.
 
 > **The test pyramid**
 >
@@ -1272,7 +1274,7 @@ Now read the file from the top:
 - **The steps** run in order, and if any one fails, the job stops and is marked failed:
   1. **`actions/checkout@v7`** copies your repository onto the runner. A step with **`uses:`** runs an **action**, a ready-made step that someone published on GitHub. The `@v7` picks the version: version 7 of GitHub's own checkout action.
   2. **`actions/setup-java@v6`** installs Java. WPILib 2026 uses Java 17, so the runner does too (`temurin` is a free build of Java).
-  3. **`gradle/actions/setup-gradle@v6`** is Gradle's own action. It remembers downloaded files between runs, so after the first run, the runner does not download all of WPILib again.
+  3. **`gradle/actions/setup-gradle@v6`** is Gradle's own action. It saves downloaded files between runs, so the runner does not download all of WPILib every time. It saves them only from runs on `main`, though: until your first pull request is merged, every run downloads everything, and after that, branch runs reuse what `main` saved.
   4. **`chmod +x gradlew`** is a Linux command that marks the `gradlew` script as a program allowed to run. A step with **`run:`** runs a command, just as if you typed it in a terminal. Projects created on Windows usually lose this mark when they reach GitHub, and without this line the next step fails with `Permission denied`.
   5. **`./gradlew build`** is exactly what **WPILib: Build Robot Code** runs on your laptop: compile everything, then run every test.
 
@@ -1343,7 +1345,7 @@ A test written this way is called a **regression test**, and it is why mature te
 
 - **Chapter 24** makes `FollowLine`'s gains live-tunable from the dashboard. The tests use `SIDE_ERROR` and `SEARCH_MAX_DEGREES` by name, so they follow along with any value you choose.
 - **Chapter 26**, the capstone, tags a release of the Explorer. A release with a red X is not a release.
-- **Chapters 27 to 34** bring a new robot. Swerve math is much harder to get right than tank drive, and much harder to check on the floor: `SwerveModule` and the kinematics get unit tests from the first day, on fake IO layers, exactly like `DrivetrainTest`.
+- **Chapters 27 to 34** bring a new robot. Swerve math is much harder to get right than tank drive, and much harder to check on the floor: each swerve `Module` and the drive's kinematics get unit tests on fake IO layers as they are written (Chapters 28 and 29), exactly like `DrivetrainTest`.
 - **Chapter 40** makes a green CI run part of the competition-day release checklist.
 
 ---
@@ -1378,7 +1380,7 @@ For any change where **no** test failed, write one sentence: is that a missing t
 
 **3. The waiting state (if you have it).** If your `FollowLine` has `WAITING_FOR_CLEAR` from Chapter 22's Collab lab, you added an `obstacleAhead` parameter in Section 23.4. Draw its new arrows on your diagram, then add one test for each: following with an obstacle ahead waits, waiting with the obstacle still there keeps waiting, and waiting with the way clear goes back to following. Then answer: when the robot is waiting and the line is **not** seen, what does your code do? Is that what you want? Write a test that holds whichever answer you choose.
 
-**4. Three strikes, test first.** Chapter 22's Practice 4 asked for a rule: give up after the third search in one run. This time, write the tests **before** the code. Add a parameter `int searchesSoFar` to `decideNextState()` (just the parameter: pass `0` from `execute()` for now), then write two tests: losing the line on the left with `searchesSoFar` of 2 still searches left, and with `searchesSoFar` of 3 gives up. Run them and see red. Now make them green: add the rule to `stateForLostLine()`, and in `FollowLine` add a `searchCount` field that `initialize()` resets and `changeState()` counts. Run every test. In `reflections.md`: did writing the tests first change how you designed the rule?
+**4. Three strikes, test first.** Chapter 22's Practice 4 asked for a rule: give up after the third search in one run. This time, write the tests **before** the code. Add a parameter `int searchesSoFar` to `decideNextState()` (just the parameter: pass `0` from `execute()` for now). That breaks every `decideNextState(...)` call already in `FollowLineTest`, so add a constant `NO_SEARCHES_YET = 0` and pass it as the last argument of each one, the way Section 23.4's callout does for `NO_OBSTACLE`. Then write two tests: losing the line on the left with `searchesSoFar` of 2 still searches left, and with `searchesSoFar` of 3 gives up. Run them: the second one is red. (The first is green already, because the old code searches no matter what.) Now make them green: add the rule to `stateForLostLine()`, and in `FollowLine` add a `searchCount` field that `initialize()` resets and `changeState()` counts. Run every test. In `reflections.md`: did writing the tests first change how you designed the rule?
 
 **5. Many questions, one test.** JUnit can run one test method many times with different inputs, called a **parameterized test**. Add these imports to `FollowLineTest`:
 
@@ -1438,16 +1440,18 @@ Diagnose anything strange:
 | `package org.junit.jupiter.api does not exist` | The JUnit lines are missing from `build.gradle`, or the test file is in `src/main` instead of `src/test` |
 | `decideNextState(...) is not public in FollowLine; cannot be accessed from outside package` | The test's `package` line does not match `FollowLine`'s, or the test is in the wrong folder |
 | `non-static method ... cannot be referenced from a static context` | A method that `decideNextState()` calls still reads a field. Every fact must come in as a parameter |
-| `BUILD SUCCESSFUL` but the report shows fewer tests than you wrote | A test method is missing `@Test`, or has parameters, or returns something other than `void` |
+| `BUILD SUCCESSFUL` but the report shows fewer tests than you wrote | A test method is missing `@Test`, or returns something other than `void` |
+| `ParameterResolutionException` | A `@Test` method has parameters. Only a `@ParameterizedTest` may have them (Practice 5) |
 | `expected: <true> but was: <false>` with nothing else to go on | Give the `assertTrue` a message as its last argument |
-| `DriveDistance never finished` | The pretend Driver Station is not enabled (`setEnabled(true)` and `notifyNewData()`), or `SimHooks.stepTiming` is missing from the loop |
+| `expected: <0.3> but was: <0.0>` in a command test | The pretend Driver Station is not enabled (`setEnabled(true)` and `notifyNewData()`): a disabled robot refuses to schedule the command, so it never moves |
 | A command test passes alone but fails when every test runs | An `@AfterEach` is missing `cancelAll()` or `unregisterAllSubsystems()`, so an earlier test's drivetrain or command is still around |
-| `Analog Input 0 previously allocated` | Two tests build a `RobotContainer` (or a `Sensors`). Only `ObstacleCourseTest` may (Section 23.8) |
-| `the course never finished` | The robot never reached leg 3, or the LED never went out: check that `setAutonomous(true)` is in `setUp()`, and read the course log in the report |
+| `Analog Input 2 previously allocated` | Two tests build a `RobotContainer` (or a `Sensors`). Only `ObstacleCourseTest` may (Section 23.8) |
+| `the course never finished` | The robot never reached leg 3, or the LED never went out: read the course log in the report |
 | `leg 3 never followed the line` | The `either` took its "no line" branch: the log says `No line here, so no leg 3`. Check that the loop calls `simulationPeriodic()`, and check the `SIM_` tape constants |
 | On GitHub: `Permission denied` on `./gradlew` | The `chmod +x gradlew` step is missing, or is after the build step |
 | On GitHub: `cannot find symbol` for a class that exists on your laptop | The file was never committed. Check `git status` for untracked files |
-| On GitHub: the workflow never runs | The file is not at exactly `.github/workflows/build.yml` (check the dot, and that `workflows` is plural), or it has a tab in it |
+| On GitHub: the workflow never runs | The file is not at exactly `.github/workflows/build.yml` (check the dot, and that `workflows` is plural) |
+| On GitHub: a red run that says **Invalid workflow file** | A YAML mistake: a tab, or a line indented one space too many or too few. The error names the line |
 
 ### Reflect
 
@@ -1501,7 +1505,7 @@ git commit -m "Ch23: Build and test every push with GitHub Actions"
 git push -u origin unit-tests
 ```
 
-Run `git status` before that last `git add`, and check that `.github/workflows/build.yml` and all five files under `src/test` are listed. Then open a pull request into `main`, wait for the green check, merge, delete the branch, and `git checkout main` and `git pull`. From this commit on, every commit in your repository's history has a check mark or an X next to it. That is a record of the code's health, not just its changes.
+Run `git status` before that last `git add`, and check that `.github/` is listed under **Untracked files**. (Your tests were committed earlier, after Build steps 6 and 8; `git log --stat` shows them.) Then open a pull request into `main`, wait for the green check, merge, delete the branch, and `git checkout main` and `git pull`. From this commit on, every commit in your repository's history has a check mark or an X next to it. That is a record of the code's health, not just its changes.
 
 ### Collab: The Merge That Only a Test Can Catch
 

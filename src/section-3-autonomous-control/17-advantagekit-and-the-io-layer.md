@@ -536,7 +536,8 @@ public class Drivetrain {
 
     /**
      * Read the hardware, log what it said, and update the pose. Call this once every loop,
-     * in every mode, before anything else asks the drivetrain a question.
+     * in every mode. Robot calls it from robotPeriodic(), which runs after the mode methods,
+     * so the mode code works with the readings from the loop before.
      */
     public void periodic() {
         readInputs();

@@ -314,7 +314,7 @@ private Command buildObstacleCourse() {
 
 Your `buildObstacleCourse()` may look a little different (your `either` from Chapter 22, your own comments). Keep yours, and only add the `step(...)` wrappers.
 
-`step()` is a **command factory** (Section 21.4) that takes a command and returns a bigger one: a tiny sequence that first records the name, and then runs the step. `Commands.runOnce` finishes in the same loop it starts, so the step itself starts right away, in the same loop. Nothing about how the course drives has changed, and `ObstacleCourseTest` will prove it in a minute.
+`step()` is a **command factory** (Section 21.4) that takes a command and returns a bigger one: a tiny sequence that first records the name, and then runs the step. `Commands.runOnce` finishes in the same loop it starts, and the sequence starts the step in the next loop. So each step now waits one extra loop (20 ms) at its start, far too little to change how the course drives, and `ObstacleCourseTest` will prove it in a minute.
 
 ### Every command the scheduler runs: `Commands/`
 
@@ -344,7 +344,7 @@ configureAutoChooser();
 logCommands();
 ```
 
-Each of the three methods takes a `Consumer<Command>` (Section 19.6): a lambda that receives the command. `onCommandInitialize` calls it when a command starts, `onCommandFinish` when it ends by itself, and `onCommandInterrupt` when something else stops it. The key is built from the command's name, so every command gets its own row: `Commands/Obstacle Course`, `Commands/DriveWithSticks`, `Commands/Line Light`. That is why Chapter 21 had you give every command a name with `withName()`: here is where the names pay off. (A default command's name, if you never gave it one, is its class's simple name, like `DriveWithSticks`.)
+Each of the three methods takes a `Consumer<Command>` (Section 19.6): a lambda that receives the command. `onCommandInitialize` calls it when a command starts, `onCommandFinish` when it ends by itself, and `onCommandInterrupt` when something else stops it. The key is built from the command's name, so every command gets its own row: `Commands/Obstacle Course`, `Commands/DriveWithSticks`, `Commands/Line Light`. That is why Chapter 21 had you give every command a name with `withName()`: here is where the names pay off. (A default command's name, if you never gave it one, is its class's simple name, like `DriveWithSticks`.) One catch: a command that starts and ends in the same loop, like `Reset Pose`, only ever shows `false`, because the log keeps the last value of each loop. `Course/Step` is how the course's instant steps show up.
 
 ### Look at it
 
@@ -360,7 +360,7 @@ Open the new `akit_` log, and on a Line Graph tab, drag these into the **discret
 
 and `Drivetrain` > `LeftSpeedMetersPerSecond` onto the left axis. Press **Ctrl+\\**.
 
-Here is the run, as a story you can read from left to right. While the robot is disabled, every row is empty: the scheduler does not run commands while the robot is disabled, unless they are marked to (only `Reset Pose` is). Autonomous starts, and `Obstacle Course` turns on. Under it, `Course/Step` reads `Reset Pose`, `Leg 1`, `Turn`, `Leg 2`, `Leg 3`, and `Done`, with the speed graph showing each step's shape above it. During `Leg 3`, `FollowLine/State` says `FOLLOWING`, and then `END_OF_LINE` at the end of the tape. At the start of teleop, `Obstacle Course` turns off (`teleopInit()` cancels it), and `DriveWithSticks`, the drivetrain's default command, turns on in the next loop, because now nothing else needs the drivetrain. When you held the left bumper, `FollowLine` turned on and `DriveWithSticks` turned off at the same instant, interrupted. Let go, and they swap back.
+Here is the run, as a story you can read from left to right. While the robot is disabled, every row is empty: the scheduler does not run commands while the robot is disabled, unless they are marked to (only `Reset Pose` is). Autonomous starts, and `Obstacle Course` turns on. Under it, `Course/Step` reads `Reset Pose`, `Leg 1`, `Turn`, `Leg 2`, `Leg 3`, and `Done`, with the speed graph showing each step's shape above it. During `Leg 3`, `FollowLine/State` says `FOLLOWING`, and then `END_OF_LINE` at the end of the tape. At the start of teleop, `Obstacle Course` turns off (`teleopInit()` cancels it), and `DriveWithSticks`, the drivetrain's default command, turns on in the same loop, because now nothing else needs the drivetrain. When you held the left bumper, `FollowLine` turned on and `DriveWithSticks` turned off at the same instant, interrupted. Let go, and they swap back.
 
 Notice `Commands/FollowLine`. It is on in teleop, when the bumper started it, but **not** during `Leg 3` of the course: in the course, `FollowLine` runs inside a group, and only the group was scheduled. That is the line between the two timelines. `Commands/` is what the scheduler did; `Course/Step` is what happened inside the course.
 
@@ -517,9 +517,9 @@ AdvantageKit replays the other built-in inputs the same way: the Driver Station 
 
 ### The clock is an input too
 
-That last one is surprising, and it matters. Your code reads the time constantly: `Timer` inside `withTimeout()`, the `Debouncer` on the line light, the PID controllers' loop period. In a normal run, time comes from the computer's clock. In a replay, the clock is replayed too: AdvantageKit records each loop's timestamp, and, during a replay, tells WPILib to use the logged timestamp instead of the real clock. So a `withTimeout(7.0)` in a replay ends on the same loop it ended on the floor, even if the replay finishes the whole run in one second.
+That last one is surprising, and it matters. Your code reads the time constantly: `Timer` inside `withTimeout()`, the `Debouncer` on the line light. In a normal run, time comes from the computer's clock. In a replay, the clock is replayed too: AdvantageKit records each loop's timestamp, and, during a replay, tells WPILib to use the logged timestamp instead of the real clock. So a `withTimeout(7.0)` in a replay ends on the same loop it ended on the floor, even if the replay finishes the whole run in a few seconds.
 
-It does finish fast. A replay does not wait 20 ms between loops, because nothing physical has to happen between them. A two-minute run replays in a second or two.
+It does finish fast. A replay does not wait 20 ms between loops, because nothing physical has to happen between them. A two-minute run replays in a few seconds.
 
 ### Determinism: the one rule
 
@@ -836,7 +836,7 @@ Then run the Explorer once with `ROBOT_MODE = RobotMode.SIM`, and once with `Rob
 
 > **Set it back before you commit**
 >
-> `ROBOT_MODE` is the one line in the project you will change most often, and the easiest to commit by mistake. The rule from Chapter 18 still holds, with one more value: commit it as `REAL`. A `SIM` commit makes your teammate's robot sit still while the field view drives. A `REPLAY` commit is worse: their robot does not start at all, because the program waits for a log. Before every commit, look at `git diff` (Chapter 11) for `ROBOT_MODE`.
+> `ROBOT_MODE` is the one line in the project you will change most often, and the easiest to commit by mistake. The rule from Chapter 18 still holds, with one more value: commit it as `REAL`. A `SIM` commit makes your teammate's robot sit still while the field view drives. A `REPLAY` commit is worse: their robot does not start at all, because the program waits for a log. Before every commit, look at `git diff` (Chapter 11) for `ROBOT_MODE`. (Practice 9 lets CI check it for you.)
 
 ---
 
@@ -862,7 +862,7 @@ public static final RobotMode ROBOT_MODE = RobotMode.REPLAY;
 
 Run **WPILib: Simulate Robot Code**, as always. VS Code asks which simulation extensions to use, with two of them checked: **Sim GUI** and **XRP Client** (the XRP template in `build.gradle` checks both by default). **Uncheck both**, and click OK.
 
-Replay must not connect to anything. The Sim GUI would let you change things (enable the robot, move a joystick) in the middle of a replay, and the XRP client would try to talk to a real robot. Either one would mean inputs that are not from the log. AdvantageKit checks, and if you forget to uncheck them, the program stops at once with a message that begins:
+Replay must not connect to anything. The Sim GUI would let you change things (enable the robot, move a joystick) in the middle of a replay, and the XRP client would try to talk to a real robot. Either one would mean inputs that are not from the log. AdvantageKit checks, and if you forget to uncheck them, the program stops at once (the Sim GUI window may flash open first) with an error. The error starts with `Error at org.littletonrobotics.junction.Logger.start(...)`, and then says:
 
 ```
 All HAL simulation extensions must be disabled when running AdvantageKit replay, including the simulation GUI and DriverStation connection.
@@ -870,7 +870,7 @@ All HAL simulation extensions must be disabled when running AdvantageKit replay,
 
 and ends with `*** EXITING DUE TO INVALID SIMULATION CONFIGURATION, SEE ABOVE. ***`. If you see that, run it again, and uncheck both.
 
-With both unchecked, watch the terminal. AdvantageKit says it is replaying the log from AdvantageScope, the program prints `Robot mode: REPLAY`, and then, a second or two later, the program **ends by itself**: the log ran out, so the run is over. No window opened, nothing drove, and your whole course just ran again.
+With both unchecked, watch the terminal. AdvantageKit says it is replaying the log from AdvantageScope, the program prints `Robot mode: REPLAY`, and then, a few seconds later, the program **ends by itself**: the log ran out, so the run is over. No window opened, nothing drove, and your whole course just ran again.
 
 Look at AdvantageScope. It has opened a new log on its own: the `_replay` file, written by the replay.
 
@@ -888,7 +888,7 @@ Start at the left. `Reset Pose`, `Leg 1`, and `Turn` are identical: the two step
 
 Then comes `Leg 2`, and the two runs come apart.
 
-On the real run, `Leg 2` ends when `DriveUntilLine` sees the crossbar, and `Leg 3` starts. On the replay, `Leg 2` keeps going, and the replay's requested volts keep driving forward while the real ones drop to follow the line. Leg 2 only ends when it reaches its distance limit or its timeout. Then the replay's `Leg 3` starts, and ends in the same loop. Add a Console tab with `ReplayOutputs` > `Console`, and there it is:
+On the real run, `Leg 2` ends when `DriveUntilLine` sees the crossbar, and `Leg 3` starts. On the replay, `Leg 2` keeps going, and the replay's requested volts keep driving forward while the real ones drop to follow the line. Leg 2 only ends when it reaches its distance limit or its timeout, and it is usually the timeout: the logged encoders may never reach the limit, because the real robot spent part of that distance following the line. Then the replay's `Leg 3` starts, and ends almost at once. Add a Console tab with `ReplayOutputs` > `Console`, and there it is:
 
 ```
 No line here, so no leg 3
@@ -1230,7 +1230,7 @@ A second anonymous class, for the same reason as the first.
 
 **4.** Delete the pretend floor from `RobotContainer`: the three `AnalogInputSim` fields, the four `SIM_` constants, `simulationPeriodic()`, `isOnPretendTape()`, and the `mode` field, which nothing reads any more, along with the `this.mode = mode;` line that set it. (The constructor's `mode` **parameter** stays: both `switch`es use it.) Then delete the imports VS Code marks as unused (`AnalogInputSim`, and probably `Rotation2d`, `Transform2d`, and `Translation2d`).
 
-**5.** Open `Robot.java` and delete `simulationPeriodic()`, which called the method you just deleted.
+**5.** Open `Robot.java` and delete `simulationPeriodic()`, which called the method you just deleted. From now on, the terminal prints `Default simulationPeriodic() method... Override me!` once at startup. That is WPILib noticing the method is gone, and it is fine.
 
 And one change in the tests. Open `ObstacleCourseTest.java` and delete the line in the loop that calls `robotContainer.simulationPeriodic();`. The pretend floor is now part of the simulated robot itself, read by the scheduler like the real sensors, so the test's loop is now exactly `Robot`'s loop: run the scheduler, step the clock.
 
@@ -1345,7 +1345,7 @@ You need a strip of tape with a right-angle corner, like the one you used for Se
 
 Run the Explorer on the real XRP, open Elastic, and follow the corner a few times in teleop with the left bumper. If your follower never fails, good: your tuning from Chapter 24 works. Give it a reason to fail. On the **Tuning** tab, set **FollowLine/Side Error** to `0.9`, and follow the corner again. This time the follower reaches the corner and stops, and the terminal says `FollowLine: FOLLOWING -> END_OF_LINE`.
 
-You just planted the bug, and you did it from the dashboard, not the code. Keep that in mind. Stop the program.
+You just planted the bug, and you did it from the dashboard, not the code. Keep that in mind. Before you stop the program, set **Side Error** on the Tuning tab back to your code's value (the number in `SIDE_ERROR`), and close Elastic. A planted bug in a dashboard can outlive the run it broke. Then stop the program.
 
 ### Step 2: Read what the log can tell you
 
@@ -1358,7 +1358,7 @@ Find the moment `State` turns to `END_OF_LINE` (click on the bar, then use the T
 
 The rule says: when the line disappears, compare `lastSteeringError` with the side error. Bigger than the side error means "off to the left"; smaller means "it was right under us." So you need two numbers at that loop: `lastSteeringError`, and the side error the follower was using.
 
-The second is in the log, because it is an input: `NetworkInputs` > `Tuning` > `FollowLine` > `Side Error`. It says `0.9`.
+The second is in the log, because it is an input: `NetworkInputs` > `Tuning` > `FollowLine` > `Side Error`. At the corner, it says `0.9`.
 
 The first is not anywhere. `lastSteeringError` is not an input (it comes from inputs, but the follower works it out and remembers it) and nobody recorded it as an output. It is the follower's private memory. On any other day, this is where the investigation would end: "add a print, and try to make it happen again."
 
@@ -1411,15 +1411,17 @@ void aRealCornerStartsASearch() {
     double errorAtTheCorner = 0.6;
 
     assertEquals(State.SEARCHING_LEFT,
-        FollowLine.decideNextState(State.FOLLOWING, false, errorAtTheCorner, 0.0));
+        FollowLine.decideNextState(State.FOLLOWING, LINE_LOST, errorAtTheCorner, NOT_SEARCHING));
 }
 ```
+
+It uses the pretend readings from the top of the file (Chapter 23), so it reads like the arrow it checks.
 
 Put **your** number in, from your replay. This test uses the four-argument `decideNextState()`, so it checks `SIDE_ERROR`, the value in your code. One day, someone will tune `Side Error` up to `0.7` on a smooth bend, copy it into `SIDE_ERROR` (Chapter 24's last step), and this test will fail, saying, in effect, "that number stops the robot at a real corner, and here is the measurement that proves it." A number from a log has become a guard.
 
 If your number is **smaller** than your `SIDE_ERROR`, the test fails right away, and that is a real finding, not a planted one: your follower would stop at that corner with the gains in your code. Tune the side error down until the test passes, and check the corner again on the floor.
 
-Run the tests: **30 tests**. Restart the Explorer (which puts the Tuning tab back to the values in your code), and follow the corner: it searches, finds the line, and carries on.
+Run the tests: **30 tests**. Restart the Explorer, reopen Elastic, and check that **Side Error** on the Tuning tab shows your code's value. Then follow the corner: it searches, finds the line, and carries on.
 
 Keep the `LastSteeringError` line. It costs almost nothing, and the next time the follower surprises you, it will already be in the log.
 
@@ -1505,13 +1507,35 @@ BooleanSupplier e = new BooleanSupplier() {
 
 **4. A perfect replay, measured.** Record a course run on the simulator, and replay it. In a **Statistics** tab, compare `RealOutputs` with `ReplayOutputs` for `Drivetrain/LeftRequestedVolts`, and then for `Drivetrain/RightRequestedVolts`. What is the largest error? Now plant a non-deterministic input: in a practice branch, add `* (1.0 + 0.01 * Math.random())` to the follow speed in `FollowLine.followSpeeds()`, record a new run, and replay it. What do the statistics say now, and where does the first difference appear? Delete the practice branch.
 
-**5. Replay without opening AdvantageScope.** `LogFileUtil.findReplayLog()` checks an environment variable before it checks AdvantageScope. Find out how to set an environment variable named `AKIT_LOG_PATH` for one program run on your computer (in a terminal, on Windows or macOS), set it to the full path of a log, and replay with AdvantageScope closed. When would this be handier than the AdvantageScope way?
+**5. Replay without opening AdvantageScope.** `LogFileUtil.findReplayLog()` checks an environment variable before it checks AdvantageScope. Find out how to set an environment variable named `AKIT_LOG_PATH` for one program run on your computer (in a terminal, on Windows or macOS), set it to the full path of a log, and replay with AdvantageScope closed: run it from that same terminal with `./gradlew simulateJava`. It needs the simulation extensions off, so see Practice 6 and do the two together. When would this be handier than the AdvantageScope way?
 
 **6. `replayWatch` (optional, a trade-off).** Chapter 17 added a Gradle task named `replayWatch` to `build.gradle`. It replays the log open in AdvantageScope **every time you save a file**, so you can add an output, save, and see it in AdvantageScope a few seconds later. Try it: set `ROBOT_MODE` to `REPLAY`, open a log in AdvantageScope, and in VS Code's terminal run `./gradlew replayWatch` (or `gradlew replayWatch` on Windows). It fails at once, with the "simulation extensions" message from Section 25.9. Why? Find the lines in `build.gradle` that turn on the Sim GUI and the XRP client by default (look for `defaultEnabled`). If you set both to `false`, `replayWatch` works, but now every normal run of the Explorer asks you to check the XRP client by hand, or the robot never connects. Decide whether that trade is worth it for you, write one sentence about why, and put `build.gradle` back if not. (`replayWatch` uses an anonymous class too: AdvantageKit's source for `ReplayWatch` is linked from its replay page. Can you find it?)
 
 **7. A routine replays too.** Record two short autonomous runs: one with **Leg 1 Only** chosen, and one with **Sit Still**. Replay both. Without a dashboard connected, how did the replay know which routine to run? Find the value it used in the log.
 
 **8. Record one more decision.** Pick a decision the log does not show yet, record it, and replay an old run to see it: for example, whether the wall stop in `DriveWithSticks` is holding the robot back (`Logger.recordOutput("DriveWithSticks/WallStop", ...)`), or the line light's debounced trigger. Add it to your AdvantageScope layout, and export the layout again.
+
+**9. Let CI remember `ROBOT_MODE` (optional).** The "Set it back before you commit" callout in Section 25.8 trusts you to read `git diff`. Chapter 23 built something that never forgets: a check on every push. In a practice branch, add `src/test/java/frc/robot/ConstantsTest.java`:
+
+```java
+package frc.robot;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import frc.robot.Constants.RobotMode;
+import org.junit.jupiter.api.Test;
+
+/** Checks the settings that must be right in every commit. */
+class ConstantsTest {
+    @Test
+    void committedCodeDrivesTheRealRobot() {
+        assertEquals(RobotMode.REAL, Constants.ROBOT_MODE,
+            "set ROBOT_MODE back to REAL before you commit");
+    }
+}
+```
+
+Build: 31 tests. Now set `ROBOT_MODE` to `SIM` and build again. What does the test say? This test goes red on your laptop every time you are in `SIM`, which is the point: a `SIM` or `REPLAY` commit would turn the pull request red. What is the cost of keeping it, and would your team want it? Could the same idea guard `TUNING_MODE` for a release? Delete the practice branch (the Build counts 30 tests).
 
 ### Build (XRP Explorer)
 
@@ -1540,7 +1564,7 @@ Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 2. Your first replay agreed with the real run until leg 2, and then disagreed. The pose agreed the whole way. Explain both, using the words **input** and **replay bubble**.
 3. Why does `RobotContainer` use `new DrivetrainIO() {}` and not `() -> {}`? When would you write a named class instead?
 4. The code said `SIDE_ERROR = 0.2`, and yet the replay stopped at the corner as if it were `0.9`. Explain why, and why that is the replay doing its job, not a bug in it.
-5. `Sensors` became a subsystem, though no command requires it. Give the reason, and say what would break, in a replay and in the simulator, if `Sensors` were created **before** `Drivetrain` in `RobotContainer`. (Hint: what order does the scheduler call `periodic()` in, and what does `SensorsIOSim` read?)
+5. `Sensors` became a subsystem, though no command requires it. Give the reason, and say what would break, in a replay and in the simulator, if `Sensors` were created **before** `Drivetrain` in `RobotContainer`. (Hint: what order does the scheduler call `periodic()` in, and what does `SensorsIOSim` read? Try it: what does the compiler say? Then imagine `drivetrain` were not `final`.)
 
 If any answer feels shaky, re-read Sections 25.2, 25.6, 25.7, 25.9, and 25.10.
 
@@ -1579,9 +1603,12 @@ git commit -m "Ch25: RobotMode with real, sim, and replay"
 After Build step 7:
 
 ```bash
+git status
 git add .
 git commit -m "Ch25: Sensors IO layer, so replay sees every input"
 ```
+
+Check `git status` before this commit: the four new `Sensors` files in `subsystems` and the two new test files should all be included, and the old `src/main/java/frc/robot/Sensors.java` should show as **deleted**. Git may even notice that the new `Sensors.java` is mostly the old one, and call it a **rename**.
 
 After Build step 8:
 
@@ -1592,7 +1619,7 @@ git commit -m "Ch25: Log the follower's steering memory, and test a real corner"
 git push -u origin log-replay
 ```
 
-Check `git status` before the last commit: `advantagescope-layout.json`, the four new `Sensors` files in `subsystems`, and the two new test files should all be included, and the old `src/main/java/frc/robot/Sensors.java` should show as **deleted**. Git may even notice that the new `Sensors.java` is mostly the old one, and call it a **rename**. Open a pull request into `main`, wait for the green check, merge, delete the branch, and `git checkout main` and `git pull`.
+Check `git status` before the last commit too: this time you should see only `FollowLine.java`, `FollowLineTest.java`, and `reflections.md` (and `advantagescope-layout.json`, if you exported it again). Open a pull request into `main`, wait for the green check, merge, delete the branch, and `git checkout main` and `git pull`.
 
 The `logs` folder is not in Git, and it should not be. But a log can be worth keeping: the run that found a bug, or the run your `aRealCornerStartsASearch` number came from. Make a folder outside your project for logs worth keeping, copy that one in, and give it a name that says what it shows, like `corner-stop-side-error-0.9.wpilog`.
 

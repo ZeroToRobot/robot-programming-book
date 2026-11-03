@@ -30,7 +30,7 @@ Engineers call that answer the **acceptance criteria**: a short list of checks t
 Here are the capstone's acceptance criteria. Read them now; Section 26.10 ends with you checking every one.
 
 1. A **design doc** for leg 4 is merged into `main`, reviewed by your partner, before any leg 4 code.
-2. `ParkAtWall` decides with a **pure** method, and every arrow of its state machine has a test.
+2. `ParkAtWall` decides with a **pure** method, and every way out of `APPROACHING` has a test.
 3. The **simulated** course runs all four legs in `ObstacleCourseTest`, and parks.
 4. **All tests pass**, on your laptop and on GitHub, with a green check on every pull request.
 5. On the real floor, the course runs **three times in a row** with no touching, ending parked.
@@ -204,10 +204,10 @@ After the line ends, the Explorer drives straight on toward a wall and stops
 - Changed: ObstacleCourseTest checks that the robot parked.
 
 ## States
-APPROACHING (start) -> PARKED     when the gap is within 2 cm
-APPROACHING         -> NO_WALL    when the safety distance runs out
-PARKED and NO_WALL are finished states: stay there, stopped.
-In APPROACHING, speed = kP x gap, capped at the auto speed. Negative backs up.
+- APPROACHING (start) -> PARKED when the gap is within 2 cm.
+- APPROACHING -> NO_WALL when the safety distance runs out.
+- PARKED and NO_WALL are finished states: stay there, stopped.
+- In APPROACHING, speed = kP x gap, capped at the auto speed. Negative backs up.
 
 ## Tests
 1. A far wall means full auto speed.
@@ -295,9 +295,10 @@ The **teammate** reviews, even though you wrote it together. Reviewing your own 
 
 - Could someone who was not here run every check in **Done means**?
 - Does every state have a way out, or is it a finished state?
-- Does every arrow in **States** have a test in **Tests**?
+- Does every rule in **States** have a test in **Tests**? (If your review adds a test the book's doc does not have, your test counts from here on are one higher than the book's. That is fine.)
 - Is there a file in **What changes** with no test, or a test for a file that is not listed?
 - Is there a risk that is not listed?
+- Does any part trust a number it knows might be wrong? (Look at the third risk: if leg 3 can end crooked, should leg 4 hold the heading it starts with, or the 90 degrees the course already knows?)
 
 Fix what the review finds, in new commits on the same branch. Then the teammate approves, and the owner merges (**Create a merge commit**, as always) and deletes the branch. Check one acceptance criterion off: the plan is in `main`.
 
@@ -382,11 +383,13 @@ error: cannot find symbol
   location: variable d of type Decision
 ```
 
-**A record is immutable.** Its fields are `final`, so once a decision is made, it cannot be changed. Try `decision.speedMetersPerSecond = 0.1;`, and:
+**A record is immutable.** Its fields are `final`, so once a decision is made, it cannot be changed. Try `decision.speedMetersPerSecond = 0.1;` inside `ParkAtWall`, and:
 
 ```
 error: cannot assign a value to final variable speedMetersPerSecond
 ```
+
+Try it in a test, and Java stops you even earlier: `speedMetersPerSecond has private access in Decision`. The field is `private` and `final`.
 
 If you want a different decision, make a new one. That is Chapter 14's rule for immutable objects, enforced by the language.
 
@@ -415,13 +418,13 @@ A record is not a general-purpose class, on purpose:
 - **No changing.** Every field is `final`. A record cannot be a robot part whose readings change every loop, or a command whose state moves. `Drivetrain` and `ParkAtWall` are classes, and always will be.
 - **No `extends`.** Every record secretly extends Java's `Record` class, the way every enum extends `Enum` (Section 25.4), so it cannot extend anything else. It **can** `implements` an interface.
 
-It **can** have methods of its own in its braces, and `static` constants. And a record written inside another class is automatically `static`, just like a nested enum (Section 22.3), so `ParkAtWall.Decision` needs no `ParkAtWall` object.
+It **can** have methods of its own in its braces, and `static` constants. And a record written inside another class is automatically `static`, just like a nested enum (Section 22.6), so `ParkAtWall.Decision` needs no `ParkAtWall` object.
 
 The rule of thumb: **if a class only carries values from one place to another, and they never change, make it a record.** If it does things, or remembers things that change, it is a class.
 
 ### You have been using records since Chapter 16
 
-In Chapter 16, `Meters.of(0.5)` gave you a `Distance`. Ctrl+click `of` in VS Code and follow it, and you land in WPILib's units library, at a class that begins:
+In Chapter 16, `Meters.of(0.5)` gave you a `Distance`. Ctrl+click `of` in VS Code, and you land in WPILib's units library, in a method whose one line makes a new `ImmutableDistance`. Ctrl+click `ImmutableDistance` in it, and you reach a class that begins:
 
 ```java
 public record ImmutableDistance(double magnitude, double baseUnitMagnitude, DistanceUnit unit) implements Distance {
@@ -431,12 +434,12 @@ A record with three components that implements an interface: every measure you m
 
 > **AdvantageKit can log a whole record**
 >
-> `Logger.recordOutput` has a version that takes any record, and AdvantageScope shows its components as a folder of fields. It works well for records of numbers, booleans, enums, and WPILib types like `Pose2d`. There is one catch, from AdvantageKit's documentation: the **first** time a record type is logged, AdvantageKit has to work out how to store it, and that first call is slow. On a laptop running the Explorer it took about 9 ms and stretched that loop to about 21 ms, one whole loop; on a roboRIO, which is much slower, it is worse. AdvantageKit's advice is to log each record type for the first time while the robot is disabled. `ParkAtWall` runs in the middle of autonomous, so it logs the decision's two parts separately instead: an enum and a `double`, which cost nothing. Exercise 4 tries the record version.
+> `Logger.recordOutput` has a version that takes any record, and AdvantageScope shows its components as a folder of fields. It works well for records of numbers, booleans, enums, and WPILib types like `Pose2d`. There is one catch, from AdvantageKit's documentation: the **first** time a record type is logged, AdvantageKit has to work out how to store it, and that first call is slow. On a laptop running the Explorer it took about 9 ms and stretched that loop to about 21 ms, one whole loop; on a roboRIO, which is much slower, it is worse. AdvantageKit's advice is to log each record type for the first time while the robot is disabled. `ParkAtWall` runs in the middle of autonomous, so it logs the decision's two parts separately instead: an enum and a `double`, which cost nothing. Practice 4 tries the record version.
 
 ---
 ## 26.5 Tests First
 
-Your design doc lists six tests for `ParkAtWall`'s decisions, as sentences. Chapter 23 taught you to write a test, watch it fail, and only then make it pass. This time, go one step further: write **all** the tests for a new feature before its code exists. That way of working is called **test-driven development** (Chapter 23 named it), and a capstone is the perfect place to try it, because the design doc has already decided what every answer should be.
+Your design doc lists six tests for `ParkAtWall`'s decisions, as sentences. Chapter 23 taught you to write a test, watch it fail, and only then make it pass. This time, go one step further: write the tests for a new feature before its code exists. Strict **test-driven development** (Chapter 23 named it) does that one test at a time: one red test, just enough code to make it green, tidy up, repeat. Here the design doc has already decided what every answer should be, so you write all six first. That is called **test-first**, and a capstone is the perfect place for it. Extension A is a good place to try the one-at-a-time loop.
 
 ### Two people, one keyboard
 
@@ -790,7 +793,7 @@ Almost nothing in it is new. That is the point of a capstone: every piece comes 
 - **The shape is `FollowLine`'s** (Chapters 22 and 23): an enum of states with `isDone()`, decide then act in `execute()`, a pure static method for the decision, and a thin part that gathers the facts.
 - **The pure part returns a record** (Section 26.4), so it can answer "which state" and "how fast" together. The switch expression has no `default` (Section 22.4): add a fourth state, and it stops compiling until you decide what the new state does.
 - **`approach()` is a P controller** (Chapter 15), written out by hand because it is one multiplication: `kP * gapMeters`, clamped to the autonomous speed with `MathUtil.clamp`. It checks "parked?" before "out of road?", so a robot that reaches the wall on the very last centimeter of its safety distance still counts as parked.
-- **The heading hold is `DriveUntilLine`'s** (Section 20.6): its own heading controller, from the factory, with the latest gains applied in `initialize()` (Chapter 24), holding the heading the command started with. The rangefinder only sees straight ahead, so driving straight matters.
+- **The heading hold is `DriveUntilLine`'s** (Section 20.6): its own heading controller, from the factory, with the latest gains applied in `initialize()` (Chapter 24), holding the heading the command started with. The rangefinder only sees straight ahead, so driving straight matters. If leg 3 ends a few degrees crooked, this holds the crooked heading. If your review asked about that (Section 26.3), a fifth constructor parameter, `targetHeadingDegrees`, with `CourseConstants.TURN_HEADING_DEGREES` passed in, would square the robot up as it parks. The book keeps the simpler version, and so does the rest of this chapter.
 - **`parkKp` is a `TunableNumber`** (Chapter 24), read **every loop**, like the follower's steering gain, and for the same reason: a P controller has no memory, so a new gain can take effect mid-run without a jump. The constant `PARK_KP` is its starting value, and stays package-private so the tests can use it.
 - **The gap and the road left are worked out in the thin part,** from the rangefinder and the encoders, in two private helpers. Distances are measured from where the command started, never by resetting the encoders (Chapter 12's rule).
 - **Two outputs, every loop** (Chapter 25): the state, as an enum, and the speed the decision asked for. The rangefinder's reading is already in the log as an input, under `Sensors`.
@@ -802,10 +805,10 @@ Now commit, with both of your names on it. GitHub gives a commit to more than on
 
 ```bash
 git add .
-git commit -m "Ch26: ParkAtWall, its decisions tested first" -m "Co-authored-by: Alex Chen <alexchen@users.noreply.github.com>"
+git commit -m "Ch26: ParkAtWall, its decisions tested first" -m "Co-authored-by: Alex Chen <12345678+alexchen@users.noreply.github.com>"
 ```
 
-Use your partner's name, and the email address their GitHub account uses for commits. If they keep their email private, GitHub gives them a "noreply" address (they can find it in their GitHub **Settings** > **Emails**). Once pushed, the commit shows both partners' pictures on GitHub.
+Use your partner's name, and the email address their GitHub account uses for commits. If they keep their email private, GitHub gives them a "noreply" address. It starts with a number and a `+`, like the one above. Copy it exactly from their GitHub **Settings** > **Emails**; do not build it from the username. Once pushed, the commit shows both partners' pictures on GitHub.
 
 ---
 
@@ -937,7 +940,7 @@ class SensorsIOSimTest {
 }
 ```
 
-Two small things to notice. `readAt()` is a **private static helper** inside a test class, which keeps each test to its Arrange, Act, Assert: tests are code, and the same rules for clean code apply. And `() -> pose` is a lambda that always supplies the same pose: a `Supplier<Pose2d>` (Section 19.6) that a test can build in eight characters.
+Two small things to notice. `readAt()` is a **private static helper** inside a test class, which keeps each test to its Arrange, Act, Assert: tests are code, and the same rules for clean code apply. And `() -> pose` is a lambda that always supplies the same pose: a `Supplier<Pose2d>` (Section 19.6) that a test can build in one short line.
 
 ### Step 4: Leg 4 joins the course
 
@@ -947,9 +950,16 @@ Open `RobotContainer.java` and import the command:
 import frc.robot.commands.ParkAtWall;
 ```
 
-In `buildObstacleCourse()`, add a fifth step after `Leg 3`, inside the sequence:
+In `buildObstacleCourse()`, add a fifth step after `Leg 3`, inside the sequence, and tell the Javadoc about it:
 
 ```java
+/**
+ * Build the obstacle course as one command: drive, turn, drive to the line, follow
+ * the line to its end, and park at the wall, with the LED on the whole way, then
+ * hold still until autonomous ends.
+ *
+ * @return the whole routine, ready to schedule
+ */
 private Command buildObstacleCourse() {
     Command course = Commands.sequence(
         step("Reset Pose", resetPose()),
@@ -1038,7 +1048,7 @@ void courseParksAtTheWall() {
 
 The name changed, because the promise changed: a test's name is the sentence it proves. The x and heading checks stay (the robot is still on the line, still facing up it), and so does the `Line State` check from Section 23.8, which proves leg 3 followed the line. The y check is gone, replaced by a better one: instead of asking "is the robot at this spot on the floor?", the test asks the rangefinder "is the wall 10 cm away?", which is what parking **means**. It is the same measurement the real robot will use.
 
-Why 3 cm? `ParkAtWall` stops the first loop the gap is within 2 cm of the target, and it comes at the wall from the far side, so it parks near the **far** edge of that window, around 12 cm, not exactly 10. Then the simulated robot coasts a little after the motors stop. A 3 cm check says "parked," and nothing more precise than the command itself promises. (Reflect question 2 asks you to explain the 12 cm in your own words.)
+Why 3 cm? `ParkAtWall` stops the first loop the gap is within 2 cm of the target, and it comes at the wall from the far side, so it parks near the **far** edge of that window, around 12 cm, not exactly 10, and the robot coasts a few millimeters more after the motors stop. A 3 cm check says "parked," and nothing more precise than the command itself promises. (Reflect question 2 asks you to explain the 12 cm in your own words.)
 
 Run the tests: **38 tests**, all green. Open the report's **Standard output** for `ObstacleCourseTest`, and read the end of the story: `ParkAtWall started ...`, `ParkAtWall: APPROACHING -> PARKED`, and `ParkAtWall finished in PARKED`, about 0.12 m from the wall.
 
@@ -1046,7 +1056,7 @@ Before you trust a green test, make it fail on purpose (Section 23.2). Set `WALL
 
 ### Step 6: Watch it
 
-Set `ROBOT_MODE` to `SIM`, run the Explorer, and connect AdvantageScope live (**File** > **Connect to Simulator**). Run the course in autonomous. On your Chapter 25 layout's Line Graph, add `RealOutputs` > `ParkAtWall` > `State` to the discrete area and `Sensors` > `DistanceAheadMeters` to the left axis. Watch `Course/Step` reach `Leg 4`, the distance fall smoothly, then slower and slower, and the state flip to `PARKED` just above 0.12. Export the layout again, so leg 4 is in it from now on.
+Set `ROBOT_MODE` to `SIM`, run the Explorer, and connect AdvantageScope live (**File** > **Connect to Simulator**). Run the course in autonomous. On your Chapter 25 layout's Line Graph, add `RealOutputs` > `ParkAtWall` > `State` to the discrete area and `Sensors` > `DistanceAheadMeters` to the left axis. Watch `Course/Step` reach `Leg 4`, the distance fall smoothly, then slower and slower, and the state flip to `PARKED` as the distance crosses 0.12. Export the layout again, so leg 4 is in it from now on.
 
 Then try teleop. Drive the simulated robot toward the pretend wall with the sticks: Chapter 9's wall stop, which lives in `DriveWithSticks` now, stops it 20 cm short, in the simulator, for the first time. The pretend wall did not only make leg 4 testable; it made an old feature testable too.
 
@@ -1059,7 +1069,7 @@ Commit, with both names, and push:
 ```bash
 git status
 git add .
-git commit -m "Ch26: Pretend wall, and leg 4 in the course" -m "Co-authored-by: Alex Chen <alexchen@users.noreply.github.com>"
+git commit -m "Ch26: Pretend wall, and leg 4 in the course" -m "Co-authored-by: Alex Chen <12345678+alexchen@users.noreply.github.com>"
 git push -u origin leg-4
 ```
 
@@ -1121,7 +1131,7 @@ Copy your tuned Park kP into `PARK_KP` in `ParkAtWall.java`. Also copy any other
 
 ```bash
 git add .
-git commit -m "Ch26: Tuned Park kP and the wall gap on our floor" -m "Co-authored-by: Sam Rivera <samrivera@users.noreply.github.com>"
+git commit -m "Ch26: Tuned Park kP and the wall gap on our floor" -m "Co-authored-by: Sam Rivera <87654321+samrivera@users.noreply.github.com>"
 ```
 
 (The teammate is driving now, so the trailer names the owner.)
@@ -1203,7 +1213,7 @@ public final class BuildConstants {
 }
 ```
 
-It is a holder class, like `Constants` (Chapter 21): `final`, a `private` constructor, and nothing but constants. `GIT_SHA` is the hash of the commit you built from. `DIRTY` is `1` if files Git tracks had changes you had not yet added or committed when you built, and `0` if not. (Yours says `1` right now, because you just changed `build.gradle`.)
+It is a holder class, like `Constants` (Chapter 21): `final`, a `private` constructor, and nothing but constants. `GIT_SHA` is the hash of the commit you built from. `DIRTY` is `1` if files Git tracks had changes you had not yet added or committed when you built, and `0` if not. (Yours says `1` right now, because you just changed `build.gradle`.) A change you have `git add`ed but not committed counts as clean too, so commit first, then build.
 
 This file is **generated**: rewritten on every build. Never edit it, and never commit it, or every build would change a file in Git, and `DIRTY` would never be `0`. Open `.gitignore` and add a line at the bottom:
 
@@ -1226,7 +1236,7 @@ Logger.recordMetadata("GitDirty", switch (BuildConstants.DIRTY) {
 Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
 ```
 
-That is a switch expression (Section 22.4) on an `int`, which is why it needs a `default`: unlike an enum, an `int` has billions of possible values, and the compiler insists every one of them has an answer. It is the same code as AdvantageKit's template projects use. Metadata has to be recorded before `Logger.start()`, and these lines are.
+That is a switch expression (Section 22.4) on an `int`, which is why it needs a `default`: unlike an enum, an `int` has billions of possible values, and the compiler insists every one of them has an answer. It records the same strings as AdvantageKit's template projects, written as one switch expression. Metadata has to be recorded before `Logger.start()`, and these lines are.
 
 Build, run the Explorer for a few seconds, and stop. Open the new log in AdvantageScope, and add a **Metadata** tab (the **+** button). There they are: `GitSHA`, `GitBranch`, `GitDirty` saying `Uncommitted changes`, and your `ProjectName` and `RobotMode` from Chapters 17 and 25. Commit, build again, run again, and the new log's `GitDirty` says `All changes committed`. That is the state every release log should be in.
 
@@ -1251,11 +1261,11 @@ Your `README.md` has grown since Chapter 3: a line about the project, maybe the 
 
 ### Step 4: The release pull request
 
-Look at the whole diff before you commit: `git diff main` (Chapter 11). You should see `build.gradle`, `.gitignore`, `Robot.java`, `Constants.java` (`TUNING_MODE` off, the wall gap), `ParkAtWall.java` (your kP), and `README.md`. You should **not** see `BuildConstants.java`. If you do, the `.gitignore` line has a typo.
+Look at the whole diff before you commit: `git diff main` (Chapter 11). You should see `build.gradle`, `.gitignore`, `Robot.java`, `Constants.java` (`TUNING_MODE` off, the wall gap), `ParkAtWall.java` (your kP), `README.md`, and `reflections.md` (your tuning log). You should **not** see `BuildConstants.java`. If you do, the `.gitignore` line has a typo.
 
 ```bash
 git add .
-git commit -m "Ch26: Ready for v1.0.0: tuning off, Git info in every log, README" -m "Co-authored-by: Sam Rivera <samrivera@users.noreply.github.com>"
+git commit -m "Ch26: Ready for v1.0.0: tuning off, Git info in every log, README" -m "Co-authored-by: Sam Rivera <87654321+samrivera@users.noreply.github.com>"
 git push -u origin release-v1.0.0
 ```
 
@@ -1347,7 +1357,7 @@ A tag is a name. A GitHub **release** is a page built around that name, with not
 2. In **Choose a tag**, pick `v1.0.0`.
 3. **Release title**: `XRP Explorer v1.0.0`.
 4. In **Describe this release**, write the release notes (below). The **Generate release notes** button will list every pull request merged so far, with links; you can use it, and then write your own summary above its list.
-5. Leave **This is a pre-release** unchecked, and click **Publish release**.
+5. Leave **Set as a pre-release** unchecked, check that **Set as the latest release** is ticked, and click **Publish release**.
 
 Good release notes answer what a teammate would ask:
 
@@ -1472,7 +1482,7 @@ Do not take your Explorer apart. It is still the fastest robot you have for tryi
 >
 > * A capstone starts with **acceptance criteria**: a short list of checks that prove the work is done. A **design doc** (goal, done means, what changes, states, tests, simulation, logging, tuning, risks, who does what) is reviewed as a pull request before any code.
 > * **Leg 4** parks in front of a wall: the ultrasonic rangefinder measures the gap (distance = speed of sound x echo time / 2), and a **P controller** turns the gap into a speed, backing up if the robot is too close.
-> * **Test-driven development**: write every test from the design doc first, watch them fail for the right reasons, then write the code until they pass. **Pair programming** (driver and navigator) and **`Co-authored-by:`** trailers put both partners on the work.
+> * **Test-first**: write every test from the design doc first, watch them fail for the right reasons, then write the code until they pass. Strict **test-driven development** does the same loop one test at a time. **Pair programming** (driver and navigator) and **`Co-authored-by:`** trailers put both partners on the work.
 > * New Java: **records**. `record Decision(State state, double speedMetersPerSecond) {}` gets `private final` fields, a constructor, accessors without `get`, `equals()` by value, `hashCode()`, and a readable `toString()`. Records are immutable, compare doubles exactly, cannot add fields or `extends`, and fit values that travel together and never change. WPILib's measures are records.
 > * The simulated floor gets a **pretend wall** by ray casting from the rangefinder, so `ObstacleCourseTest` checks parking by what the rangefinder reads. 38 tests.
 > * A **release** is a named, proven, unchanging version: tuning off, `ROBOT_MODE` on `REAL`, every log stamped with its **commit hash** and **dirty** flag by **gversion**, three clean runs in a row checked in their logs and a replay, a **semantic version** (`MAJOR.MINOR.PATCH`), an **annotated tag** pushed with `git push origin v1.0.0`, and a GitHub release with notes and a demo video. `git checkout v1.0.0` gets it back exactly, in **detached HEAD**.
@@ -1518,7 +1528,7 @@ System.out.println(new ParkAtWall.Decision(ParkAtWall.State.APPROACHING, 0.1 + 0
     .equals(new ParkAtWall.Decision(ParkAtWall.State.APPROACHING, 0.3)));
 ```
 
-**4. Log the whole record.** In a practice branch, add `Logger.recordOutput("ParkAtWall/Decision", decision);` in `execute()`. Run the course and open the log: how does AdvantageScope show a record? Now graph `RealOutputs` > `LoggedRobot` > `FullCycleMS` (Section 25.11's Practice 2) around the moment leg 4 starts. Is the first loop of leg 4 slow? AdvantageKit's documentation says to log a record type for the first time while the robot is disabled. Try it: log a `Decision` once at the end of `RobotContainer`'s constructor, and compare. Delete the branch.
+**4. Log the whole record.** In a practice branch, add `Logger.recordOutput("ParkAtWall/Decision", decision);` in `execute()`. Run the course and open the log: how does AdvantageScope show a record? Now graph `RealOutputs` > `LoggedRobot` > `FullCycleMS` (Chapter 25's Practice 2) around the moment leg 4 starts. Is the first loop of leg 4 slow? AdvantageKit's documentation says to log a record type for the first time while the robot is disabled. Try it: log a `Decision` once at the end of `RobotContainer`'s constructor, and compare. Delete the branch.
 
 **5. Read a real release.** Open WPILib's GitHub repository (`wpilibsuite/allwpilib`) and find its **Releases**. Pick the newest one. What is its version, and which of its three numbers changed since the one before? Skim its notes: find one bug fix and one new feature. Then do the same for AdvantageKit. Which would you update to the day before a competition, and which would you wait on?
 
@@ -1540,7 +1550,7 @@ For pairs who finish early, and for the catch-up meetings at the end of the seas
 Design, build, prove, and release leg 4.
 
 1. Check that the teammate is a collaborator on the owner's repository, and both have `main` from the end of Chapter 25 (30 tests).
-2. Write the leg 4 design doc together in `docs/leg-4-design.md`, open it as a pull request, review it with the five questions, and merge it (Section 26.3).
+2. Write the leg 4 design doc together in `docs/leg-4-design.md`, open it as a pull request, review it with the six questions, and merge it (Section 26.3).
 3. On branch `leg-4`, pair-program the outline of `ParkAtWall` and `ParkAtWallTest`. Run the tests: **36 tests, 5 failed** (Section 26.5).
 4. Write the whole `ParkAtWall`. Run the tests: **36, all green**. Commit with a `Co-authored-by:` trailer (Section 26.6).
 5. Add the leg 4 constants, the pretend wall and `SensorsIOSimTest`, leg 4 in the course and the chooser, `getDistanceAheadMeters()`, and the new `courseParksAtTheWall` test. Run the tests: **38**. Make it fail on purpose, then put it back. Watch leg 4 in AdvantageScope, and export the layout (Section 26.7).
@@ -1585,9 +1595,9 @@ git checkout main
 git pull
 git checkout -b leg-4
 git add .
-git commit -m "Ch26: ParkAtWall, its decisions tested first" -m "Co-authored-by: Teammate Name <teammate@users.noreply.github.com>"
+git commit -m "Ch26: ParkAtWall, its decisions tested first" -m "Co-authored-by: Teammate Name <12345678+teammate@users.noreply.github.com>"
 git add .
-git commit -m "Ch26: Pretend wall, and leg 4 in the course" -m "Co-authored-by: Teammate Name <teammate@users.noreply.github.com>"
+git commit -m "Ch26: Pretend wall, and leg 4 in the course" -m "Co-authored-by: Teammate Name <12345678+teammate@users.noreply.github.com>"
 git push -u origin leg-4
 ```
 
@@ -1598,9 +1608,9 @@ git checkout main
 git pull
 git checkout -b release-v1.0.0
 git add .
-git commit -m "Ch26: Tuned Park kP and the wall gap on our floor" -m "Co-authored-by: Owner Name <owner@users.noreply.github.com>"
+git commit -m "Ch26: Tuned Park kP and the wall gap on our floor" -m "Co-authored-by: Owner Name <87654321+owner@users.noreply.github.com>"
 git add .
-git commit -m "Ch26: Ready for v1.0.0: tuning off, Git info in every log, README" -m "Co-authored-by: Owner Name <owner@users.noreply.github.com>"
+git commit -m "Ch26: Ready for v1.0.0: tuning off, Git info in every log, README" -m "Co-authored-by: Owner Name <87654321+owner@users.noreply.github.com>"
 git push -u origin release-v1.0.0
 ```
 
@@ -1624,7 +1634,7 @@ A tag can be deleted, but treat it as permanent: other people (and your own logs
 
 A release is only real if someone **else** can run it. Trade with another pair.
 
-1. Each pair sends the other a link to its release page, and nothing else.
+1. Each pair sends the other a link to its release page, and nothing else. If your repository is private, first add the other pair as collaborators with **Read** access (or, with your mentor's OK, make the repository public), or the link shows them a 404 page. You can remove the access after the swap.
 2. Clone the other pair's repository (into a new folder, not over your own), and `git checkout v1.0.0`. Read their README, and lay out their course on your floor using **only** the README's measurements.
 3. Build it, connect your XRP, run their course three times, and keep the logs.
 4. Report back by opening an **Issue** on their repository (the **Issues** tab, **New issue**): how many of the three runs were clean, your logs' times and final distances, and anything in the README you had to guess. Be specific and kind, the same rules as a code review (Section 11.4).
