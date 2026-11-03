@@ -929,7 +929,7 @@ Give the Explorer its first real autonomous routine: obstacle course leg 1.
 
 1. Lay out the course from Section 12.1 on your floor: start line, corner mark at 0.5 m, black tape line about 0.4 m to the left of the corner.
 2. Update `Robot.java` to the listing in Section 12.7. Build and confirm `BUILD SUCCESSFUL`.
-3. Power on the XRP flat and still, wait for the gyro calibration to finish, and run the program. Add the three new autonomous widgets in Elastic and save the layout (**File** > **Save**).
+3. Power on the XRP flat and still, wait for the gyro calibration to finish, and run the program. Add the three new autonomous widgets in Elastic and save the layout (**File** > **Save As**, replacing `src/main/deploy/elastic-layout.json`).
 4. Place the robot on the start line, on the floor. With your finger on **Disabled** (Section 12.1's safety rules), run autonomous. Watch `Auto Step` count from `1` to `4`.
 5. Read the terminal output and confirm each step started in order. Note how long each step took.
 6. Run it five times. Each time, measure how far from the center of the tape the robot's line sensors stopped. Record the results.

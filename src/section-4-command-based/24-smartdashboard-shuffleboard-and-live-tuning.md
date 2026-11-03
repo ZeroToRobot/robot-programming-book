@@ -160,7 +160,7 @@ On the **Driver** tab, keep only what the drive team needs: `Mode`, `Line State`
 
 ### Step 3: Save the layout in your project
 
-Choose **File** > **Save**. Your layout already lives at `src/main/deploy/elastic-layout.json` (Chapter 9), so this updates that file, ready to commit. If you ever lose track of which file Elastic is saving to, use **File** > **Save As** and pick that path again. Never edit the JSON by hand: Elastic writes it, and Elastic reads it back with **File** > **Open Layout**.
+Choose **File** > **Save As** and replace `src/main/deploy/elastic-layout.json` (Chapter 9), so the file in your project has the new tabs, ready to commit. Plain **File** > **Save** only keeps the layout inside Elastic for next time; it does not change that file. Never edit the JSON by hand: Elastic writes it, and Elastic reads it back with **File** > **Open Layout**.
 
 Why `src/main/deploy`? That folder is where a WPILib project keeps files that travel with the robot program. On a roboRIO, its contents are copied onto the robot every time you deploy, and Elastic can even download a layout straight from the robot with **File** > **Download From Robot** (Practice 6 tries it). That is how a team makes sure every Driver Station laptop shows the same dashboard.
 
@@ -611,7 +611,7 @@ A switch nobody can see is easy to forget, so put it on the dashboard. In `Robot
 SmartDashboard.putBoolean("Tuning Mode", Constants.TUNING_MODE);
 ```
 
-Run the Explorer, add `Tuning Mode` from the **SmartDashboard** table to the **Driver** tab as a **Boolean Box**, and save the layout (**File** > **Save**). If that box is lit at a competition, someone forgot a step.
+Run the Explorer, add `Tuning Mode` from the **SmartDashboard** table to the **Driver** tab as a **Boolean Box**, and save the layout (**File** > **Save As**, replacing `src/main/deploy/elastic-layout.json`). If that box is lit at a competition, someone forgot a step.
 
 ### Step 2: `TunableNumber`
 
@@ -935,7 +935,7 @@ Then add the things you will want to **watch** while you tune, from the **SmartD
 
 These Elastic graphs are quick looks: each shows one value over the last few seconds, with no target line and no way to read a past moment. To read a step response properly, open AdvantageScope too (**File** > **Connect to Simulator** > **NetworkTables 4 (AdvantageKit)**, as in Chapter 17) and graph `Drivetrain` > `HeadingDegrees` on a **Line Graph**. To read the overshoot, click the graph at the peak: the legend shows the value at that moment.
 
-Save the layout again (**File** > **Save**), over the same `src/main/deploy/elastic-layout.json`.
+Save the layout again with **File** > **Save As**, over the same `src/main/deploy/elastic-layout.json`.
 
 Try one change before you go on. Make sure `Heading kP` shows `0.3` (or your own value). Click in it, type `0.6`, and press Enter. Now look at the Simulation GUI's **NetworkTables** window: under **Tuning** > **Drivetrain**, `Heading kP` reads `0.6` there too. One server, many clients, all agreeing. Set it back.
 
@@ -1224,7 +1224,7 @@ As before, the **owner** is the person whose Explorer repository you use, and th
 
 **Part A: two dashboards, one file.** Work at the same time.
 
-1. **Owner:** create a branch `driver-tab-range`. Open the layout in Elastic (**File** > **Open Layout**), add `Distance Ahead (m)` to the Driver tab, and save over `src/main/deploy/elastic-layout.json`. Commit (`Add the rangefinder to the Driver tab`), push, open a pull request, and merge it once it is green.
+1. **Owner:** create a branch `driver-tab-range`. Open the layout in Elastic (**File** > **Open Layout**), add `Distance Ahead (m)` to the Driver tab, and save over `src/main/deploy/elastic-layout.json` (**File** > **Save As**). Commit (`Add the rangefinder to the Driver tab`), push, open a pull request, and merge it once it is green.
 2. **Teammate:** create a branch `driver-tab-heading`. Open the same layout, add `Pose Heading (deg)` to the Driver tab, and save over the same file. Commit (`Add the heading to the Driver tab`) and push.
 3. **Teammate:** bring `main` into your branch, as in Section 11.8: `git fetch origin`, then `git merge origin/main`. Git almost certainly reports a **conflict** in `elastic-layout.json`. Open it in VS Code and look at the conflict markers.
 

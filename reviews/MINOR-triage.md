@@ -51,7 +51,7 @@ New, cross-chapter (for batch 4): the `Drivetrain.periodic()` Javadoc says it ru
 
 Ch 19 to 26 (92 rows), plus the `Drivetrain.periodic()` Javadoc (Ch 17 listing, ch17 to ch19 solutions) and the "AdvantageKit first" wording (Ch 20 and 21). Checked against sources: Elastic 2026.1.1 menus from `Gold872/elastic-dashboard` `lib/pages/dashboard_page.dart` (File: Open Layout, Save, Save As, Download From Robot; no "Export Layout"); AdvantageScope Line Graph docs (click, not hover, to read values); WPILib 2026.2.1 source jars (`MathUtil` throws `AssertionError`); GitHub Docs (releases, noreply emails). Output text in Ch 21, 23, 24 and 25 copied from real runs. Ch 25 gains an optional Practice 9 (`ConstantsTest`); Build test counts unchanged (Ch 23 24, Ch 24 27, Ch 25 30, Ch 26 38).
 
-Carried forward into later chapters in a follow-up commit: `DriveWithSticks` `slowMode` (Ch 20), the Y binding guarded in autonomous (Ch 21), `FollowLine.end()` updating `Line State` (Ch 22), the `Tuning Mode` box (Ch 24), and the Ch 27 "export the layout" step.
+Carried forward into later chapters in a follow-up commit: `DriveWithSticks` `slowMode` (Ch 20), the Y binding guarded in autonomous (Ch 21), `FollowLine.end()` updating `Line State` (Ch 22), the `Tuning Mode` box (Ch 24), and the Ch 27 "export the layout" step. Done in that commit, with ch21 to ch26 rebuilt (tests 24, 27, 30, 38). The same commit corrects the Elastic save steps: in Elastic 2026.1.1 **File > Save** only stores the layout in Elastic's preferences (`saveLayout` in `lib/pages/dashboard/dashboard_page_layouts.dart`), and only **Save As** (`exportLayout`) writes `elastic-layout.json`. Ch 9, 12, 24 and 27 and the Ch 15 and 24 sheets now say Save As wherever the project file must change.
 
 ## Plan
 

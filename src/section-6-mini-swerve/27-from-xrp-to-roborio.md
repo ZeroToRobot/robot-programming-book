@@ -1361,7 +1361,7 @@ If you did the crash drill with a stick in, find that log too, and open its **Co
 
 Chapter 24 promised that the dashboard would come along with one change, and here it is. Open Elastic, click the gear, and set **IP Address Mode** to **Driver Station**: Elastic asks the Driver Station where the robot is, so it follows whatever connection the Driver Station is using. (On the Explorer, it was **localhost**, because the program ran on your laptop.) The bottom of the window turns green.
 
-The Mini Swerve has almost nothing to show yet, which makes it a good time to start its dashboard properly. Make a **Driver** tab with two widgets: the **Alerts** (find `SmartDashboard` > `Alerts` and show it as an Alerts widget), and the battery voltage. Then do Section 24.4's last steps: save, and export the layout to `src/main/deploy/elastic-layout.json`. Remember Section 27.5's `deploy` block: that file now gets copied to the robot on every deploy, and from there, Elastic's **File** > **Download From Robot** can fetch it (Chapter 24's Practice showed how). Commit the layout on a branch, through a pull request.
+The Mini Swerve has almost nothing to show yet, which makes it a good time to start its dashboard properly. Make a **Driver** tab with two widgets: the **Alerts** (find `SmartDashboard` > `Alerts` and show it as an Alerts widget), and the battery voltage. Then save it into the project as in Section 24.4: **File** > **Save As**, to `src/main/deploy/elastic-layout.json`. Remember Section 27.5's `deploy` block: that file now gets copied to the robot on every deploy, and from there, Elastic's **File** > **Download From Robot** can fetch it (Chapter 24's Practice showed how). Commit the layout on a branch, through a pull request.
 
 > **The Driver Station keeps its own log**
 >
@@ -1474,7 +1474,7 @@ Move your team's code onto the Mini Swerve, without moving the robot.
 8. Write `RoboRioTest` and `AutoLightTest`: **6 tests, all green**. Make one fail on purpose, then put it back (Section 27.9).
 9. Push, open the pull request, have a teammate review it, wait for the green check, and merge.
 10. Do the crash drill on a throwaway branch, read the crash in RioLog and in the log's Console, and delete the branch (Section 27.10).
-11. Set up AdvantageScope's robot address, download your logs, and open one. Set up Elastic with **Driver Station** mode, a Driver tab with the Alerts and the battery, and export it to `src/main/deploy/elastic-layout.json` (Section 27.11).
+11. Set up AdvantageScope's robot address, download your logs, and open one. Set up Elastic with **Driver Station** mode, a Driver tab with the Alerts and the battery, and save it with **File** > **Save As** to `src/main/deploy/elastic-layout.json` (Section 27.11).
 12. Turn your notebook fact sheet into `docs/robot.md`, through a pull request (Collab, below).
 
 If RioLog says `Robot mode: REAL`, the RADIO light turns green in autonomous, the Actions tab shows six green tests, and AdvantageScope can open a log from the robot's USB stick, the Mini Swerve has your code on it, and you are ready for Chapter 28.
@@ -1537,7 +1537,7 @@ A team repository works when everyone on the team has used it, not just the owne
 
 - **The fact sheet.** Turn the notebook table into `docs/robot.md`, with every row you know and "unknown" for the rest. The reviewer checks at least three rows against the real robot.
 - **The robot rules.** Copy the Explorer's `CONTRIBUTING.md` (Chapter 11) and add a section for the shared robot: how your team books robot time, your enable word, your mentors' shop rules, the safety rules from Section 27.3, "USB stick in, battery charged" before every session, and "never merge red." The reviewer checks it against what your mentors actually expect.
-- **The dashboard.** The Elastic layout from Section 27.11, exported to `src/main/deploy/elastic-layout.json`. The reviewer deploys it, opens Elastic on their own laptop, and loads the layout from the robot.
+- **The dashboard.** The Elastic layout from Section 27.11, saved to `src/main/deploy/elastic-layout.json`. The reviewer deploys it, opens Elastic on their own laptop, and loads the layout from the robot.
 
 If there are only two of you, split the third one. Afterward, write two sentences in `reflections.md`: which review found something the author missed, and what was it?
 
