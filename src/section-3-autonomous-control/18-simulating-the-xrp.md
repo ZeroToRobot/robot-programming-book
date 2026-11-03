@@ -323,7 +323,7 @@ Here is the top of the constructor now, down to the line that creates `Sensors`.
 
 ```java
 public Robot() {
-    // AdvantageKit first, before anything else is created (Section 17.3).
+    // AdvantageKit first, before anything the constructor creates (Section 17.3).
     Logger.recordMetadata("ProjectName", "XRP Explorer");
     Logger.recordMetadata("Robot", USE_SIMULATED_ROBOT ? "Simulated XRP" : "Real XRP");
     Logger.addDataReceiver(new WPILOGWriter());   // write a log file into logs/
@@ -352,7 +352,7 @@ public Robot() {
 }
 ```
 
-The order matters. AdvantageKit starts first, so it is recording before any hardware exists. `DataLogManager` starts next, as in Chapter 10. Only then is the drivetrain created, so the first thing its constructor does (reading the hardware once) is recorded too.
+The order matters. AdvantageKit starts first, so it is recording before the drivetrain and the sensors exist. `DataLogManager` starts next, as in Chapter 10. Only then is the drivetrain created, so the first thing its constructor does (reading the hardware once) is recorded too.
 
 ### A simulated floor for the other sensors
 
@@ -435,7 +435,7 @@ Now look at the field. The robot is a dot at the start line. Choose **Teleoperat
 
 Then try the routines you already have, in order:
 
-- **The cruise check.** Choose **Test**, hold the left bumper, and watch `Measured Forward (m per s)`. It should settle almost exactly on 0.10, because the simulated robot obeys precisely the model your feedforward was built from.
+- **The cruise check.** Choose **Test**, hold the left bumper, and watch `Measured Forward (m per s)`. It should settle almost exactly on 0.10, because the simulated robot is built from the same SysId gains your feedforward uses. (Not quite the same, though: the simulator averages your two sides, while the feedforward gives each side its own volts. Section 18.6 shows where that peeks through.)
 - **The tuning bench.** Still in Test, press **B** (turn to 90), then **A** (home), then **X** (drive out 0.30 m). Open an AdvantageScope Line Graph (Section 15.9) of the heading setpoint and measurement, and watch PID do its job on a robot made of math.
 - **Autonomous.** Press **Y** to reset the pose, choose **Autonomous**, and watch the dot drive leg 1, turn left, and drive up to the tape. On the field, it should end on the `Course` ghost's last pose, or very close. The event log in VS Code's terminal panel should show each step starting and `Line found after ... m`.
 
@@ -445,7 +445,7 @@ Then try the routines you already have, in order:
 
 ### Watching it in AdvantageScope
 
-Connect AdvantageScope exactly as in Section 17.5: **File** > **Connect to Simulator** > **NetworkTables 4 (AdvantageKit)**. The **Drivetrain** folder has the same eight inputs, and **RealOutputs** > **Drivetrain** has the same `Pose`. Open the Line Graph tab you set up in Chapter 17, hold the left bumper in Test mode, and watch the two speeds climb toward 0.10 and level off, the curve from your table at the start of Section 18.4. Then run autonomous with the 2D Field tab open.
+Connect AdvantageScope exactly as in Section 17.5: **File** > **Connect to Simulator** > **NetworkTables 4 (AdvantageKit)**. The **Drivetrain** folder has the same eight inputs, and **RealOutputs** > **Drivetrain** has the same `Pose`. Open the Line Graph tab you set up in Chapter 17, hold the left bumper in Test mode, and watch the two speeds climb toward 0.10 and level off (a hair apart, one just above and one just below), the curve from your table at the start of Section 18.4. Then run autonomous with the 2D Field tab open.
 
 It all looks the same as it did with the real robot. That is the point.
 
@@ -466,14 +466,15 @@ Run autonomous five times on the simulated robot and record where each step ende
 | Every run the same? | Exactly the same, to the millimeter | A little different each time |
 | Leg 1 ends at 0.50 m? | Almost exactly | Within a centimeter or so |
 | Turn ends at 90 degrees? | Almost exactly | Within your tolerance, plus a little slide |
-| Drives straight? | Perfectly | Curves a little, PID corrects |
+| Drives straight? | Almost: with no PID it drifts a little, PID corrects | Curves a little, PID corrects |
 | Time for the routine | About the same every run | Varies with battery and floor |
 
 The simulator is **too perfect**, and the reasons are all things the model leaves out:
 
 - **No noise.** Simulated encoders and the simulated gyro report exact values. Real ones tick in steps, jitter, and drift.
 - **Perfect heading.** The simulated heading is worked out from the same two wheel distances as the encoders, so gyro and encoders always agree. On the real robot, wheels slip and scrub, and the gyro and encoders disagree a little. (Chapter 14's square that never closed came from exactly that.)
-- **Twin motors.** The simulation averages your two sides' kV and kA, so its two sides are identical, except for kS. Your real robot's sides are not twins.
+- **Twin motors.** The simulation averages your two sides' kV and kA, so its two sides are identical, except for kS. Your real robot's sides are not twins. (Your feedforward still gives each side its own volts, built for its own kV, so on the twin simulated motors one wheel runs a hair fast and the other a hair slow. That is the small drift in the table.)
+- **No friction while coasting.** `subtractFriction` takes kS out of the volts, so it only works while a wheel is being driven. Send 0 volts to a moving simulated wheel and nothing slows it but kV, so a stopped simulated robot slides a little further than the real one. (It also means "less than kS does not move the robot" is true only from a standstill.)
 - **Batteries that never tire.** The model is a snapshot of the day you ran SysId. The simulated robot is always on fresh batteries.
 - **No scrub in turns.** The simulation uses straight-line gains for turning. The real robot fights more friction when it spins in place (Section 16.10).
 

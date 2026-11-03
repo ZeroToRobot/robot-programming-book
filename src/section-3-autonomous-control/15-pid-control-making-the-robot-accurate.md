@@ -282,7 +282,7 @@ D is most useful on things that move fast and coast a long way: a heavy arm swin
 
 The XRP is light and slow, and its friction is so strong that it stops almost the moment the power drops. It barely coasts. So D has little to do, and on the XRP you will probably leave `kD` at zero. Two other reasons to be careful with D:
 
-- **Noise.** The error rate is a **difference** of two readings, divided by a tiny time. One encoder count on the XRP is about 0.3 mm. A single extra count in one loop looks like a speed of `0.0003 ÷ 0.02 = 0.016` m/s, even if nothing really changed. Sensor flicker (Chapter 9) gets multiplied by `kD` and sent straight to the motors, which can make them buzz or twitch.
+- **Noise.** The error rate is a **difference** of two readings, divided by a tiny time. One encoder count on the XRP is about 0.32 mm. A single extra count in one loop looks like a speed of `0.00032 ÷ 0.02 = 0.016` m/s, even if nothing really changed. Sensor flicker (Chapter 9) gets multiplied by `kD` and sent straight to the motors, which can make them buzz or twitch.
 - **Derivative kick.** If the setpoint suddenly jumps (say, from 0 to 90 degrees), the error jumps in a single loop, and the error rate for that one loop is enormous. With a nonzero `kD`, the motors get a one-loop jolt. You may see it as a small twitch at the start of a turn.
 
 > **PID, in one sentence**
@@ -305,7 +305,7 @@ P could be a single line of math. But I and D need **memory**: values that survi
 
 ### Here is the bug
 
-Suppose you add an I term to your hand-written P controller like this:
+Suppose you add an I term to your hand-written P controller like this. (To try it yourself, first add `private static final double HAND_KI = 2.0;   // (m/s) per (m × s) of error` next to `HAND_KP`.)
 
 ```java
 @Override
@@ -364,6 +364,8 @@ And because a field remembers **everything**, including leftovers from the last 
 ```java
 errorSum = 0.0;
 ```
+
+Run it again with the field version. Now the sum keeps growing while the robot is stalled, and leg 1 should finish instead of timing out.
 
 You have used this pattern before. In Chapter 10, `wasBlocked` had to be a field because it remembered the last loop's answer. In Chapter 12, `autoStep` and `stepStartDistanceMeters` had to be fields because they remembered which step you were in and where it started. Now you know the general rule behind all of them.
 
@@ -435,7 +437,7 @@ By default it assumes it will be called every 0.02 seconds, which is exactly how
 
 > **Gains cannot be negative**
 >
-> If your robot drives away from the target instead of toward it, it is tempting to make `kP` negative. Do not. `PIDController` throws an `IllegalArgumentException` with the message `Kp must be a non-negative number!` the moment you try (Chapter 10 taught you to read that). A robot that runs away from its setpoint has a **sign** problem: an encoder counting backward, a gyro reading clockwise as positive, or a motor that needs inverting. Fix the sign where it starts, in `Drivetrain`'s getters, the way Chapter 9 taught you, and every controller that uses that getter is fixed at once.
+> If your robot drives away from the target instead of toward it, it is tempting to make `kP` negative. Do not. If you pass a negative gain to the constructor, `PIDController` throws an `IllegalArgumentException` with the message `Kp must be a non-negative number!` (Chapter 10 taught you to read that). But a negative number typed into the dashboard's PID widget later (Section 15.9) is accepted without a word, and the robot runs away. A robot that runs away from its setpoint has a **sign** problem: an encoder counting backward, a gyro reading clockwise as positive, or a motor that needs inverting. Fix the sign where it starts, in `Drivetrain`'s getters, the way Chapter 9 taught you, and every controller that uses that getter is fixed at once.
 
 ### Using it: `calculate`
 
@@ -493,7 +495,7 @@ headingController.setIZone(10.0);
 
 `setIZone(10.0)` means "if the error is bigger than 10, clear the error sum and do not add to it." The I term only works inside the last 10 units of the approach (10 degrees, for a heading controller). By default, there is no I zone at all.
 
-The cap on the sum is already on by default: WPILib never lets the I term's contribution to the output go above `1.0` or below `-1.0`. You can change that range with `setIntegratorRange(min, max)`, in the same units as the output. On the XRP, where the outputs are in meters or radians per second, the default is a reasonable cap, so you can leave it alone.
+The cap on the sum is already on by default: WPILib never lets the I term's contribution to the output go above `1.0` or below `-1.0`. You can change that range with `setIntegratorRange(min, max)`, in the same units as the output. For the heading controller, whose output is clamped at 2 radians per second anyway, the default is a reasonable cap, so you can leave it alone. For the distance controller it caps nothing: 1.0 m/s is five times the 0.20 m/s the robot is ever asked for. If you ever add I to the distance controller, give it an I zone in **meters**, a few centimeters (for example `distanceController.setIZone(0.03)`), and consider a tighter cap such as `distanceController.setIntegratorRange(-0.1, 0.1)`.
 
 ### Angles that wrap around: continuous input
 
@@ -1063,7 +1065,7 @@ In Test mode, both controllers run all the time, holding whatever target the but
 | **X** | Distance 0.30 m, heading 0 | Drives 30 cm forward, holding its heading |
 | **Y** | (unchanged from Chapter 14) | Resets the pose: "here is home now" |
 
-Press **B**, then **A**, then **B**, then **A**, and you get a series of 90 degree turns, left and right, in place, as many as you like. Press **X**, then **A**, and the robot drives 30 cm out and back. Each press clears both controllers' memory, through `setBenchTarget()`, so every test starts fresh.
+Press **B**, then **A**, then **B**, then **A**, and you get a series of 90 degree turns, left and right, in place, as many as you like. Press **X**, then **A**, and the robot drives 30 cm out and back. Each button sets **both** targets, so after a drive, press **A** before **B**: X then B drives back toward home while it turns, along a curve, and ends up somewhere you did not expect. Each press clears both controllers' memory, through `setBenchTarget()`, so every test starts fresh.
 
 To enter Test mode, choose **Test** where you normally choose Autonomous or Teleoperated (in the Simulation GUI's **Robot State** panel), with your controller set up as in Chapter 8. Give the robot room to drive 30 cm forward, and keep a hand nearby in case it heads somewhere you did not expect.
 
@@ -1120,8 +1122,8 @@ The dashed line is the setpoint. On the left, the robot creeps up and stalls bel
 There are entire books about tuning, but this recipe works for most FRC mechanisms, and it works for the XRP. Do the **heading** controller first (turns are the hardest job), using B and A.
 
 1. **Start simple.** Set **I** and **D** to `0`. Set **P** small: `0.05`.
-2. **Find the edge.** Press B and A a few times and watch the plot. Then **double** P and try again: `0.1`, `0.2`, `0.4`, `0.8`, and so on. Each time, the robot gets quicker and stops closer. Keep going until the robot overshoots and rings (swings past and back at least once). That is the edge.
-3. **Back off.** Set P to about **half** of the value that rang. Test turns in both directions (B then A is a left turn; A then B is a right turn).
+2. **Find the edge.** Press B and A a few times and watch the plot. Then **double** P and try again: `0.1`, `0.2`, `0.4`, `0.8`, and so on. Each time, the robot gets quicker and stops closer. Keep going until the robot overshoots and rings (swings past and back at least once). That is the edge. If P reaches about `2` and the robot still does not ring, stop: the 2 rad/s clamp is doing the limiting, so a bigger P changes almost nothing. In step 3, instead of halving, use the smallest P that finishes inside the tolerance without a visible bump.
+3. **Back off.** Set P to about **half** of the value that rang. Test turns in both directions: pressing **B** turns left to 90, and pressing **A** after it turns right, back to 0. Watch both on the plot; friction is often different each way.
 4. **Close the last gap with I, only if needed.** If the robot still stalls a few degrees short, outside the 2 degree tolerance, set the **IZone** a little bigger than the gap (the listing uses 10 degrees) and raise **I** in small steps, starting around `0.1`. Watch for the robot to stall briefly, then nudge itself the rest of the way. If it starts overshooting, or pausing and then jumping past, I is too high: lower it.
 5. **Try D, only if needed.** If the robot overshoots and you cannot lower P without it stalling, try a small **D**, like `0.005`. On the XRP, you will probably find D does little; leave it at `0` if so.
 6. **Check it at the edges.** Test a few turns with tired batteries, and a few on a different surface. A tune that only works on fresh batteries is not done.
@@ -1165,7 +1167,7 @@ Auto step 4 started at 6.33 s, Pose2d(Translation2d(X: 0.50, Y: 0.39), Rotation2
 
 - **Step 2's line** is where leg 1 ended. In Chapter 14 it ended past `X: 0.50` with the heading a degree or so off. Now it should end within a centimeter of `0.50`, with the heading near `0`, because one controller stopped it on the mark while the other held it straight.
 - **Step 3's line** is where the turn ended. In Chapter 14 the turn ended the moment the heading passed 90, then the robot coasted further. Now it ends only once the heading has **settled** within 2 degrees of 90.
-- **The times got longer.** Leg 1 took about 3 seconds instead of 2.6, and the turn took longer too. Slowing down near a target costs time. That is the trade: bang-bang is fast and sloppy, PID is a little slower and much more accurate. In Chapter 16, feedforward will win some of that time back.
+- **The times got longer.** Leg 1 took about 3 seconds instead of 2.6, and the turn took longer too. Slowing down near a target costs time. That is the trade: bang-bang is fast and sloppy, PID is a little slower and much more accurate. In Chapter 16, feedforward will win some of that time back. Notice, too, that each step starts by asking for full speed at once. A smarter controller plans a smooth speed-up, a steady cruise, and a slow-down (a **motion profile**), and runs PID on that moving target. WPILib's `ProfiledPIDController` does exactly that. Chapter 35 uses it for arms, and the same class works for driving to a distance or turning to a heading.
 
 Then measure the truth with your tape measure, exactly as you did in Chapter 14's Build, and compare. The Build exercise has you do this five times and fill in a before-and-after table. This is the moment the chapter has been building to: the same robot, the same course, and a measurably better result, because the robot now corrects itself.
 
@@ -1180,13 +1182,13 @@ Then measure the truth with your tape measure, exactly as you did in Chapter 14'
 You will write PID code, or tune someone else's, on every robot for the rest of this book. Here is where it shows up next:
 
 - **Chapter 16, feedforward.** SysId measures what it takes to move your XRP, including the friction term **kS**. Then the output becomes **feedforward plus PID**: feedforward predicts most of the power, and PID only corrects what is left. The steady-state gaps that needed `kI` in this chapter mostly disappear.
-- **Chapter 20, commands.** These two controllers move into commands called `DriveDistance` and `TurnToAngle`, which own their own controllers and use `atSetpoint()` to decide when they are finished. The ideas do not change; only where the code lives.
+- **Chapter 20, commands.** These two controllers move into commands called `DriveDistance` and `TurnToHeading`, which own their own controllers and use `atSetpoint()` to decide when they are finished. The ideas do not change; only where the code lives.
 - **Chapter 24, live tuning.** More ways to tune from the dashboard, and to keep the tuned numbers.
 - **Chapters 28 and 33, motor controllers.** A Talon FX can run its own PID loop on its own processor, much faster than 50 times a second, right next to the motor. You give it gains and a setpoint over the CAN bus. Chapter 28 introduces the Talon FX, and Chapter 33 moves the Mini Swerve's loops onto it.
 - **Chapter 29, swerve.** Every swerve module steers its wheel to an angle with a PID controller with continuous input, exactly like your heading controller.
 - **Chapter 32, path following.** PathPlanner's controller takes **two** sets of PID gains: one that pushes the robot back onto the path's position, and one that holds the path's heading. That is your leg 1 drive, plus the cascade from Practice 5, in every direction at once.
 - **Chapter 34, vision.** Auto-align turns the robot until a camera says the target is centered: a heading controller whose measurement comes from a camera instead of a gyro.
-- **Chapter 35, mechanisms.** Arms and elevators use a cousin called `ProfiledPIDController`, which moves the setpoint smoothly instead of letting it jump. A smooth setpoint means no derivative kick, and no slamming a heavy arm into motion.
+- **Chapter 35, mechanisms.** Arms, elevators, and smooth drive-to-distance moves use a cousin called `ProfiledPIDController`, which moves the setpoint smoothly instead of letting it jump. A smooth setpoint means no derivative kick, and no slamming a heavy arm into motion.
 
 It is all the same three terms. The measurement changes, the output changes, the units change. Error now, error over time, error rate. Once you can tune a turn on a desk robot, you can tune almost anything.
 
@@ -1223,7 +1225,7 @@ It is all the same three terms. The measurement changes, the output changes, the
 
 The first row is done for you. Then answer: Which term shrinks fastest as the robot arrives? Which one grows? What would the clamp in `calculateTurnRate()` do to loop 1's output? Why is the D column negative the whole time?
 
-**3. Build your own PID controller.** Create `SimplePID.java` from Section 15.6. Type it, do not paste. Then, in your `Robot()` constructor, add temporary test lines that create a `SimplePID` and a WPILib `PIDController` with the **same** gains (`0.3`, `0.5`, `0.004`), feed both the same five measurements, one call each (`81.0`, `82.0`, `85.0`, `87.5`, `89.0`, all with a setpoint of `90.0`), and print both outputs side by side. They should match. Look at the first output: it is much bigger than the others. Explain why, using the words "previous error" and "derivative kick." Then break `SimplePID` on purpose: move `errorSum` inside `calculate` as a local variable (`double errorSum = 0.0;` as its first line). Rerun. What happens to the I term, and why? Put it back, remove the test lines, and keep `SimplePID.java` or delete it (the robot does not use it).
+**3. Build your own PID controller.** Create `SimplePID.java` from Section 15.6. Type it, do not paste. Then, in your `Robot()` constructor, add temporary test lines that create a `SimplePID` and a WPILib `PIDController` with the **same** gains (`0.3`, `0.5`, `0.004`), feed both the same five measurements, one call each (`81.0`, `82.0`, `85.0`, `87.5`, `89.0`, all with a setpoint of `90.0`), and print both outputs side by side. They should match. Look at the first output: it is much bigger than the others. Explain why, using the words "previous error" and "derivative kick." Then break `SimplePID` on purpose: add `double errorSum = 0.0;` as the first line of `calculate` (leave the field where it is: the new local variable hides it, and `reset()` still compiles). Rerun. What happens to the I term, and why? Put it back, remove the test lines, and keep `SimplePID.java` or delete it (the robot does not use it).
 
 **4. Which way around?** A heading controller has continuous input on `-180` to `180`. For each setpoint and measurement, predict the error the controller uses, and say which way the robot turns (left or right) and by how much:
 
@@ -1253,7 +1255,7 @@ private double getLineHoldHeadingDegrees() {
 }
 ```
 
-Test it: during leg 1, give the front of the robot a gentle sideways nudge with a finger, about a third of the way down the leg. Do five runs with the cascade and five without (use the plain `LEG_1_HEADING_DEGREES`). Record `Pose Y` at the end of leg 1 for each run. Which version ends closer to `y = 0`? Explain in two sentences why the plain heading hold cannot fix a nudge, and the cascade can. (Notice that `CROSS_TRACK_DEGREES_PER_METER` is a gain, too. It is a P controller whose output is another controller's setpoint.) Keep whichever version you prefer.
+Test it: during leg 1, give the front of the robot a gentle sideways nudge with a finger, about a third of the way down the leg. Do five runs with the cascade and five without (use the plain `LEG_1_HEADING_DEGREES`). Record `Pose Y` at the end of leg 1 for each run, **and** measure the real sideways offset from the leg 1 line with a tape measure. Then do one more test that odometry can see: temporarily change `autonomousInit()` to `drivetrain.resetPose(new Pose2d(0.0, 0.03, new Rotation2d()))` (odometry starts out believing the robot is 3 cm left of the line), and compare `Pose Y` at the end of leg 1 with and without the cascade. Put `START_POSE` back afterward. Which version ends closer to `y = 0`, in `Pose Y` and on the tape measure? Explain in two sentences why the plain heading hold cannot fix a sideways offset, and the cascade can. Then explain why neither can fix a slide: if the wheels slid sideways without turning, the encoders never felt it, so odometry (and every controller that trusts it) thinks the robot is still on the line. (Notice that `CROSS_TRACK_DEGREES_PER_METER` is a gain, too. It is a P controller whose output is another controller's setpoint.) Keep whichever version you prefer.
 
 ### Build (XRP Explorer)
 
@@ -1270,7 +1272,7 @@ Replace the open-loop drive and turn with PID, tune it, and measure the improvem
 Diagnose anything strange:
 
 - **The robot drives backward or spins away from the target:** a sign is backward somewhere. Check that `Avg Distance (m)` goes up when you push forward and `Heading (deg)` goes up when you turn left (Chapter 9). Fix it in the getter, never with a negative gain. (A negative gain will not even run: the constructor throws `IllegalArgumentException`.)
-- **Leg 1 never ends and times out after 7 seconds:** the distance controller is stalling outside its 1 cm tolerance. Watch `Distance Error (m)` when it stops. Raise `DISTANCE_KP`, or add a small `DISTANCE_KI` with an I zone (copy the heading controller's setup).
+- **Leg 1 never ends and times out after 7 seconds:** the distance controller is stalling outside its 1 cm tolerance. Watch `Distance Error (m)` when it stops. Raise `DISTANCE_KP`, or add a small `DISTANCE_KI` with an I zone in meters (a few centimeters, such as `distanceController.setIZone(0.03)`; not the heading controller's 10, which would be 10 meters).
 - **The turn never ends and times out:** same idea for the heading. Watch `Heading Error (deg)`. If it is stuck at a few degrees, raise `HEADING_KI` a little. If it keeps swinging back and forth, lower `HEADING_KP`.
 - **The robot spins the long way around (more than 180 degrees) to reach a heading:** `enableContinuousInput(-180.0, 180.0)` is missing from the constructor.
 - **The I term seems to do nothing:** check that you edited the **I** box (not the IZone box), that the I zone is not `0`, and that the error is inside the I zone. An I zone smaller than the stall gap means the sum is cleared every loop.

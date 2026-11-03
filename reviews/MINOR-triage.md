@@ -41,6 +41,12 @@ The two missed MAJORs (ch02-M1: Git moved from Ch 2 into Ch 3 Section 3.6, which
 
 Ch 1 to 11 and the book-wide rows, except bw-m3 (Ch 14, moved to batch 3). Checked online: bw-m4 (docs.wpilib.org keeps `/en/2025/` and `/en/2024/`), ch02-m2 (XRP firmware 2.1.0 is still the latest), ch10-m4 (Simulate Robot Code launches the Java debugger, `vscode-wpilib` `simulate.ts`), ch11-m4 (Student Developer Pack includes GitHub Pro, which has protected branches on private repos), ch11-v6 (GitHub shows the contributing link when someone opens a PR or an issue). Probed: the GradleRIO `Compilation Error!` banner prints right after `compileJava FAILED`, before `FAILURE:`. Also fixed along the way: the Ch 2 exercise sheet (Simulate Robot Code, no Driver Station or deploy), the Ch 3 exercise sheet (no Ch 2 commit, `pull.rebase false`, sign-in), Ch 4 `Uptime` replaces `Match Time` in the chapter and solution, and Ch 29 `TRACKWIDTH_METERS` (ch29 solution builds, tests pass).
 
+## Batch 3 (done 2026-11-02)
+
+Ch 12 to 18 and bw-m3. ch14-m3 and bw-m3 went into CLAUDE.md as promises for the stub chapters (Ch 30 and 32 flip for the red alliance; Ch 31 compares drift per meter). Checked against sources: ch16-m3 (the SysId labels "Diagnostic Plots" and "Direction" are right, allwpilib v2026.2.1 `Analyzer.cpp`), Ch 16 sample log copied from a real simulated run of the Ch 16 solution, Ch 12 and 14 sample numbers taken from the VERIFY probes. Ch 12 log times and timeout still wait on the top-speed measurement. Still open: whether AdvantageScope draws a second pose as a ghost (ch14-m2, needs the app).
+
+New, cross-chapter (for batch 4): the `Drivetrain.periodic()` Javadoc says it runs "before anything else asks the drivetrain a question", but the mode methods run before `robotPeriodic()`. The same Javadoc is copied into the Ch 17 listing and every later `Drivetrain.java`, so fix it everywhere at once.
+
 ## Plan
 
 Fix in five batches, one commit per batch in each repo, exercises and solutions updated with the chapter and rebuilt where code changes: (1) the missed MAJORs and high-priority items; (2) Ch 1 to 11; (3) Ch 12 to 18; (4) Ch 19 to 26; (5) Ch 27 to 29. VERIFY-WEB items are checked online inside their batch; HARDWARE items are left for Devang. Mark each row's status in this file as it lands.
@@ -54,7 +60,7 @@ Fix in five batches, one commit per batch in each repo, exercises and solutions 
 |---|---|---|---|---|---|
 | bw-m1 | `TRACKWIDTH_METERS` vs `TRACK_WIDTH_METERS`; Spark MAX spellings | DONE (batch 2) | M | XRP Ch 13 to 18+ use `TRACKWIDTH_METERS`, only Ch 29 (swerve) uses `TRACK_WIDTH_METERS`: rename Ch 29's 7 uses (and "track width" prose) to `TRACKWIDTH_METERS`/"trackwidth" to match WPILib and the XRP chapters, plus the ch29 solution. Ch 1 prose "Spark MAX" (2x) becomes "SPARK MAX" | `section-6-mini-swerve/29-swerve-kinematics.md`, `ch29-*/solution`, `section-1-foundations/01-*.md` |
 | bw-m2 | Ch 23 title names retired apps | DONE | | Now Ch 24 "Live Tuning and the Autonomous Chooser" in heading and `SUMMARY.md` | `src/SUMMARY.md`, `24-*.md` |
-| bw-m3 | No alliance-flip preview before swerve chapters | FIX | S | Ch 14 line 108 already mentions the blue-wall origin; add one sentence: red robots flip paths and poses, covered in Ch 30 and Ch 32 (old 29, 31) | `section-3-autonomous-control/14-*.md` |
+| bw-m3 | No alliance-flip preview before swerve chapters | DONE (batch 3) | S | Ch 14 line 108 already mentions the blue-wall origin; add one sentence: red robots flip paths and poses, covered in Ch 30 and Ch 32 (old 29, 31) | `section-3-autonomous-control/14-*.md` |
 | bw-m4 | Docs links use `/en/stable/`, will move to 2027 | DONE (batch 2) | S | Check whether docs.wpilib.org keeps a per-year path (e.g. `/en/2025/`) once a season rolls over. If not, add one line under the Ch 2 versions table about using the docs version picker | `section-1-foundations/02-*.md` |
 | bw-m5 | CLAUDE.md "Current status" stale | DONE | | CLAUDE.md line 212 now says Ch 1 to 29 written, 30 to 40 stubs | `CLAUDE.md` |
 
@@ -219,40 +225,40 @@ DONE 12, FIX 47, VERIFY-WEB 1, HARDWARE 0, SKIP 1 (61 items).
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch12-m1 | "Wheels scrub" wrong reason for a 2-wheel XRP | FIX | M | Line 344: encoders mislead in turns from wheel slip, caster drag, and contact points not exactly 155 mm apart; scrub is a 4/6-wheel FRC thing; Ch 13 measures it. Line 378: "friction of the caster dragging". Summary line 871 too. Consider Ch 14 lines 180, 1055 for consistency. | book 12 (and 14) |
-| ch12-m2 | `>=` turn check only works for left turns | FIX | S | After line 372: "This check only works for left turns; a right turn to -90 needs `<=` and negative rotation. Ch 15's PID with tolerance turns either way." | book 12 |
-| ch12-v2 | "0.5 means 0.5" ignores default 0.02 deadband rescale (0.4898) | FIX | S | Line 167: add "(almost: `DifferentialDrive`'s tiny 0.02 deadband from Ch 8 makes it 0.49)". | book 12 |
-| ch12-v3 | Sample log omits `XRP Explorer started!`, shows rounded times | FIX | S | Lines 806 to 815: add `XRP Explorer started!` line and note real times print as long decimals (e.g. `1.1799999999999997 s`). Times themselves wait on the open top-speed HARDWARE item. | book 12 |
-| ch12-v4 | Intro says turn for half a second, course turns 0.6 s | FIX | S | Line 7: "then turn for a little over half a second" or "for 0.6 seconds". | book 12 |
+| ch12-m1 | "Wheels scrub" wrong reason for a 2-wheel XRP | DONE (batch 3) | M | Line 344: encoders mislead in turns from wheel slip, caster drag, and contact points not exactly 155 mm apart; scrub is a 4/6-wheel FRC thing; Ch 13 measures it. Line 378: "friction of the caster dragging". Summary line 871 too. Consider Ch 14 lines 180, 1055 for consistency. | book 12 (and 14) |
+| ch12-m2 | `>=` turn check only works for left turns | DONE (batch 3) | S | After line 372: "This check only works for left turns; a right turn to -90 needs `<=` and negative rotation. Ch 15's PID with tolerance turns either way." | book 12 |
+| ch12-v2 | "0.5 means 0.5" ignores default 0.02 deadband rescale (0.4898) | DONE (batch 3) | S | Line 167: add "(almost: `DifferentialDrive`'s tiny 0.02 deadband from Ch 8 makes it 0.49)". | book 12 |
+| ch12-v3 | Sample log omits `XRP Explorer started!`, shows rounded times | DONE (batch 3) | S | Lines 806 to 815: add `XRP Explorer started!` line and note real times print as long decimals (e.g. `1.1799999999999997 s`). Times themselves wait on the open top-speed HARDWARE item. | book 12 |
+| ch12-v4 | Intro says turn for half a second, course turns 0.6 s | DONE (batch 3) | S | Line 7: "then turn for a little over half a second" or "for 0.6 seconds". | book 12 |
 | ch12-v5 | CLAUDE.md Ch 12 entry "plus a timed segment" | DONE | S | CLAUDE.md line 111 now describes the chapter correctly; no "timed segment". | CLAUDE.md |
 
 ## Ch 13
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch13-m1 | Diagnose says print private `speedToPower` | FIX | S | Line 1009: "Check the constant. If it looks right, add a temporary `println` inside `drive()` that prints the two powers, then remove it." | book 13, ex ch13 assignment.md (check) |
-| ch13-m2 | Mutate vs return-new rule overstated; Ch 28 `withOutput` breaks it | FIX | S | Line 487: "return type is a strong hint ... returns same class usually builds a new one, but not always (Chapter 28 shows one that changes the object and returns it). Check the Javadoc." Confirm the `withOutput` section's new chapter number. | book 13 |
-| ch13-m3 | Practice 4 retypes 0.28 and 0.155 as magic numbers | FIX | M | Make `MAX_WHEEL_SPEED_METERS_PER_SECOND` and `TRACKWIDTH_METERS` public (or add getters) and use them by name in lines 987 to 988; same in assignment and answer key. | book 13, ex ch13 assignment.md, answer-key.md |
-| ch13-m4 | Feedforward callout calls kV "voltage" though code uses power | FIX | S | Line 543: "how much extra push each m/s needs. Here push is power (1/0.28, about 3.6); in Ch 16 you'll measure it in volts, so the number looks different." | book 13 |
-| ch13-v1 | "left 0.21, right 0.5" only true with squaring off | FIX | S | Line 221: add "with squaring off; with Ch 8's squared call it's about 0.18 and 0.25" (matches Ch 8 line 340). | book 13 |
-| ch13-v2 | `tankDrive` "more or less straight" hides 0.02 deadband rescale | FIX | S | Line 762: name the 0.02 deadband rescale, or add `diffDrive.setDeadband(0.0)` in the constructor (M if code route: listings and solutions Ch 13 on). | book 13 |
-| ch13-v3 | "turn will be the wrong shape" wrong (desaturate runs first) | FIX | S | Line 1010: "every power is huge; desaturate caps the faster wheel at 1.0 and keeps the turn's shape, but the robot runs at full power". | book 13 |
-| ch13-v4 | "Only two parts of Robot.java change" forgets import and `Measured` widgets | FIX | S | Line 790: list the import and the two `Measured` widgets from 13.8 too. | book 13 |
+| ch13-m1 | Diagnose says print private `speedToPower` | DONE (batch 3) | S | Line 1009: "Check the constant. If it looks right, add a temporary `println` inside `drive()` that prints the two powers, then remove it." | book 13, ex ch13 assignment.md (check) |
+| ch13-m2 | Mutate vs return-new rule overstated; Ch 28 `withOutput` breaks it | DONE (batch 3) | S | Line 487: "return type is a strong hint ... returns same class usually builds a new one, but not always (Chapter 28 shows one that changes the object and returns it). Check the Javadoc." Confirm the `withOutput` section's new chapter number. | book 13 |
+| ch13-m3 | Practice 4 retypes 0.28 and 0.155 as magic numbers | DONE (batch 3) | M | Make `MAX_WHEEL_SPEED_METERS_PER_SECOND` and `TRACKWIDTH_METERS` public (or add getters) and use them by name in lines 987 to 988; same in assignment and answer key. | book 13, ex ch13 assignment.md, answer-key.md |
+| ch13-m4 | Feedforward callout calls kV "voltage" though code uses power | DONE (batch 3) | S | Line 543: "how much extra push each m/s needs. Here push is power (1/0.28, about 3.6); in Ch 16 you'll measure it in volts, so the number looks different." | book 13 |
+| ch13-v1 | "left 0.21, right 0.5" only true with squaring off | DONE (batch 3) | S | Line 221: add "with squaring off; with Ch 8's squared call it's about 0.18 and 0.25" (matches Ch 8 line 340). | book 13 |
+| ch13-v2 | `tankDrive` "more or less straight" hides 0.02 deadband rescale | DONE (batch 3) | S | Line 762: name the 0.02 deadband rescale, or add `diffDrive.setDeadband(0.0)` in the constructor (M if code route: listings and solutions Ch 13 on). | book 13 |
+| ch13-v3 | "turn will be the wrong shape" wrong (desaturate runs first) | DONE (batch 3) | S | Line 1010: "every power is huge; desaturate caps the faster wheel at 1.0 and keeps the turn's shape, but the robot runs at full power". | book 13 |
+| ch13-v4 | "Only two parts of Robot.java change" forgets import and `Measured` widgets | DONE (batch 3) | S | Line 790: list the import and the two `Measured` widgets from 13.8 too. | book 13 |
 
 ## Ch 14
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch14-m1 | `resetPose` teaches hardware zeroing as the rule | FIX | M | Add callout after the walk-through (line ~660): "You don't actually have to zero the sensors": `resetPosition` with current readings alone moves the pose; Explorer zeroes only because the turn step reads raw heading; Ch 17 switches to software zeroing. | book 14 |
-| ch14-m2 | Field map rewrite to AdvantageScope 2D Field | FIX | S | Main rewrite DONE (lines 693 to 717, 1181, 1194 to 1195, Evergreen, Resources). Leftover: Practice 4 line 1173 "the Field window open" to "AdvantageScope's 2D Field open". Whether a second pose on Poses draws as a ghost by default needs a look in AdvantageScope (HARDWARE). | book 14 |
-| ch14-m3 | Practice 2 promise to Ch 31 (drift per meter) unrecorded | FIX | S | Add "compare Ch 14 Practice 2 drift per meter with the Mini Swerve" to the Ch 31 entry in CLAUDE.md and the promises list in 00-book-wide.md (old "Ch 30" row). Line 1085 sim-vs-real promise is now kept by Ch 18. | CLAUDE.md, reviews/00-book-wide.md |
-| ch14-v1 | "four new imports" in Robot.java, really three | FIX | S | Line 723: "three new imports" (Pose2d, Rotation2d, Field2d). | book 14 |
-| ch14-v2 | `autonomousPeriodic` runs before `robotPeriodic`; logged pose is a loop stale; 91.10 sample | FIX | S | Line 994: "before the dashboard reads the pose" and note mode methods see last loop's pose; line 1026: heading just under 90 (e.g. `Rads: 1.55, Deg: 88.79`). | book 14 |
-| ch14-v3 | Reason for constructing odometry in constructor misstated; "(Chapter 12)" | FIX | S | Line 655: starting readings would be taken before encoders are set up and zeroed, so a leftover count becomes a jump on the first update; "(Chapter 10)". | book 14 |
-| ch14-v4 | "In Chapter 20 ... `periodic()`": Ch 17 introduces it | FIX | S | Line 664: "In Chapter 17 the update moves into `periodic()`, and in Chapter 20 WPILib starts calling it for you." | book 14 |
-| ch14-v5 | Practice 1 move 6 needs cos/sin 135, not in 14.3 table | FIX | S | Add row after line 139: `| 135 degrees | -0.707 | 0.707 | equal parts -x and +y |`. | book 14 |
-| ch14-v6 | Uniform wheel-size error doesn't open a closed square | FIX | S | Line 1057: add "It shows on straight runs like the course; on a closed square it mostly cancels, because every side is equally too long." | book 14 |
-| ch14-v7 | Practice 4 encoder-only reset after a straight push looks correct | FIX | S | Line 1173: "drive forward 30 cm, turn left a quarter turn, drive 20 cm, and press Y"; ask where the icon lands and why. | book 14 |
+| ch14-m1 | `resetPose` teaches hardware zeroing as the rule | DONE (batch 3) | M | Add callout after the walk-through (line ~660): "You don't actually have to zero the sensors": `resetPosition` with current readings alone moves the pose; Explorer zeroes only because the turn step reads raw heading; Ch 17 switches to software zeroing. | book 14 |
+| ch14-m2 | Field map rewrite to AdvantageScope 2D Field | DONE (batch 3) | S | Main rewrite DONE (lines 693 to 717, 1181, 1194 to 1195, Evergreen, Resources). Leftover: Practice 4 line 1173 "the Field window open" to "AdvantageScope's 2D Field open". Whether a second pose on Poses draws as a ghost by default needs a look in AdvantageScope (HARDWARE). | book 14 |
+| ch14-m3 | Practice 2 promise to Ch 31 (drift per meter) unrecorded | DONE (batch 3) | S | Add "compare Ch 14 Practice 2 drift per meter with the Mini Swerve" to the Ch 31 entry in CLAUDE.md and the promises list in 00-book-wide.md (old "Ch 30" row). Line 1085 sim-vs-real promise is now kept by Ch 18. | CLAUDE.md, reviews/00-book-wide.md |
+| ch14-v1 | "four new imports" in Robot.java, really three | DONE (batch 3) | S | Line 723: "three new imports" (Pose2d, Rotation2d, Field2d). | book 14 |
+| ch14-v2 | `autonomousPeriodic` runs before `robotPeriodic`; logged pose is a loop stale; 91.10 sample | DONE (batch 3) | S | Line 994: "before the dashboard reads the pose" and note mode methods see last loop's pose; line 1026: heading just under 90 (e.g. `Rads: 1.55, Deg: 88.79`). | book 14 |
+| ch14-v3 | Reason for constructing odometry in constructor misstated; "(Chapter 12)" | DONE (batch 3) | S | Line 655: starting readings would be taken before encoders are set up and zeroed, so a leftover count becomes a jump on the first update; "(Chapter 10)". | book 14 |
+| ch14-v4 | "In Chapter 20 ... `periodic()`": Ch 17 introduces it | DONE (batch 3) | S | Line 664: "In Chapter 17 the update moves into `periodic()`, and in Chapter 20 WPILib starts calling it for you." | book 14 |
+| ch14-v5 | Practice 1 move 6 needs cos/sin 135, not in 14.3 table | DONE (batch 3) | S | Add row after line 139: `| 135 degrees | -0.707 | 0.707 | equal parts -x and +y |`. | book 14 |
+| ch14-v6 | Uniform wheel-size error doesn't open a closed square | DONE (batch 3) | S | Line 1057: add "It shows on straight runs like the course; on a closed square it mostly cancels, because every side is equally too long." | book 14 |
+| ch14-v7 | Practice 4 encoder-only reset after a straight push looks correct | DONE (batch 3) | S | Line 1173: "drive forward 30 cm, turn left a quarter turn, drive 20 cm, and press Y"; ask where the icon lands and why. | book 14 |
 
 ## Counts
 
@@ -268,54 +274,54 @@ DONE 12, FIX 47, VERIFY-WEB 1, HARDWARE 0, SKIP 1 (61 items).
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch15-m1 | Scope bug listing uses undefined `HAND_KI` | FIX | S | Before the §15.6 listing (line 316) add "To try it, add `private static final double HAND_KI = 2.0;` next to `HAND_KP`"; after the field fix add "now leg 1 finishes" | src/section-3-autonomous-control/15-pid-control-making-the-robot-accurate.md |
-| ch15-m2 | "B then A is a left turn" reads backwards | FIX | S | Line 1124: "pressing B turns left to 90, and pressing A after it turns right, back to 0" | 15-pid...md |
-| ch15-m3 | Clamp is a crude profile; `ProfiledPIDController` filed under arms only | FIX | S | Add 2 sentences to "The times got longer" (line 1168) on motion profiles; line 1189 "Arms, elevators, and smooth drive-to-distance moves use" (Ch 35) | 15-pid...md |
-| ch15-v1 | `0.0003 / 0.02` is 0.015, not 0.016 | FIX | S | Line 285: "about 0.32 mm ... `0.00032 / 0.02 = 0.016`" | 15-pid...md |
-| ch15-v2 | Default integrator cap useless for distance; "copy the heading setup" gives 10 m I zone | FIX | S | Line 496: default cap suits heading only; for distance `setIZone(0.03)` and maybe `setIntegratorRange(-0.1, 0.1)`. Line 1273: "an I zone in meters (a few cm)" | 15-pid...md |
-| ch15-v3 | Negative gain "throws the moment you try"; `setP` and widget accept it | FIX | S | Line 438: "the constructor throws ... a negative number typed into the widget is accepted, and the robot runs away" | 15-pid...md |
+| ch15-m1 | Scope bug listing uses undefined `HAND_KI` | DONE (batch 3) | S | Before the §15.6 listing (line 316) add "To try it, add `private static final double HAND_KI = 2.0;` next to `HAND_KP`"; after the field fix add "now leg 1 finishes" | src/section-3-autonomous-control/15-pid-control-making-the-robot-accurate.md |
+| ch15-m2 | "B then A is a left turn" reads backwards | DONE (batch 3) | S | Line 1124: "pressing B turns left to 90, and pressing A after it turns right, back to 0" | 15-pid...md |
+| ch15-m3 | Clamp is a crude profile; `ProfiledPIDController` filed under arms only | DONE (batch 3) | S | Add 2 sentences to "The times got longer" (line 1168) on motion profiles; line 1189 "Arms, elevators, and smooth drive-to-distance moves use" (Ch 35) | 15-pid...md |
+| ch15-v1 | `0.0003 / 0.02` is 0.015, not 0.016 | DONE (batch 3) | S | Line 285: "about 0.32 mm ... `0.00032 / 0.02 = 0.016`" | 15-pid...md |
+| ch15-v2 | Default integrator cap useless for distance; "copy the heading setup" gives 10 m I zone | DONE (batch 3) | S | Line 496: default cap suits heading only; for distance `setIZone(0.03)` and maybe `setIntegratorRange(-0.1, 0.1)`. Line 1273: "an I zone in meters (a few cm)" | 15-pid...md |
+| ch15-v3 | Negative gain "throws the moment you try"; `setP` and widget accept it | DONE (batch 3) | S | Line 438: "the constructor throws ... a negative number typed into the widget is accepted, and the robot runs away" | 15-pid...md |
 | ch15-v4 | Rate tolerance ends leg 1 6 to 8 mm short; sample log `X: 0.50` | HARDWARE | S | Sim probe says `X: 0.49`; confirm on a real XRP, then change sample log (line 1158) and add "a few mm short, inside 1 cm" at line 1166 | 15-pid...md |
-| ch15-v5 | Bench buttons set both targets; X then B drives an arc | FIX | S | After line 1063 add "After a drive, press A before B (X then B drives back along a curve while it turns)" | 15-pid...md |
-| ch15-v6 | "Double P until it rings" may never ring with 2 rad/s clamp | FIX | S | Step 2 (line 1123): add stopping rule "if P reaches about 2 and it still does not ring, stop: the clamp is limiting; use the smallest P that finishes in tolerance" (assignment already says this) | 15-pid...md |
-| ch15-v7 | Practice 3 "move `errorSum` inside" breaks `reset()` | FIX | S | Line 1226: "add `double errorSum = 0.0;` as the first line of `calculate` (leave the field; the local hides it)" | 15-pid...md |
-| ch15-v8 | Practice 5 finger nudge may not show the cascade | FIX | M | Line 1256: add tape-measure reading next to `Pose Y`, start with `resetPose(new Pose2d(0.0, 0.03, new Rotation2d()))`, one sentence that a slide fools odometry (copy from assignment) | 15-pid...md |
-| ch15-v9 | §15.11 says `TurnToAngle` | FIX | S | Line 1183: `TurnToHeading` | 15-pid...md |
+| ch15-v5 | Bench buttons set both targets; X then B drives an arc | DONE (batch 3) | S | After line 1063 add "After a drive, press A before B (X then B drives back along a curve while it turns)" | 15-pid...md |
+| ch15-v6 | "Double P until it rings" may never ring with 2 rad/s clamp | DONE (batch 3) | S | Step 2 (line 1123): add stopping rule "if P reaches about 2 and it still does not ring, stop: the clamp is limiting; use the smallest P that finishes in tolerance" (assignment already says this) | 15-pid...md |
+| ch15-v7 | Practice 3 "move `errorSum` inside" breaks `reset()` | DONE (batch 3) | S | Line 1226: "add `double errorSum = 0.0;` as the first line of `calculate` (leave the field; the local hides it)" | 15-pid...md |
+| ch15-v8 | Practice 5 finger nudge may not show the cascade | DONE (batch 3) | M | Line 1256: add tape-measure reading next to `Pose Y`, start with `resetPose(new Pose2d(0.0, 0.03, new Rotation2d()))`, one sentence that a slide fools odometry (copy from assignment) | 15-pid...md |
+| ch15-v9 | §15.11 says `TurnToAngle` | DONE (batch 3) | S | Line 1183: `TurnToHeading` | 15-pid...md |
 | ch15-v10 | Talon FX onboard PID pointer is wrong chapter | DONE (batch 1) | S | Line 1185: point to Ch 33 (Ch 29 line 428 says loops move into the Talon FX in Ch 33) | 15-pid...md |
 
 ## Ch 16 (review ch16-sme)
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch16-m1 | "Try every possible kS, kV, kA" misdescribes least squares | FIX | S | Line 195: use review's wording ("finds the one set ... a little algebra gets there in one step") | src/section-3-autonomous-control/16-sysid-characterization-on-the-xrp.md |
+| ch16-m1 | "Try every possible kS, kV, kA" misdescribes least squares | DONE (batch 3) | S | Line 195: use review's wording ("finds the one set ... a little algebra gets there in one step") | src/section-3-autonomous-control/16-sysid-characterization-on-the-xrp.md |
 | ch16-m2 | 165-line SysId runner not signposted as temporary | DONE (batch 1) | S | Before listing (line 505) add "This is a teaching version: in Chapter 20, `SysIdRoutine` replaces it". End-of-chapter checkpoint (line 1396) already exists. Also line 1313 "Chapters 19 to 21" should say Chapter 20 | 16-sysid...md |
-| ch16-m3 | "Diagnostic Plots" window and "Direction" box not in docs | VERIFY-WEB | S | Check allwpilib `sysid` GUI source (or open SysId 2026.2.1) for exact labels; fall back to "Diagnostics pane, forward and backward plots" (line 800) | 16-sysid...md |
-| ch16-v1 | "two regular imports" but three named | FIX | S | Line 915: "three regular imports" | 16-sysid...md |
+| ch16-m3 | "Diagnostic Plots" window and "Direction" box not in docs | DONE (batch 3) | S | Check allwpilib `sysid` GUI source (or open SysId 2026.2.1) for exact labels; fall back to "Diagnostics pane, forward and backward plots" (line 800) | 16-sysid...md |
+| ch16-v1 | "two regular imports" but three named | DONE (batch 3) | S | Line 915: "three regular imports" | 16-sysid...md |
 | ch16-v2 | §16.8 listing drops Ch 14 Javadoc | DONE | | Ch 14 and Ch 16 `Drivetrain` listings now match (no getter Javadoc in either; same `getHeadingDegrees` Javadoc) | |
-| ch16-v3 | "You could pick 1.0" needs scaled test volts and re-run | FIX | S | Line 146: "You could pick 1.0, scale the SysId test voltages to match, re-run SysId, and..." | 16-sysid...md |
-| ch16-v4 | Tests swing 15 to 20 deg, end 30 cm to side | FIX | S | "Space" (line 698): add "leave about 30 cm on each side; straighten it by hand between tests". Wording is safe without hardware | 16-sysid...md |
-| ch16-v5 | Sample log missing "stopped by a safety net" line | FIX | S | Lines 721 to 732: show the safety-net line and ~8.0 s for quasistatic tests; add "(normal)" to step 1 | 16-sysid...md |
-| ch16-v6 | "five or so entries with no `NT:`" | FIX | S | Line 760: "seven entries whose names end in `-drive`" | 16-sysid...md |
-| ch16-v7 | Practice 1 acceleration row cannot be checked with one-arg `calculate` | FIX | S | Line 1356: add "(for the acceleration row, `calculateWithVelocities(0.10, 0.11)` gives about 3.39)" | 16-sysid...md |
-| ch16-v8 | `tankDrive` 0.02 deadband folds into kS | FIX | S | Line 350: "with no squaring (it still ignores powers under 0.02, which SysId measures as part of kS, so it cancels too)" | 16-sysid...md |
+| ch16-v3 | "You could pick 1.0" needs scaled test volts and re-run | DONE (batch 3) | S | Line 146: "You could pick 1.0, scale the SysId test voltages to match, re-run SysId, and..." | 16-sysid...md |
+| ch16-v4 | Tests swing 15 to 20 deg, end 30 cm to side | DONE (batch 3) | S | "Space" (line 698): add "leave about 30 cm on each side; straighten it by hand between tests". Wording is safe without hardware | 16-sysid...md |
+| ch16-v5 | Sample log missing "stopped by a safety net" line | DONE (batch 3) | S | Lines 721 to 732: show the safety-net line and ~8.0 s for quasistatic tests; add "(normal)" to step 1 | 16-sysid...md |
+| ch16-v6 | "five or so entries with no `NT:`" | DONE (batch 3) | S | Line 760: "seven entries whose names end in `-drive`" | 16-sysid...md |
+| ch16-v7 | Practice 1 acceleration row cannot be checked with one-arg `calculate` | DONE (batch 3) | S | Line 1356: add "(for the acceleration row, `calculateWithVelocities(0.10, 0.11)` gives about 3.39)" | 16-sysid...md |
+| ch16-v8 | `tankDrive` 0.02 deadband folds into kS | DONE (batch 3) | S | Line 350: "with no squaring (it still ignores powers under 0.02, which SysId measures as part of kS, so it cancels too)" | 16-sysid...md |
 
 ## Ch 17 (review ch17-sme)
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch17-m2 | Two-recorders callout: `FRC_` log now doubles all AdvantageKit values | FIX | S | Callout line 244: add `NT:/AdvantageKit/` side effect; "still the seven ending in `-drive`"; Chapter 25 retires one | src/section-3-autonomous-control/17-advantagekit-and-the-io-layer.md |
-| ch17-m3 | IO classes read constants from `Drivetrain` (two-way dependency) | FIX | S | "Public constants" callout (line 794): add one sentence on direction and AdvantageKit's constants class; Chapter 21 `Constants.java` | 17-advantagekit...md |
-| ch17-v4 | Real robot is "same within tolerance", not "exactly as before" | FIX | S | Heading line 796 and Build step 4 (line 922): "the same, within tolerance" plus one clause on 20 ms older inputs and deadband move. Wording safe without hardware | 17-advantagekit...md |
-| ch17-v6 | Pinned vendordep's `jsonUrl` is `releases/latest`; updates will offer v27 | FIX | S | After line 186 add "If VS Code later offers to update AdvantageKit, decline" | 17-advantagekit...md |
-| ch17-v7 | "Logger before anything is created": field initializers run first | FIX | S | Line 229 and listing comment (232, 822): "before anything the constructor creates" | 17-advantagekit...md, 18-simulating-the-xrp.md (line 322 comment) |
-| ch17-v8 | "hardware imports are gone" but `DifferentialDrive` stays | FIX | S | Line 435: "the hardware imports are gone except `DifferentialDrive` (for its static math)"; list the comment rewrites | 17-advantagekit...md |
+| ch17-m2 | Two-recorders callout: `FRC_` log now doubles all AdvantageKit values | DONE (batch 3) | S | Callout line 244: add `NT:/AdvantageKit/` side effect; "still the seven ending in `-drive`"; Chapter 25 retires one | src/section-3-autonomous-control/17-advantagekit-and-the-io-layer.md |
+| ch17-m3 | IO classes read constants from `Drivetrain` (two-way dependency) | DONE (batch 3) | S | "Public constants" callout (line 794): add one sentence on direction and AdvantageKit's constants class; Chapter 21 `Constants.java` | 17-advantagekit...md |
+| ch17-v4 | Real robot is "same within tolerance", not "exactly as before" | DONE (batch 3) | S | Heading line 796 and Build step 4 (line 922): "the same, within tolerance" plus one clause on 20 ms older inputs and deadband move. Wording safe without hardware | 17-advantagekit...md |
+| ch17-v6 | Pinned vendordep's `jsonUrl` is `releases/latest`; updates will offer v27 | DONE (batch 3) | S | After line 186 add "If VS Code later offers to update AdvantageKit, decline" | 17-advantagekit...md |
+| ch17-v7 | "Logger before anything is created": field initializers run first | DONE (batch 3) | S | Line 229 and listing comment (232, 822): "before anything the constructor creates" | 17-advantagekit...md, 18-simulating-the-xrp.md (line 322 comment) |
+| ch17-v8 | "hardware imports are gone" but `DifferentialDrive` stays | DONE (batch 3) | S | Line 435: "the hardware imports are gone except `DifferentialDrive` (for its static math)"; list the comment rewrites | 17-advantagekit...md |
 
 ## Ch 18 (review ch17-sme)
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
 | ch17-m1 | Creating `RangefinderDistanceSensor` beside `Sensors` throws "already allocated" | DONE (batch 1) | M | Worse now: Ch 18 Practice 1 (line 525) has students run the `false` branch. Tell students it throws because `Sensors` owns the rangefinder (or make it the lesson), and add the note after §18.3 snippet (line 94). Confirm exact error text by running Simulate Robot Code | 18-simulating-the-xrp.md, 17-advantagekit...md (Practice 1) |
-| ch17-v2 | "Drives straight? Perfectly" wrong: per-side FF vs averaged model curves | FIX | S | §18.6 table line 465: "Almost; per-side feedforward on twin sim motors drifts a little, PID corrects" | 18-simulating-the-xrp.md |
-| ch17-v3 | `subtractFriction` only while driven; coasting sim wheel slides further | FIX | S | Add bullet to §18.6 list (after line 474): "No friction while coasting" | 18-simulating-the-xrp.md |
+| ch17-v2 | "Drives straight? Perfectly" wrong: per-side FF vs averaged model curves | DONE (batch 3) | S | §18.6 table line 465: "Almost; per-side feedforward on twin sim motors drifts a little, PID corrects" | 18-simulating-the-xrp.md |
+| ch17-v3 | `subtractFriction` only while driven; coasting sim wheel slides further | DONE (batch 3) | S | Add bullet to §18.6 list (after line 474): "No friction while coasting" | 18-simulating-the-xrp.md |
 | ch17-v5 | Sim sensors answer a loop sooner than real ones | HARDWARE | S | Confirm the one-loop lag on a real XRP before adding a §18.6 bullet | 18-simulating-the-xrp.md |
 
 ## Ch 19 (review ch18-sme)

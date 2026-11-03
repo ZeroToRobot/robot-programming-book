@@ -218,7 +218,7 @@ That last row is interesting. When the turn is tight enough, the turn center end
 
 > **What `arcadeDrive` was really doing**
 >
-> In Chapter 8, you saw that `arcadeDrive` computes `left = forward - rotation` and `right = forward + rotation`. Now you can see it has the same shape as real kinematics, with the `(L / 2)` tucked inside the meaning of `rotation`. Chapter 8 called that version "rough," and here is the full story from WPILib's source code: after adding and subtracting, `arcadeDrive` divides both sides by the same number, chosen so that the faster wheel ends up at exactly the bigger of your two inputs. So forward `0.5` with rotation `0.2` really gives left `0.21` and right `0.5`, not `0.3` and `0.7`. The ratio between the two wheels, and so the shape of the curve, is the same either way (the turn-radius math in Chapter 11 still holds), and this scaling is what keeps full stick in any direction at exactly full power. But it is one more reason `arcadeDrive`'s numbers do not map to any physical speed. Kinematics does.
+> In Chapter 8, you saw that `arcadeDrive` computes `left = forward - rotation` and `right = forward + rotation`. Now you can see it has the same shape as real kinematics, with the `(L / 2)` tucked inside the meaning of `rotation`. Chapter 8 called that version "rough," and here is the full story from WPILib's source code: after adding and subtracting, `arcadeDrive` divides both sides by the same number, chosen so that the faster wheel ends up at exactly the bigger of your two inputs. So with squaring off (`arcadeDrive(0.5, 0.2, false)`), forward `0.5` with rotation `0.2` really gives left `0.21` and right `0.5`, not `0.3` and `0.7`. With Chapter 8's squared, two-number call, it is about `0.18` and `0.25`. The ratio between the two wheels, and so the shape of the curve, is the same either way (the turn-radius math in Chapter 11 still holds), and this scaling is what keeps full stick in any direction at exactly full power. But it is one more reason `arcadeDrive`'s numbers do not map to any physical speed. Kinematics does.
 
 ---
 
@@ -260,9 +260,9 @@ vx = (0.12 + 0.18) / 2     = 0.15 m/s forward
 
 Here is something you can test. Spin the XRP in place and compare the turn rate from forward kinematics with the turn rate the gyro measures. They will not quite match. The encoders usually claim the robot is turning **faster** than the gyro says it is.
 
-You already know why from Chapter 12: when the robot spins in place, the wheels **scrub**, sliding sideways across the floor instead of rolling cleanly. The wheels turn more than the robot does, so the encoder estimate runs high. The geometry in Section 13.3 assumed perfect rolling with no slip, and real floors do not cooperate.
+You already know why from Chapter 12: in a turn, the wheels slip a little, the caster drags on the floor, and the tires do not touch the ground exactly 155 mm apart. The wheels turn more than the robot does, so the encoder estimate runs high. The geometry in Section 13.3 assumed perfect rolling with no slip, and real floors do not cooperate.
 
-There is a clever fix. Instead of the trackwidth you measure with a ruler, use an **effective trackwidth**: the number that makes the formula agree with the gyro on your robot and your floor. Because scrubbing makes the wheels travel extra distance, the effective trackwidth usually comes out a little **larger** than the real one. WPILib's own documentation for its kinematics class says exactly this: the empirical value may be larger than the physical one because of scrubbing. You will measure yours in Practice 2.
+There is a clever fix. Instead of the trackwidth you measure with a ruler, use an **effective trackwidth**: the number that makes the formula agree with the gyro on your robot and your floor. Because the wheels travel extra distance, the effective trackwidth usually comes out a little **larger** than the real one. WPILib's own documentation for its kinematics class says exactly this: the empirical value may be larger than the physical one because of **scrubbing**, its word for wheels sliding instead of rolling cleanly. You will measure yours in Practice 2.
 
 > **From speeds to position: an odometry preview**
 >
@@ -484,7 +484,7 @@ These are the two ways a method can work with an object, and you have to know wh
 | **Changes the object** (mutates it) | `wheelSpeeds.desaturate(0.28)` | usually `void` | It is changed. |
 | **Returns a new object** | `full.times(0.5)` | the class itself | It is untouched. You must store the result. |
 
-How do you tell them apart? Look at the return type, in VS Code's hover popup or in the Javadoc (Chapter 11). A `void` method that is called on an object almost always changes that object; there is nothing else for it to do. A method that returns the same class almost always leaves the original alone and hands you a new one.
+How do you tell them apart? Look at the return type, in VS Code's hover popup or in the Javadoc (Chapter 11). The return type is a strong hint. A `void` method cannot hand you anything, so if it does something to the object, it must change it in place. A method that returns the same class **usually** builds a new one, but not always (Chapter 28 shows a kind that changes the object **and** returns it). When it matters, read the method's Javadoc: it says which one it does.
 
 > **A common beginner mistake**
 >
@@ -540,7 +540,7 @@ This is a guess. It assumes speed is exactly proportional to power, and it is no
 
 > **You just wrote your first feedforward**
 >
-> Dividing by top speed is the simplest possible **feedforward**: a rule that predicts the power you need for a speed, before the robot even moves. In Chapter 12 you met the idea that a full feedforward model has three parts. The `1 / topSpeed` you are using now is a rough version of one of them, called **kV**: how much extra voltage each extra meter per second needs. It is missing **kS**, the extra push to overcome friction and get moving at all, which is why the robot will drive a bit slower than you ask, especially at low speeds. In Chapter 16, SysId will measure kS, kV, and kA on your XRP, and you will replace this one line of division with a `SimpleMotorFeedforward`. Everything else you build in this chapter stays the same.
+> Dividing by top speed is the simplest possible **feedforward**: a rule that predicts the power you need for a speed, before the robot even moves. In Chapter 12 you met the idea that a full feedforward model has three parts. The `1 / topSpeed` you are using now is a rough version of one of them, called **kV**: how much extra push each extra meter per second needs. Here the push is a power (`1 / 0.28`, about 3.6 power per meter per second); in Chapter 16 you will measure it in volts, so the number will look different even though it means the same thing. It is missing **kS**, the extra push to overcome friction and get moving at all, which is why the robot will drive a bit slower than you ask, especially at low speeds. In Chapter 16, SysId will measure kS, kV, and kA on your XRP, and you will replace this one line of division with a `SimpleMotorFeedforward`. Everything else you build in this chapter stays the same.
 
 ### Measure your top speed
 
@@ -759,7 +759,7 @@ Walk through what changed since Chapter 11:
 - **Two new constants.** `TRACKWIDTH_METERS` is a physical fact, so it sits with the other physical facts. `MAX_WHEEL_SPEED_METERS_PER_SECOND` is a **measurement**, so it gets its own comment saying where it came from and when to re-measure it.
 - **One new field**, `kinematics`. It is a math object, not hardware, but it never changes, so it is created once and `final` like everything else in this class.
 - **Two `drive` methods.** This is method overloading from Chapter 11 again. `drive(ChassisSpeeds)` does the real work: inverse kinematics, desaturate, convert, send. `drive(double, double)` is a convenience that builds the `ChassisSpeeds` for you and **delegates** to the first one, exactly like the two `arcadeDrive` methods. One place does the work.
-- **`diffDrive.tankDrive(left, right, false)`.** You have not used this method before. `arcadeDrive` takes forward and rotation and does its own mixing; `tankDrive` takes a left power and a right power and sends them more or less straight to the motors. Kinematics has already done the mixing, so `tankDrive` is the right tool. The `false` turns off squaring, for the same reason as in Chapter 12: you want `0.5` to mean `0.5`. And because it still goes through `diffDrive`, Motor Safety (Chapter 12) keeps watching.
+- **`diffDrive.tankDrive(left, right, false)`.** You have not used this method before. `arcadeDrive` takes forward and rotation and does its own mixing; `tankDrive` takes a left power and a right power and sends them more or less straight to the motors. (The only change is `DifferentialDrive`'s tiny `0.02` deadband from Chapter 8, which turns `0.714` into about `0.708`.) Kinematics has already done the mixing, so `tankDrive` is the right tool. The `false` turns off squaring, for the same reason as in Chapter 12: you want `0.5` to mean `0.5`. And because it still goes through `diffDrive`, Motor Safety (Chapter 12) keeps watching.
 - **A private helper, `speedToPower`.** The rough "divide by top speed" rule lives in exactly one place. In Chapter 16, this is the method you will replace.
 - **`getChassisSpeeds()`**, a computed getter (Chapter 9) that runs forward kinematics on the encoder speeds and **returns an object**. This is your robot's speedometer, in real units.
 
@@ -787,7 +787,7 @@ Add `import edu.wpi.first.math.kinematics.ChassisSpeeds;` at the top of `Robot.j
 
 ## 13.9 The Explorer's Autonomous, in Real Units
 
-Now rewrite the Chapter 12 routine to drive by velocity. Only two parts of `Robot.java` change: the autonomous constants and the `drivetrain` calls inside `autonomousPeriodic()`. The steps, the `switch`, the timeouts, and the logging all stay exactly as they were. That is a sign the routine was well organized.
+Now rewrite the Chapter 12 routine to drive by velocity. Beyond the import and the two `Measured` dashboard lines from Section 13.8, only two parts of `Robot.java` change: the autonomous constants and the `drivetrain` calls inside `autonomousPeriodic()`. The steps, the `switch`, the timeouts, and the logging all stay exactly as they were. That is a sign the routine was well organized.
 
 ### New constants, with units
 
@@ -805,7 +805,7 @@ Replace `AUTO_DRIVE_SPEED` and `AUTO_TURN_SPEED` with these, and update `STEP_TI
 
 The names now say what the numbers mean. Anyone reading `AUTO_DRIVE_METERS_PER_SECOND = 0.20` knows exactly what to expect from the robot, with no experiment needed.
 
-Why `2.0` radians per second for the turn? Spinning in place, each wheel goes `0.0775 × 2.0 = 0.155` m/s, a bit over half of top speed. In Chapter 12, you may have needed `0.5` or even `0.6` power just to get the robot to turn in place, because the wheels have to scrub sideways. If your robot hesitates or jerks during the turn, raise this number.
+Why `2.0` radians per second for the turn? Spinning in place, each wheel goes `0.0775 × 2.0 = 0.155` m/s, a bit over half of top speed. In Chapter 12, you may have needed `0.5` or even `0.6` power just to get the robot to turn in place, because the caster drags and the wheels slip as they pivot. If your robot hesitates or jerks during the turn, raise this number.
 
 ### The new `autonomousPeriodic()`
 
@@ -859,7 +859,7 @@ Replace the three `arcadeDrive` calls with `drive` calls:
 
 Three lines changed. Read the first one aloud: "Drive forward at the auto drive speed, in meters per second, with no turning." The turn step reads: "Turn left at the auto turn rate, in radians per second, without driving forward." Compare that to `arcadeDrive(0.0, AUTO_TURN_SPEED, false)`: same behavior, but now every number has a meaning.
 
-Everything else in `Robot.java` stays as Chapter 12 left it, including teleop, which still uses `arcadeDrive`. That is on purpose. A human driver does not think in meters per second; they think "a bit more stick." The squared, power-based `arcadeDrive` still feels best in a driver's hands. (Practice 4 lets you try a velocity-based teleop and decide for yourself.)
+Everything else in `Robot.java` (apart from the Section 13.8 dashboard lines) stays as Chapter 12 left it, including teleop, which still uses `arcadeDrive`. That is on purpose. A human driver does not think in meters per second; they think "a bit more stick." The squared, power-based `arcadeDrive` still feels best in a driver's hands. (Practice 4 lets you try a velocity-based teleop and decide for yourself.)
 
 ### Predict before you run
 
@@ -880,7 +880,7 @@ Now run it. Place the Explorer on the start line, enable **Autonomous**, and wat
 
 The routine should still drive leg 1, turn, and stop at the line. But the step times will probably come out a bit **longer** than predicted, and the `Measured Forward (m per s)` widget will probably read a bit **less** than `0.20` during the straight legs.
 
-That is the `speedToPower` guess showing its weakness. You asked for 0.20 m/s, which the guess turned into `0.20 / 0.28 = 0.71` power. But part of that power goes into overcoming friction, so the robot settles a bit below 0.20. The turn is usually even further off, because scrubbing adds a lot of friction.
+That is the `speedToPower` guess showing its weakness. You asked for 0.20 m/s, which the guess turned into `0.20 / 0.28 = 0.71` power. But part of that power goes into overcoming friction, so the robot settles a bit below 0.20. The turn is usually even further off, because the caster dragging and the wheels slipping add a lot of friction.
 
 This is not a failure. It is the first time you could **see** the gap at all. With `arcadeDrive(0.5, ...)`, there was no "asked for" number to compare against. Now there is: commanded 0.20, measured maybe 0.17. A gap you can measure is a gap you can close, and closing it is exactly what PID control (Chapter 15) and feedforward (Chapter 16) do.
 
@@ -944,7 +944,7 @@ Then do it backward: the encoders read left `0.20` m/s and right `0.10` m/s. Wha
 
 Finally, verify every answer with code: put temporary lines in your `Robot()` constructor that build a `DifferentialDriveKinematics(0.155)`, call `toWheelSpeeds` and `toChassisSpeeds`, and print the results (Section 13.6). For any row where your hand answer and the code disagree, find the mistake and write one sentence about what it was. Remove the temporary lines when you are done, and save your table in `reflections.md`.
 
-**2. Measure your effective trackwidth.** In Section 13.4, you learned that scrubbing makes the real robot turn as if its wheels were farther apart. Measure how much:
+**2. Measure your effective trackwidth.** In Section 13.4, you learned that wheel slip and caster drag make the real robot turn as if its wheels were farther apart. Measure how much:
 
 1. Put the robot on your usual surface. Press Y on the controller to zero the encoders and gyro (Chapter 9).
 2. In teleop, spin the robot in place to the left for about **five full turns**, slowly. Stop.
@@ -981,15 +981,17 @@ System.out.println(f.leftMetersPerSecond + " " + f.rightMetersPerSecond);
 
 For each block, write one sentence explaining the result. Block D is not a trick, but it might surprise you. (Hint: read what `desaturate` does when nothing is too fast.)
 
-**4. Velocity teleop (optional).** What would teleop feel like in real units? Make a copy of your `teleopPeriodic()` drive line and try this instead, temporarily:
+**4. Velocity teleop (optional).** What would teleop feel like in real units? First, in `Drivetrain`, change `MAX_WHEEL_SPEED_METERS_PER_SECOND` and `TRACKWIDTH_METERS` from `private` to `public`, so `Robot.java` can use them by name. A number that describes the drivetrain should be written down in exactly one place, not retyped. Then make a copy of your `teleopPeriodic()` drive line and try this instead, temporarily:
 
 ```java
-double maxTurnRadiansPerSecond = 2.0 * 0.28 / 0.155;   // fastest spin: both wheels at top speed
-drivetrain.drive(limitedForward * speedScale * 0.28,
+// fastest spin: both wheels at top speed
+double maxTurnRadiansPerSecond =
+    2.0 * Drivetrain.MAX_WHEEL_SPEED_METERS_PER_SECOND / Drivetrain.TRACKWIDTH_METERS;
+drivetrain.drive(limitedForward * speedScale * Drivetrain.MAX_WHEEL_SPEED_METERS_PER_SECOND,
     rotation * speedScale * TURN_SCALE * maxTurnRadiansPerSecond);
 ```
 
-First, check the math in the comment: why is the fastest in-place spin `2 × topSpeed / trackwidth`? How many degrees per second is that? Then drive around. How does it feel compared to `arcadeDrive`? (Remember that `arcadeDrive` squares the sticks and `drive` does not.) Which would you give to your drive team, and why? Put teleop back to `arcadeDrive` when you are done, unless you have a good reason to keep the new version and can explain it in your commit message.
+First, check the math in the comment: why is the fastest in-place spin `2 × topSpeed / trackwidth`? How many degrees per second is that? Then drive around. How does it feel compared to `arcadeDrive`? (Remember that `arcadeDrive` squares the sticks and `drive` does not.) Which would you give to your drive team, and why? Put teleop back to `arcadeDrive` and the two constants back to `private` when you are done, unless you have a good reason to keep the new version and can explain it in your commit message.
 
 ### Build (XRP Explorer)
 
@@ -1006,10 +1008,10 @@ Give the Explorer a drivetrain that drives by chassis velocity, and run the obst
 
 Diagnose anything strange:
 
-- **The robot does not move at all in autonomous:** `MAX_WHEEL_SPEED_METERS_PER_SECOND` may be much larger than it should be (a typo like `2.8`), making every power tiny. Print `speedToPower(0.20)` or check the constant.
-- **The robot lurches at full power in autonomous:** the opposite problem: top speed too small (a typo like `0.028`), so every power is huge. `tankDrive` caps power at `1.0`, but the turn will be the wrong shape.
+- **The robot does not move at all in autonomous:** `MAX_WHEEL_SPEED_METERS_PER_SECOND` may be much larger than it should be (a typo like `2.8`), making every power tiny. Check the constant. If it looks right, add a temporary `System.out.println(...)` **inside** `drive()` that prints the two powers it sends, and remove it when you are done.
+- **The robot lurches at full power in autonomous:** the opposite problem: top speed too small (a typo like `0.028`), so every power is `1.0`. `desaturate` caps each wheel at the (wrong) top speed, and dividing by that same number gives full power. The robot follows the right shape, just much too fast.
 - **Turns right instead of left:** check the sign of `AUTO_TURN_RADIANS_PER_SECOND`. Positive turns left. If the constant is positive and the robot still turns right, check that `tankDrive` gets left first, then right.
-- **Turns very slowly, or in jerky bursts:** the turn speed is too low to overcome scrubbing friction. Raise `AUTO_TURN_RADIANS_PER_SECOND` to `2.5` or `3.0`.
+- **Turns very slowly, or in jerky bursts:** the turn speed is too low to overcome the friction of turning in place. Raise `AUTO_TURN_RADIANS_PER_SECOND` to `2.5` or `3.0`.
 - **`Measured Turn` and the gyro's turn rate have opposite signs:** one of them is backward. Turn the robot left by hand. Both should go positive. If the gyro is wrong, fix it in `getHeadingDegrees()` and `getTurnRateDegreesPerSecond()` (Chapter 9). If the measured turn is wrong, one encoder is counting backward; check that both distances go up when you push the robot forward.
 - **A step times out that used to finish:** the robot is running slower than commanded. Compare `Measured Forward` with `AUTO_DRIVE_METERS_PER_SECOND`, and size the timeout from the measured speed.
 - **Compile error `cannot find symbol: class ChassisSpeeds`:** a missing import. Both files that use it need `import edu.wpi.first.math.kinematics.ChassisSpeeds;`.

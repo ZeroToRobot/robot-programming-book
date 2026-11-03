@@ -4,7 +4,7 @@ In Chapter 10 you learned to hunt down bugs, including ones buried in your Git h
 
 That is about to change. Every FRC match starts with **autonomous**: 15 to 20 seconds, depending on the year's game, when the drivers put their hands down and the robot runs on code alone. No sticks, no buttons, no one to correct it. Whatever your program tells the robot to do, it does, and if the robot ends up in the wrong place, there is nothing anyone can do about it until teleop begins.
 
-This chapter gives the Explorer its first real autonomous routine. You will build it two ways. First with a **timer**: "drive forward for one second, then turn for half a second." Then with the **sensors** from Chapter 9: "drive forward until the encoders say 0.5 meters, then turn until the gyro says 90 degrees." You will run both versions on the same course, measure where the robot actually stops with a tape measure, and find out for yourself which one puts the robot where you meant.
+This chapter gives the Explorer its first real autonomous routine. You will build it two ways. First with a **timer**: "drive forward for one second, then turn for 0.6 seconds." Then with the **sensors** from Chapter 9: "drive forward until the encoders say 0.5 meters, then turn until the gyro says 90 degrees." You will run both versions on the same course, measure where the robot actually stops with a tape measure, and find out for yourself which one puts the robot where you meant.
 
 By the end of the chapter, the Explorer will run leg 1 of its obstacle course on its own: drive forward, turn left, drive to a black line, and stop.
 
@@ -164,7 +164,7 @@ Then replace the inside of `autonomousPeriodic()`:
 Two things changed from Chapter 7, and both are about honesty:
 
 - **Named constants** replace the `1.0` and `0.6` that have been sitting there as magic numbers since Chapter 7. You are about to tune these, and you should be able to find them at a glance.
-- **The third argument, `false`**, uses the linear `arcadeDrive` overload you wrote in Chapter 11. The two-number version squares its inputs, which is great for a driver's thumb and confusing for autonomous: `0.5` would quietly become `0.25`. In autonomous, you want `0.5` to mean `0.5`.
+- **The third argument, `false`**, uses the linear `arcadeDrive` overload you wrote in Chapter 11. The two-number version squares its inputs, which is great for a driver's thumb and confusing for autonomous: `0.5` would quietly become `0.25`. In autonomous, you want `0.5` to mean `0.5` (almost: `DifferentialDrive`'s tiny `0.02` deadband from Chapter 8 rescales it to about `0.49`).
 
 Also add a line to `autonomousInit()`, right before `autoTimer.restart()`, so every run starts its distance count from zero:
 
@@ -341,7 +341,7 @@ That reads as "are we within 2 centimeters of the target?" WPILib has a shortcut
 
 Driving straight is half the course. The other half is the corner.
 
-You might think the encoders could handle turning too. When the XRP spins in place to the left, the right wheel rolls forward and the left wheel rolls back, and in the Chapter 9 kinematics callout you computed the heading from that difference. But turning in place is exactly when wheels **scrub**: they slide sideways across the floor as the robot pivots, so the wheel distances say one thing while the robot does another. In Chapter 9's Practice 3, the gyro probably beat the encoder estimate for a quarter turn. The gyro measures rotation directly, and it does not care whether the wheels slipped. So the gyro decides when a turn is done.
+You might think the encoders could handle turning too. When the XRP spins in place to the left, the right wheel rolls forward and the left wheel rolls back, and in the Chapter 9 kinematics callout you computed the heading from that difference. But turning is exactly when the encoders are least trustworthy. The wheels can slip, the caster drags on the floor, and the tires do not touch the ground exactly 155 mm apart, so the wheel distances say one thing while the robot does another. (On a big FRC robot with four or six wheels, turning also makes the wheels **scrub**, sliding sideways across the floor, which is even worse.) Chapter 13 measures how far off your XRP is. In Chapter 9's Practice 3, the gyro probably beat the encoder estimate for a quarter turn. The gyro measures rotation directly, and it does not care whether the wheels slipped. So the gyro decides when a turn is done.
 
 ### The turn test
 
@@ -373,9 +373,11 @@ Then replace `autonomousPeriodic()` one more time:
 
 Forward is `0.0`, so the robot spins in place. Rotation is **positive**, and in WPILib's robot frame, positive rotation is counterclockwise: the robot turns **left**. The gyro agrees: turning left makes the heading climb from `0` toward `90`. Same convention, both ends. You checked this on your own robot in Chapter 9; if your gyro needed a minus sign then, it is already inside `getHeadingDegrees()`, and this code works unchanged. That is the payoff of putting the fix in the getter.
 
+This check only works for **left** turns, where the heading climbs toward the target. To turn right to `-90`, the test would have to be `<=`, and the rotation negative. For now, every turn on the course is a left turn. In Chapter 15, a PID controller with a tolerance turns either way with the same code, which is one of the reasons it exists.
+
 Put a piece of tape on the floor along one side of the robot before you run it, so you can see the starting angle. Run it a few times. You will see the same pattern as before: the turns are consistent, and they **overshoot**. The heading widget probably settles a few degrees past `90`. Turning has a stopping distance too (engineers would call it momentum, or **angular momentum**), and the faster you spin, the farther you coast.
 
-If the robot does not turn at all, or turns in jerky little bursts, the motors are not strong enough at `0.5` to overcome the friction of the wheels scrubbing sideways. Try `0.6`. The amount of power it takes just to get a robot moving is one of the three numbers SysId measures in Chapter 16. It is called **kS**, for static friction.
+If the robot does not turn at all, or turns in jerky little bursts, the motors are not strong enough at `0.5` to overcome the friction of the caster dragging and the wheels getting started. Try `0.6`. The amount of power it takes just to get a robot moving is one of the three numbers SysId measures in Chapter 16. It is called **kS**, for static friction.
 
 > **Turn by an angle, or turn to a heading?**
 >
@@ -803,6 +805,7 @@ Place the robot on the start line, pointing down leg 1. Run the program, open El
 You should see the robot drive forward about half a meter, spin left a quarter turn, drive to the black line, and stop, with `Auto Step` counting `1`, `2`, `3`, `4` along the way. Disable it, then look at the terminal panel, where `DataLogManager.log` also prints. You should see the story of the run:
 
 ```
+XRP Explorer started!
 ********** Robot program startup complete **********
 Mode: Disabled
 Mode: Autonomous
@@ -814,7 +817,7 @@ Auto step 4 started at 2.73 s
 Mode: Disabled
 ```
 
-(Your times and distances will be different. The order should not be.)
+(Your times and distances will be different. The order should not be. Your terminal will also show them with many more decimal places, like `2.5599999999999983 s`, because the code prints the raw `double`. They are shortened here to make the story easier to read.)
 
 > **On a real field, autonomous ends on its own**
 >
@@ -868,7 +871,7 @@ Timers do not disappear from autonomous. They just change jobs. Good uses for a 
 > * A `Timer` object is a **stopwatch**: `restart()`, `get()`, `hasElapsed(seconds)`. In a periodic method, **check** the time every loop instead of **waiting** with `Timer.delay()`. A periodic method is a snapshot, not a story. Every loop must also command the drivetrain, or **Motor Safety** stops the motors.
 > * A **timed** routine is simple, but `0.5` is power, not speed, so batteries and surfaces change where the robot ends up. **Encoder** driving measures distance directly and is far more repeatable. Both overshoot by the robot's **stopping distance**, which PID control (Chapter 15) will fix.
 > * Never compare measured `double`s with `==`: sensors are sampled every 20 ms and `double` math has tiny rounding errors (`0.1 + 0.2` is not `0.3`). Use `>=` for "reached or passed" and `Math.abs(target - value) < tolerance` for "close enough."
-> * The **gyro** decides when a turn is done, because wheels scrub during turns. Reset it once at the start of autonomous and turn **to a heading**, so small errors do not pile up.
+> * The **gyro** decides when a turn is done, because wheels slip and the caster drags during turns. Reset it once at the start of autonomous and turn **to a heading**, so small errors do not pile up.
 > * The **`switch` statement** picks one block of code based on a value. Every `case` ends with `break`, or the code **falls through** into the next case. Name your cases with `static final int` constants.
 > * A multi-step routine is a variable that remembers the current step, a `switch` that acts on it, and rules for moving to the next step: a **state machine**. Sensors decide when a step is done; a **timeout** catches steps that never finish.
 

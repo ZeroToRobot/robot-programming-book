@@ -12,7 +12,7 @@ This is the most important structural change since you created `Drivetrain` in C
 
 On the Java side, you will learn the idea that makes an IO layer possible: **interfaces**, including **default methods**, the kind AdvantageKit uses.
 
-You will need your XRP for the whole chapter. When you finish, the Explorer should drive exactly as it did at the end of Chapter 16. That is the point: a big change on the inside, and nothing different on the floor.
+You will need your XRP for the whole chapter. When you finish, the Explorer should drive the same as it did at the end of Chapter 16, within your PID tolerances. That is the point: a big change on the inside, and nothing different on the floor.
 
 ---
 
@@ -184,7 +184,7 @@ AdvantageKit is a **vendor library** (a vendordep): code from outside WPILib tha
 https://github.com/Mechanical-Advantage/AdvantageKit/releases/download/v26.0.2/AdvantageKit.json
 ```
 
-That link names a version on purpose. **AdvantageKit 26.0.2** is the newest version that runs on WPILib 2026 and the roboRIO, the versions this whole book uses (Chapter 2). A "latest" link would one day hand you a version built for a different robot controller, and your project would stop building.
+That link names a version on purpose. **AdvantageKit 26.0.2** is the newest version that runs on WPILib 2026 and the roboRIO, the versions this whole book uses (Chapter 2). A "latest" link would one day hand you a version built for a different robot controller, and your project would stop building. If VS Code later offers to update AdvantageKit, decline: the file's own update link points at the newest release, not at 26.0.2.
 
 A new file appears in your project: `vendordeps/AdvantageKit.json`. It tells Gradle which version of AdvantageKit to download. The next build needs an internet connection, once, to download it.
 
@@ -226,10 +226,10 @@ import org.littletonrobotics.junction.LoggedRobot;
 
 `LoggedRobot` works just like `TimedRobot`: the same mode methods, the same 20 millisecond loop. Your `autonomousPeriodic()`, `teleopPeriodic()`, and the rest keep working unchanged. This is Chapter 5's `extends` paying off: swap the parent class, and every method you wrote is still an `@Override` of the same method in the new parent.
 
-Then AdvantageKit has to be told where to send what it records, and started. That goes at the very **top** of the `Robot()` constructor, before anything else, so the logger is running before any part of the robot is created. You will see the top of the finished constructor in Section 17.4. Here is the new part:
+Then AdvantageKit has to be told where to send what it records, and started. That goes at the very **top** of the `Robot()` constructor, so the logger is running before anything the constructor creates (the drivetrain and the sensors). (Java creates the fields that have an `=` right on their line, like the controller and the timers, just before the constructor runs. AdvantageKit does not record any of those, so that is fine.) You will see the top of the finished constructor in Section 17.4. Here is the new part:
 
 ```java
-// AdvantageKit first, before anything else is created (Section 17.3).
+// AdvantageKit first, before anything the constructor creates (Section 17.3).
 Logger.recordMetadata("ProjectName", "XRP Explorer");
 Logger.addDataReceiver(new WPILOGWriter());   // write a log file into logs/
 Logger.addDataReceiver(new NT4Publisher());   // publish live, for AdvantageScope
@@ -243,7 +243,9 @@ Logger.start();
 
 > **Two flight recorders**
 >
-> Keep `DataLogManager.start()` in the constructor, right after `Logger.start()`. From now on, each run of your program writes **two** log files into `logs/`: the `FRC_...` file from Chapter 10, and the new `akit_...` file. Your SysId routine from Chapter 16 still writes to the `FRC_...` file, and SysId still reads it exactly as in Section 16.7. AdvantageKit's file is the one AdvantageScope and log replay are built around. Chapter 25 looks at both and decides which one the Explorer really needs.
+> Keep `DataLogManager.start()` in the constructor, right after `Logger.start()`. From now on, each run of your program writes **two** log files into `logs/`: the `FRC_...` file from Chapter 10, and the new `akit_...` file. Your SysId routine from Chapter 16 still writes to the `FRC_...` file, and SysId still reads it exactly as in Section 16.7. AdvantageKit's file is the one AdvantageScope and log replay are built around.
+>
+> One side effect: `DataLogManager` records everything on NetworkTables, and `NT4Publisher` puts everything AdvantageKit records there. So the `FRC_...` file now also holds a copy of every AdvantageKit value, under `NT:/AdvantageKit/`. When you load it in SysId, the list is much longer than in Chapter 16, but the entries you want are still the seven whose names end in `-drive`. Recording everything twice is wasteful, and Chapter 25 retires one of the recorders.
 
 ### Step 4: `@AutoLog`, the code you do not write
 
@@ -292,7 +294,7 @@ Time to cut the drivetrain along the seam. You will end up with three files wher
 | `DrivetrainIOXRP.java` | The real XRP's motors, encoders, and gyro | Yes |
 | `Drivetrain.java` | The logic, now built on top of any `DrivetrainIO` | No |
 
-All three go in `src/main/java/frc/robot`, next to `Robot.java`. Do this section with your real XRP, and test it at the end: when you are done, the Explorer should drive exactly as it did in Chapter 16. (In Chapter 18, a fourth file, `DrivetrainIOSim.java`, joins them: a simulated robot.)
+All three go in `src/main/java/frc/robot`, next to `Robot.java`. Do this section with your real XRP, and test it at the end: when you are done, the Explorer should drive the same as it did in Chapter 16. (In Chapter 18, a fourth file, `DrivetrainIOSim.java`, joins them: a simulated robot.)
 
 ### `DrivetrainIO`: the seam
 
@@ -432,14 +434,15 @@ Walk through it:
 
 Now the old `Drivetrain`, with the hardware taken out. Here is the complete file. The changes since Chapter 16 are:
 
-- the hardware imports are gone, and `Logger` is imported;
+- the `Encoder`, `XRPGyro`, and `XRPMotor` imports are gone (`DifferentialDrive` stays, for its static arcade math), and `Logger` is imported;
 - `WHEEL_DIAMETER_METERS`, `TRACKWIDTH_METERS`, `NOMINAL_BATTERY_VOLTS`, and the six gains are now `public`, because the IO classes need them;
 - the motors, encoders, gyro, `DifferentialDrive`, and remembered volts are replaced by two fields, `io` and `inputs`;
 - three new "zero" fields, and a `zeroSensors()` method that replaces `resetEncoders()` and `resetHeading()`;
 - the constructor takes a `DrivetrainIO`;
 - `updateOdometry()` becomes `periodic()`, which reads the inputs first;
 - `arcadeDrive` and `setVolts` send volts through `io`;
-- every getter reads from `inputs`; `getLeftCount()` and `getRightCount()` are gone.
+- every getter reads from `inputs`; `getLeftCount()` and `getRightCount()` are gone;
+- a few comments are reworded to match: the `NOMINAL_BATTERY_VOLTS` comment, the odometry field's comment, and the Javadoc on `setVolts` and `calculateVolts`.
 
 Replace your whole `Drivetrain.java` with this. Type the changed parts, do not paste:
 
@@ -791,9 +794,11 @@ From outside the class, nothing changed. `getLeftDistanceMeters()` is still "met
 
 > **Public constants**
 >
-> Since Chapter 8, constants have been `private static final`. Some of `Drivetrain`'s are now `public static final`, because the IO classes need the wheel size, the trackwidth, the nominal volts, and the SysId gains. Sharing a constant is safe: `final` means no other class can change it, only read it. It is fields that can change (like `leftZeroMeters`) that must stay `private`. In Chapter 21, the constants that many classes share move into a `Constants.java` file of their own.
+> Since Chapter 8, constants have been `private static final`. Some of `Drivetrain`'s are now `public static final`, because the IO classes need the wheel size, the trackwidth, the nominal volts, and the SysId gains. Sharing a constant is safe: `final` means no other class can change it, only read it. It is fields that can change (like `leftZeroMeters`) that must stay `private`.
+>
+> Notice the direction, though: the IO classes now read numbers from `Drivetrain`, the class above the seam, so each side of the seam leans on the other. That is fine for one subsystem. AdvantageKit's own template projects put the numbers both sides need into a separate constants class that both sides read. In Chapter 21, the constants that many classes share move into a `Constants.java` file of their own.
 
-### Check: the real robot drives exactly as before
+### Check: the real robot drives the same as before
 
 Before going any further, prove the split did not break anything. `Robot.java` needs only a few changes:
 
@@ -819,7 +824,7 @@ Here is the top of the constructor now, down to the line that creates `Sensors`.
 
 ```java
 public Robot() {
-    // AdvantageKit first, before anything else is created (Section 17.3).
+    // AdvantageKit first, before anything the constructor creates (Section 17.3).
     Logger.recordMetadata("ProjectName", "XRP Explorer");
     Logger.addDataReceiver(new WPILOGWriter());   // write a log file into logs/
     Logger.addDataReceiver(new NT4Publisher());   // publish live, for AdvantageScope
@@ -838,11 +843,11 @@ public Robot() {
 }
 ```
 
-The order matters. AdvantageKit starts first, so it is recording before any hardware exists. `DataLogManager` starts next, as in Chapter 10. Only then is the drivetrain created, so the first thing its constructor does (reading the hardware once) is recorded too.
+The order matters. AdvantageKit starts first, so it is recording before the drivetrain and the sensors exist. `DataLogManager` starts next, as in Chapter 10. Only then is the drivetrain created, so the first thing its constructor does (reading the hardware once) is recorded too.
 
 Build. If the compiler complains about `getLeftCount`, `updateOdometry`, or `resetEncoders`, you missed one of the steps above; the error message names the line.
 
-Then run the program with your XRP on, and repeat three checks you already know: drive in teleop, run the Chapter 16 cruise check in Test mode (left bumper, `Measured Forward (m per s)` near 0.10), and run autonomous once. Everything should behave exactly as it did at the end of Chapter 16. If it does, commit (see the Git exercise). A refactor that changes behavior is a bug; a refactor that does not is a safe place to stand.
+Then run the program with your XRP on, and repeat three checks you already know: drive in teleop, run the Chapter 16 cruise check in Test mode (left bumper, `Measured Forward (m per s)` near 0.10), and run autonomous once. Everything should behave the same as at the end of Chapter 16, within your PID tolerances (a turn may end a degree or so differently). Two small things really did change underneath. Every reading now comes from `inputs`, which `robotPeriodic()` refreshes after the mode methods run, so `autonomousPeriodic()` sees the readings from the end of the last loop, 20 ms older than before. And the small deadband `DifferentialDrive` applies (it ignores powers under 0.02) now acts on each wheel's power instead of on the sticks. If everything matches within tolerance, commit (see the Git exercise). A refactor that changes behavior is a bug; a refactor that does not is a safe place to stand.
 
 > **Refactoring, in one sentence**
 >
@@ -919,7 +924,7 @@ Split the drivetrain into an IO layer and install AdvantageKit, on the real XRP.
 1. Install the AdvantageKit vendordep and add the two `build.gradle` blocks (Section 17.3, Steps 1 and 2). Build once with an internet connection and confirm `BUILD SUCCESSFUL`.
 2. Change `Robot` to extend `LoggedRobot`, and add the `Logger` setup at the top of the constructor (Section 17.3, Step 3).
 3. Create `DrivetrainIO.java` and `DrivetrainIOXRP.java`, and replace `Drivetrain.java` with the new listing (Section 17.4). Keep **your** SysId gains in the six constants, not the example values.
-4. Make the small `Robot.java` changes in "Check: the real robot drives exactly as before," build, and confirm on the **real** XRP that teleop, the cruise check, and autonomous behave exactly as at the end of Chapter 16.
+4. Make the small `Robot.java` changes in "Check: the real robot drives the same as before," build, and confirm on the **real** XRP that teleop, the cruise check, and autonomous behave the same as at the end of Chapter 16, within your PID tolerances.
 5. Connect AdvantageScope and find the eight `Drivetrain` inputs and the `Pose` output (Section 17.5). Find the `akit_...` log file in `logs/`.
 
 Diagnose anything strange:
@@ -931,7 +936,7 @@ Diagnose anything strange:
 - **The pose never changes on the field, but the robot drives:** `robotPeriodic()` still calls the old `updateOdometry()`, or does not call `drivetrain.periodic()` at all.
 - **AdvantageScope connects but shows no Drivetrain folder:** you picked plain **NetworkTables 4**; choose **NetworkTables 4 (AdvantageKit)**.
 
-When the real Explorer drives exactly as it did in Chapter 16 and AdvantageScope shows the drivetrain's inputs, your Explorer has an IO layer. Every chapter from here on builds on it.
+When the real Explorer drives the same as it did in Chapter 16 and AdvantageScope shows the drivetrain's inputs, your Explorer has an IO layer. Every chapter from here on builds on it.
 
 > **Checkpoint**
 >

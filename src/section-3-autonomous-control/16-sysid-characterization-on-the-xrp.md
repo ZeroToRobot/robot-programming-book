@@ -143,7 +143,7 @@ Chapter 13's `speedToPower` is a line that starts at zero. The real robot's line
 >
 > The XRP's motors really are driven by voltage: `set(0.5)` switches the battery on and off so fast that the motor feels about half the battery's voltage. But the XRP has no way to **measure** its battery, so your code cannot know whether half power is 3.0 volts or 2.4.
 >
-> This chapter uses **pretend volts**: power times a fixed number, `NOMINAL_BATTERY_VOLTS = 6.0`, which is about what four fresh AA batteries give. When you record a test, you log pretend volts. When you drive, you divide pretend volts by the same 6.0 to get power. Because the same number is used both ways, it cancels out. You could pick 1.0 and the robot would drive exactly the same, but every gain would be harder to compare with the rest of the FRC world, where kS is usually written in volts.
+> This chapter uses **pretend volts**: power times a fixed number, `NOMINAL_BATTERY_VOLTS = 6.0`, which is about what four fresh AA batteries give. When you record a test, you log pretend volts. When you drive, you divide pretend volts by the same 6.0 to get power. Because the same number is used both ways, it cancels out. You could pick 1.0, scale the SysId test voltages to match, re-run SysId, and the robot would drive exactly the same, but every gain would be harder to compare with the rest of the FRC world, where kS is usually written in volts.
 >
 > The catch is batteries. As they drain, a given power produces less real voltage, so the robot gets slower, and a model measured on fresh batteries will over-promise. That is why you put fresh batteries in for the tests, and why PID stays in the loop to cover the drift. A roboRIO **can** measure its battery, and its motor controllers can compensate on every loop, which you will use in Chapter 27 and again when you repeat SysId on real brushless motors in Chapter 33.
 
@@ -192,7 +192,7 @@ The robot leaps forward, accelerating hard at first, then less and less until it
 
 ### What SysId does with the data
 
-Once you have the data, SysId does what you may have done in math or science class with a scatter plot: it finds the **line of best fit**. With three unknowns, it is a "line" in more dimensions than a graph can show, but the idea is the same. The method is called **least squares**: try every possible kS, kV, and kA, and keep the set whose predicted voltages are closest to the measured ones, on average, over every loop of every test. You do not have to do any of that math. You have to give it good data.
+Once you have the data, SysId does what you may have done in math or science class with a scatter plot: it finds the **line of best fit**. With three unknowns, it is a "line" in more dimensions than a graph can show, but the idea is the same. The method is called **least squares**: it finds the one set of kS, kV, and kA whose predicted voltages are closest to the measured ones, on average, over every loop of every test. You can picture it as trying every possible set and keeping the best, but a little algebra gets there in one step. You do not have to do any of that math. You have to give it good data.
 
 > **System identification, in one sentence**
 >
@@ -347,7 +347,7 @@ public void setVolts(double leftVolts, double rightVolts) {
 }
 ```
 
-The parameters have the same names as the fields, so `this.leftVolts` means the field and plain `leftVolts` means the parameter (Chapter 7). The method clamps first, because the battery cannot give more than it has, then stores the clamped value, so the log records what the motors really got. `tankDrive(..., false)` sends each side its power with no squaring, exactly as `drive()` already does.
+The parameters have the same names as the fields, so `this.leftVolts` means the field and plain `leftVolts` means the parameter (Chapter 7). The method clamps first, because the battery cannot give more than it has, then stores the clamped value, so the log records what the motors really got. `tankDrive(..., false)` sends each side its power with no squaring, exactly as `drive()` already does. (It still ignores powers under 0.02, the deadband from Chapter 12. SysId measures that as part of kS, and `drive()` goes through the same `setVolts`, so it cancels too.)
 
 Change `stop()` to use it, so a stop also clears the remembered volts:
 
@@ -695,7 +695,7 @@ Build, and fix anything the compiler finds. Then get ready.
 
 - **Fresh batteries.** Section 16.2 explained why: the model you measure is only true for the batteries you measure it with.
 - **The right floor.** Run the tests on the floor where you run the course. A model measured on a smooth desk will be wrong on carpet, because kS is mostly the floor's friction.
-- **Space.** Put the robot at one end of a clear, straight stretch about a meter and a half long, pointing down it. The forward tests drive about half a meter forward, and the reverse tests bring it back. Leave room behind it, too, in case a reverse test runs longer than its forward partner.
+- **Space.** Put the robot at one end of a clear, straight stretch about a meter and a half long, pointing down it. The forward tests drive about half a meter forward, and the reverse tests bring it back. Leave room behind it, too, in case a reverse test runs longer than its forward partner, and about 30 cm on each side: the two motors are never exactly matched (that is part of what SysId measures), so the robot may curve during a test. Between tests, you can straighten it by hand.
 - **Controller.** Set up as in Chapter 8: in the Simulation GUI, in Joysticks slot 0, with **Map gamepad** checked.
 
 ### Check the old guess first
@@ -712,7 +712,7 @@ With the old `speedToPower`, you will probably see something well under 0.10, pe
 
 Still in Test mode, in the **same** run of the program:
 
-1. **Quasistatic forward.** Hold **D-pad up**. For a second or two, nothing seems to happen. That is the voltage climbing toward kS. Then the robot starts to creep, and slowly speeds up. Keep holding until it has driven about half a meter, or until it stops by itself (a safety net). Let go. Watch `SysId Test` change from `quasistatic-forward` back to `none`.
+1. **Quasistatic forward.** Hold **D-pad up**. For a second or two, nothing seems to happen. That is the voltage climbing toward kS. Then the robot starts to creep, and slowly speeds up. Keep holding until it has driven about half a meter, or until it stops by itself (a safety net). A slow test often runs the full 8 seconds and stops by itself, with a `stopped by a safety net` line in the terminal: that is normal. Let go. Watch `SysId Test` change from `quasistatic-forward` back to `none`.
 2. **Quasistatic reverse.** Wait until the robot is completely still, then hold **D-pad down** the same way. It backs up toward where it started.
 3. **Dynamic forward.** Hold **D-pad right**. The robot leaps forward. Let go after 2 or 3 seconds, before it runs out of room.
 4. **Dynamic reverse.** Hold **D-pad left**, 2 or 3 seconds, and let go.
@@ -723,17 +723,19 @@ The terminal shows each test's start and end:
 Mode: Test (tuning bench and SysId)
 Bench target: 0.0 m, 0.0 deg
 SysId quasistatic-forward started
-SysId quasistatic-forward ended after 7.42 s and 0.48 m
-Bench target: 0.4791 m, 0.0 deg
+SysId quasistatic-forward stopped by a safety net
+SysId quasistatic-forward ended after 8.0 s and 0.51 m
+Bench target: 0.5072 m, 0.0 deg
 SysId quasistatic-reverse started
-SysId quasistatic-reverse ended after 7.51 s and -0.47 m
-Bench target: 0.0123 m, 0.0 deg
+SysId quasistatic-reverse stopped by a safety net
+SysId quasistatic-reverse ended after 8.02 s and -0.51 m
+Bench target: -0.0026 m, 0.0 deg
 SysId dynamic-forward started
-SysId dynamic-forward ended after 2.63 s and 0.42 m
-Bench target: 0.4341 m, 0.0 deg
+SysId dynamic-forward ended after 2.6 s and 0.44 m
+Bench target: 0.4363 m, 0.0 deg
 SysId dynamic-reverse started
-SysId dynamic-reverse ended after 2.71 s and -0.43 m
-Bench target: 0.0062 m, 0.0 deg
+SysId dynamic-reverse ended after 2.6 s and -0.44 m
+Bench target: -0.0027 m, 0.0 deg
 ```
 
 (Your numbers will differ. Java will print more decimal places than shown here.) Then **disable** the robot and **stop** the program, so the log file is closed and complete.
@@ -762,7 +764,7 @@ Open SysId from VS Code: `WPILib: Start Tool` > `SysId`. It opens with several p
 
 ### Step 1: Load the log
 
-In the **Log Loader** pane, click **Open data log file...** and choose your newest `FRC_...wpilog` from the project's `logs` folder. The pane fills with a list of every entry in the log. It is a long list: `DataLogManager` records every dashboard value too (those start with `NT:`). You are looking for five or so entries with **no** `NT:` in front:
+In the **Log Loader** pane, click **Open data log file...** and choose your newest `FRC_...wpilog` from the project's `logs` folder. The pane fills with a list of every entry in the log. It is a long list: `DataLogManager` records every dashboard value too (those start with `NT:`). You are looking for seven entries whose names end in `-drive`:
 
 ```
 sysid-test-state-drive
@@ -912,7 +914,7 @@ The guard says: if a wheel is asked for less than `STOPPED_SPEED_METERS_PER_SECO
 
 Here is the complete `Drivetrain` after this chapter, starting from the end of Chapter 14. The changes are:
 
-- three static imports and two regular imports (`MathUtil`, `SimpleMotorFeedforward`, `SysIdRoutineLog`);
+- three static imports and three regular imports (`MathUtil`, `SimpleMotorFeedforward`, `SysIdRoutineLog`);
 - the `NOMINAL_BATTERY_VOLTS` constant, six gain constants, and `STOPPED_SPEED_METERS_PER_SECOND`;
 - two feedforward fields and the two remembered-volts fields;
 - `stop()` now uses `setVolts`;
@@ -1349,7 +1351,7 @@ Every one of them is the same idea as this chapter. Know your robot, in numbers.
 | 0.10 | 0.5 | | | |
 | -0.10 | 0 | | | |
 
-The second row is done for you. Then answer: at which speed is the old guess furthest off, as a fraction of what was needed? Why is the `-0.10` row not just "the same as `0.10`, but negative" for the kS part? (It is, but explain **why** that is right.) Check your volts in code with a temporary `System.out.println(new SimpleMotorFeedforward(0.95, 18.0, 1.1).calculate(0.05));` in the constructor, then remove it.
+The second row is done for you. Then answer: at which speed is the old guess furthest off, as a fraction of what was needed? Why is the `-0.10` row not just "the same as `0.10`, but negative" for the kS part? (It is, but explain **why** that is right.) Check your volts in code with a temporary `System.out.println(new SimpleMotorFeedforward(0.95, 18.0, 1.1).calculate(0.05));` in the constructor, then remove it. (One-argument `calculate` has no acceleration, so for the acceleration row use `calculateWithVelocities(0.10, 0.11)`. It gives about 3.39, a little more than the hand formula, because it works over one 20 ms loop in which the speed rises from 0.10 to 0.11.)
 
 **2. Predict your top speed.** With your own gains for each side, compute the predicted top speed at full power: `(NOMINAL_BATTERY_VOLTS - kS) ÷ kV`. (Or let the model do it: `leftFeedforward.maxAchievableVelocity(6.0, 0.0)`.) Compare with the top speed you measured in Chapter 13 and put in `MAX_WHEEL_SPEED_METERS_PER_SECOND`. If the slower side's prediction is **lower** than that constant, desaturation will let `drive()` ask that side for a speed it cannot reach. Change the constant to the slower side's prediction, and write a comment saying where the number came from. If the prediction is higher, explain in one sentence why your Chapter 13 measurement and the prediction might differ (think about which batteries you used each time).
 

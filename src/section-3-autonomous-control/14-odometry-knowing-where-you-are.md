@@ -105,7 +105,7 @@ Notice the turn. The robot's position did not change at all, only its heading. A
 
 > **Two frames, one robot**
 >
-> It is easy to mix these up, so say it out loud: **robot frame** is "forward and left, from where I am facing right now." **Field frame** is "along and across the floor, from the start line, no matter where I am facing." Chassis speeds (Chapter 13) live in the robot frame. Poses live in the field frame. On a real FRC field, WPILib puts the field origin at a corner of the field, with +x pointing away from the blue alliance wall, so every team's code agrees on where (0, 0) is. Your desk has no blue alliance wall, so the start line will do. You will meet the full FRC field frame in Chapter 30, when field-oriented driving turns the driver's stick into field-frame motion.
+> It is easy to mix these up, so say it out loud: **robot frame** is "forward and left, from where I am facing right now." **Field frame** is "along and across the floor, from the start line, no matter where I am facing." Chassis speeds (Chapter 13) live in the robot frame. Poses live in the field frame. On a real FRC field, WPILib puts the field origin at a corner of the field, with +x pointing away from the blue alliance wall, so every team's code agrees on where (0, 0) is. That origin stays in the blue corner for **both** alliances, so a robot on the red alliance has to flip its paths and its driver's controls to match. Chapters 30 and 32 deal with that. Your desk has no blue alliance wall, so the start line will do. You will meet the full FRC field frame in Chapter 30, when field-oriented driving turns the driver's stick into field-frame motion.
 
 ---
 
@@ -137,6 +137,7 @@ You do not need trigonometry class to use these. Think of `cos(θ)` as "how much
 | -90 degrees | 0 | -1 | all along -y |
 | 45 degrees | 0.707 | 0.707 | equal parts +x and +y |
 | 30 degrees | 0.866 | 0.5 | mostly +x, some +y |
+| 135 degrees | -0.707 | 0.707 | equal parts -x and +y |
 
 Java has both, as `static` methods in the `Math` class, and they expect **radians** (Chapter 13 again):
 
@@ -177,7 +178,7 @@ The wheels moved "forward," but the pose moved along +y, because the robot faces
 
 In Chapter 13 you learned that the encoders can compute the heading on their own: `(right - left) / trackwidth`. So why use the gyro?
 
-You already know the answer: **scrubbing**. When the robot turns, its wheels slide sideways a little, so the encoders think it turned more than it really did. You measured this yourself in Chapter 13's effective-trackwidth practice. The gyro feels the actual rotation of the robot's body, so it does not care whether the wheels slipped.
+You already know the answer from Chapter 12: in a turn, the wheels slip a little and the caster drags, so the encoders think the robot turned more than it really did. You measured this yourself in Chapter 13's effective-trackwidth practice. The gyro feels the actual rotation of the robot's body, so it does not care whether the wheels slipped.
 
 WPILib's odometry agrees. Its `update` method does compute a turn from the encoders, and then immediately **throws it away** and uses the gyro's heading instead. (You can see this in WPILib's source code, in the `Odometry` class. It is about four lines.) The encoders are trusted for how far the robot moved, and the gyro is trusted for which way it faces. Each sensor does the job it is best at. That is the sensor fusion idea from Chapter 9, in its simplest form.
 
@@ -652,16 +653,20 @@ public class Drivetrain {
 Walk through what changed since Chapter 13:
 
 - **Three new imports**: `Pose2d` and `Rotation2d` from `geometry`, and `DifferentialDriveOdometry` from `kinematics`.
-- **One new field, `odometry`**, that is `final` but has no `= new ...` on its line. It gets its value in the constructor instead, just like `drivetrain` and `sensors` in `Robot.java` (Chapter 12). Why wait? Field initializers run **before** the constructor body. If `odometry` were created in its field line, it would read the encoders before `setDistancePerPulse` had run, and it would start counting in raw counts instead of meters. Creating it on the last line of the constructor guarantees every sensor is set up first. Java still checks that a `final` field is assigned exactly once, so if you forget the line, the code does not compile.
+- **One new field, `odometry`**, that is `final` but has no `= new ...` on its line. It gets its value in the constructor instead, just like `drivetrain` and `sensors` in `Robot.java` (Chapter 10). Why wait? Field initializers run **before** the constructor body. If `odometry` were created in its field line, it would take its starting readings before the encoders were set up and zeroed, and any count already on them would show up as a jump on the first update. Creating it on the last line of the constructor guarantees every sensor is set up first. Java still checks that a `final` field is assigned exactly once, so if you forget the line, the code does not compile.
 - **`getRotation2d()`**, a computed getter (Chapter 9) that turns `getHeadingDegrees()` into a `Rotation2d` with the static factory from Section 14.4. Odometry gets its heading from here, so a sign fix in `getHeadingDegrees()` reaches it automatically. (`XRPGyro` has its own `getRotation2d()` method, and WPILib's examples often call it directly. On your robot, going through your own method keeps one source of truth.)
 - **`updateOdometry()`** does one thing: feed the three readings to `odometry.update`. `Robot.java` will call it every loop.
 - **`getPose()`** returns the pose. It is a getter that returns an immutable object, so the caller can do anything they like with it and the odometry is never affected.
 - **`resetPose(Pose2d)`** resets the sensors and the odometry in the right order: sensors first, then `resetPosition` with the fresh readings. It passes the actual readings (`getLeftDistanceMeters()` and so on) rather than assuming they are exactly zero, so it is correct even if a reading is a hair off.
 - **`resetEncoders()` and `resetHeading()` are now `private`.** This will break two places in `Robot.java`, and that is the point: the compiler will show you every caller that needs to change.
 
+> **You don't actually have to zero the sensors**
+>
+> `resetPosition` takes the sensors' readings **as they are** and calls that spot the new pose. So `odometry.resetPosition(getRotation2d(), getLeftDistanceMeters(), getRightDistanceMeters(), pose)` alone would move the pose with no jump, without touching any hardware. The Explorer zeroes its encoders and gyro too, because its turn step still reads the raw heading from `getHeadingDegrees()`. On a real FRC robot, zeroing a motor controller or a gyro over the CAN bus takes a moment to arrive, so strong teams leave the sensors alone and reset only the odometry. Chapter 17 switches the Explorer to that style.
+
 > **Why not just update odometry inside `getPose()`?**
 >
-> It is tempting to make `getPose()` call `odometry.update(...)` first, so the pose is always fresh. Do not. Odometry needs to be updated **exactly once per loop**, at a steady rhythm. If `getPose()` updated it, then calling `getPose()` three times in one loop would update three times (harmless here, but confusing), and **not** calling it during some loop would skip an update (and if the robot moved, that move is folded into the next update less accurately). Keep "update" and "read" separate: one call to `updateOdometry()` per loop, as many calls to `getPose()` as you like. In Chapter 20, when `Drivetrain` becomes a command-based subsystem, the update will move into a method called `periodic()` that WPILib calls for you once per loop.
+> It is tempting to make `getPose()` call `odometry.update(...)` first, so the pose is always fresh. Do not. Odometry needs to be updated **exactly once per loop**, at a steady rhythm. If `getPose()` updated it, then calling `getPose()` three times in one loop would update three times (harmless here, but confusing), and **not** calling it during some loop would skip an update (and if the robot moved, that move is folded into the next update less accurately). Keep "update" and "read" separate: one call to `updateOdometry()` per loop, as many calls to `getPose()` as you like. In Chapter 17, the update moves into a method called `periodic()`, and in Chapter 20, when `Drivetrain` becomes a command-based subsystem, WPILib starts calling it for you once per loop.
 
 ---
 
@@ -720,7 +725,7 @@ And look at those three constants. They are `static final Pose2d` constants, whi
 
 ### The full `Robot.java`
 
-Here is the complete `Robot.java` after this chapter, so you can check yours line by line. It starts from the end of Chapter 13. The changes for this chapter are: four new imports, a new constant group for the course poses, the `field`, two lines in the constructor, the `robotPeriodic()` changes, an **Odometry** block in `updateDashboard()`, the new `resetPose` call in `autonomousInit()`, and the pose in `startStep()`'s log message.
+Here is the complete `Robot.java` after this chapter, so you can check yours line by line. It starts from the end of Chapter 13. The changes for this chapter are: three new imports (`Pose2d`, `Rotation2d`, and `Field2d`), a new constant group for the course poses, the `field`, two lines in the constructor, the `robotPeriodic()` changes, an **Odometry** block in `updateDashboard()`, the new `resetPose` call in `autonomousInit()`, and the pose in `startStep()`'s log message.
 
 ```java
 package frc.robot;
@@ -991,7 +996,7 @@ Walk through what changed since Chapter 13:
 
 - **A new constant group: the course.** `LINE_DISTANCE_METERS` is how far your tape is from the corner; measure yours and put in your number. The three poses are built **from** the other constants, so if you change `LEG_1_DISTANCE_METERS`, the map changes with it. These constants come **after** the autonomous constants on purpose: Java sets up `static` constants from top to bottom, and using a constant on a line above where it is declared is a compile error (`illegal forward reference`).
 - **`field`**, created once in its field line and published once in the constructor with `putData`. The constructor also draws the course on the map.
-- **`robotPeriodic()`** calls `drivetrain.updateOdometry()` first, before anything reads the pose. It runs in **every** mode, including disabled, so if you pick up the robot and put it down somewhere, or push it by hand, the odometry still tracks every wheel turn.
+- **`robotPeriodic()`** calls `drivetrain.updateOdometry()` first, before the dashboard reads the pose. `TimedRobot` runs the mode method (like `autonomousPeriodic()`) **before** `robotPeriodic()` in each loop, so anything the mode methods read is the pose from the end of the last loop, 20 ms old. It runs in **every** mode, including disabled, so if you pick up the robot and put it down somewhere, or push it by hand, the odometry still tracks every wheel turn.
 - **The Y button now calls `resetPose(START_POSE)`** instead of resetting the encoders and gyro separately. (Those two lines would not compile anymore anyway.) Y now means "the robot is on the start line, facing down leg 1."
 - **`autonomousInit()` calls `resetPose(START_POSE)`** for the same reason. The rest of the routine is unchanged: the turn still checks `getHeadingDegrees()`, and the steps still measure their distance by subtracting. Odometry watches the routine; it does not drive it yet.
 - **`updateDashboard()` has an Odometry block**: three number widgets and the `setRobotPose` call. `pose` is a local variable holding an immutable object, read once and used four times. Notice the chain in `pose.getRotation().getDegrees()`.
@@ -1023,12 +1028,12 @@ Now put the robot on the start line, run **Autonomous**, and watch both the robo
 Mode: Autonomous
 Auto step 1 started at 0.0 s, Pose2d(Translation2d(X: 0.00, Y: 0.00), Rotation2d(Rads: 0.00, Deg: 0.00))
 Auto step 2 started at 2.62 s, Pose2d(Translation2d(X: 0.50, Y: 0.01), Rotation2d(Rads: 0.02, Deg: 1.15))
-Auto step 3 started at 3.55 s, Pose2d(Translation2d(X: 0.51, Y: 0.01), Rotation2d(Rads: 1.59, Deg: 91.10))
+Auto step 3 started at 3.55 s, Pose2d(Translation2d(X: 0.51, Y: 0.01), Rotation2d(Rads: 1.53, Deg: 87.91))
 Line found after 0.38 m
 Auto step 4 started at 5.61 s, Pose2d(Translation2d(X: 0.50, Y: 0.39), Rotation2d(Rads: 1.59, Deg: 91.29))
 ```
 
-(Your numbers will differ. Read them anyway.) Look at step 2's line. The robot drove "0.50 m straight," but odometry says it ended with `Y: 0.01` and a heading of about 1 degree: it curved slightly left. That is the drift you measured with a tape measure in Chapter 12, now measured by the robot itself. And look at the last line. The robot believes it stopped at about `(0.50, 0.39)`. Measure where it really is with your tape measure. How close is the robot's belief to the truth?
+(Your numbers will differ. Read them anyway.) Step 3's heading is just under 90, even though the turn ends at 90 or more: `startStep()` runs in `autonomousPeriodic()`, so it logs the pose from the loop before. Look at step 2's line. The robot drove "0.50 m straight," but odometry says it ended with `Y: 0.01` and a heading of about 1 degree: it curved slightly left. That is the drift you measured with a tape measure in Chapter 12, now measured by the robot itself. And look at the last line. The robot believes it stopped at about `(0.50, 0.39)`. Measure where it really is with your tape measure. How close is the robot's belief to the truth?
 
 ---
 
@@ -1053,8 +1058,8 @@ A few centimeters and a few degrees off, after one lap. Drive the square again w
 Every number odometry uses comes from a sensor, and every sensor is a little bit wrong in its own way (Chapter 9's "every sensor lies a little"). Here are the main culprits, in roughly the order they matter on an XRP:
 
 1. **Wheel slip.** When a wheel spins without the robot moving the same distance (a fast start, a slick spot, pushing against something), the encoder counts distance the robot never traveled. You saw this in step 4 of the hand test, in an extreme form.
-2. **Scrubbing during turns.** When the robot spins in place, the wheels slide sideways and forward a little. Since odometry takes the heading from the gyro, scrubbing does not fool the heading. But it can nudge the robot's center a few millimeters during each turn that the encoders never see.
-3. **Wheel size.** Odometry turns encoder counts into meters using `WHEEL_DIAMETER_METERS = 0.060`. If your real wheels are 59 mm because the tires are worn, or squish under the robot's weight, every distance is about 1.7 percent too long. That is almost a centimeter in a 50 cm leg.
+2. **Slip during turns.** When the robot spins in place, the wheels slip a little and the caster drags. Since odometry takes the heading from the gyro, this does not fool the heading. But it can nudge the robot's center a few millimeters during each turn that the encoders never see.
+3. **Wheel size.** Odometry turns encoder counts into meters using `WHEEL_DIAMETER_METERS = 0.060`. If your real wheels are 59 mm because the tires are worn, or squish under the robot's weight, every distance is about 1.7 percent too long. That is almost a centimeter in a 50 cm leg. It shows on straight runs, like the course. On a closed square it mostly cancels, because every side is equally too long.
 4. **Gyro drift.** The gyro's heading slowly creeps, even when the robot is still (Chapter 9). Small, but it never stops.
 5. **Sampling.** Odometry only looks every 20 ms. During a fast, jerky move, a lot can happen between looks. The arc math (Section 14.3) helps, but it assumes smooth motion.
 6. **The floor and the world.** Bumps, carpet seams, cables, and (on a real field) other robots pushing yours. Odometry assumes a flat floor and a robot nobody touches.
@@ -1097,7 +1102,7 @@ Look at how your code is set up for all of this. `Robot.java` asks the drivetrai
 >
 > * **Odometry** is dead reckoning done every loop: add up the robot's small moves to keep a running estimate of where it is. Distance traveled is not position; position needs **how far** and **which way**.
 > * A **pose** is x, y, and heading in the **field frame**, a coordinate system fixed to the floor (for the Explorer: origin at the start line, +x down leg 1, counterclockwise positive). Chassis speeds live in the robot frame; poses live in the field frame.
-> * Each loop, the center moves `d = (Δleft + Δright) / 2`, split into `d × cos(θ)` along x and `d × sin(θ)` along y. WPILib takes the heading from the **gyro**, because scrubbing fools the encoders, and follows a small arc (the pose exponential) instead of a straight line.
+> * Each loop, the center moves `d = (Δleft + Δright) / 2`, split into `d × cos(θ)` along x and `d × sin(θ)` along y. WPILib takes the heading from the **gyro**, because wheel slip in turns fools the encoders, and follows a small arc (the pose exponential) instead of a straight line.
 > * `Translation2d`, `Rotation2d`, and `Pose2d` show **composition**: a pose **has a** translation and **has a** rotation, unlike inheritance, where `Robot` **is a** `TimedRobot`. You reach inside with **method chaining** (`pose.getRotation().getDegrees()`) and build angles with **static factory methods** (`Rotation2d.fromDegrees`).
 > * The geometry classes are **immutable**: `private final` fields and no setters, so every "change" returns a new object. Immutable objects are safe to share, and only immutable objects make truly constant `static final` object constants.
 > * `DifferentialDriveOdometry` needs the gyro heading and both encoder distances to start, `update` once per loop, and `getPoseMeters()` to read. **Resetting sensors without `resetPosition` makes the pose teleport**, so `Drivetrain.resetPose(Pose2d)` resets everything together and the raw resets are now `private`.
@@ -1170,7 +1175,7 @@ System.out.println(c);
 
 Explain in two sentences why `a` and `b` still print the same thing, and why that is no longer a problem the way it was with `desaturate` in Chapter 13. Then try adding a `setName` method that changes the `name` field. What does the compiler say, and why? (You can delete `Waypoint.java` afterward, or keep it; Chapter 21 has a use for something like it.)
 
-**4. Fool the odometry.** With the robot disabled and AdvantageScope's 2D Field open, try to make the odometry wrong in as many different ways as you can in five minutes. Some ideas: lift the robot and spin a wheel, slide it sideways, rotate it while it is lifted, push it while holding one wheel still. For each trick, write one line: what you did, what the map showed, and which sensor was fooled (or which assumption odometry made). Then, as a final trick, temporarily make `resetEncoders()` public again, call it from the Y button **instead of** `resetPose`, drive forward 30 cm, and press Y. Describe what the robot icon does, and use Section 14.6 to explain why. Put `resetPose` back and make `resetEncoders()` private again when you are done.
+**4. Fool the odometry.** With the robot disabled and AdvantageScope's 2D Field open, try to make the odometry wrong in as many different ways as you can in five minutes. Some ideas: lift the robot and spin a wheel, slide it sideways, rotate it while it is lifted, push it while holding one wheel still. For each trick, write one line: what you did, what the map showed, and which sensor was fooled (or which assumption odometry made). Then, as a final trick, temporarily make `resetEncoders()` public again, call it from the Y button **instead of** `resetPose`, drive forward 30 cm, turn left a quarter turn, drive 20 cm, and press Y. Where does the robot icon land? Use Section 14.6 to explain why it lands there. Put `resetPose` back and make `resetEncoders()` private again when you are done.
 
 ### Build (XRP Explorer)
 
