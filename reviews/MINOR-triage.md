@@ -53,6 +53,14 @@ Ch 19 to 26 (92 rows), plus the `Drivetrain.periodic()` Javadoc (Ch 17 listing, 
 
 Carried forward into later chapters in a follow-up commit: `DriveWithSticks` `slowMode` (Ch 20), the Y binding guarded in autonomous (Ch 21), `FollowLine.end()` updating `Line State` (Ch 22), the `Tuning Mode` box (Ch 24), and the Ch 27 "export the layout" step. Done in that commit, with ch21 to ch26 rebuilt (tests 24, 27, 30, 38). The same commit corrects the Elastic save steps: in Elastic 2026.1.1 **File > Save** only stores the layout in Elastic's preferences (`saveLayout` in `lib/pages/dashboard/dashboard_page_layouts.dart`), and only **Save As** (`exportLayout`) writes `elastic-layout.json`. Ch 9, 12, 24 and 27 and the Ch 15 and 24 sheets now say Save As wherever the project file must change.
 
+## Batch 5 (done 2026-11-02)
+
+Ch 27 to 29 (27 rows). Checked against sources: the FMS whitepaper and WPILib Driver Station docs (a restarted program comes back enabled by the FMS), GradleRIO 2026.2.1 `FRCJREArtifact` (the first deploy after imaging installs Java), DeployUtils 2025.2.0 (addresses tried at once), Phoenix 6 26.3.0 in a JUnit run (two `TalonFX(1)` objects raise no error, unlike a second `DigitalInput`), and the Phoenix 6 jar for `optimizeBusUtilization` (4 Hz). Ch 27 gains an optional Practice 7 (a debounced low-battery warning, red first); the Build stays at 6 tests. The teardown fix (`getDefaultButtonLoop().clear()`) cuts the ch28 and ch29 test warnings from 17 to 1; ch28 11 and ch29 18 tests pass. `ChassisSpeeds.discretize` added to CLAUDE.md's Ch 30 plan.
+
+## Result
+
+Every MINOR row is now DONE or SKIP, except the HARDWARE rows (ch15-v4, ch17-v5, ch18-v3, ch21-v6, ch27-m5) and the ghost-pose look in ch14-m2, which need a real robot or an app.
+
 ## Plan
 
 Fix in five batches, one commit per batch in each repo, exercises and solutions updated with the chapter and rebuilt where code changes: (1) the missed MAJORs and high-priority items; (2) Ch 1 to 11; (3) Ch 12 to 18; (4) Ch 19 to 26; (5) Ch 27 to 29. VERIFY-WEB items are checked online inside their batch; HARDWARE items are left for Devang. Mark each row's status in this file as it lands.
@@ -490,16 +498,16 @@ File: `section-6-mini-swerve/27-from-xrp-to-roborio.md`
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch26-m1 | "Has to be enabled again before teleop" is wrong on a field | VERIFY-WEB | S | Check FMS/DS docs on code restart mid-match; then line 1202: "comes back enabled in the match's mode, but as a brand-new program (pose, state, auto step gone)" | Ch 27 §27.10 Step 1 |
-| ch26-m2 | Image "includes a JVM" vs deploy installs it | VERIFY-WEB | S | Check GradleRIO / WPILib deploy docs for the roboRIO JRE install; then line 363 "the deploy tool installs one on a fresh image" and line 450 "first deploy after imaging also installs Java" | Ch 27 §27.6, §27.7 |
-| ch26-m3 | Low battery alert can flicker at the threshold | FIX | M | Add 0.5 s rising `Debouncer` to the low-battery alert (Ch 21's), tests use `stepTiming` or zero time; or make it Practice 7 and say so near line 779 | Ch 27 §27.8 Step 4; ch27 solution |
-| ch26-m4 | Deploy tries addresses "in order" and "first wins" | FIX | S | Line 191: "tries several addresses at once ... whichever answers first wins" | Ch 27 §27.4 callout, §27.7 |
-| ch26-m5 | One-container callout predicts an error Phoenix 6 will not give | VERIFY-WEB | S | Check Phoenix 6 behavior for two `TalonFX` objects with one CAN ID; then rewrite line 1143 (`previously allocated` for DIO; CAN objects give no error) | Ch 27 §27.9 callout |
-| ch26-v2 | `Logging to` line still prints with no USB stick | FIX | S | Line 958: "If the DS shows `[AdvantageKit] Failed to open output log file.` right after the `Logging to` line, the stick is missing ..." | Ch 27 §27.8 Step 8 |
-| ch26-v3 | "Chapter 25's enum, word for word": comments changed | FIX | S | Line 584: "with the comments updated for the new robot" | Ch 27 §27.8 Step 1 |
-| ch26-v4 | "Two lines inside `configureBindings()`" | FIX | S | Line 312: "the two statements (and their comments) inside `configureBindings()`" | Ch 27 §27.5 Step 4 |
-| ch26-v5 | Practice 3 PowerShell `&` fenced as `bash` | FIX | S | Line 1450: fence `powershell`, say "in VS Code's terminal (PowerShell)" | Ch 27 Practice 3 |
-| ch26-v6 | AdvantageScope shows no yellow alert | FIX | S | Line 967: "Elastic (Section 27.11) shows the yellow **Battery low** alert, and AdvantageScope has it in the log" | Ch 27 §27.8 Step 8 |
+| ch26-m1 | "Has to be enabled again before teleop" is wrong on a field | DONE (batch 5) | S | Check FMS/DS docs on code restart mid-match; then line 1202: "comes back enabled in the match's mode, but as a brand-new program (pose, state, auto step gone)" | Ch 27 §27.10 Step 1 |
+| ch26-m2 | Image "includes a JVM" vs deploy installs it | DONE (batch 5) | S | Check GradleRIO / WPILib deploy docs for the roboRIO JRE install; then line 363 "the deploy tool installs one on a fresh image" and line 450 "first deploy after imaging also installs Java" | Ch 27 §27.6, §27.7 |
+| ch26-m3 | Low battery alert can flicker at the threshold | DONE (batch 5) | M | Add 0.5 s rising `Debouncer` to the low-battery alert (Ch 21's), tests use `stepTiming` or zero time; or make it Practice 7 and say so near line 779 | Ch 27 §27.8 Step 4; ch27 solution |
+| ch26-m4 | Deploy tries addresses "in order" and "first wins" | DONE (batch 5) | S | Line 191: "tries several addresses at once ... whichever answers first wins" | Ch 27 §27.4 callout, §27.7 |
+| ch26-m5 | One-container callout predicts an error Phoenix 6 will not give | DONE (batch 5) | S | Check Phoenix 6 behavior for two `TalonFX` objects with one CAN ID; then rewrite line 1143 (`previously allocated` for DIO; CAN objects give no error) | Ch 27 §27.9 callout |
+| ch26-v2 | `Logging to` line still prints with no USB stick | DONE (batch 5) | S | Line 958: "If the DS shows `[AdvantageKit] Failed to open output log file.` right after the `Logging to` line, the stick is missing ..." | Ch 27 §27.8 Step 8 |
+| ch26-v3 | "Chapter 25's enum, word for word": comments changed | DONE (batch 5) | S | Line 584: "with the comments updated for the new robot" | Ch 27 §27.8 Step 1 |
+| ch26-v4 | "Two lines inside `configureBindings()`" | DONE (batch 5) | S | Line 312: "the two statements (and their comments) inside `configureBindings()`" | Ch 27 §27.5 Step 4 |
+| ch26-v5 | Practice 3 PowerShell `&` fenced as `bash` | DONE (batch 5) | S | Line 1450: fence `powershell`, say "in VS Code's terminal (PowerShell)" | Ch 27 Practice 3 |
+| ch26-v6 | AdvantageScope shows no yellow alert | DONE (batch 5) | S | Line 967: "Elastic (Section 27.11) shows the yellow **Battery low** alert, and AdvantageScope has it in the log" | Ch 27 §27.8 Step 8 |
 | ch26-v7 | CLAUDE.md "No CAN/SparkMAX" | DONE | S | CLAUDE.md has no SparkMAX mention now | CLAUDE.md |
 
 ## Ch 28 (review ch27-sme)
@@ -508,16 +516,16 @@ File: `section-6-mini-swerve/28-can-bus-and-real-motor-controllers.md`
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch27-m1 | No mention of `setUpdateFrequency` / `optimizeBusUtilization` | FIX | S | After the CANivore sentence (line 98): your code sets each signal's rate; no chapter does it yet, so either name no chapter or add it to a later chapter's plan (old note promised Ch 31) | Ch 28 §28.2 |
-| ch27-m2 | Explore asks about Tuner X generator, never answered | FIX | S | Add short "What about Tuner X's swerve generator?" callout in §28.8 intro, pointing to Ch 29's `TunerConstants` table (now at Ch 29 line 682) | Ch 28 §28.8 |
-| ch27-m3 | Team robot's front-left inversion hint | FIX | S | Line 1350 callout: "On our team's Mini Swerve the front left needed both motors inverted; yours may differ: the table wins" (check sample first) | Ch 28 §28.9 |
+| ch27-m1 | No mention of `setUpdateFrequency` / `optimizeBusUtilization` | DONE (batch 5) | S | After the CANivore sentence (line 98): your code sets each signal's rate; no chapter does it yet, so either name no chapter or add it to a later chapter's plan (old note promised Ch 31) | Ch 28 §28.2 |
+| ch27-m2 | Explore asks about Tuner X generator, never answered | DONE (batch 5) | S | Add short "What about Tuner X's swerve generator?" callout in §28.8 intro, pointing to Ch 29's `TunerConstants` table (now at Ch 29 line 682) | Ch 28 §28.8 |
+| ch27-m3 | Team robot's front-left inversion hint | DONE (batch 5) | S | Line 1350 callout: "On our team's Mini Swerve the front left needed both motors inverted; yours may differ: the table wins" (check sample first) | Ch 28 §28.9 |
 | ch27-m4 | Split note and checkpoint | DONE | S | "How to split this chapter" at line 23, Checkpoint at line 1752 | Ch 28 |
 | ch27-m5 | Tuner X green/purple card colors and year picker | HARDWARE | S | Open Tuner X 2026; else keep only red and yellow rows (lines 199 to 202) and reword line 209 "pick the newest 2026 firmware" | Ch 28 §28.4 Steps 3, 4 |
-| ch27-v1 | Leftover button bindings print 17 joystick warnings | FIX | M | Add `CommandScheduler.getInstance().getDefaultButtonLoop().clear();` to `AutoLightTest.tearDown()` (and `MotorCheckTest`); not in book or solution yet | Ch 28 §28.11; ch28 and ch29 solution tests |
-| ch27-v2 | Vendordep swept into the move-only commit | FIX | S | Before line 640: commit `vendordeps` first ("Ch28: Add Phoenix 6"), or use `git add src` for the move | Ch 28 §28.8 Step 1 |
-| ch27-v3 | Git recap repeats `checkout -b`, uses `git add .` | FIX | S | Lines 1774 to 1781: drop `checkout -b`, use `git add src/.../DriveConstants.java` for the inversions commit | Ch 28 Git |
-| ch27-v4 | Summary says "rotor rotations" | FIX | S | Line 1697: "(motor rotations, rotations per second, volts, amps, degrees)" | Ch 28 Summary |
-| ch27-v5 | "Overwritten at the next deploy" | FIX | S | Line 258: "overwritten the next time the robot program starts (every deploy, and every power-on)" | Ch 28 §28.4 callout |
+| ch27-v1 | Leftover button bindings print 17 joystick warnings | DONE (batch 5) | M | Add `CommandScheduler.getInstance().getDefaultButtonLoop().clear();` to `AutoLightTest.tearDown()` (and `MotorCheckTest`); not in book or solution yet | Ch 28 §28.11; ch28 and ch29 solution tests |
+| ch27-v2 | Vendordep swept into the move-only commit | DONE (batch 5) | S | Before line 640: commit `vendordeps` first ("Ch28: Add Phoenix 6"), or use `git add src` for the move | Ch 28 §28.8 Step 1 |
+| ch27-v3 | Git recap repeats `checkout -b`, uses `git add .` | DONE (batch 5) | S | Lines 1774 to 1781: drop `checkout -b`, use `git add src/.../DriveConstants.java` for the inversions commit | Ch 28 Git |
+| ch27-v4 | Summary says "rotor rotations" | DONE (batch 5) | S | Line 1697: "(motor rotations, rotations per second, volts, amps, degrees)" | Ch 28 Summary |
+| ch27-v5 | "Overwritten at the next deploy" | DONE (batch 5) | S | Line 258: "overwritten the next time the robot program starts (every deploy, and every power-on)" | Ch 28 §28.4 callout |
 
 ## Ch 29 (review ch28-sme)
 
@@ -525,17 +533,17 @@ File: `section-6-mini-swerve/29-swerve-kinematics.md`
 
 | ID | Finding (short) | Status | Effort | Fix / reason | Files |
 |---|---|---|---|---|---|
-| ch28-m1 | `runVelocity` skips `ChassisSpeeds.discretize` | FIX | M | Line 1259 bullet: one sentence previewing `discretize` and "you will add it in Chapter 30"; Ch 30 has no `discretize` yet, so add it there too | Ch 29 §29.8; Ch 30 |
-| ch28-m2 | Whole-file `DriveConstants` wipes measured inversions | FIX | S | Above lines 647 to 656 add `// Copy your driveInverted and steerInverted from Chapter 28 (Section 28.9).`; Step 1 note "put your Chapter 28 values back" | Ch 29 §29.8 Step 1 |
+| ch28-m1 | `runVelocity` skips `ChassisSpeeds.discretize` | DONE (batch 5) | M | Line 1259 bullet: one sentence previewing `discretize` and "you will add it in Chapter 30"; Ch 30 has no `discretize` yet, so add it there too | Ch 29 §29.8; Ch 30 |
+| ch28-m2 | Whole-file `DriveConstants` wipes measured inversions | DONE (batch 5) | S | Above lines 647 to 656 add `// Copy your driveInverted and steerInverted from Chapter 28 (Section 28.9).`; Step 1 note "put your Chapter 28 values back" | Ch 29 §29.8 Step 1 |
 | ch28-m3 | Split note and checkpoint | DONE | S | "How to split this chapter" at line 24, Checkpoint at line 1786 | Ch 29 |
-| ch28-v3 | Step 8 stopgap leaves a failing test before commit | FIX | S | Line 1309: "the build shows one failing test until Section 29.10 rewrites it; Simulate Robot Code still runs" | Ch 29 §29.8 Step 8 |
-| ch28-v4 | Every wheel steers exactly 45 degrees, not a quarter turn | FIX | S | Line 1662: "they have to steer 45 degrees each (thanks to `optimize`, never more)" | Ch 29 §29.10 |
-| ch28-v5 | "Almost no overshoot": one rebound of about 9 degrees | FIX | S | Line 424: "well under a tenth of a second, swing back once by about 10 degrees, settle within a fifth of a second" | Ch 29 §29.6 |
-| ch28-v6 | Kinematics callout claims an impossible test-order failure | FIX | S | Line 678: make conditional ("a test that asked for zero speeds would start with angles another test left behind") | Ch 29 §29.8 callout |
-| ch28-v7 | Practice 2 range equals `inputModulus`; hint misleads | FIX | S | Line 1729: "they should all agree; check 180 and -180 especially" (or change the range to -180 included, 180 excluded) | Ch 29 Practice 2; ch29 answer-key.md |
-| ch28-v8 | Git recap repeats `checkout -b swerve-kinematics` | FIX | S | Line 1808: drop it or say "on the branch from Section 29.8" | Ch 29 Git |
+| ch28-v3 | Step 8 stopgap leaves a failing test before commit | DONE (batch 5) | S | Line 1309: "the build shows one failing test until Section 29.10 rewrites it; Simulate Robot Code still runs" | Ch 29 §29.8 Step 8 |
+| ch28-v4 | Every wheel steers exactly 45 degrees, not a quarter turn | DONE (batch 5) | S | Line 1662: "they have to steer 45 degrees each (thanks to `optimize`, never more)" | Ch 29 §29.10 |
+| ch28-v5 | "Almost no overshoot": one rebound of about 9 degrees | DONE (batch 5) | S | Line 424: "well under a tenth of a second, swing back once by about 10 degrees, settle within a fifth of a second" | Ch 29 §29.6 |
+| ch28-v6 | Kinematics callout claims an impossible test-order failure | DONE (batch 5) | S | Line 678: make conditional ("a test that asked for zero speeds would start with angles another test left behind") | Ch 29 §29.8 callout |
+| ch28-v7 | Practice 2 range equals `inputModulus`; hint misleads | DONE (batch 5) | S | Line 1729: "they should all agree; check 180 and -180 especially" (or change the range to -180 included, 180 excluded) | Ch 29 Practice 2; ch29 answer-key.md |
+| ch28-v8 | Git recap repeats `checkout -b swerve-kinematics` | DONE (batch 5) | S | Line 1808: drop it or say "on the branch from Section 29.8" | Ch 29 Git |
 | ch28-v9 | Inertia loads credited to TalonFX template | SKIP | S | Review downgraded to no action: the credit at line 1005 is right | none |
-| ch28-v10 | Reflect 2 assumes wheels on a long robot roll at different speeds | FIX | S | Line 1795: expect "still the same: every corner of a centered rectangle is equally far from the center; the angles change"; update answer key | Ch 29 Reflect 2; ch29 answer-key.md |
+| ch28-v10 | Reflect 2 assumes wheels on a long robot roll at different speeds | DONE (batch 5) | S | Line 1795: expect "still the same: every corner of a centered rectangle is equally far from the center; the angles change"; update answer key | Ch 29 Reflect 2; ch29 answer-key.md |
 
 ## Counts
 

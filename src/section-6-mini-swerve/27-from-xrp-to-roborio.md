@@ -188,7 +188,7 @@ For this chapter, use a USB cable. The robot is on blocks and not going anywhere
 
 > **Why one robot, many names**
 >
-> The deploy tool tries several addresses for your roboRIO, in order: its network name (`roborio-3415-FRC.local`), its radio address (`10.34.15.2`), the USB address (`172.22.11.2`), and a few more for unusual networks. Whichever answers first wins. That is why the same Deploy button works over USB in the shop and over the radio on a practice field, without you changing anything.
+> The deploy tool tries several addresses for your roboRIO at once: its network name (`roborio-3415-FRC.local`), its radio address (`10.34.15.2`), the USB address (`172.22.11.2`), and a few more for unusual networks. Whichever answers first wins. That is why the same Deploy button works over USB in the shop and over the radio on a practice field, without you changing anything.
 
 ---
 
@@ -309,7 +309,7 @@ git checkout -b roborio-setup
 
 ### Step 4: Clear out the examples
 
-Delete `ExampleSubsystem.java`, `ExampleCommand.java`, and `Autos.java`. Build. It fails, because `RobotContainer` still uses them. You will rewrite `RobotContainer.java`, `Robot.java`, and `Constants.java` completely in Section 27.8, so for now make the build pass the quickest way: in `RobotContainer`, delete the field, the two lines inside `configureBindings()`, and the imports that refer to the deleted files, and make `getAutonomousCommand()` return `Commands.none()` (import `edu.wpi.first.wpilibj2.command.Commands`). Build again: `BUILD SUCCESSFUL`. A project that builds after every step is a habit worth keeping on a new robot too.
+Delete `ExampleSubsystem.java`, `ExampleCommand.java`, and `Autos.java`. Build. It fails, because `RobotContainer` still uses them. You will rewrite `RobotContainer.java`, `Robot.java`, and `Constants.java` completely in Section 27.8, so for now make the build pass the quickest way: in `RobotContainer`, delete the field, the two statements (and their comments) inside `configureBindings()`, and the imports that refer to the deleted files, and make `getAutonomousCommand()` return `Commands.none()` (import `edu.wpi.first.wpilibj2.command.Commands`). Build again: `BUILD SUCCESSFUL`. A project that builds after every step is a habit worth keeping on a new robot too.
 
 ### Step 5: What comes along from the Explorer
 
@@ -360,7 +360,7 @@ Here is a puzzle. Your laptop has an Intel or AMD processor, or an Apple one. Th
 
 When the Java compiler (`javac`) reads your `.java` files, it does **not** turn them into instructions for any real processor. It turns them into **bytecode**: instructions for an imaginary computer called the **Java Virtual Machine**, or **JVM**. Each class becomes a `.class` file of bytecode.
 
-Then, on whatever computer runs the program, a real program called the JVM (part of every Java installation) reads that bytecode and runs it, translating it on the fly into instructions for the processor it is sitting on. Your laptop has a JVM for its processor. The roboRIO's image includes a JVM for ARM. Same bytecode, two JVMs, one program.
+Then, on whatever computer runs the program, a real program called the JVM (part of every Java installation) reads that bytecode and runs it, translating it on the fly into instructions for the processor it is sitting on. Your laptop has a JVM for its processor. The roboRIO gets a JVM for ARM too: the deploy tool installs one whenever the roboRIO does not have the right one, which is why the first deploy after imaging takes longer. Same bytecode, two JVMs, one program.
 
 This is what Java's designers meant by "write once, run anywhere," and it is why a Java robot program is built once, on your laptop, with no idea which computer it will run on.
 
@@ -444,10 +444,10 @@ If Communications stays red, check the team number first, and the cable second. 
 In VS Code, run **WPILib: Deploy Robot Code** from the command palette (or the `...` menu at the top right of the editor). Watch the terminal. A deploy to a roboRIO does much more than "run the program," and you can see the steps go by:
 
 1. **Build.** Gradle compiles your code and packs the fat jar (Section 27.6).
-2. **Find the roboRIO.** The deploy tool tries its addresses (Section 27.4) until one answers.
+2. **Find the roboRIO.** The deploy tool tries all its addresses at once (Section 27.4), and uses the first one that answers.
 3. **Check the image.** It reads the roboRIO's image version and stops if it is the wrong year.
 4. **Stop the old program.** Whatever was running on the roboRIO is stopped.
-5. **Copy.** The jar goes to `/home/lvuser`, the ARM native libraries go to their own folder, and the files in `src/main/deploy` go to `/home/lvuser/deploy`. The first deploy of a season may also copy Java itself, if the roboRIO's image did not include it, which takes a few extra minutes once.
+5. **Copy.** The jar goes to `/home/lvuser`, the ARM native libraries go to their own folder, and the files in `src/main/deploy` go to `/home/lvuser/deploy`. The deploy also checks that the roboRIO has the right version of Java, and installs it if not. That happens on the first deploy after the roboRIO is imaged, and it takes a few extra minutes, once.
 6. **Write the start command.** A tiny file on the roboRIO, `/home/lvuser/robotCommand`, gets the exact line that starts your program: the roboRIO's Java, a few settings, and `-jar` with the path of your jar. That is the JVM from Section 27.6, being told which jar to run.
 7. **Start it.**
 
@@ -581,7 +581,7 @@ public final class Constants {
 }
 ```
 
-The enum is Chapter 25's, word for word. The difference is the last two constants. `RobotBase.isReal()` is `true` when the program is running on a roboRIO and `false` anywhere else. On the Explorer it was always `false` (the program never ran on a roboRIO), which is why `ROBOT_MODE` had to be set by hand. Here, the ternary from Chapter 8 picks `REAL` on the robot, and `SIM_MODE` on a laptop. `SIM_MODE` is the only thing you ever change by hand, and only to choose between simulating and replaying.
+The enum is Chapter 25's, with the comments updated for the new robot. The difference is the last two constants. `RobotBase.isReal()` is `true` when the program is running on a roboRIO and `false` anywhere else. On the Explorer it was always `false` (the program never ran on a roboRIO), which is why `ROBOT_MODE` had to be set by hand. Here, the ternary from Chapter 8 picks `REAL` on the robot, and `SIM_MODE` on a laptop. `SIM_MODE` is the only thing you ever change by hand, and only to choose between simulating and replaying.
 
 > **A rule from Chapter 25 gets easier**
 >
@@ -776,7 +776,7 @@ public class RoboRio extends SubsystemBase {
 Walk through it:
 
 - **`periodic()`** has the shape of every subsystem from Chapter 17 on: update the inputs from the IO layer, hand them to AdvantageKit with `processInputs`, then use them. Everything after `processInputs` reads `inputs`, never `RobotController`.
-- **The low battery alert** is set every loop to a fresh answer, so it comes and goes with the battery. It only looks while the robot is **disabled**, because sag while driving is normal (the table above) and a warning that flickers every time the robot accelerates teaches everyone to ignore warnings.
+- **The low battery alert** is set every loop to a fresh answer, so it comes and goes with the battery. It only looks while the robot is **disabled**, because sag while driving is normal (the table above) and a warning that flickers every time the robot accelerates teaches everyone to ignore warnings. One gap is left on purpose: a resting battery right at 12.5 volts can read 12.49, 12.51, 12.48 from one loop to the next, and the warning blinks along with it. Practice 7 closes that gap with a `Debouncer`, the same tool that kept Chapter 21's line light from flickering.
 - **The brownout alert** is different on purpose: it is only ever set to `true`. A brownout might last a tenth of a second, far too short for anyone to notice a light. Leaving the alert up until the program restarts means that whoever looks at the dashboard after the run finds out it happened. Chapter 10's "did it just change?" pattern would catch the moment; this one remembers it.
 - **`showColor(color)`** is a command factory, like Chapter 21's `lightTheLed()`. `startEnd` is a method every subsystem inherits (Chapter 20): it builds a command that runs one lambda when it starts and another when it ends, and that **requires** this subsystem, so two light commands cannot fight over the light (Section 19.5's one-command-per-subsystem rule).
 - **The RADIO light is an output**, so the color is recorded with `recordOutput` (Chapter 25) every loop. In a replay, `io.setRadioLed` does nothing, but the log still shows what the code asked for.
@@ -956,7 +956,7 @@ The terminal (not RioLog: this program is on your laptop) shows `Robot mode: SIM
 
 ### Step 8: Deploy, and watch a real battery
 
-Back to the robot, on blocks, with the USB stick in. Deploy. RioLog shows the program starting, then AdvantageKit's line naming its log file on the USB stick, then your own `Robot mode: REAL`. If the line about the log file is missing and the Driver Station shows an AdvantageKit error about the log file, the USB stick is missing, unreadable, or not FAT32 (Section 27.11).
+Back to the robot, on blocks, with the USB stick in. Deploy. RioLog shows the program starting, then AdvantageKit's line naming its log file on the USB stick (`[AdvantageKit] Logging to "/U/logs/..."`), then your own `Robot mode: REAL`. That line prints even with no stick, so it does not prove the log is being written. If the Driver Station shows `[AdvantageKit] Failed to open output log file.` right after it, the USB stick is missing, unreadable, or not FAT32 (Section 27.11).
 
 Now three tests on the real robot:
 
@@ -964,7 +964,7 @@ Now three tests on the real robot:
 2. **Teleop.** Plug in your controller (check **Joysticks** is green and the controller is in slot 0 on the **USB Devices** tab, Section 8.2). Enable in **TeleOperated**, hold A: **orange**. Let go: off.
 3. **The battery.** With the robot disabled, compare three numbers: the voltage in the Driver Station, `RoboRio/BatteryVolts` in AdvantageScope (**File** > **Connect to Robot**; Section 27.11 sets the address), and, if your team has one, a voltmeter or battery tester on the battery itself. The first two should agree to a few hundredths of a volt; the third will read a little higher, because it is measuring the battery with less load on it. Write all three in your notebook.
 
-If your battery happens to be tired, the Elastic dashboard (Section 27.11) or AdvantageScope will show the yellow **Battery low** alert. Swap the battery and watch the alert go away.
+If your battery happens to be tired, the Elastic dashboard (Section 27.11) shows the yellow **Battery low** alert, and AdvantageScope has it in the log. Swap the battery and watch the alert go away.
 
 Commit:
 
@@ -1140,7 +1140,7 @@ Run the tests (**WPILib: Test Robot Code**, or just build): **6 tests, all green
 
 > **Where the one-container rule went**
 >
-> In Chapter 23, only one test could build the Explorer's whole `RobotContainer`, because the XRP's motors and sensors could only be created once per test run. `RoboRioIOSim` creates no hardware objects at all, so `AutoLightTest` can build `RobotContainer(RobotMode.SIM)` freely, and so could other tests. Keep an eye on that as the Mini Swerve grows. The moment a simulation IO class creates something WPILib only allows once, the old rule comes back, and the error will look like Chapter 10's `already allocated`.
+> In Chapter 23, only one test could build the Explorer's whole `RobotContainer`, because the XRP's motors and sensors could only be created once per test run. `RoboRioIOSim` creates no hardware objects at all, so `AutoLightTest` can build `RobotContainer(RobotMode.SIM)` freely, and so could other tests. Keep an eye on that as the Mini Swerve grows. roboRIO hardware like a DIO channel can still be created only once: a second `new DigitalInput(3)` throws an `AllocationException` that says `PWM or DIO 3 previously allocated.` CAN devices from Phoenix 6 (Chapter 28) are different. Java lets you make two `TalonFX` objects with the same CAN ID without any error, and both of them will send commands to that one motor. Nothing crashes to warn you, so the habit still stands: create each piece of hardware once, in one IO class.
 
 ### CI, unchanged
 
@@ -1199,7 +1199,7 @@ The startCompetition() method (or methods called by it) should have handled the 
 
 Read the stack trace the Chapter 10 way: the exception type and message, then the first line that names `frc.robot`. That is your lambda (`lambda$configureBindings$0`, Chapter 19), at the line of the `throw`. The rest is WPILib's scheduler, which called it.
 
-Now picture it in a match. The robot is halfway across the field in autonomous, a bug throws, and the robot goes dead. By the time the program is back, a 15-second autonomous could be over, and your robot has to be enabled again before teleop can use it. Nothing about the robot was broken. One line of code was.
+Now picture it in a match. The robot is halfway across the field in autonomous, a bug throws, and the robot goes dead. By the time the program is back, a 15-second autonomous could be over. On the field, nobody presses Enable: the field tells your Driver Station whether the robot is enabled and in which mode, and the Driver Station passes that on. So the robot comes back enabled in whatever mode the match is in, but as a brand-new program: its pose, its state machines, and which autonomous step it was on are all gone. Nothing about the robot was broken. One line of code was.
 
 Delete the branch when you are done (`git checkout main`, then `git branch -D crash-drill`), and deploy `main` again.
 
@@ -1445,9 +1445,9 @@ Now change `"7"` to `null`. What happens, and why does the `catch` not help? (Hi
 
 **2. Checked or unchecked?** For each of these, decide whether it is checked or unchecked, then look it up in the Java documentation to check: `NullPointerException`, `IOException`, `IllegalArgumentException`, `ArithmeticException` (try `5 / 0` with `int`s), `FileNotFoundException`, `InterruptedException`. For each, write one sentence in `reflections.md`: if robot code met this exception, should it be caught, and what should the robot do instead?
 
-**3. Read some bytecode.** Type the `Battery` class from Section 27.6 into a scratch folder. Compile it, and print its bytecode with the JDK that WPILib installed for you. On Windows, in a terminal in that folder:
+**3. Read some bytecode.** Type the `Battery` class from Section 27.6 into a scratch folder. Compile it, and print its bytecode with the JDK that WPILib installed for you. On Windows, in VS Code's terminal (PowerShell) in that folder:
 
-```bash
+```powershell
 & "C:\Users\Public\wpilib\2026\jdk\bin\javac.exe" Battery.java
 & "C:\Users\Public\wpilib\2026\jdk\bin\javap.exe" -c Battery.class
 ```
@@ -1459,6 +1459,14 @@ Now change `"7"` to `null`. What happens, and why does the `catch` not help? (Hi
 **5. One more input.** A roboRIO 2 lets code change its brownout level, and both roboRIOs can report it. In a practice branch, add `public double brownoutVolts = 0.0;` to `RoboRioIOInputs`, fill it from `RobotController.getBrownoutVoltage()` in `RoboRioIOReal`, and from `BROWNOUT_VOLTS` in `RoboRioIOSim`. Deploy, and find it in AdvantageScope. What does your roboRIO say? Compare it with `SystemStats` > `BrownoutVoltage`. Do **not** call `setBrownoutVoltage`: raising it makes the robot brown out sooner, and lowering it puts the electronics at risk. Delete the branch, or keep it through a pull request if your team likes it.
 
 **6. A battery that drains.** The pretend battery never gets tired. In a practice branch, make `RoboRioIOSim.updateInputs` lower `batteryVolts` by `0.001` every loop while `DriverStation.isEnabled()` is true. Write a test: start fresh, enable, call `periodic()` enough times to drain below 12.5, disable, call `periodic()` once more, and assert the low battery alert is on. How many loops did it take, and how many seconds is that at 50 loops per second? Is that a realistic battery? (It is not; real sag depends on current. That is what WPILib's `BatterySim` is for, once there are simulated motors.)
+
+**7. A warning that waits.** A resting battery right at 12.5 volts can make the low battery warning blink on and off (Section 27.8, Step 4). On its own practice branch, fix that with WPILib's `Debouncer` (import `edu.wpi.first.math.filter.Debouncer` and `edu.wpi.first.math.filter.Debouncer.DebounceType`), the class that Chapter 21's `.debounce(...)` uses inside. Give `RoboRio` a field:
+
+```java
+private final Debouncer lowBatteryDebouncer = new Debouncer(0.5, DebounceType.kRising);
+```
+
+and set the alert from `lowBatteryDebouncer.calculate(DriverStation.isDisabled() && inputs.batteryVolts < LOW_BATTERY_VOLTS)`. Now the battery has to read low for half a second before the warning shows. Run the tests. One goes red: which one, and why? Fix the test, not the code: in `setUp()`, call `SimHooks.pauseTiming()` (Chapter 23) before building the `RoboRio`, and `SimHooks.resumeTiming()` at the end of `tearDown()`. Then make the red test call `periodic()`, `SimHooks.stepTiming(0.6)`, and `periodic()` again before it asserts. Finally, write a new test, red first: a battery that has been low for only `0.2` seconds raises no warning yet.
 
 ### Build (Mini Swerve)
 

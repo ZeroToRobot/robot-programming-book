@@ -421,7 +421,7 @@ The input is the CANcoder's angle in radians, the setpoint is the target in radi
 - **kD = 0.08 volts per radian per second.** The Mini Swerve's steering gears are fast (3.41 to 1), so the module can swing past its target. The D term pushes back against fast swinging, the brake pedal of Chapter 15's three terms.
 - **At most 6 volts.** The output is clamped (Chapter 15's `MathUtil.clamp`), so a sudden big error cannot slam a module around while you are still learning how it behaves.
 
-These are **untested starting points**, picked by trying them on the pretend module in the simulator, where they reach a quarter turn in about a tenth of a second with almost no overshoot. A real module has friction, which the simulator does not, so a real wheel may stop a degree or two short of its target, held back by **kS** (Chapter 16). Chapter 33 measures the steering's kS and retunes these gains on the real robot.
+These are **untested starting points**, picked by trying them on the pretend module in the simulator, where they reach a quarter turn in well under a tenth of a second, swing back once by about 10 degrees, and settle within a fifth of a second. A real module has friction, which the simulator does not, so a real wheel may stop a degree or two short of its target, held back by **kS** (Chapter 16). Chapter 33 measures the steering's kS and retunes these gains on the real robot.
 
 > **Why steer on the roboRIO, for now?**
 >
@@ -556,7 +556,7 @@ git checkout -b swerve-kinematics
 
 ### Step 1: `DriveConstants`
 
-Here is the whole file. Your Chapter 28 inversions (the `true`/`false` values you measured in Section 28.9) stay exactly as they are; only the new parts are new. Type the new parts in, and check every number against your fact sheet.
+Here is the whole file. Your Chapter 28 inversions (the `true`/`false` values you measured in Section 28.9) stay exactly as they are; only the new parts are new. Type the new parts in, and check every number against your fact sheet. The listing shows `false` for every inversion, so if you paste the whole file, put your Chapter 28 values back before you build.
 
 ```java
 package frc.robot.subsystems.drive;
@@ -643,6 +643,7 @@ public final class DriveConstants {
 
     // CAN IDs and directions from the fact sheet. The CANcoder settings start as "no change":
     // Section 29.9 measures the real ones.
+    // Copy your driveInverted and steerInverted from Chapter 28 (Section 28.9). Do not paste these falses over them.
     public static final ModuleConstants FRONT_LEFT = new ModuleConstants(
         "FrontLeft", 1, 2, 1, false, false, false, 0.0,
         new Translation2d(WHEELBASE_METERS / 2.0, TRACKWIDTH_METERS / 2.0));
@@ -675,7 +676,7 @@ Walk through what is new:
 
 > **Why not a `static final` kinematics constant?**
 >
-> The old swerve draft this book grew from, and plenty of team code online, writes `public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(...)`. It works on a robot with one drive. But a `SwerveDriveKinematics` remembers each module's last angle (Section 29.6), so it is a changeable object, and Chapter 24's rule says that is not a constant. Here is how that bites: in Section 29.10, two tests each build a `Drive`. If they shared one kinematics object, the second test would start with the first test's remembered wheel angles, and pass or fail depending on which test ran first. A factory gives every `Drive`, and every test, its own.
+> The old swerve draft this book grew from, and plenty of team code online, writes `public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(...)`. It works on a robot with one drive. But a `SwerveDriveKinematics` remembers each module's last angle (Section 29.6), so it is a changeable object, and Chapter 24's rule says that is not a constant. Here is how that could bite: in Section 29.10, two tests each build a `Drive`. If they shared one kinematics object, a test that asked for zero speeds would start with whatever wheel angles some other test left behind, and could pass or fail depending on which test ran first. (This chapter's tests never ask for zero speeds, so they would get away with it. The next test someone writes might not.) A factory gives every `Drive`, and every test, its own.
 
 > **The same facts, in someone else's file**
 >
@@ -1256,7 +1257,7 @@ Walk through the new parts:
 
 - **`kinematics`** is a field, made by the factory in `DriveConstants`, one per `Drive`.
 - **`periodic()`** now also stops the motors whenever the robot is disabled. Section 28.1's heartbeat already stops them, inside each Talon FX. But Phoenix remembers the **last request** you sent, so a robot that is enabled again could pick up where it left off. Commands are cancelled when the robot is disabled (Chapter 19), and every command here stops the motors in its `end`, so this is a second lock on the same door. AdvantageKit's template does the same. Then it logs the measured module states and the measured `ChassisSpeeds`, every loop, enabled or not, so you can watch the CANcoders while you turn wheels by hand.
-- **`runVelocity`** is the whole of swerve driving, in five lines: inverse kinematics, desaturate, log, hand each state to its module, log again. The loop uses an index (not for-each) because it walks two arrays side by side: `modules[i]` gets `states[i]`, and both arrays are in the book's order. That shared order is the one thing in this method that can go silently wrong, which is why Section 29.10 tests it.
+- **`runVelocity`** is the whole of swerve driving, in five lines: inverse kinematics, desaturate, log, hand each state to its module, log again. The loop uses an index (not for-each) because it walks two arrays side by side: `modules[i]` gets `states[i]`, and both arrays are in the book's order. That shared order is the one thing in this method that can go silently wrong, which is why Section 29.10 tests it. AdvantageKit's version has one more line at the top, `ChassisSpeeds.discretize(speeds, 0.02)`. It fixes a small sideways drift that shows up when the robot drives and spins at the same time. On blocks there is nothing to drift, so this chapter leaves it out, and a later chapter adds it once the robot drives on the floor. (The last Explore in this chapter lets you read about it first.)
 - **`getModuleStates()` and `getChassisSpeeds()`** are Section 29.7's "return a new array" and Section 29.2's forward kinematics. `toChassisSpeeds` takes varargs, so passing it an array works.
 - **`kinematicsCheck`** is one `runEnd` command (Chapter 20), like a step of the motor check: it calls `runVelocity` with the same speeds every loop while it runs, and stops the modules when it ends. The `speeds` object is captured by the lambda (Chapter 19). That is safe, because nothing in this code ever changes a `ChassisSpeeds` once it is made.
 
@@ -1306,7 +1307,7 @@ The three-argument `ChassisSpeeds` constructor takes forward, left, and counterc
 
 ### Step 8: Simulate first
 
-Build. If the build fails with "cannot find symbol" on `getDriveMotorRotationsPerSecond`, that is `ModuleTest` from Chapter 28, still asking for a reading that no longer exists. That is the compiler doing its job (Chapter 10): a rename finds every place that used the old name. Section 29.10 rewrites that test. For now, change its two getter calls to `getVelocityMetersPerSecond()` and `getAngle().getRotations()` so the project builds, and run **WPILib: Simulate Robot Code**.
+Build. If the build fails with "cannot find symbol" on `getDriveMotorRotationsPerSecond`, that is `ModuleTest` from Chapter 28, still asking for a reading that no longer exists. That is the compiler doing its job (Chapter 10): a rename finds every place that used the old name. Section 29.10 rewrites that test. For now, change its two getter calls to `getVelocityMetersPerSecond()` and `getAngle().getRotations()` so the project compiles. The build still shows one failing test, `sixVoltsSpinsThePretendDriveMotorAtAboutHalfSpeed`, because its expected number is still in motor rotations per second. It stays red until Section 29.10 rewrites it. Simulate Robot Code does not run the tests, so run **WPILib: Simulate Robot Code** anyway.
 
 In AdvantageScope, **File** > **Connect to Simulator**. This time, open a **Swerve** tab (the **+** button, then **Swerve**). It draws a little robot with four modules, and an arrow on each one for a module state. Drag **`RealOutputs` > `Drive` > `MeasuredStates`** into its sources, and then **`Drive/SetpointStates`**. AdvantageScope expects four states in the order front left, front right, back left, back right, which is why the book has used that order since Chapter 28. In the tab's settings, set the frame size to 15.5 inches by 15.5 inches, and the max speed to about 3.1 meters per second.
 
@@ -1659,7 +1660,7 @@ class DriveTest {
 }
 ```
 
-The loop calls `periodic()` and then `runVelocity()`, the same order the scheduler would use (read, then act). It starts with all four pretend wheels pointing straight ahead, so in the first tenth of a second they have to steer a quarter turn or more, and cosine scaling keeps them from rolling until they get close. After a second, the robot the wheels describe should be spinning at 1 radian per second and not sliding. This test fails if the steering is broken, if the drive feedforward is wrong, or if `optimize` misbehaves. It does not care **how**: it checks the one thing a driver would. (It cannot catch a wrong module **location**, though. `Drive` uses one kinematics object, with the same location, in both directions, so forward kinematics undoes inverse kinematics exactly. Only the real robot, or a hand-computed test like `SwerveMathTest`, can see that.)
+The loop calls `periodic()` and then `runVelocity()`, the same order the scheduler would use (read, then act). It starts with all four pretend wheels pointing straight ahead, so in the first tenth of a second they have to steer 45 degrees each (thanks to `optimize`, never more), and cosine scaling keeps them from rolling until they get close. After a second, the robot the wheels describe should be spinning at 1 radian per second and not sliding. This test fails if the steering is broken, if the drive feedforward is wrong, or if `optimize` misbehaves. It does not care **how**: it checks the one thing a driver would. (It cannot catch a wrong module **location**, though. `Drive` uses one kinematics object, with the same location, in both directions, so forward kinematics undoes inverse kinematics exactly. Only the real robot, or a hand-computed test like `SwerveMathTest`, can see that.)
 
 No `SimHooks.pauseTiming()` this time: the test calls `periodic()` directly and never asks the clock anything, so the clock does not matter. (`MotorCheckTest` needed it, because its commands time out.)
 
@@ -1726,7 +1727,7 @@ System.out.println(MathUtil.inputModulus(0.6, -0.5, 0.5));
 
 Which two lines would surprise someone who thinks `%` always gives an answer from 0 up?
 
-**2. Write your own wrap.** Write `static double wrapDegrees(double degrees)` that returns the same direction as a number from -180 (not included) up to 180 (included). Use `%`, and handle negative numbers yourself (hint: after `degrees % 360.0`, the answer is from -360 to 360; one or two `if`s will finish the job). Test it on 0, 90, 180, 190, 360, 540, -90, -180, -190, and -725. Then compare your answers with `MathUtil.inputModulus(degrees, -180.0, 180.0)` and write down any that differ. (Look closely at what each one does with exactly 180 and -180.)
+**2. Write your own wrap.** Write `static double wrapDegrees(double degrees)` that returns the same direction as a number from -180 (not included) up to 180 (included). Use `%`, and handle negative numbers yourself (hint: after `degrees % 360.0`, the answer is from -360 to 360; one or two `if`s will finish the job). Test it on 0, 90, 180, 190, 360, 540, -90, -180, -190, and -725. Then compare your answers with `MathUtil.inputModulus(degrees, -180.0, 180.0)` and write down any that differ. If your `wrapDegrees` is right, they should all agree. Check 180 and -180 especially: that is where a `<` that should be `<=` shows up.
 
 **3. Kinematics by hand, then by code.** With the Mini Swerve's dimensions, work out all four module states, by hand, for `new ChassisSpeeds(0.0, 0.4, 1.0)`: sliding left while spinning. Write your table in `reflections.md`. Then add a test to `SwerveMathTest` that checks your four angles. Did your hand math and WPILib agree? If not, which one was wrong, and where?
 
@@ -1792,7 +1793,7 @@ If the wheels match your hand math on all three checks, the CANcoders read zero 
 Answer in 2 to 3 sentences each, and add your answers to `reflections.md`:
 
 1. The Explorer's kinematics had two numbers on the robot side; the Mini Swerve's has three. What does the third one let a swerve robot do, and why could the Explorer's wheels never do it?
-2. On a spin in place, every wheel on the Mini Swerve rolls at the same speed. Would that still be true on a robot that is twice as long as it is wide? Which wheels would roll faster, and why? (Hint: distance from the center.)
+2. On a spin in place, every wheel on the Mini Swerve rolls at the same speed. Would that still be true on a robot that is twice as long as it is wide, with a wheel at each corner? Work it out from each wheel's distance from the center, and say what changes and what stays the same.
 3. When one wheel is asked for more than its top speed, why is it wrong to slow down only that wheel? What would the robot do?
 4. A module's target is 170 degrees and it points at -170 degrees. Without `enableContinuousInput`, how far would the PID controller try to turn the wheel? With it? With `optimize` as well? Draw it.
 5. The CANcoder offsets are measured with the bevel gears on one particular side. What goes wrong with a module calibrated with its bevel gear on the other side, and which check in Section 29.9 catches it?
@@ -1802,10 +1803,9 @@ If any answer feels shaky, re-read Sections 29.2, 29.4, 29.6, and 29.7.
 
 ### Git
 
-On the `swerve-kinematics` branch, one commit per idea:
+On the `swerve-kinematics` branch from Section 29.8, one commit per idea:
 
 ```bash
-git checkout -b swerve-kinematics
 git add .
 git commit -m "Ch29: Gear ratios, steering, and swerve kinematics for the four modules"
 git add src/main/java/frc/robot/subsystems/drive/DriveConstants.java

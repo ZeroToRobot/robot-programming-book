@@ -72,7 +72,7 @@ Done and committed, in this order:
 Still open:
 
 - **Needs hardware:** the Ch 12 and 13 XRP top speed (Ch 12 VERIFY 1). Measure one real XRP at full power, then make Ch 12's sample log and 3.0 s `STEP_TIMEOUT_SECONDS` agree with Ch 13's `MAX_WHEEL_SPEED_METERS_PER_SECOND`, and add a Diagnose line for leg 1 timing out.
-- **MINOR findings:** triaged in `MINOR-triage.md` (2026-11-02: 246 to fix, 27 already done, 8 to check online, 5 need hardware, 3 skipped), plus two MAJORs Phase C missed (Ch 2 Git exercise, Ch 24 failure text). Fixes not started.
+- **MINOR findings:** done 2026-11-02 in five batches (see `MINOR-triage.md`), plus the two MAJORs Phase C missed. Left: five HARDWARE rows and one AdvantageScope look.
 
 ## CLAUDE.md
 

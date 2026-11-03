@@ -95,7 +95,7 @@ Before you touch any code, trace the chain with your finger, from the roboRIO to
 
 ### How busy is the bus?
 
-The CAN bus on the roboRIO carries a fixed number of messages per second, and every device's reports use some of them. Twelve devices each reporting several readings fifty or a hundred times a second adds up. The Driver Station's utilization number, and the `SystemStats` > `CANBus` > `Utilization` value AdvantageKit already records in every log, tell you how full it is. Somewhere under about 70 to 80 percent is comfortable; a bus near 100 percent starts dropping messages. You will check yours in Section 28.9. (Teams with many devices often add a second, faster CAN bus with a CTRE device called a **CANivore**. The Mini Swerve does not need one, and this book does not use one.)
+The CAN bus on the roboRIO carries a fixed number of messages per second, and every device's reports use some of them. Twelve devices each reporting several readings fifty or a hundred times a second adds up. The Driver Station's utilization number, and the `SystemStats` > `CANBus` > `Utilization` value AdvantageKit already records in every log, tell you how full it is. Somewhere under about 70 to 80 percent is comfortable; a bus near 100 percent starts dropping messages. You will check yours in Section 28.9. (Teams with many devices often add a second, faster CAN bus with a CTRE device called a **CANivore**. The Mini Swerve does not need one, and this book does not use one.) Your code also controls how often each device reports. Phoenix 6 lets you set each reading's rate with `setUpdateFrequency`, and slow every reading your code never uses down to four times a second with `optimizeBusUtilization`. This chapter leaves every reading at its default rate, which twelve devices on the roboRIO's bus can easily carry.
 
 ---
 
@@ -255,7 +255,7 @@ Each device's details page also has a **Self Test** button. It shows a snapshot 
 
 > **Tuner X and robot code at the same time**
 >
-> Tuner X and your robot program can both talk to the devices at once, and that is usually fine for looking. Be careful with **changing** settings in Tuner X while your code is running, though. Section 28.6 sets every motor's settings from code each time the program starts, so anything you change in Tuner X's **Configs** tab will be overwritten at the next deploy. That is on purpose: the code is the one true record of how each device is set up. If a setting matters, it goes in the code.
+> Tuner X and your robot program can both talk to the devices at once, and that is usually fine for looking. Be careful with **changing** settings in Tuner X while your code is running, though. Section 28.6 sets every motor's settings from code each time the program starts, so anything you change in Tuner X's **Configs** tab will be overwritten the next time the robot program starts (every deploy, and every power-on). That is on purpose: the code is the one true record of how each device is set up. If a setting matters, it goes in the code.
 
 ---
 
@@ -616,6 +616,10 @@ Time to write it. The plan has the same shape as `RoboRio` in Chapter 27, with o
 
 Why is `Module` not a subsystem? Because nothing should ever command one module on its own while another command drives the other three. The robot drives as one thing, so `Drive` is the one subsystem that commands require, and the modules are parts inside it. It is Chapter 14's **composition**: a `Drive` **has** four `Module`s, and each `Module` **has** a `ModuleIO`. AdvantageKit's own swerve templates are built exactly this way, which means the code you write here will look familiar when you read them (Explore, at the end of the chapter).
 
+> **What about Tuner X's swerve generator?**
+>
+> Tuner X can write a swerve project for you: you type in the CAN IDs, gear ratios, and inversions, and it produces a file called `TunerConstants`. Many teams with Krakens start there, and AdvantageKit's TalonFX template reads that same file. This book builds the pieces by hand first, so every device, setting, and reading has a line you wrote and can test. Chapter 29 lines up your `DriveConstants` with `TunerConstants`, fact by fact. When you open a generated project (this chapter's Explore), you will recognize each line, because you will have written its twin.
+
 Work on a new branch:
 
 ```bash
@@ -634,10 +638,12 @@ In VS Code, create two folders inside `src/main/java/frc/robot/subsystems`: `rob
 package frc.robot.subsystems.roborio;
 ```
 
-Do the same in the test folder: create `src/test/java/frc/robot/subsystems/roborio`, move `RoboRioTest.java` into it, and fix its `package` line. (It has to move too: it calls `RoboRio`'s package-private test methods, so it must live in the same package.) In `RobotContainer.java`, the four imports change from `frc.robot.subsystems.RoboRio...` to `frc.robot.subsystems.roborio.RoboRio...`. Build: `BUILD SUCCESSFUL`, and run the tests: still **6 tests, all green**. Commit the move by itself, so the history shows it as a move and nothing else:
+Do the same in the test folder: create `src/test/java/frc/robot/subsystems/roborio`, move `RoboRioTest.java` into it, and fix its `package` line. (It has to move too: it calls `RoboRio`'s package-private test methods, so it must live in the same package.) In `RobotContainer.java`, the four imports change from `frc.robot.subsystems.RoboRio...` to `frc.robot.subsystems.roborio.RoboRio...`. Build: `BUILD SUCCESSFUL`, and run the tests: still **6 tests, all green**. Commit the move by itself, so the history shows it as a move and nothing else. One thing is in the way: Phoenix 6's file went into `vendordeps` in Section 28.6, before this branch existed, and it is not part of the move. So commit it first, on its own, and then commit only the `src` folder for the move:
 
 ```bash
-git add .
+git add vendordeps
+git commit -m "Ch28: Add Phoenix 6"
+git add src
 git commit -m "Ch28: Move the RoboRio subsystem into its own package"
 ```
 
@@ -1347,7 +1353,7 @@ And copy every direction into the fact sheet, so the next team to build a Mini S
 
 > **Do not be surprised by a pattern**
 >
-> On many swerve modules, the motors on the left side of the robot need the opposite setting from the motors on the right, because the modules are mirror images. On others, all four match. Whatever your table says is the answer for your robot. Do not "fix" a result because it looks lopsided.
+> On many swerve modules, the motors on the left side of the robot need the opposite setting from the motors on the right, because the modules are mirror images. On others, all four match. Whatever your table says is the answer for your robot. Do not "fix" a result because it looks lopsided. On our team's Mini Swerve, the older code inverts both motors on the front left module and none on the other three. Yours may differ: the table wins.
 
 ### Watch the CANcoders too
 
@@ -1582,6 +1588,7 @@ class MotorCheckTest {
     void tearDown() {
         CommandScheduler.getInstance().cancelAll();
         CommandScheduler.getInstance().unregisterAllSubsystems();
+        CommandScheduler.getInstance().getDefaultButtonLoop().clear();
         DriverStationSim.resetData();
         DriverStationSim.notifyNewData();
         SimHooks.resumeTiming();
@@ -1651,6 +1658,7 @@ This is Chapter 23's pattern for a command that takes time: pause the clock with
 - **The first test** walks through the whole check: one motor at a time, front left drive first, back right steer last, and nothing left spinning or scheduled at the end. Work out the times yourself: each step is 1.5 seconds of spin plus 0.5 seconds of rest, so step `k` spins from `2k` to `2k + 1.5` seconds. At 14.5 seconds, step 7, the eighth motor, is spinning.
 - **The second test** is the dead-man's switch: cancel the check in the middle of a spin, and every motor must be at zero at once.
 - **`spinningMotors()`** is a for-each loop over the array of fakes. Even the tests got shorter because of arrays.
+- **`getDefaultButtonLoop().clear()`** in `tearDown` throws away every button binding a test left behind, which `cancelAll` and `unregisterAllSubsystems` do not. `AutoLightTest` builds a whole `RobotContainer`, and its bindings stay alive after that test ends. Without this line, every loop of `MotorCheckTest` checks them for a controller that is not plugged in, and the build prints `Joystick Button 1 on port 0 not available, check if controller is plugged in` 17 times. Open `AutoLightTest.java` and add the same line to its `tearDown`, right after `unregisterAllSubsystems()`, because that is the test that makes the bindings. With both lines in, the warning shows up once.
 
 Run the tests: **11 tests, all green** (the six from Chapter 27, three in `ModuleTest`, two in `MotorCheckTest`). Then break one on purpose, as always. In `Drive.motorCheck()`, swap the two indexes inside the loop, so the drive step goes into `steps[2 * i + 1]` and the steer step into `steps[2 * i]`, and run the tests. `theCheckSpinsOneMotorAtATimeInOrder` fails with the message `front left drive goes first`: the check now steers each wheel before it drives it, which Section 28.9 explained is the wrong order. Put it back.
 
@@ -1694,7 +1702,7 @@ Open a pull request into `main`. The reviewer's checklist for this one is short 
 > * Every device has a **CAN ID** that you set. Devices ship as ID 0, so every one needs its own number. IDs must be unique only among devices of the same kind and maker, so a Kraken and a CANcoder can both be 1. The **fact sheet** holds the CAN map, and the code must match it.
 > * **Phoenix Tuner X** finds the devices on the bus and sets their IDs, names, and firmware. **Blink** is how you prove which physical device has which ID.
 > * New Java: an **array** holds a fixed-size, numbered row of values of one type; indexes start at **0**, `length` is its size, and `ArrayIndexOutOfBoundsException` means you asked for a slot that is not there. Arrays of objects start full of `null`. The **for-each** loop visits every item; **varargs** (`...`) parameters are arrays in disguise.
-> * **Phoenix 6** configures a Talon FX with a `TalonFXConfiguration`: inversion, **brake or coast**, and **current limits** that protect motors, breakers, and the battery. A full configuration is applied from code on every start, so every motor is in a known state. Readings come as **status signals** (rotor rotations, rotations per second, volts, amps, degrees), refreshed with `BaseStatusSignal.refreshAll`, whose **status code** says whether the device answered.
+> * **Phoenix 6** configures a Talon FX with a `TalonFXConfiguration`: inversion, **brake or coast**, and **current limits** that protect motors, breakers, and the battery. A full configuration is applied from code on every start, so every motor is in a known state. Readings come as **status signals** (motor rotations, rotations per second, volts, amps, degrees), refreshed with `BaseStatusSignal.refreshAll`, whose **status code** says whether the device answered.
 > * New Java: a method that changes its object and **returns `this`** makes a **fluent** interface you can chain on one object, like `VoltageOut.withOutput`. Make the request once and reuse it every loop.
 > * The `Drive` subsystem owns an **array of four `Module`s**, each with a `ModuleIO`. Alerts name a silent device by its CAN ID. The **motor check** spins every motor alone, bound with `whileTrue` as a **dead-man's switch**, to prove each motor is the one the code thinks and turns the way it should. Inversions are fixed in code, and written down.
 
@@ -1744,7 +1752,7 @@ Wire the code to every motor, prove each one, and fix their directions.
 7. Run the motor check in Test mode, and fill in the direction table: which way each of the eight motors turns for positive volts, and whether each CANcoder's reading rises or falls when its steer motor turns (Section 28.9).
 8. Set each `driveInverted` and `steerInverted` from the table, deploy, and run the check again until every drive wheel rolls forward and every module turns counterclockwise.
 9. Do the wrong-ID drill (Section 28.10), and put the ID back.
-10. Write `FakeModuleIO`, `ModuleTest`, and `MotorCheckTest`: **11 tests, all green**. Break one on purpose, then fix it (Section 28.11).
+10. Write `FakeModuleIO`, `ModuleTest`, and `MotorCheckTest`, and add the button-loop line to `AutoLightTest`'s `tearDown`: **11 tests, all green**. Break one on purpose, then fix it (Section 28.11).
 11. Push, open the pull request, have a teammate check every ID and direction against the fact sheet, wait for green, and merge.
 
 If every device answers, the motor check moves the motor it names in the direction it should, the alerts are quiet, and GitHub shows eleven green tests, your Mini Swerve is ready for Chapter 29.
@@ -1768,22 +1776,23 @@ If any answer feels shaky, re-read Sections 28.1, 28.3, 28.6, and 28.9.
 
 ### Git
 
-On the `can-motors` branch, one commit per idea:
+On the `can-motors` branch from Section 28.8, one commit per idea:
 
 ```bash
-git checkout -b can-motors
-git add .
+git add vendordeps
+git commit -m "Ch28: Add Phoenix 6"
+git add src
 git commit -m "Ch28: Move the RoboRio subsystem into its own package"
 git add .
 git commit -m "Ch28: Drive subsystem with an IO layer for four swerve modules, and the motor check"
-git add .
+git add src/main/java/frc/robot/subsystems/drive/DriveConstants.java
 git commit -m "Ch28: Set motor directions from the motor check"
 git add .
 git commit -m "Ch28: Tests for the modules and the motor check"
 git push -u origin can-motors
 ```
 
-The third commit holds only the `driveInverted` and `steerInverted` changes from Section 28.9. Look at it with `git show` before you push: a reviewer should see eight `true`/`false` values change and nothing else. That one small commit is the record of what your team **measured**, which is why it deserves to be on its own.
+The "Set motor directions" commit holds only the `driveInverted` and `steerInverted` changes from Section 28.9. Look at it with `git show` before you push: a reviewer should see eight `true`/`false` values change and nothing else. That one small commit is the record of what your team **measured**, which is why it deserves to be on its own.
 
 The wrong-ID drill (Section 28.10) is never committed. Before every commit, run `git diff src/main/java/frc/robot/subsystems/drive/DriveConstants.java` and check every CAN ID against the fact sheet.
 
